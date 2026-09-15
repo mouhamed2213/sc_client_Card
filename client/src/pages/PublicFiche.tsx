@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
 import { ArrowUpRight, Phone, XCircle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { FicheTemplate, type FicheTemplateActions } from "../../templates/base/FicheTemplate";
-import type { FicheTemplateModel } from "../../templates/model";
+import { FicheTemplate, type FicheTemplateActions } from "../../../templates/base/FicheTemplate";
+import type { FicheTemplateModel } from "../../../templates/model";
 
 type PublicData = FicheTemplateModel["data"];
 
