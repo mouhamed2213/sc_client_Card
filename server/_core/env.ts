@@ -10,7 +10,9 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
 
   // STORAGE
-  storageApi: process.env.S3_API,
-  storageAccessKey: process.env.S3_ACCESS_KEY,  
-  storageSecret: process.env.S3_SECRET,
+  storageEndpoint: process.env.S3_ENDPOINT,
+  storageAccessKeyId: process.env.S3_ACCESS_KEY_ID,
+  storageSecretKey: process.env.S3_SECRET_ACCESS_KEY,
+  publicUrl: process.env.S3_PUBLIC_BASE_URL,
+  bucket: process.env.S3_BUCKET_NAME,
 };
