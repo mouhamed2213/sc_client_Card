@@ -46,6 +46,14 @@ function clearFailures(key: string): void {
   failures.delete(key);
 }
 
+function adminCookieOptions(req: Request) {
+  return {
+    ...getSessionCookieOptions(req),
+    sameSite: "lax" as const,
+    secure: ENV.isProduction,
+  };
+}
+
 export function registerAdminRoutes(app: Express): void {
   app.post("/api/admin/login", async (req, res) => {
     const key = getClientKey(req);
@@ -90,7 +98,7 @@ export function registerAdminRoutes(app: Express): void {
     });
 
     res.cookie(COOKIE_NAME, sessionToken, {
-      ...getSessionCookieOptions(req),
+      ...adminCookieOptions(req),
       maxAge: 8 * 60 * 60 * 1000,
     });
 
@@ -98,9 +106,9 @@ export function registerAdminRoutes(app: Express): void {
     return res.json({ success: true, username: ENV.adminUsername });
   });
 
-  app.post("/api/admin/logout", (_req, res) => {
+  app.post("/api/admin/logout", (req, res) => {
     res.clearCookie(COOKIE_NAME, {
-      ...getSessionCookieOptions(_req),
+      ...adminCookieOptions(req),
       maxAge: -1,
     });
     return res.json({ success: true });
