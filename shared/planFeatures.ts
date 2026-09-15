@@ -1,8 +1,31 @@
 export const planFeatures = {
-  essentiel: { maxLinks: 3, maxPhotos: 0, hasForm: false, hasGoogleReview: false, requiresProfile: false, requiresHours: false, hasCatalog: false },
-  pro: { maxLinks: 10, maxPhotos: 3, hasForm: true, hasGoogleReview: false, requiresProfile: true, requiresHours: false, hasCatalog: false },
-  signature: { maxLinks: 10, maxPhotos: 8, hasForm: true, hasGoogleReview: false, requiresProfile: true, requiresHours: false, hasCatalog: false },
-  commerce: { maxLinks: 10, maxPhotos: 8, hasForm: true, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true },
+  essentiel: {
+    maxLinks: 3,
+    maxPhotos: 0,
+    hasForm: false,
+    hasGoogleReview: false,
+    requiresProfile: false,
+    requiresHours: true,
+    hasCatalog: false,
+  },
+  pro: {
+    maxLinks: 10,
+    maxPhotos: 8,
+    hasForm: true,
+    hasGoogleReview: true,
+    requiresProfile: true,
+    requiresHours: true,
+    hasCatalog: false,
+  },
+  signature: {
+    maxLinks: 10,
+    maxPhotos: 8,
+    hasForm: true,
+    hasGoogleReview: true,
+    requiresProfile: true,
+    requiresHours: true,
+    hasCatalog: true,
+  },
 } as const;
 
 export type PlanName = keyof typeof planFeatures;
