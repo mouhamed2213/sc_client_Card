@@ -40,6 +40,7 @@ export default function PublicFiche() {
   const data = fiche.data as PublicData;
   const phoneHref = `tel:${fiche.telephone}`;
   const whatsappHref = `https://wa.me/${fiche.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(data.messageWhatsapp || `Bonjour, je souhaite échanger avec ${fiche.prenom}.`)}`;
+  const emailHref = fiche.email ? `mailto:${fiche.email}` : undefined;
   const vCard = [
     "BEGIN:VCARD",
     "VERSION:3.0",
@@ -56,10 +57,10 @@ export default function PublicFiche() {
   const contactHref = `data:text/vcard;charset=utf-8,${encodeURIComponent(vCard)}`;
   const primaryButton = data.premierBouton || "whatsapp";
   const buttonOrder: FicheTemplateActions["buttonOrder"] = primaryButton === "appel"
-    ? ["appel", "contact", "whatsapp"]
+    ? ["appel", "whatsapp", "email"]
     : primaryButton === "contact"
-      ? ["contact", "appel", "whatsapp"]
-      : ["whatsapp", "appel", "contact"];
+      ? ["whatsapp", "appel", "email"]
+      : ["whatsapp", "appel", "email"];
 
   const templateFiche: FicheTemplateModel = {
     slug: fiche.slug,
@@ -83,6 +84,7 @@ export default function PublicFiche() {
   const actions: FicheTemplateActions = {
     phoneHref,
     whatsappHref,
+    emailHref,
     contactHref,
     buttonOrder,
     contactOpen,
