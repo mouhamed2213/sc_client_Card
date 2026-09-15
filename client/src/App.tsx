@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -12,7 +12,7 @@ const PublicFiche = lazy(() => import("@/pages/PublicFiche"));
 const FicheEditor = lazy(() => import("@/pages/FicheEditor"));
 const AdminLogin = lazy(() => import("@/pages/AdminLogin"));
 
-function AdminRoute({ children }: { children: React.ReactNode }) {
+function AdminRoute({ children }: { children: ReactNode }) {
   return <AdminGuard>{children}</AdminGuard>;
 }
 
