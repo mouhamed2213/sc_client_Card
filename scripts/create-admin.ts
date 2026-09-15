@@ -10,7 +10,6 @@ function askHidden(question: string): Promise<string> {
 
     if (!input.isTTY) {
       const rl = createInterface({ input, output });
-
       rl.question("")
         .then(value => {
           rl.close();
@@ -20,13 +19,11 @@ function askHidden(question: string): Promise<string> {
           rl.close();
           reject(error);
         });
-
       return;
     }
 
     const wasRaw = Boolean(input.isRaw);
     input.setRawMode?.(true);
-
     let value = "";
 
     const cleanup = () => {
@@ -38,27 +35,23 @@ function askHidden(question: string): Promise<string> {
     const onData = (chunk: Buffer | string) => {
       const char = chunk.toString();
 
-      // Ctrl + C
       if (char === "\u0003") {
         cleanup();
         reject(new Error("Opération annulée."));
         return;
       }
 
-      // Entrée
       if (char === "\r" || char === "\n") {
         cleanup();
         resolve(value.trim());
         return;
       }
 
-      // Backspace
       if (char === "\u007f" || char === "\b") {
         value = value.slice(0, -1);
         return;
       }
 
-      // Ignore les caractères de contrôle
       if (char.length === 1 && char.charCodeAt(0) >= 32) {
         value += char;
       }
@@ -87,43 +80,36 @@ async function main() {
     );
 
     if (password.length < 12) {
-      throw new Error(
-        "Le mot de passe doit contenir au moins 12 caractères."
-      );
+      throw new Error("Le mot de passe doit contenir au moins 12 caractères.");
     }
 
-    const confirmation = await askHidden(
-      "Confirmer le mot de passe : "
-    );
+    const confirmation = await askHidden("Confirmer le mot de passe : ");
 
     if (password !== confirmation) {
       throw new Error("Les mots de passe ne correspondent pas.");
     }
 
-    const existingCredential =
-      await prisma.adminCredential.findUnique({
-        where: { username },
-      });
+    // Le modèle AdminCredential doit être présent dans Prisma avant d'exécuter ce script.
+    const existingCredential = await prisma.adminCredential.findUnique({
+      where: { username },
+    });
 
     if (existingCredential) {
-      throw new Error(
-        `Le nom d'utilisateur "${username}" existe déjà.`
-      );
+      throw new Error(`Le nom d'utilisateur "${username}" existe déjà.`);
     }
 
-    const passwordHash = hashAdminPassword(password);
-
     const openId = `local_admin_${username}`;
-
     const existingUser = await prisma.user.findUnique({
       where: { openId },
     });
 
     if (existingUser) {
       throw new Error(
-        `Un utilisateur admin associé à "${username}" existe déjà.`
+        `Un utilisateur associé à "${username}" existe déjà.`
       );
     }
+
+    const passwordHash = hashAdminPassword(password);
 
     const admin = await prisma.$transaction(async tx => {
       const user = await tx.user.create({
@@ -143,27 +129,17 @@ async function main() {
         },
       });
 
-      return {
-        user,
-        credential,
-      };
+      return { user, credential };
     });
 
     console.log("\n========================================");
     console.log("      ADMIN CRÉÉ AVEC SUCCÈS");
     console.log("========================================\n");
-
     console.log(`Username : ${admin.credential.username}`);
     console.log(`User ID  : ${admin.user.id}`);
     console.log(`Role     : ${admin.user.role}`);
-
-    console.log(
-      "\nLe mot de passe n'a pas été enregistré en clair."
-    );
-
-    console.log(
-      "\nTu peux maintenant utiliser ce compte pour /admin/login.\n"
-    );
+    console.log("\nLe mot de passe n'a pas été enregistré en clair.");
+    console.log("Tu peux maintenant utiliser ce compte pour /admin/login.\n");
   } finally {
     rl.close();
   }
@@ -172,11 +148,8 @@ async function main() {
 main()
   .catch(error => {
     console.error(
-      `\nErreur : ${
-        error instanceof Error ? error.message : String(error)
-      }`
+      `\nErreur : ${error instanceof Error ? error.message : String(error)}`
     );
-
     process.exitCode = 1;
   })
   .finally(async () => {
