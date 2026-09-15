@@ -9,6 +9,10 @@ export const ENV = {
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
 
+  // LOCAL ADMIN AUTH
+  adminUsername: process.env.ADMIN_USERNAME ?? "",
+  adminPasswordHash: process.env.ADMIN_PASSWORD_HASH ?? "",
+
   // STORAGE
   storageEndpoint: process.env.S3_ENDPOINT,
   storageAccessKeyId: process.env.S3_ACCESS_KEY_ID,
