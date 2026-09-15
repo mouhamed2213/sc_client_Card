@@ -24,14 +24,19 @@ describe("fiches.public", () => {
     await expect(caller.fiches.getBySlug({ slug: "inconnue" })).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
 
-  it("persists suspension and reactivation", async () => {
+  it("blocks incomplete Pro reactivation, then persists it after the required portrait is added", async () => {
     const caller = appRouter.createCaller(createPublicContext());
     const fiche = await getFicheBySlug("marie-diallo");
     expect(fiche).toBeTruthy();
     await caller.fiches.updateStatus({ id: fiche!.id, statut: "suspendue" });
     expect((await getFicheBySlug("marie-diallo"))?.statut).toBe("suspendue");
+    if (!fiche!.photo && !fiche!.logo) {
+      await expect(caller.fiches.updateStatus({ id: fiche!.id, statut: "active" })).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      await updateFiche(fiche!.id, { photo: "/manus-storage/test-profile.webp" });
+    }
     await caller.fiches.updateStatus({ id: fiche!.id, statut: "active" });
     expect((await getFicheBySlug("marie-diallo"))?.statut).toBe("active");
+    await updateFiche(fiche!.id, { photo: fiche!.photo });
   });
 
   it("records a real scan and keeps the previous total after verification", async () => {

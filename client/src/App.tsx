@@ -8,10 +8,12 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 const Home = lazy(() => import("@/pages/Home"));
 const PublicFiche = lazy(() => import("@/pages/PublicFiche"));
+const FicheEditor = lazy(() => import("@/pages/FicheEditor"));
 
 function Router() {
   return <Suspense fallback={<div className="public-loading"><div className="loading-pulse" /><p>Chargement…</p></div>}><Switch>
     <Route path="/" component={Home} />
+    <Route path="/studio/fiche/:slug" component={FicheEditor} />
     <Route path="/fiche/:slug" component={PublicFiche} />
     <Route path="/404" component={NotFound} />
     <Route component={NotFound} />

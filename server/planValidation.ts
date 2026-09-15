@@ -20,8 +20,8 @@ export function validatePlanPayload(input: {
   const photos = input.data.galerie ?? [];
 
   if (links.length > features.maxLinks) errors.push(`${input.formule}: maximum ${features.maxLinks} liens.`);
-  if (photos.length > features.maxPhotos) errors.push(`${input.formule}: maximum ${features.maxPhotos} photo${features.maxPhotos > 1 ? "s" : ""}.`);
   if (features.maxPhotos === 0 && photos.length > 0) errors.push("La formule Essentiel ne permet pas de galerie photo.");
+  else if (photos.length > features.maxPhotos) errors.push(`${input.formule}: maximum ${features.maxPhotos} photo${features.maxPhotos > 1 ? "s" : ""}.`);
   if (features.requiresProfile && !input.photo && !input.logo) errors.push(`${input.formule}: un portrait ou un logo est obligatoire.`);
   if (features.hasGoogleReview && !input.googlePlaceId) errors.push("Commerce : google_place_id est obligatoire pour l'avis Google.");
   if (features.requiresHours) {
