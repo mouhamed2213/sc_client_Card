@@ -1,9 +1,8 @@
-import { ReactNode } from "react";
-import { Redirect, useLocation } from "wouter";
+import type { ReactNode } from "react";
+import { Redirect } from "wouter";
 import { trpc } from "@/lib/trpc";
 
 export default function AdminGuard({ children }: { children: ReactNode }) {
-  const [, navigate] = useLocation();
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
@@ -21,6 +20,5 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
     return <Redirect to="/admin/login" />;
   }
 
-  void navigate;
   return <>{children}</>;
 }
