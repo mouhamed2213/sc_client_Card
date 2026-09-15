@@ -1,7 +1,8 @@
 import "../themes.css";
 import "../themes/essentiel.css";
 import type { FormEvent, ReactNode } from "react";
-import { ArrowUpRight, CalendarDays, Clock3, Download, ExternalLink, Globe2, Mail, MapPin, MessageCircle, Phone, Star, UserRound } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, Clock3, Download, ExternalLink, Globe2, Mail, MapPin, MessageCircle, Phone, Star, UserRound } from "lucide-react";
 import type { FicheTemplateModel } from "../model";
 import { getTemplateConfig } from "../config";
 
@@ -53,6 +54,31 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
   </section>;
 }
 
+function GalleryCarousel({ images }: { images: FicheTemplateModel["data"]["galerie"] }) {
+  const gallery = images ?? [];
+  const [current, setCurrent] = useState(0);
+
+  if (!gallery.length) return null;
+
+  const previous = () => setCurrent((index) => (index - 1 + gallery.length) % gallery.length);
+  const next = () => setCurrent((index) => (index + 1) % gallery.length);
+  const image = gallery[current];
+
+  return <div className="pro-gallery">
+    <div className="pro-gallery-stage">
+      <img src={image.url} alt={image.alt} loading="lazy" />
+      {gallery.length > 1 && <>
+        <button type="button" className="pro-gallery-control pro-gallery-control-prev" onClick={previous} aria-label="Photo précédente"><ArrowLeft className="h-4 w-4" /></button>
+        <button type="button" className="pro-gallery-control pro-gallery-control-next" onClick={next} aria-label="Photo suivante"><ArrowRight className="h-4 w-4" /></button>
+      </>}
+    </div>
+    <div className="pro-gallery-meta">
+      <span>Photo {current + 1} / {gallery.length}</span>
+      {gallery.length > 1 && <div className="pro-gallery-dots" aria-label="Navigation de la galerie">{gallery.map((item, index) => <button type="button" key={item.url} className={`pro-gallery-dot ${index === current ? "is-active" : ""}`} onClick={() => setCurrent(index)} aria-label={`Afficher la photo ${index + 1}`} aria-current={index === current ? "true" : undefined} />)}</div>}
+    </div>
+  </div>;
+}
+
 export function FicheTemplate({ fiche, actions, children }: FicheTemplateProps) {
   const config = getTemplateConfig(fiche.formule);
   const { features } = config;
@@ -70,7 +96,7 @@ export function FicheTemplate({ fiche, actions, children }: FicheTemplateProps) 
         {features.requiresHours && fiche.data.horaires?.length ? <section className="public-section"><SectionTitle icon={<Clock3 className="h-4 w-4" />} title="Horaires" /><div className="hours-list">{fiche.data.horaires.map((row) => <div key={row.jour} className="hours-row"><span>{row.jour}</span><strong className={row.horaire.toLowerCase().includes("fermé") ? "text-[#a86155]" : ""}>{row.horaire}</strong></div>)}</div></section> : null}
         {features.hasForm ? <section className="public-section"><SectionTitle icon={<MessageCircle className="h-4 w-4" />} title="Être rappelé" />{actions.contactSent ? <div className="rounded-xl bg-emerald-50 p-4 text-sm font-medium text-emerald-800">Votre demande a bien été transmise. L’établissement peut maintenant vous rappeler.</div> : actions.contactOpen ? <form className="contact-form" onSubmit={actions.onContactSubmit}><input required minLength={2} placeholder="Votre nom" value={actions.contactForm.name} onChange={(event) => actions.onContactFormChange("name", event.target.value)} /><input required minLength={8} placeholder="Votre téléphone" value={actions.contactForm.phone} onChange={(event) => actions.onContactFormChange("phone", event.target.value)} /><textarea required minLength={2} placeholder="Votre message" value={actions.contactForm.message} onChange={(event) => actions.onContactFormChange("message", event.target.value)} /><div className="flex gap-2"><button type="button" className="public-secondary-link" onClick={actions.onCloseContact}>Annuler</button><button disabled={actions.contactPending} className="public-primary-link" type="submit">{actions.contactPending ? "Envoi…" : "Envoyer ma demande"}</button></div>{actions.contactError && <p className="text-xs font-medium text-red-600">{actions.contactError}</p>}</form> : <><p className="public-address">Laissez vos coordonnées, l’établissement vous recontactera directement.</p><button className="public-primary-link" onClick={actions.onOpenContact}>Demander un rappel <ArrowUpRight className="h-4 w-4" /></button></>}</section> : null}
         {features.hasCatalog && fiche.data.sections?.length ? <section className="public-section"><SectionTitle icon={<CalendarDays className="h-4 w-4" />} title="Carte & prestations" />{fiche.data.sections.map((section) => <div key={section.titre} className="catalog-section"><h3>{section.titre}</h3>{section.articles.map((article) => <div key={article.nom} className="catalog-row"><div><p className="font-semibold text-[#26344a]">{article.nom}</p><p className="mt-1 text-xs leading-5 text-[#8891a0]">{article.description}</p></div><span>{article.prix}</span></div>)}</div>)}</section> : null}
-        {gallery.length ? <section className="public-section"><SectionTitle icon={<UserRound className="h-4 w-4" />} title="Galerie" /><div className="gallery-grid">{gallery.map((image) => <img key={image.url} src={image.url} alt={image.alt} loading="lazy" />)}</div></section> : null}
+        {gallery.length ? <section className="public-section"><SectionTitle icon={<UserRound className="h-4 w-4" />} title="Galerie" /><GalleryCarousel images={gallery} /></section> : null}
         {children}
         <section className="public-footer"><div className="flex items-center justify-between gap-3"><p>Mentions légales · Confidentialité</p><a href="/" className="public-brand">Support Connecté <ArrowUpRight className="h-3 w-3" /></a></div><p className="mt-3 max-w-sm text-[11px] leading-5 text-[#9aa3b1]">Les informations envoyées via cette fiche servent uniquement à répondre à votre demande. Vous pouvez demander leur suppression en contactant l'établissement.</p></section>
       </main>
