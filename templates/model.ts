@@ -29,6 +29,9 @@ export type TemplateSection = {
 export type FicheTemplateData = {
   premierBouton?: "whatsapp" | "appel" | "contact";
   messageWhatsapp?: string;
+  presentation?: string;
+  rendezVous?: TemplateLink;
+  reseauxSociaux?: TemplateLink[];
   liens?: TemplateLink[];
   horaires?: TemplateHour[];
   galerie?: TemplateImage[];
