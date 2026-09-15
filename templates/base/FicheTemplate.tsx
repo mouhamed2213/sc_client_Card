@@ -57,13 +57,10 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
 function GalleryCarousel({ images }: { images: FicheTemplateModel["data"]["galerie"] }) {
   const gallery = images ?? [];
   const [current, setCurrent] = useState(0);
-
   if (!gallery.length) return null;
-
   const previous = () => setCurrent((index) => (index - 1 + gallery.length) % gallery.length);
   const next = () => setCurrent((index) => (index + 1) % gallery.length);
   const image = gallery[current];
-
   return <div className="pro-gallery">
     <div className="pro-gallery-stage">
       <img src={image.url} alt={image.alt} loading="lazy" />
@@ -79,6 +76,19 @@ function GalleryCarousel({ images }: { images: FicheTemplateModel["data"]["galer
   </div>;
 }
 
+function ProContent({ fiche }: { fiche: FicheTemplateModel }) {
+  const presentation = fiche.data.presentation?.trim();
+  const appointment = fiche.data.rendezVous?.url?.trim() ? fiche.data.rendezVous : null;
+  const socials = fiche.data.reseauxSociaux ?? [];
+  if (!presentation && !appointment && !socials.length) return null;
+
+  return <>
+    {presentation && <section className="public-section pro-presentation"><SectionTitle icon={<UserRound className="h-4 w-4" />} title="Présentation" /><p className="pro-presentation-text">{presentation}</p></section>}
+    {appointment && <section className="public-section pro-appointment"><div><SectionTitle icon={<CalendarDays className="h-4 w-4" />} title="Rendez-vous" /><p className="public-address">Choisissez directement votre créneau.</p></div><a href={appointment.url} target="_blank" rel="noreferrer" className="public-primary-link">{appointment.label || "Prendre rendez-vous"}<ArrowUpRight className="h-4 w-4" /></a></section>}
+    {socials.length > 0 && <section className="public-section"><SectionTitle icon={<Globe2 className="h-4 w-4" />} title="Réseaux sociaux" /><div className="link-list">{socials.map((social) => <a key={social.url} href={social.url} target="_blank" rel="noreferrer" className="public-link"><span>{social.label}</span><ExternalLink className="h-4 w-4" /></a>)}</div></section>}
+  </>;
+}
+
 export function FicheTemplate({ fiche, actions, children }: FicheTemplateProps) {
   const config = getTemplateConfig(fiche.formule);
   const { features } = config;
@@ -90,6 +100,7 @@ export function FicheTemplate({ fiche, actions, children }: FicheTemplateProps) 
       <Hero fiche={fiche} actions={actions} />
       <main className="public-content">
         {fiche.formule === "essentiel" && <div className="essential-save-row"><a href={actions.contactHref} download={`${fiche.slug}.vcf`} className="public-save-contact"><Download className="h-4 w-4" /> Enregistrer le contact</a></div>}
+        {fiche.formule === "pro" && <ProContent fiche={fiche} />}
         {(links.length || fiche.site) ? <section className="public-section"><SectionTitle icon={<Globe2 className="h-4 w-4" />} title="Liens utiles" /><div className="link-list">{fiche.site && <a href={fiche.site} target="_blank" rel="noreferrer" className="public-link"><span>Site internet</span><ExternalLink className="h-4 w-4" /></a>}{links.map((link) => <a key={link.url} href={link.url} target="_blank" rel="noreferrer" className="public-link"><span>{link.label}</span><ExternalLink className="h-4 w-4" /></a>)}</div></section> : null}
         {fiche.adresse ? <section className="public-section"><SectionTitle icon={<MapPin className="h-4 w-4" />} title="Localisation" /><p className="public-address">{fiche.adresse}</p>{fiche.lienItineraire && <a href={fiche.lienItineraire} target="_blank" rel="noreferrer" className="public-primary-link">Ouvrir Google Maps <ArrowUpRight className="h-4 w-4" /></a>}</section> : null}
         {features.hasGoogleReview && fiche.googlePlaceId ? <section className="review-panel"><div><p className="text-sm font-semibold text-[#3b3024]">Votre expérience compte</p><p className="mt-1 text-xs leading-5 text-[#806c58]">Partagez votre avis sur Google en un clic.</p></div><a href={`https://search.google.com/local/writereview?placeid=${fiche.googlePlaceId}`} target="_blank" rel="noreferrer" className="review-button"><Star className="h-4 w-4" /> Laisser un avis</a></section> : null}
