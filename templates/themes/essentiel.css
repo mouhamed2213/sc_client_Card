@@ -1,0 +1,156 @@
+.fiche-template--essentiel .public-hero {
+  min-height: 390px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 18px 18px;
+  background: #17324f;
+}
+
+.fiche-template--essentiel .public-cover,
+.fiche-template--essentiel .public-cover img,
+.fiche-template--essentiel .public-hero-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fiche-template--essentiel .public-cover img {
+  object-fit: cover;
+  object-position: center;
+}
+
+.fiche-template--essentiel .public-hero-overlay {
+  background: linear-gradient(180deg, rgba(8,25,42,.12) 0%, rgba(8,25,42,.28) 38%, rgba(8,25,42,.92) 100%);
+}
+
+.fiche-template--essentiel .public-topline {
+  position: absolute;
+  inset: 18px 18px auto;
+  margin: 0;
+}
+
+.fiche-template--essentiel .public-identity {
+  margin-top: auto;
+}
+
+.fiche-template--essentiel .public-avatar {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 12px;
+  border: 2px solid rgba(255,255,255,.82);
+  border-radius: 14px;
+  background: rgba(255,255,255,.14);
+  box-shadow: 0 10px 30px rgba(0,0,0,.16);
+}
+
+.fiche-template--essentiel .public-avatar img {
+  object-fit: cover;
+}
+
+.fiche-template--essentiel .public-name {
+  font-size: 26px;
+  line-height: 1.05;
+  text-shadow: 0 2px 18px rgba(0,0,0,.22);
+}
+
+.fiche-template--essentiel .public-role {
+  max-width: 330px;
+  margin-left: auto;
+  margin-right: auto;
+  color: rgba(255,255,255,.78);
+}
+
+.fiche-template--essentiel .public-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.fiche-template--essentiel .public-action {
+  min-height: 46px;
+  border-color: rgba(255,255,255,.22);
+  border-radius: 12px;
+  background: rgba(255,255,255,.12);
+  backdrop-filter: blur(8px);
+}
+
+.fiche-template--essentiel .public-action-call {
+  background: rgba(255,255,255,.94);
+  color: #17324f;
+}
+
+.fiche-template--essentiel .public-action:hover,
+.fiche-template--essentiel .public-action-call:hover {
+  background: #ffffff;
+  color: #17324f;
+}
+
+.fiche-template--essentiel .essential-save-row {
+  padding: 16px 0 4px;
+}
+
+.fiche-template--essentiel .public-save-contact {
+  width: 100%;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #d9e2eb;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #17324f;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(23,50,79,.05);
+}
+
+.fiche-template--essentiel .public-save-contact:hover {
+  border-color: #315f91;
+  background: #f5f9fd;
+}
+
+.fiche-template--essentiel .public-content {
+  padding-top: 0;
+}
+
+.fiche-template--essentiel .public-section {
+  padding: 20px 0;
+}
+
+.fiche-template--essentiel .public-section:first-of-type {
+  padding-top: 18px;
+}
+
+.fiche-template--essentiel .public-link {
+  min-height: 52px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.fiche-template--essentiel .public-primary-link {
+  margin-top: 12px;
+}
+
+.fiche-template--essentiel .hours-list {
+  background: #ffffff;
+}
+
+.fiche-template--essentiel .hours-row strong {
+  font-weight: 750;
+}
+
+.fiche-template--essentiel .public-footer {
+  border-top: 0;
+}
+
+@media (max-width: 420px) {
+  .fiche-template--essentiel .public-hero {
+    min-height: 370px;
+  }
+
+  .fiche-template--essentiel .public-name {
+    font-size: 24px;
+  }
+}
