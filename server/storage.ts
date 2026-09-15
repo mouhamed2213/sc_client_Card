@@ -49,7 +49,6 @@ export async function storagePut(
   try {
     
     await s3Client.send(command);
-    console.log(command)
 
     // Génération de l'URL publique ou d'accès selon l'environnement
     const publicUrl = process.env.S3_PUBLIC_BASE_URL

@@ -15,4 +15,11 @@ export const ENV = {
   storageSecretKey: process.env.S3_SECRET_ACCESS_KEY,
   publicUrl: process.env.S3_PUBLIC_BASE_URL,
   bucket: process.env.S3_BUCKET_NAME,
+
+  // admin Login
+  adminUserName: process.env.ADMIN_USERNAME,
+  adminPassword: process.env.ADMIN_PASSWORD,
+
+  // jwt
+  jwt: process.env.JWT_SECRET,
 };
