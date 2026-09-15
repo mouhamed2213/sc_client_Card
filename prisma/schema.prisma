@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum Formule {
+  essentiel
+  pro
+  signature
+  commerce
+}
+
+enum Statut {
+  active
+  suspendue
+  supprimee
+  brouillon
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  openId       String   @unique @db.VarChar(64)
+  name         String?  @db.Text
+  email        String?  @db.VarChar(320)
+  loginMethod  String?  @db.VarChar(64)
+  role         UserRole @default(user)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lastSignedIn DateTime @default(now())
+
+  @@map("users")
+}
+
+model Fiche {
+  id             Int        @id @default(autoincrement())
+  slug           String     @unique @db.VarChar(160)
+  formule        Formule
+  statut         Statut     @default(brouillon)
+  nom            String     @db.VarChar(120)
+  prenom         String     @db.VarChar(120)
+  fonction       String     @db.VarChar(160)
+  entreprise     String     @db.VarChar(180)
+  photo          String?    @db.Text
+  logo           String?    @db.Text
+  telephone      String     @db.VarChar(32)
+  whatsapp       String     @db.VarChar(32)
+  email          String?    @db.VarChar(320)
+  site           String?    @db.Text
+  adresse        String?    @db.Text
+  lienItineraire String?    @db.Text
+  googlePlaceId  String?    @db.VarChar(180)
+  dateCreation   DateTime   @default(now())
+  dateEcheance   DateTime
+  dataJson       String     @db.Text
+  scansTotal     Int        @default(0)
+  lastScanAt     DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  scans          FicheScan[]
+  contactRequests ContactRequest[]
+
+  @@map("fiches")
+}
+
+model FicheScan {
+  id        Int      @id @default(autoincrement())
+  ficheId   Int
+  scanDate  String   @db.VarChar(10)
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  fiche     Fiche    @relation(fields: [ficheId], references: [id], onDelete: Cascade)
+
+  @@unique([ficheId, scanDate])
+  @@map("fiche_scans")
+}
+
+model ContactRequest {
+  id        Int      @id @default(autoincrement())
+  ficheId   Int
+  name      String   @db.VarChar(120)
+  phone     String   @db.VarChar(32)
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+  fiche     Fiche    @relation(fields: [ficheId], references: [id], onDelete: Cascade)
+
+  @@index([ficheId, createdAt])
+  @@map("contact_requests")
+}

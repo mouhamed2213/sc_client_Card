@@ -1,0 +1,14 @@
+{
+  "id": "web-db-user",
+  "name": "Support Connecté — Fiches clients",
+  "description": "Application full-stack de gestion et publication de fiches clients avec Prisma, tRPC et Manus Auth.",
+  "capabilities": ["server", "db", "user"],
+  "database": {
+    "orm": "prisma",
+    "schema": "prisma/schema.prisma",
+    "commands": {
+      "generate": "pnpm prisma generate",
+      "push": "pnpm prisma db push"
+    }
+  }
+}
