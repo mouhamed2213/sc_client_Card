@@ -7,8 +7,32 @@ const t = initTRPC.context<TrpcContext>().create({
   transformer: superjson,
 });
 
+const ADMIN_ONLY_PATHS = new Set([
+  "fiches.list",
+  "fiches.overview",
+  "fiches.create",
+  "fiches.update",
+  "fiches.updateStatus",
+  "fiches.contactRequests",
+  "media.upload",
+]);
+
+const requireAdminForSensitivePath = t.middleware(async opts => {
+  if (ADMIN_ONLY_PATHS.has(opts.path)) {
+    if (!opts.ctx.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+    }
+
+    if (opts.ctx.user.role !== "admin") {
+      throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+    }
+  }
+
+  return opts.next();
+});
+
 export const router = t.router;
-export const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure.use(requireAdminForSensitivePath);
 
 const requireUser = t.middleware(async opts => {
   const { ctx, next } = opts;
