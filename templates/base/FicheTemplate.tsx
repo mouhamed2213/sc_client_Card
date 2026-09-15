@@ -1,4 +1,5 @@
 import "../themes.css";
+import "../themes/essentiel.css";
 import type { FormEvent, ReactNode } from "react";
 import { ArrowUpRight, CalendarDays, Clock3, Download, ExternalLink, Globe2, Mail, MapPin, MessageCircle, Phone, Star, UserRound } from "lucide-react";
 import type { FicheTemplateModel } from "../model";
