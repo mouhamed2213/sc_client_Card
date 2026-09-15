@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { appRouter } from "./routers";
-import { getFicheBySlug, updateFiche } from "./db";
-import type { TrpcContext } from "./_core/context";
+import { appRouter } from "../routers";
+import { getFicheBySlug, updateFiche } from "../db";
+import type { TrpcContext } from "../_core/context";
 
 function createPublicContext(): TrpcContext {
   return {

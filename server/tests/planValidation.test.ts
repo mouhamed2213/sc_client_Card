@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getPlanFeatures, planFeatures } from "@shared/planFeatures";
-import { validatePlanPayload } from "./planValidation";
+import { validatePlanPayload } from "../planValidation";
 
 const base = { photo: "", logo: "", googlePlaceId: "", data: { liens: [], galerie: [], horaires: [], sections: [] } };
 const items = (count: number) => Array.from({ length: count }, () => ({}));

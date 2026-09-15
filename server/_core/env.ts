@@ -1,5 +1,6 @@
 export const ENV = {
   appId: process.env.VITE_APP_ID ?? "",
+  host: process.env.HOST ?? "http://localhost",
   cookieSecret: process.env.JWT_SECRET ?? "",
   databaseUrl: process.env.DATABASE_URL ?? "",
   oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
@@ -7,4 +8,9 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+
+  // STORAGE
+  storageApi: process.env.S3_API,
+  storageAccessKey: process.env.S3_ACCESS_KEY,  
+  storageSecret: process.env.S3_SECRET,
 };
