@@ -23,19 +23,29 @@ export function validatePlanPayload(input: {
   if (features.maxPhotos === 0 && photos.length > 0)
     errors.push("La formule Essentiel ne permet pas de galerie photo.");
   else if (photos.length > features.maxPhotos)
-    errors.push(`${input.formule}: maximum ${features.maxPhotos} photo${features.maxPhotos > 1 ? "s" : ""}.`);
+    errors.push(
+      `${input.formule}: maximum ${features.maxPhotos} photo${features.maxPhotos > 1 ? "s" : ""}.`
+    );
   if (features.requiresProfile && !input.photo && !input.logo)
     errors.push(`${input.formule}: un portrait ou un logo est obligatoire.`);
   if (features.hasGoogleReview && !input.googlePlaceId)
-    errors.push(`${input.formule}: google_place_id est obligatoire pour l'avis Google.`);
+    errors.push(
+      `${input.formule}: google_place_id est obligatoire pour l'avis Google.`
+    );
   if (features.requiresHours) {
     const hours = input.data.horaires ?? [];
-    if (hours.length !== 7)
-      errors.push(`${input.formule}: les horaires doivent couvrir exactement les 7 jours.`);
+    if (hours.length !== 7 && input.formule !== "essentiel")
+      errors.push(
+        `${input.formule}: les horaires doivent couvrir exactement les 7 jours.`
+      );
     if (hours.some(row => !row.jour?.trim() || !row.horaire?.trim()))
-      errors.push(`${input.formule}: chaque jour doit avoir un horaire ou une mention Fermé.`);
+      errors.push(
+        `${input.formule}: chaque jour doit avoir un horaire ou une mention Fermé.`
+      );
   }
   if (features.hasCatalog && !(input.data.sections ?? []).length)
-    errors.push(`${input.formule}: au moins une section de catalogue est obligatoire.`);
+    errors.push(
+      `${input.formule}: au moins une section de catalogue est obligatoire.`
+    );
   return errors;
 }
