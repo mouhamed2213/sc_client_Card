@@ -1,5 +1,6 @@
 .fiche-template--signature .public-hero {
   min-height: 400px;
+  max-height: auto;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -16,9 +17,14 @@
 }
 
 .fiche-template--signature .public-cover img {
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
 }
+/* 
+.fiche-template--signature_blur .public-cover_blur img {
+  object-fit: cover;
+  object-position: center;
+} */
 
 .fiche-template--signature .public-hero-overlay {
   background: linear-gradient(
