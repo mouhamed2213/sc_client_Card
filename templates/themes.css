@@ -11,21 +11,13 @@
   --theme-hero: #172033;
   --theme-hero-text: #ffffff;
   --theme-radius: 22px;
-  min-height: 100vh;
-  padding: 24px 12px 40px;
   background: var(--theme-bg);
-  color: var(--theme-text);
 }
 
 .fiche-template__card {
-  width: min(100%, 520px);
-  margin: 0 auto;
-  overflow: hidden;
-  border: 1px solid var(--theme-line);
-  border-radius: var(--theme-radius);
-  background: var(--theme-card);
   box-shadow: 0 24px 70px rgba(23, 32, 51, 0.1);
 }
+
 .fiche-template .public-hero {
   position: relative;
   overflow: hidden;
@@ -131,13 +123,7 @@
   background: rgba(255, 255, 255, 0.14);
   transform: translateY(-1px);
 }
-.fiche-template .public-content {
-  padding: 8px 20px 0;
-}
-.fiche-template .public-section {
-  padding: 22px 0;
-  border-bottom: 1px solid var(--theme-line);
-}
+
 .fiche-template .intro-note {
   display: flex;
   align-items: flex-start;
@@ -157,29 +143,18 @@
   border-radius: 99px;
   background: var(--theme-accent);
 }
+
+/* Kept temporarily because the corresponding Tailwind token classes are now
+   used by SectionTitle. This selector can be removed after visual validation. */
 .fiche-template .public-content .mb-4 {
   color: var(--theme-muted) !important;
 }
 .fiche-template .public-content .bg-\[\#eef3f8\] {
   background: var(--theme-accent-soft) !important;
 }
-.fiche-template .link-list {
-  display: grid;
-  gap: 8px;
-}
+
 .fiche-template .public-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 48px;
-  border: 1px solid var(--theme-line);
-  border-radius: 12px;
-  padding: 0 13px;
-  color: var(--theme-text);
   background: #fff;
-  font-size: 12px;
-  font-weight: 650;
   transition:
     border-color 0.18s ease,
     transform 0.18s ease;
@@ -408,10 +383,6 @@
 .fiche-template--essentiel .public-action {
   background: rgba(255, 255, 255, 0.1);
 }
-.fiche-template--essentiel .public-content {
-  padding-left: 18px;
-  padding-right: 18px;
-}
 
 /* PRO — warmer business presentation with stronger content hierarchy. */
 .fiche-template--pro {
@@ -590,14 +561,6 @@
 }
 
 @media (max-width: 420px) {
-  .fiche-template {
-    padding: 0 0 24px;
-  }
-  .fiche-template__card {
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
-  }
   .fiche-template .public-actions {
     gap: 6px;
   }
@@ -611,5 +574,10 @@
   .fiche-template .pro-gallery-control {
     width: 34px;
     height: 34px;
+  }
+  .fiche-template__card {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
   }
 }
