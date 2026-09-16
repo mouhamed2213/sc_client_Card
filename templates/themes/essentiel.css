@@ -42,9 +42,10 @@
 }
 
 .fiche-template--essentiel .public-topline {
-  position: absolute;
+  position: absolute !important;
   inset: 18px 18px auto;
   margin: 0;
+  z-index: 2;
 }
 
 .fiche-template--essentiel .public-identity {
