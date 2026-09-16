@@ -38,17 +38,11 @@
 .fiche-template .catalog-row { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; padding:12px 0; border-bottom:1px dashed var(--theme-line); }
 .fiche-template .catalog-row:last-child { border-bottom:0; }
 .fiche-template .catalog-row > span { flex-shrink:0; color:var(--theme-accent); font-size:12px; font-weight:800; }
-.fiche-template .pro-gallery { width:100%; }
-.fiche-template .pro-gallery-stage { position:relative; overflow:hidden; width:100%; aspect-ratio:4/3; border-radius:16px; background:#ebe7e1; }
-.fiche-template .pro-gallery-stage img { display:block; width:100%; height:100%; object-fit:cover; }
-.fiche-template .pro-gallery-control { position:absolute; top:50%; display:flex; width:38px; height:38px; align-items:center; justify-content:center; transform:translateY(-50%); border:1px solid rgba(255,255,255,.55); border-radius:50%; background:rgba(25,22,19,.62); color:white; backdrop-filter:blur(6px); transition:background .18s ease,transform .18s ease; }
+.fiche-template .pro-gallery-stage { background:#ebe7e1; }
+.fiche-template .pro-gallery-control { border:1px solid rgba(255,255,255,.55); border-radius:50%; background:rgba(25,22,19,.62); color:white; backdrop-filter:blur(6px); transition:background .18s ease,transform .18s ease; }
 .fiche-template .pro-gallery-control:hover { background:rgba(25,22,19,.82); }
-.fiche-template .pro-gallery-control-prev { left:12px; }
-.fiche-template .pro-gallery-control-next { right:12px; }
-.fiche-template .pro-gallery-meta { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; color:var(--theme-muted); font-size:10px; font-weight:700; }
-.fiche-template .pro-gallery-dots { display:flex; align-items:center; gap:5px; }
-.fiche-template .pro-gallery-dot { width:6px; height:6px; padding:0; border:0; border-radius:50%; background:var(--theme-line); cursor:pointer; }
-.fiche-template .pro-gallery-dot.is-active { width:18px; border-radius:999px; background:var(--theme-accent); }
+.fiche-template .pro-gallery-dot { border:0; border-radius:50%; background:var(--theme-line); }
+.fiche-template .pro-gallery-dot.is-active { border-radius:999px; background:var(--theme-accent); }
 .fiche-template .contact-form { margin-top:4px; }
 .fiche-template .contact-form input,.fiche-template .contact-form textarea { border-color:var(--theme-line); border-radius:11px; }
 .fiche-template .public-footer { padding:22px 0 24px; color:#9aa3b1; font-size:10px; }
