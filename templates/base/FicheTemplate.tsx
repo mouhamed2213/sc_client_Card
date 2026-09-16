@@ -18,6 +18,10 @@ import {
   UserRound,
   Youtube,
 } from "lucide-react";
+import "../themes/essentiel.css";
+import "../themes/pro.css";
+import "../themes/signature.css";
+
 import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
 import { getTemplateConfig } from "../config";
