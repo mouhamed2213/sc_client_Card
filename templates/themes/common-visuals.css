@@ -1,0 +1,94 @@
+/* Shared cover and identity geometry for Essentiel, Pro and Signature. */
+
+.fiche-template .public-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  min-height: 0;
+  padding: 0 22px 28px;
+}
+
+.fiche-template .public-cover {
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 258px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #24201c 0%, #100f0e 55%, #3b171b 100%);
+}
+
+.fiche-template .public-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.fiche-template .public-hero-overlay {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.fiche-template .public-topline {
+  position: absolute !important;
+  z-index: 4;
+  inset: 20px 22px auto;
+  margin: 0;
+}
+
+.fiche-template .public-identity {
+  position: relative;
+  z-index: 3;
+  padding-top: 184px;
+  text-align: center;
+}
+
+.fiche-template .public-avatar {
+  width: 132px;
+  height: 132px;
+  margin: 0 auto 18px;
+  border: 4px solid #c9a46a;
+  border-radius: 50%;
+  background: #f7f5f0;
+  box-shadow:
+    0 0 0 7px rgba(12, 12, 12, 0.5),
+    0 14px 38px rgba(0, 0, 0, 0.3);
+}
+
+.fiche-template .public-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.fiche-template .public-actions {
+  position: relative;
+  z-index: 3;
+}
+
+@media (max-width: 420px) {
+  .fiche-template .public-hero {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .fiche-template .public-topline {
+    left: 16px;
+    right: 16px;
+  }
+
+  .fiche-template .public-identity {
+    padding-top: 176px;
+  }
+
+  .fiche-template .public-avatar {
+    width: 116px;
+    height: 116px;
+  }
+}
