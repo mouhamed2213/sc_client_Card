@@ -1,3 +1,5 @@
+@import "./theme-tokens.css";
+
 .fiche-template .pro-social-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
 .fiche-template .pro-social-button { display:flex; align-items:center; gap:9px; min-height:52px; border:1px solid var(--theme-line); border-radius:14px; padding:8px 10px; background:var(--theme-card); color:var(--theme-text); transition:transform .18s ease,border-color .18s ease,background .18s ease; }
 .fiche-template .pro-social-button:hover { transform:translateY(-1px); border-color:var(--theme-accent); }
