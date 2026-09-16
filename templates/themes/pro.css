@@ -1,5 +1,4 @@
 .fiche-template--pro .public-hero {
-  min-height: 540px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -104,7 +103,6 @@
 
 @media (max-width: 420px) {
   .fiche-template--pro .public-hero {
-    min-height: 520px;
     padding-left: 16px;
     padding-right: 16px;
   }
