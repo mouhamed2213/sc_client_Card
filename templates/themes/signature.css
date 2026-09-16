@@ -10,7 +10,11 @@
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(circle at 85% 8%, rgba(201, 164, 106, 0.2), transparent 30%),
+    radial-gradient(
+      circle at 85% 8%,
+      rgba(201, 164, 106, 0.2),
+      transparent 30%
+    ),
     linear-gradient(180deg, #0a0a0a 0%, #121212 58%, #0d0d0d 100%);
 }
 
@@ -136,7 +140,9 @@
   border-color: #e4c18c;
 }
 
-.fiche-template.fiche-template--signature .public-actions > span:has(.public-action-email) {
+.fiche-template.fiche-template--signature
+  .public-actions
+  > span:has(.public-action-email) {
   grid-column: 1 / -1;
 }
 
@@ -157,7 +163,9 @@
   color: #e4c18c;
   font-size: 12px;
   font-weight: 800;
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .fiche-template.fiche-template--signature .public-save-contact:hover {
@@ -227,7 +235,9 @@
     grid-template-columns: 1fr;
   }
 
-  .fiche-template.fiche-template--signature .public-actions > span:has(.public-action-email) {
+  .fiche-template.fiche-template--signature
+    .public-actions
+    > span:has(.public-action-email) {
     grid-column: auto;
   }
 }

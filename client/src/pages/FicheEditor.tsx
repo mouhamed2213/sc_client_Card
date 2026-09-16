@@ -6,6 +6,7 @@ import { getPlanFeatures, type PlanName } from "@shared/planFeatures";
 import {
   ArrowLeft,
   Check,
+  Eye,
   ImagePlus,
   Loader2,
   Plus,
@@ -236,6 +237,11 @@ export default function FicheEditor() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button>
+              <Eye className="h4 w-4"/ > Voir la fiche
+
+            </Button>
+
             <Button
               variant="outline"
               onClick={() => save("brouillon")}

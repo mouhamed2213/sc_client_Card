@@ -1,11 +1,3 @@
-/* .fiche-template--essentiel .public-hero {
-  min-height: 390px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 0 18px 18px;
-  background: #17324f;
-} */
 
 .fiche-template--essentiel .public-hero {
   position: relative;

@@ -89,7 +89,9 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
         <Mail className="h-5 w-5" />
         <span>E-mail</span>
       </a>
-    ) : null,
+    ) : (
+      <p className="item-center justify-center "> Email non fourni</p>
+    ),
   } as const;
   return (
     <section className="public-hero">
@@ -98,11 +100,6 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
           <img src={fiche.photo} alt="" />
         </div>
       )}
-      {/* {fiche.photo && (
-        <div className="public-cover_blur blur-2xl">
-          <img src={fiche.photo} alt="" />
-        </div>
-      )} */}
       <div className="public-hero-overlay" />
       <div className="public-topline">
         <span className="public-chip">Fiche de contact</span>
@@ -305,18 +302,17 @@ export function FicheTemplate({
       <div className="public-card fiche-template__card">
         <Hero fiche={fiche} actions={actions} />
         <main className="public-content">
-          {fiche.formule === "essentiel" ||
-            (true && (
-              <div className="essential-save-row">
-                <a
-                  href={actions.contactHref}
-                  download={`${fiche.slug}.vcf`}
-                  className="public-save-contact"
-                >
-                  <Download className="h-4 w-4" /> Enregistrer le contact
-                </a>
-              </div>
-            ))}
+          {fiche.formule && (
+            <div className="essential-save-row">
+              <a
+                href={actions.contactHref}
+                download={`${fiche.slug}.vcf`}
+                className="public-save-contact"
+              >
+                <Download className="h-4 w-4" /> Enregistrer le contact
+              </a>
+            </div>
+          )}
           {fiche.formule !== "essentiel" && <ProContent fiche={fiche} />}
           {links.length || fiche.site ? (
             <section className="public-section">
@@ -532,7 +528,7 @@ export function FicheTemplate({
           ) : null}
           {children}
           <section className="public-footer">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex item-center justify-between gap-3">
               <p>Mentions légales · Confidentialité</p>
               <a href="/" className="public-brand">
                 Support Connecté <ArrowUpRight className="h-3 w-3" />
