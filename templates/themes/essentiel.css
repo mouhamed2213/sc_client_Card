@@ -1,4 +1,15 @@
+/* .fiche-template--essentiel .public-hero {
+  min-height: 390px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 18px 18px;
+  background: #17324f;
+} */
+
 .fiche-template--essentiel .public-hero {
+  position: relative; /* ← manquant, indispensable pour que .public-cover (absolute) se cale dessus */
+  overflow: hidden; /* ← sécurité supplémentaire pour rien ne déborde visuellement */
   min-height: 390px;
   display: flex;
   flex-direction: column;
@@ -22,7 +33,12 @@
 }
 
 .fiche-template--essentiel .public-hero-overlay {
-  background: linear-gradient(180deg, rgba(8,25,42,.12) 0%, rgba(8,25,42,.28) 38%, rgba(8,25,42,.92) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(8, 25, 42, 0.12) 0%,
+    rgba(8, 25, 42, 0.28) 38%,
+    rgba(8, 25, 42, 0.92) 100%
+  );
 }
 
 .fiche-template--essentiel .public-topline {
@@ -39,10 +55,10 @@
   width: 72px;
   height: 72px;
   margin-bottom: 12px;
-  border: 2px solid rgba(255,255,255,.82);
+  border: 2px solid rgba(255, 255, 255, 0.82);
   border-radius: 14px;
-  background: rgba(255,255,255,.14);
-  box-shadow: 0 10px 30px rgba(0,0,0,.16);
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
 }
 
 .fiche-template--essentiel .public-avatar img {
@@ -52,14 +68,14 @@
 .fiche-template--essentiel .public-name {
   font-size: 26px;
   line-height: 1.05;
-  text-shadow: 0 2px 18px rgba(0,0,0,.22);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.22);
 }
 
 .fiche-template--essentiel .public-role {
   max-width: 330px;
   margin-left: auto;
   margin-right: auto;
-  color: rgba(255,255,255,.78);
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .fiche-template--essentiel .public-actions {
@@ -69,14 +85,14 @@
 
 .fiche-template--essentiel .public-action {
   min-height: 46px;
-  border-color: rgba(255,255,255,.22);
+  border-color: rgba(255, 255, 255, 0.22);
   border-radius: 12px;
-  background: rgba(255,255,255,.12);
+  background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(8px);
 }
 
 .fiche-template--essentiel .public-action-call {
-  background: rgba(255,255,255,.94);
+  background: rgba(255, 255, 255, 0.94);
   color: #17324f;
 }
 
@@ -103,7 +119,7 @@
   color: #17324f;
   font-size: 12px;
   font-weight: 800;
-  box-shadow: 0 4px 14px rgba(23,50,79,.05);
+  box-shadow: 0 4px 14px rgba(23, 50, 79, 0.05);
 }
 
 .fiche-template--essentiel .public-save-contact:hover {
