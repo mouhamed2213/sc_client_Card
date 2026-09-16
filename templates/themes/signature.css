@@ -33,12 +33,7 @@
   z-index: 1;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.12) 0%,
-    rgba(0, 0, 0, 0.26) 42%,
-    rgba(0, 0, 0, 0.72) 100%
-  );
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.26) 42%, rgba(0, 0, 0, 0.72) 100%);
 }
 
 .fiche-template.fiche-template--signature .public-topline {
@@ -66,27 +61,6 @@
   text-align: center;
 }
 
-.fiche-template.fiche-template--signature .public-avatar {
-  width: 132px;
-  height: 132px;
-  margin: 0 auto 18px;
-  border: 4px solid #c9a46a;
-  border-radius: 50%;
-  background: #f7f5f0;
-  box-shadow:
-    0 0 0 7px rgba(12, 12, 12, 0.68),
-    0 14px 38px rgba(0, 0, 0, 0.42);
-}
-
-.fiche-template.fiche-template--signature .public-avatar img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-  object-position: center;
-}
-
 .fiche-template.fiche-template--signature .public-name {
   margin: 0;
   color: #fffaf2;
@@ -108,8 +82,6 @@
 .fiche-template.fiche-template--signature .public-actions {
   position: relative;
   z-index: 3;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
   margin-top: 30px;
 }
 
@@ -129,12 +101,6 @@
   border-color: #e4c18c;
 }
 
-.fiche-template.fiche-template--signature
-  .public-actions
-  > span:has(.public-action-email) {
-  grid-column: 1 / -1;
-}
-
 .fiche-template.fiche-template--signature .essential-save-row {
   padding: 18px 0 4px;
 }
@@ -152,9 +118,7 @@
   color: #e4c18c;
   font-size: 12px;
   font-weight: 800;
-  transition:
-    background 0.18s ease,
-    border-color 0.18s ease;
+  transition: background 0.18s ease, border-color 0.18s ease;
 }
 
 .fiche-template.fiche-template--signature .public-save-contact:hover {
@@ -214,20 +178,5 @@
 
   .fiche-template.fiche-template--signature .public-identity {
     padding-top: 205px;
-  }
-
-  .fiche-template.fiche-template--signature .public-avatar {
-    width: 116px;
-    height: 116px;
-  }
-
-  .fiche-template.fiche-template--signature .public-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .fiche-template.fiche-template--signature
-    .public-actions
-    > span:has(.public-action-email) {
-    grid-column: auto;
   }
 }
