@@ -205,3 +205,85 @@
     grid-column: auto;
   }
 }
+
+/* Shared Signature geometry: fixed cover frame and circular identity logo. */
+.fiche-template--essentiel .public-hero {
+  min-height: 0;
+  padding: 0 22px 28px;
+  isolation: isolate;
+}
+
+.fiche-template--essentiel .public-cover {
+  z-index: 0;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 258px;
+  overflow: hidden;
+}
+
+.fiche-template--essentiel .public-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.fiche-template--essentiel .public-hero-overlay {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.fiche-template--essentiel .public-topline {
+  z-index: 4;
+}
+
+.fiche-template--essentiel .public-identity {
+  position: relative;
+  z-index: 3;
+  padding-top: 184px;
+  text-align: center;
+}
+
+.fiche-template--essentiel .public-avatar {
+  width: 132px;
+  height: 132px;
+  margin: 0 auto 18px;
+  border: 4px solid #c9a46a;
+  border-radius: 50%;
+  background: #f7f5f0;
+  box-shadow:
+    0 0 0 7px rgba(12, 12, 12, 0.5),
+    0 14px 38px rgba(0, 0, 0, 0.3);
+}
+
+.fiche-template--essentiel .public-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+@media (max-width: 420px) {
+  .fiche-template--essentiel .public-hero {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .fiche-template--essentiel .public-topline {
+    left: 16px;
+    right: 16px;
+  }
+
+  .fiche-template--essentiel .public-identity {
+    padding-top: 176px;
+  }
+
+  .fiche-template--essentiel .public-avatar {
+    width: 116px;
+    height: 116px;
+  }
+}
