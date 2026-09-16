@@ -40,6 +40,27 @@
   margin-top: auto;
 }
 
+.fiche-template--pro .public-avatar {
+  width: 132px;
+  height: 132px;
+  margin: 0 auto 18px;
+  border: 4px solid #c9a46a;
+  border-radius: 50%;
+  background: #fffaf4;
+  box-shadow:
+    0 0 0 7px rgba(41, 37, 31, 0.68),
+    0 14px 38px rgba(83, 55, 35, 0.28);
+}
+
+.fiche-template--pro .public-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
 .fiche-template--pro .essential-save-row {
   padding: 18px 0 4px;
 }
@@ -63,4 +84,33 @@
 .fiche-template--pro .public-save-contact:hover {
   border-color: #9a6841;
   background: #f7eee6;
+}
+
+.fiche-template--pro .public-action-email {
+  border-color: rgba(202, 157, 112, 0.7);
+  background: rgba(154, 104, 65, 0.18);
+}
+
+.fiche-template--pro .public-action-email:hover {
+  border-color: #d7ad80;
+  background: rgba(154, 104, 65, 0.3);
+}
+
+.fiche-template--pro .public-actions > span:has(.public-action-email) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 420px) {
+  .fiche-template--pro .public-avatar {
+    width: 116px;
+    height: 116px;
+  }
+
+  .fiche-template--pro .public-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .fiche-template--pro .public-actions > span:has(.public-action-email) {
+    grid-column: auto;
+  }
 }
