@@ -98,6 +98,11 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
           <img src={fiche.photo} alt="" />
         </div>
       )}
+      {/* {fiche.photo && (
+        <div className="public-cover_blur blur-2xl">
+          <img src={fiche.photo} alt="" />
+        </div>
+      )} */}
       <div className="public-hero-overlay" />
       <div className="public-topline">
         <span className="public-chip">Fiche de contact</span>
@@ -300,17 +305,18 @@ export function FicheTemplate({
       <div className="public-card fiche-template__card">
         <Hero fiche={fiche} actions={actions} />
         <main className="public-content">
-          {fiche.formule === "essentiel" && (
-            <div className="essential-save-row">
-              <a
-                href={actions.contactHref}
-                download={`${fiche.slug}.vcf`}
-                className="public-save-contact"
-              >
-                <Download className="h-4 w-4" /> Enregistrer le contact
-              </a>
-            </div>
-          )}
+          {fiche.formule === "essentiel" ||
+            (true && (
+              <div className="essential-save-row">
+                <a
+                  href={actions.contactHref}
+                  download={`${fiche.slug}.vcf`}
+                  className="public-save-contact"
+                >
+                  <Download className="h-4 w-4" /> Enregistrer le contact
+                </a>
+              </div>
+            ))}
           {fiche.formule !== "essentiel" && <ProContent fiche={fiche} />}
           {links.length || fiche.site ? (
             <section className="public-section">

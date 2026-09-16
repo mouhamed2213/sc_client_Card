@@ -68,7 +68,7 @@
   background: rgba(255, 255, 255, 0.08);
 }
 .fiche-template .public-nfc {
-  opacity: 0.58;
+  opacity: 1.68;
 }
 .fiche-template .public-identity {
   text-align: center;
@@ -162,7 +162,7 @@
 }
 .fiche-template .public-content .bg-\[\#eef3f8\] {
   background: var(--theme-accent-soft) !important;
-}   
+}
 .fiche-template .link-list {
   display: grid;
   gap: 8px;
@@ -493,7 +493,7 @@
 }
 .fiche-template--signature .public-chip {
   border-color: rgba(201, 164, 106, 0.35);
-  color: #dfc08e;
+  color: #f9f6f0;
   background: rgba(201, 164, 106, 0.08);
 }
 .fiche-template--signature .public-avatar {
