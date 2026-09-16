@@ -1,0 +1,11 @@
+{
+  "name": "Support Connecté",
+  "short_name": "Support Connecté",
+  "description": "Fiches professionnelles accessibles depuis QR code et NFC.",
+  "lang": "fr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#172033",
+  "icons": []
+}
