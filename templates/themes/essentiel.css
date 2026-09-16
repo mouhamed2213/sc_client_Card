@@ -100,10 +100,6 @@
   border-color: #e4c18c;
 }
 
-.fiche-template--essentiel .public-actions > span:has(.public-action-email) {
-  grid-column: 1 / -1;
-}
-
 .fiche-template--essentiel .essential-save-row {
   padding: 16px 0 4px;
 }
@@ -166,8 +162,6 @@
 @media (max-width: 420px) {
   .fiche-template--essentiel .public-hero { min-height: 520px; }
   .fiche-template--essentiel .public-name { font-size: 24px; }
-  .fiche-template--essentiel .public-actions { grid-template-columns: 1fr; }
-  .fiche-template--essentiel .public-actions > span:has(.public-action-email) { grid-column: auto; }
   .fiche-template--essentiel .public-hero { padding-left: 16px; padding-right: 16px; }
   .fiche-template--essentiel .public-topline { left: 16px; right: 16px; }
   .fiche-template--essentiel .public-identity { padding-top: 205px; }
