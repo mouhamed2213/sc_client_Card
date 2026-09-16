@@ -23,6 +23,11 @@ export * from './enums.ts';
  */
 export type User = Prisma.UserModel
 /**
+ * Model AdminCredential
+ * 
+ */
+export type AdminCredential = Prisma.AdminCredentialModel
+/**
  * Model Fiche
  * 
  */

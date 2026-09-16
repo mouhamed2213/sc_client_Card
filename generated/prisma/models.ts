@@ -9,6 +9,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User.ts'
+export type * from './models/AdminCredential.ts'
 export type * from './models/Fiche.ts'
 export type * from './models/FicheScan.ts'
 export type * from './models/ContactRequest.ts'

@@ -398,6 +398,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
+  AdminCredential: 'AdminCredential',
   Fiche: 'Fiche',
   FicheScan: 'FicheScan',
   ContactRequest: 'ContactRequest'
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "fiche" | "ficheScan" | "contactRequest"
+    modelProps: "user" | "adminCredential" | "fiche" | "ficheScan" | "contactRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -491,6 +492,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    AdminCredential: {
+      payload: Prisma.$AdminCredentialPayload<ExtArgs>
+      fields: Prisma.AdminCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.AdminCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.AdminCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.AdminCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.AdminCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.AdminCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload>
+        }
+        update: {
+          args: Prisma.AdminCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.AdminCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminCredential>
+        }
+        groupBy: {
+          args: Prisma.AdminCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminCredentialCountAggregateOutputType> | number
         }
       }
     }
@@ -768,6 +843,18 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const AdminCredentialScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  username: 'username',
+  passwordHash: 'passwordHash',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdminCredentialScalarFieldEnum = (typeof AdminCredentialScalarFieldEnum)[keyof typeof AdminCredentialScalarFieldEnum]
 
 
 export const FicheScalarFieldEnum = {
@@ -1103,6 +1190,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
+  adminCredential?: Prisma.AdminCredentialOmit
   fiche?: Prisma.FicheOmit
   ficheScan?: Prisma.FicheScanOmit
   contactRequest?: Prisma.ContactRequestOmit

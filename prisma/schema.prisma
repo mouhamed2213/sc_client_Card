@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -6,8 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-} 
-
+}
 
 enum UserRole {
   user
@@ -28,45 +26,58 @@ enum Statut {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  openId       String   @unique @db.VarChar(64)
-  name         String?  @db.Text
-  email        String?  @db.VarChar(320)
-  loginMethod  String?  @db.VarChar(64)
-  role         UserRole @default(user)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  lastSignedIn DateTime @default(now())
+  id             Int              @id @default(autoincrement())
+  openId         String           @unique @db.VarChar(64)
+  name           String?          @db.Text
+  email          String?          @db.VarChar(320)
+  loginMethod    String?          @db.VarChar(64)
+  role           UserRole         @default(user)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  lastSignedIn   DateTime         @default(now())
+  adminCredential AdminCredential?
 
   @@map("users")
 }
 
+model AdminCredential {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  username     String   @unique @db.VarChar(64)
+  passwordHash String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_credentials")
+}
+
 model Fiche {
-  id             Int        @id @default(autoincrement())
-  slug           String     @unique @db.VarChar(160)
-  formule        Formule
-  statut         Statut     @default(brouillon)
-  nom            String     @db.VarChar(120)
-  prenom         String     @db.VarChar(120)
-  fonction       String     @db.VarChar(160)
-  entreprise     String     @db.VarChar(180)
-  photo          String?    @db.Text
-  logo           String?    @db.Text
-  telephone      String     @db.VarChar(32)
-  whatsapp       String     @db.VarChar(32)
-  email          String?    @db.VarChar(320)
-  site           String?    @db.Text
-  adresse        String?    @db.Text
-  lienItineraire String?    @db.Text
-  googlePlaceId  String?    @db.VarChar(180)
-  dateCreation   DateTime   @default(now())
-  dateEcheance   DateTime
-  dataJson       String     @db.Text
-  scansTotal     Int        @default(0)
-  lastScanAt     DateTime?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  scans          FicheScan[]
+  id              Int               @id @default(autoincrement())
+  slug            String            @unique @db.VarChar(160)
+  formule         Formule
+  statut          Statut            @default(brouillon)
+  nom             String            @db.VarChar(120)
+  prenom          String            @db.VarChar(120)
+  fonction        String            @db.VarChar(160)
+  entreprise      String            @db.VarChar(180)
+  photo           String?           @db.Text
+  logo            String?           @db.Text
+  telephone       String            @db.VarChar(32)
+  whatsapp        String            @db.VarChar(32)
+  email           String?           @db.VarChar(320)
+  site            String?           @db.Text
+  adresse         String?           @db.Text
+  lienItineraire  String?           @db.Text
+  googlePlaceId   String?           @db.VarChar(180)
+  dateCreation    DateTime          @default(now())
+  dateEcheance    DateTime
+  dataJson        String            @db.Text
+  scansTotal      Int               @default(0)
+  lastScanAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  scans           FicheScan[]
   contactRequests ContactRequest[]
 
   @@map("fiches")
