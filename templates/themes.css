@@ -1,16 +1,6 @@
 /* Shared visual language: one markup, three art directions. */
 
 .fiche-template {
-  --theme-bg: #f4f6f8;
-  --theme-card: #ffffff;
-  --theme-text: #172033;
-  --theme-muted: #718096;
-  --theme-accent: #315f91;
-  --theme-accent-soft: #edf3f9;
-  --theme-line: #e4e9ef;
-  --theme-hero: #172033;
-  --theme-hero-text: #ffffff;
-  --theme-radius: 22px;
   background: var(--theme-bg);
 }
 
@@ -18,6 +8,7 @@
   box-shadow: 0 24px 70px rgba(23, 32, 51, 0.1);
 }
 
+/* Complex visual treatment remains in CSS; structural layout is handled by Tailwind. */
 .fiche-template .public-hero {
   position: relative;
   overflow: hidden;
@@ -119,7 +110,7 @@
     transform 0.18s ease,
     background 0.18s ease;
 }
-.fiche-template .public-action:hover {
+f.iche-template .public-action:hover {
   background: rgba(255, 255, 255, 0.14);
   transform: translateY(-1px);
 }
@@ -144,8 +135,7 @@
   background: var(--theme-accent);
 }
 
-/* Kept temporarily because the corresponding Tailwind token classes are now
-   used by SectionTitle. This selector can be removed after visual validation. */
+/* Kept temporarily for compatibility with older markup. */
 .fiche-template .public-content .mb-4 {
   color: var(--theme-muted) !important;
 }
@@ -170,10 +160,6 @@
 }
 .fiche-template .public-primary-link,
 .fiche-template .public-secondary-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
   border-radius: 10px;
   padding: 10px 13px;
   font-size: 11px;
@@ -190,10 +176,6 @@
   color: var(--theme-muted);
 }
 .fiche-template .review-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
   margin: 18px 0 0;
   border: 1px solid var(--theme-line);
   border-radius: 14px;
@@ -201,9 +183,6 @@
   background: var(--theme-accent-soft);
 }
 .fiche-template .review-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   flex-shrink: 0;
   border-radius: 9px;
   padding: 9px 11px;
@@ -218,9 +197,6 @@
   border-radius: 12px;
 }
 .fiche-template .hours-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
   padding: 10px 12px;
   border-bottom: 1px solid var(--theme-line);
   font-size: 11px;
@@ -263,7 +239,7 @@
 .fiche-template .pro-gallery {
   width: 100%;
 }
-.fiche-template .pro-gallery-stage {
+f.iche-template .pro-gallery-stage {
   position: relative;
   overflow: hidden;
   width: 100%;
@@ -398,11 +374,7 @@
 }
 .fiche-template--pro .public-hero {
   background:
-    radial-gradient(
-      circle at 82% 10%,
-      rgba(180, 126, 80, 0.28),
-      transparent 34%
-    ),
+    radial-gradient(circle at 82% 10%, rgba(180, 126, 80, 0.28), transparent 34%),
     var(--theme-hero);
 }
 .fiche-template--pro .public-avatar {
@@ -448,11 +420,7 @@
 .fiche-template--signature .public-hero {
   padding: 28px 22px 26px;
   background:
-    radial-gradient(
-      circle at 50% -20%,
-      rgba(201, 164, 106, 0.2),
-      transparent 42%
-    ),
+    radial-gradient(circle at 50% -20%, rgba(201, 164, 106, 0.2), transparent 42%),
     var(--theme-hero);
 }
 .fiche-template--signature .public-hero::after {
@@ -491,9 +459,6 @@
 }
 .fiche-template--signature .public-action:hover {
   background: rgba(201, 164, 106, 0.14);
-}
-.fiche-template--signature .public-content .bg-\[\#eef3f8\] {
-  background: #28231c !important;
 }
 .fiche-template--signature .public-link {
   border-color: #302d29;
@@ -561,6 +526,14 @@
 }
 
 @media (max-width: 420px) {
+  .fiche-template {
+    padding: 0 0 24px;
+  }
+  .fiche-template__card {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
   .fiche-template .public-actions {
     gap: 6px;
   }
@@ -574,10 +547,5 @@
   .fiche-template .pro-gallery-control {
     width: 34px;
     height: 34px;
-  }
-  .fiche-template__card {
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
   }
 }
