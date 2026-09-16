@@ -16,8 +16,6 @@
     linear-gradient(180deg, #0a0a0a 0%, #121212 58%, #0d0d0d 100%);
 }
 
-/* A stable cover frame: portrait, landscape and transparent images are all
- * contained inside the same area. No image can push the layout outward. */
 .fiche-template.fiche-template--signature .public-cover {
   position: absolute;
   z-index: 0;
@@ -25,8 +23,7 @@
   width: 100%;
   height: 258px;
   overflow: hidden;
-  background:
-    linear-gradient(135deg, #24201c 0%, #100f0e 55%, #3b171b 100%);
+  background: linear-gradient(135deg, #24201c 0%, #100f0e 55%, #3b171b 100%);
 }
 
 .fiche-template.fiche-template--signature .public-cover img {
@@ -38,22 +35,19 @@
   object-position: center;
 }
 
-/* The overlay is independent from the image and keeps text readable for any
- * uploaded photo, including very bright or very detailed images. */
 .fiche-template.fiche-template--signature .public-hero-overlay {
   position: absolute;
   z-index: 1;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(8, 8, 8, 0.16) 0%,
-      rgba(8, 8, 8, 0.28) 26%,
-      rgba(12, 12, 12, 0.72) 53%,
-      #0d0d0d 74%,
-      #0d0d0d 100%
-    );
+  background: linear-gradient(
+    180deg,
+    rgba(8, 8, 8, 0.16) 0%,
+    rgba(8, 8, 8, 0.28) 26%,
+    rgba(12, 12, 12, 0.72) 53%,
+    #0d0d0d 74%,
+    #0d0d0d 100%
+  );
 }
 
 .fiche-template.fiche-template--signature .public-topline {
@@ -74,8 +68,6 @@
   color: rgba(244, 238, 228, 0.48);
 }
 
-/* The identity block reserves the cover overlap area. The enlarged logo is
- * clipped inside a circular frame and stays above the cover. */
 .fiche-template.fiche-template--signature .public-identity {
   position: relative;
   z-index: 3;
@@ -195,8 +187,8 @@
   }
 
   .fiche-template.fiche-template--signature .public-topline {
-    inset-left: 16px;
-    inset-right: 16px;
+    left: 16px;
+    right: 16px;
   }
 
   .fiche-template.fiche-template--signature .public-identity {
