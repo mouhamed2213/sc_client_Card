@@ -147,14 +147,14 @@ function GalleryCarousel({
   const next = () => setCurrent((index) => (index + 1) % gallery.length);
   const image = gallery[current];
   return (
-    <div className="pro-gallery">
-      <div className="pro-gallery-stage">
-        <img src={image.url} alt={image.alt} loading="lazy" />
+    <div className="pro-gallery w-full">
+      <div className="pro-gallery-stage relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
+        <img className="block h-full w-full object-cover" src={image.url} alt={image.alt} loading="lazy" />
         {gallery.length > 1 && (
           <>
             <button
               type="button"
-              className="pro-gallery-control pro-gallery-control-prev"
+              className="pro-gallery-control absolute top-1/2 left-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
               onClick={previous}
               aria-label="Photo précédente"
             >
@@ -162,7 +162,7 @@ function GalleryCarousel({
             </button>
             <button
               type="button"
-              className="pro-gallery-control pro-gallery-control-next"
+              className="pro-gallery-control absolute top-1/2 right-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
               onClick={next}
               aria-label="Photo suivante"
             >
@@ -171,20 +171,20 @@ function GalleryCarousel({
           </>
         )}
       </div>
-      <div className="pro-gallery-meta">
+      <div className="pro-gallery-meta mt-2.5 flex items-center justify-between gap-3 text-[10px] font-bold text-theme-muted">
         <span>
           Photo {current + 1} / {gallery.length}
         </span>
         {gallery.length > 1 && (
           <div
-            className="pro-gallery-dots"
+            className="pro-gallery-dots flex items-center gap-[5px]"
             aria-label="Navigation de la galerie"
           >
             {gallery.map((item, index) => (
               <button
                 type="button"
                 key={item.url}
-                className={`pro-gallery-dot ${index === current ? "is-active" : ""}`}
+                className={`pro-gallery-dot h-1.5 w-1.5 shrink-0 cursor-pointer border-0 p-0 ${index === current ? "is-active" : ""}`}
                 onClick={() => setCurrent(index)}
                 aria-label={`Afficher la photo ${index + 1}`}
                 aria-current={index === current ? "true" : undefined}
@@ -295,6 +295,7 @@ export function FicheTemplate({
   const { features } = config;
   const links = (fiche.data.liens ?? []).slice(0, features.maxLinks);
   const gallery = (fiche.data.galerie ?? []).slice(0, features.maxPhotos);
+
   return (
     <div
       className={`public-page fiche-template fiche-template--${config.theme} min-h-screen px-3 pt-6 pb-10 text-theme-text`}
@@ -531,8 +532,8 @@ export function FicheTemplate({
             </section>
           ) : null}
           {children}
-          <section className="public-footer">
-            <div className="flex item-center justify-between gap-3">
+          <section className="public-footer py-[22px] pb-6 text-[10px]">
+            <div className="flex items-center justify-between gap-3">
               <p>Mentions légales · Confidentialité</p>
               <a href="/" className="public-brand">
                 Support Connecté <ArrowUpRight className="h-3 w-3" />
