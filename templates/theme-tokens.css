@@ -1,0 +1,59 @@
+/*
+ * Theme tokens for the shared FicheTemplate.
+ * Tailwind handles layout/spacing/typography; these variables hold theme identity.
+ */
+
+.fiche-template {
+  --theme-bg: #f4f6f8;
+  --theme-card: #ffffff;
+  --theme-text: #172033;
+  --theme-muted: #718096;
+  --theme-accent: #315f91;
+  --theme-accent-soft: #edf3f9;
+  --theme-line: #e4e9ef;
+  --theme-hero: #172033;
+  --theme-hero-text: #ffffff;
+  --theme-radius: 22px;
+  --theme-danger: #a86155;
+  --theme-success-bg: #ecfdf5;
+  --theme-success-text: #065f46;
+}
+
+.fiche-template--essentiel {
+  --theme-bg: #f4f7fa;
+  --theme-card: #ffffff;
+  --theme-text: #203047;
+  --theme-muted: #748196;
+  --theme-accent: #315f91;
+  --theme-accent-soft: #edf4fb;
+  --theme-line: #e3e9ef;
+  --theme-hero: #18304b;
+  --theme-hero-text: #ffffff;
+  --theme-radius: 18px;
+}
+
+.fiche-template--pro {
+  --theme-bg: #f7f4ef;
+  --theme-card: #fffdf9;
+  --theme-text: #2d2b28;
+  --theme-muted: #7b746b;
+  --theme-accent: #9a6841;
+  --theme-accent-soft: #f7eee6;
+  --theme-line: #e8ded4;
+  --theme-hero: #29251f;
+  --theme-hero-text: #ffffff;
+  --theme-radius: 22px;
+}
+
+.fiche-template--signature {
+  --theme-bg: #111111;
+  --theme-card: #171717;
+  --theme-text: #f4eee4;
+  --theme-muted: #aaa094;
+  --theme-accent: #c9a46a;
+  --theme-accent-soft: #28231c;
+  --theme-line: #302d29;
+  --theme-hero: #0b0b0b;
+  --theme-hero-text: #f4eee4;
+  --theme-radius: 26px;
+}
