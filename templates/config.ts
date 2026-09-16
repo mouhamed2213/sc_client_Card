@@ -15,6 +15,5 @@ export const templateConfig: Record<Formule, TemplateConfig> = {
 };
 
 export function getTemplateConfig(formule: Formule): TemplateConfig {
-  console.log(formule);
   return templateConfig[formule];
 }
