@@ -18,6 +18,7 @@ import {
   UserRound,
   Youtube,
 } from "lucide-react";
+import "../theme-tokens.css";
 import "../themes/essentiel.css";
 import "../themes/pro.css";
 import "../themes/signature.css";
@@ -28,7 +29,6 @@ import { getTemplateConfig } from "../config";
 import type { FicheTemplateModel } from "../model";
 import "../socials.css";
 import "../themes.css";
-import "../themes/essentiel.css";
 
 export type FicheTemplateActions = {
   phoneHref: string;
@@ -57,8 +57,8 @@ export type FicheTemplateProps = {
 
 function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   return (
-    <div className="mb-4 flex items-center gap-2 text-[#60728c]">
-      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef3f8]">
+    <div className="mb-4 flex items-center gap-2 text-theme-muted">
+      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-theme-accent-soft">
         {icon}
       </span>
       <h2 className="text-xs font-bold uppercase tracking-[0.16em]">{title}</h2>
@@ -369,10 +369,10 @@ export function FicheTemplate({
           {features.hasGoogleReview && fiche.googlePlaceId ? (
             <section className="review-panel">
               <div>
-                <p className="text-sm font-semibold text-[#3b3024]">
+                <p className="text-sm font-semibold text-theme-text">
                   Votre expérience compte
                 </p>
-                <p className="mt-1 text-xs leading-5 text-[#806c58]">
+                <p className="mt-1 text-xs leading-5 text-theme-muted">
                   Partagez votre avis sur Google en un clic.
                 </p>
               </div>
@@ -399,7 +399,7 @@ export function FicheTemplate({
                     <strong
                       className={
                         row.horaire.toLowerCase().includes("fermé")
-                          ? "text-[#a86155]"
+                          ? "text-theme-danger"
                           : ""
                       }
                     >
@@ -417,7 +417,7 @@ export function FicheTemplate({
                 title="Être rappelé"
               />
               {actions.contactSent ? (
-                <div className="rounded-xl bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
+                <div className="rounded-xl bg-theme-success-bg p-4 text-sm font-medium text-theme-success-text">
                   Votre demande a bien été transmise. L’établissement peut
                   maintenant vous rappeler.
                 </div>
@@ -503,10 +503,10 @@ export function FicheTemplate({
                   {section.articles.map(article => (
                     <div key={article.nom} className="catalog-row">
                       <div>
-                        <p className="font-semibold text-[#26344a]">
+                        <p className="font-semibold text-theme-text">
                           {article.nom}
                         </p>
-                        <p className="mt-1 text-xs leading-5 text-[#8891a0]">
+                        <p className="mt-1 text-xs leading-5 text-theme-muted">
                           {article.description}
                         </p>
                       </div>
@@ -534,10 +534,10 @@ export function FicheTemplate({
                 Support Connecté <ArrowUpRight className="h-3 w-3" />
               </a>
             </div>
-            <p className="mt-3 max-w-sm text-[11px] leading-5 text-[#9aa3b1]">
+            <p className="mt-3 max-w-sm text-[11px] leading-5 text-theme-muted">
               Les informations envoyées via cette fiche servent uniquement à
               répondre à votre demande. Vous pouvez demander leur suppression en
-              contactant l'établissement.
+              contactant l’établissement.
             </p>
           </section>
         </main>
