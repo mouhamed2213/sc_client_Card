@@ -18,6 +18,7 @@ import {
   UserRound,
   Youtube,
 } from "lucide-react";
+import "../theme-tokens.css";
 import "../themes/essentiel.css";
 import "../themes/pro.css";
 import "../themes/signature.css";
@@ -28,7 +29,6 @@ import { getTemplateConfig } from "../config";
 import type { FicheTemplateModel } from "../model";
 import "../socials.css";
 import "../themes.css";
-import "../themes/essentiel.css";
 
 export type FicheTemplateActions = {
   phoneHref: string;
@@ -57,8 +57,8 @@ export type FicheTemplateProps = {
 
 function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   return (
-    <div className="mb-4 flex items-center gap-2 text-[#60728c]">
-      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#eef3f8]">
+    <div className="mb-4 flex items-center gap-2 text-theme-muted">
+      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-theme-accent-soft">
         {icon}
       </span>
       <h2 className="text-xs font-bold uppercase tracking-[0.16em]">{title}</h2>
@@ -126,7 +126,7 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
         </p>
       </div>
       <div className="public-actions">
-        {actions.buttonOrder.map(key => (
+        {actions.buttonOrder.map((key) => (
           <span key={key}>{buttons[key]}</span>
         ))}
       </div>
@@ -143,8 +143,8 @@ function GalleryCarousel({
   const [current, setCurrent] = useState(0);
   if (!gallery.length) return null;
   const previous = () =>
-    setCurrent(index => (index - 1 + gallery.length) % gallery.length);
-  const next = () => setCurrent(index => (index + 1) % gallery.length);
+    setCurrent((index) => (index - 1 + gallery.length) % gallery.length);
+  const next = () => setCurrent((index) => (index + 1) % gallery.length);
   const image = gallery[current];
   return (
     <div className="pro-gallery">
@@ -205,6 +205,7 @@ function socialKey(label: string, url: string) {
   if (value.includes("youtube")) return "youtube";
   return "other";
 }
+
 function SocialIcon({ label, url }: { label: string; url: string }) {
   const key = socialKey(label, url);
   if (key === "instagram") return <Instagram className="h-5 w-5" />;
@@ -219,7 +220,7 @@ function ProContent({ fiche }: { fiche: FicheTemplateModel }) {
   const appointment = fiche.data.rendezVous?.url?.trim()
     ? fiche.data.rendezVous
     : null;
-  const socials = (fiche.data.reseauxSociaux ?? []).filter(social =>
+  const socials = (fiche.data.reseauxSociaux ?? []).filter((social) =>
     social.url?.trim()
   );
   if (!presentation && !appointment && !socials.length) return null;
@@ -263,7 +264,7 @@ function ProContent({ fiche }: { fiche: FicheTemplateModel }) {
             title="Réseaux sociaux"
           />
           <div className="pro-social-grid">
-            {socials.map(social => (
+            {socials.map((social) => (
               <a
                 key={`${social.label}-${social.url}`}
                 href={social.url}
@@ -296,12 +297,12 @@ export function FicheTemplate({
   const gallery = (fiche.data.galerie ?? []).slice(0, features.maxPhotos);
   return (
     <div
-      className={`public-page fiche-template fiche-template--${config.theme}`}
+      className={`public-page fiche-template fiche-template--${config.theme} min-h-screen px-3 pt-6 pb-10 text-theme-text`}
       data-formule={fiche.formule}
     >
-      <div className="public-card fiche-template__card">
+      <div className="public-card fiche-template__card mx-auto w-full max-w-[520px] overflow-hidden rounded-[var(--theme-radius)] border border-theme-line bg-theme-card">
         <Hero fiche={fiche} actions={actions} />
-        <main className="public-content">
+        <main className="public-content px-5 pt-2">
           {fiche.formule && (
             <div className="essential-save-row">
               <a
@@ -315,30 +316,30 @@ export function FicheTemplate({
           )}
           {fiche.formule !== "essentiel" && <ProContent fiche={fiche} />}
           {links.length || fiche.site ? (
-            <section className="public-section">
+            <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
                 icon={<Globe2 className="h-4 w-4" />}
                 title="Liens utiles"
               />
-              <div className="link-list">
+              <div className="link-list grid gap-2">
                 {fiche.site && (
                   <a
                     href={fiche.site}
                     target="_blank"
                     rel="noreferrer"
-                    className="public-link"
+                    className="public-link flex min-h-12 items-center justify-between gap-3 rounded-xl border border-theme-line px-[13px] text-xs font-semibold text-theme-text"
                   >
                     <span>Site internet</span>
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 )}
-                {links.map(link => (
+                {links.map((link) => (
                   <a
                     key={link.url}
                     href={link.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="public-link"
+                    className="public-link flex min-h-12 items-center justify-between gap-3 rounded-xl border border-theme-line px-[13px] text-xs font-semibold text-theme-text"
                   >
                     <span>{link.label}</span>
                     <ExternalLink className="h-4 w-4" />
@@ -348,7 +349,7 @@ export function FicheTemplate({
             </section>
           ) : null}
           {fiche.adresse ? (
-            <section className="public-section">
+            <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
                 icon={<MapPin className="h-4 w-4" />}
                 title="Localisation"
@@ -369,10 +370,10 @@ export function FicheTemplate({
           {features.hasGoogleReview && fiche.googlePlaceId ? (
             <section className="review-panel">
               <div>
-                <p className="text-sm font-semibold text-[#3b3024]">
+                <p className="text-sm font-semibold text-theme-text">
                   Votre expérience compte
                 </p>
-                <p className="mt-1 text-xs leading-5 text-[#806c58]">
+                <p className="mt-1 text-xs leading-5 text-theme-muted">
                   Partagez votre avis sur Google en un clic.
                 </p>
               </div>
@@ -387,19 +388,22 @@ export function FicheTemplate({
             </section>
           ) : null}
           {features.requiresHours && fiche.data.horaires?.length ? (
-            <section className="public-section">
+            <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
                 icon={<Clock3 className="h-4 w-4" />}
                 title="Horaires"
               />
-              <div className="hours-list">
-                {fiche.data.horaires.map(row => (
-                  <div key={row.jour} className="hours-row">
+              <div className="hours-list grid gap-2">
+                {fiche.data.horaires.map((row) => (
+                  <div
+                    key={row.jour}
+                    className="hours-row flex items-center justify-between gap-3"
+                  >
                     <span>{row.jour}</span>
                     <strong
                       className={
                         row.horaire.toLowerCase().includes("fermé")
-                          ? "text-[#a86155]"
+                          ? "text-theme-danger"
                           : ""
                       }
                     >
@@ -411,13 +415,13 @@ export function FicheTemplate({
             </section>
           ) : null}
           {features.hasForm ? (
-            <section className="public-section">
+            <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
                 icon={<MessageCircle className="h-4 w-4" />}
                 title="Être rappelé"
               />
               {actions.contactSent ? (
-                <div className="rounded-xl bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
+                <div className="rounded-xl bg-theme-success-bg p-4 text-sm font-medium text-theme-success-text">
                   Votre demande a bien été transmise. L’établissement peut
                   maintenant vous rappeler.
                 </div>
@@ -431,7 +435,7 @@ export function FicheTemplate({
                     minLength={2}
                     placeholder="Votre nom"
                     value={actions.contactForm.name}
-                    onChange={event =>
+                    onChange={(event) =>
                       actions.onContactFormChange("name", event.target.value)
                     }
                   />
@@ -440,7 +444,7 @@ export function FicheTemplate({
                     minLength={8}
                     placeholder="Votre téléphone"
                     value={actions.contactForm.phone}
-                    onChange={event =>
+                    onChange={(event) =>
                       actions.onContactFormChange("phone", event.target.value)
                     }
                   />
@@ -449,7 +453,7 @@ export function FicheTemplate({
                     minLength={2}
                     placeholder="Votre message"
                     value={actions.contactForm.message}
-                    onChange={event =>
+                    onChange={(event) =>
                       actions.onContactFormChange("message", event.target.value)
                     }
                   />
@@ -492,21 +496,21 @@ export function FicheTemplate({
             </section>
           ) : null}
           {features.hasCatalog && fiche.data.sections?.length ? (
-            <section className="public-section">
+            <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
                 icon={<CalendarDays className="h-4 w-4" />}
                 title="Carte & prestations"
               />
-              {fiche.data.sections.map(section => (
+              {fiche.data.sections.map((section) => (
                 <div key={section.titre} className="catalog-section">
                   <h3>{section.titre}</h3>
-                  {section.articles.map(article => (
+                  {section.articles.map((article) => (
                     <div key={article.nom} className="catalog-row">
                       <div>
-                        <p className="font-semibold text-[#26344a]">
+                        <p className="font-semibold text-theme-text">
                           {article.nom}
                         </p>
-                        <p className="mt-1 text-xs leading-5 text-[#8891a0]">
+                        <p className="mt-1 text-xs leading-5 text-theme-muted">
                           {article.description}
                         </p>
                       </div>
@@ -518,7 +522,7 @@ export function FicheTemplate({
             </section>
           ) : null}
           {gallery.length ? (
-            <section className="public-section">
+            <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
                 icon={<UserRound className="h-4 w-4" />}
                 title="Galerie"
@@ -534,10 +538,10 @@ export function FicheTemplate({
                 Support Connecté <ArrowUpRight className="h-3 w-3" />
               </a>
             </div>
-            <p className="mt-3 max-w-sm text-[11px] leading-5 text-[#9aa3b1]">
+            <p className="mt-3 max-w-sm text-[11px] leading-5 text-theme-muted">
               Les informations envoyées via cette fiche servent uniquement à
               répondre à votre demande. Vous pouvez demander leur suppression en
-              contactant l'établissement.
+              contactant l’établissement.
             </p>
           </section>
         </main>
