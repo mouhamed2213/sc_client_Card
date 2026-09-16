@@ -12,15 +12,27 @@
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 100%;
+}
+
+.fiche-template--pro .public-cover {
+  z-index: 0;
+  inset: 0 0 auto;
+  height: auto;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  background: var(--theme-hero);
 }
 
 .fiche-template--pro .public-cover img {
-  object-fit: cover;
+  display: block;
+  height: 100%;
+  max-width: 100%;
+  object-fit: contain;
   object-position: center;
 }
 
 .fiche-template--pro .public-hero-overlay {
+  height: 100%;
   background: linear-gradient(
     180deg,
     rgba(41, 37, 31, 0.1) 0%,
@@ -115,7 +127,6 @@
   }
 }
 
-/* Shared Signature geometry: fixed cover frame and circular identity logo. */
 .fiche-template--pro .public-hero {
   min-height: 0;
   padding: 0 22px 28px;
@@ -125,19 +136,6 @@
 
 .fiche-template--pro .public-cover {
   z-index: 0;
-  inset: 0 0 auto;
-  width: 100%;
-  height: 258px;
-  overflow: hidden;
-}
-
-.fiche-template--pro .public-cover img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  object-fit: cover;
-  object-position: center;
 }
 
 .fiche-template--pro .public-hero-overlay {
