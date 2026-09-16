@@ -1,4 +1,3 @@
-
 .fiche-template { background: var(--theme-bg); }
 .fiche-template__card { box-shadow: 0 24px 70px rgba(23, 32, 51, 0.1); }
 .fiche-template .public-hero { position: relative; overflow: hidden; padding: 22px 20px 24px; background: var(--theme-hero); color: var(--theme-hero-text); }
@@ -8,8 +7,8 @@
 .fiche-template .public-chip { border:1px solid rgba(255,255,255,.16); border-radius:999px; padding:6px 9px; background:rgba(255,255,255,.08); }
 .fiche-template .public-nfc { opacity:1.68; }
 .fiche-template .public-identity { text-align:center; }
-.fiche-template .public-avatar { width:88px; height:88px; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:3px solid rgba(255,255,255,.18); border-radius:50%; background:rgba(255,255,255,.1); color:white; font-size:20px; font-weight:800; letter-spacing:.04em; }
-.fiche-template .public-avatar img { width:100%; height:100%; object-fit:cover; }
+.fiche-template .public-avatar { width:132px; height:132px; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:4px solid #c9a46a; border-radius:50%; background:#f7f5f0; color:#171717; font-size:20px; font-weight:800; letter-spacing:.04em; box-shadow:0 0 0 7px rgba(12,12,12,.68),0 14px 38px rgba(0,0,0,.42); }
+.fiche-template .public-avatar img { display:block; width:100%; height:100%; max-width:100%; object-fit:contain; object-position:center; }
 .fiche-template .public-name { margin:0; font-size:25px; font-weight:800; letter-spacing:-.03em; }
 .fiche-template .public-role { margin:6px 0 0; color:rgba(255,255,255,.66); font-size:12px; }
 .fiche-template .public-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:22px; }
@@ -19,7 +18,7 @@
 .fiche-template .intro-note p { margin:0; color:var(--theme-muted); font-size:12px; line-height:1.65; }
 .fiche-template .accent-line { width:3px; min-height:30px; flex:0 0 3px; border-radius:99px; background:var(--theme-accent); }
 .fiche-template .public-content .mb-4 { color:var(--theme-muted)!important; }
-.fiche-template .public-content .bg-\[\#eef3f8\] { background:var(--theme-accent-soft)!important; }
+.fiche-template .public-content .bg-\\[\\#eef3f8\\] { background:var(--theme-accent-soft)!important; }
 .fiche-template .public-link { background:#fff; transition:border-color .18s ease,transform .18s ease; }
 .fiche-template .public-link:hover { border-color:var(--theme-accent); transform:translateX(2px); }
 .fiche-template .public-address { color:var(--theme-muted); font-size:12px; line-height:1.7; }
@@ -66,7 +65,6 @@
 .fiche-template--signature .public-hero { padding:28px 22px 26px; background:radial-gradient(circle at 50% -20%,rgba(201,164,106,.2),transparent 42%),var(--theme-hero); }
 .fiche-template--signature .public-hero::after { width:280px; height:280px; right:-120px; top:-170px; border-color:rgba(201,164,106,.24); }
 .fiche-template--signature .public-chip { border-color:rgba(201,164,106,.35); color:#f9f6f0; background:rgba(201,164,106,.08); }
-.fiche-template--signature .public-avatar { width:102px; height:102px; border:1px solid rgba(201,164,106,.55); box-shadow:0 0 0 7px rgba(201,164,106,.05); }
 .fiche-template--signature .public-name { font-family:Georgia,"Times New Roman",serif; font-size:31px; font-weight:600; letter-spacing:-.02em; }
 .fiche-template--signature .public-role { color:#b9aea1; }
 .fiche-template--signature .public-actions { grid-template-columns:repeat(3,1fr); }
