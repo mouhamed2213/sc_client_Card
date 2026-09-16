@@ -660,7 +660,7 @@ function FicheIdentity({ fiche }: { fiche: Fiche }) {
   return (
     <div className="flex items-center gap-3">
       <div
-        className={`avatar ${fiche.formule === "singnature" ? "avatar-copper" : ""}`}
+        className={`avatar ${fiche.formule === "signature" ? "avatar-copper" : ""}`}
       >
         {initials(fiche)}
       </div>
