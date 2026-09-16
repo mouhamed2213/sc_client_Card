@@ -87,12 +87,28 @@
 .fiche-template--signature .contact-form input,.fiche-template--signature .contact-form textarea { border-color:#39332c; background:#1c1c1b; color:#eee7dc; }
 .fiche-template--signature .public-footer { color:#746d64; }
 .fiche-template--signature .public-brand { color:#c9a46a; }
+
+/* Shared fixed hero frame. The photo fills the same frame across all formulas. */
+.fiche-template .public-cover { position:absolute; inset:0; z-index:0; width:100%; height:100%; overflow:hidden; background:var(--theme-hero); }
+.fiche-template .public-cover img { display:block; width:100%; height:100%; max-width:100%; object-fit:cover; object-position:center; }
+.fiche-template .public-hero-overlay { position:absolute; inset:0; z-index:1; width:100%; height:100%; pointer-events:none; }
+.fiche-template .public-topline { z-index:4; }
+.fiche-template .public-identity { z-index:3; }
+.fiche-template .public-actions { z-index:3; }
+
+/* Readable identity panel over the cover photo. */
+.fiche-template .public-identity-copy { width:fit-content; max-width:min(92%,390px); margin:0 auto; padding:10px 16px 11px; border:1px solid rgba(255,255,255,.16); border-radius:15px; background:rgba(12,12,12,.56); box-shadow:0 10px 30px rgba(0,0,0,.18); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+.fiche-template .public-identity-copy .public-name,
+.fiche-template .public-identity-copy .public-role { text-shadow:0 1px 10px rgba(0,0,0,.32); }
+
 @media (max-width:420px) {
   .fiche-template { padding:0 0 24px; }
   .fiche-template__card { border-radius:0; border-left:0; border-right:0; }
   .fiche-template .public-hero { min-height:540px; }
   .fiche-template .public-actions { grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; }
   .fiche-template .public-action { min-height:44px; gap:4px; padding:0 3px; font-size:9px; }
+  .fiche-template .public-cover { min-height:540px; }
+  .fiche-template .public-identity-copy { max-width:94%; padding:9px 13px 10px; border-radius:13px; }
   .fiche-template .pro-gallery-stage { aspect-ratio:4/3; border-radius:13px; }
   .fiche-template .pro-gallery-control { width:34px; height:34px; }
 }
