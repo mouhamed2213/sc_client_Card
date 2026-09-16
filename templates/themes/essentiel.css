@@ -1,7 +1,6 @@
 .fiche-template--essentiel .public-hero {
   position: relative;
   overflow: hidden;
-  min-height: 540px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -160,7 +159,6 @@
 }
 
 @media (max-width: 420px) {
-  .fiche-template--essentiel .public-hero { min-height: 520px; }
   .fiche-template--essentiel .public-name { font-size: 24px; }
   .fiche-template--essentiel .public-hero { padding-left: 16px; padding-right: 16px; }
   .fiche-template--essentiel .public-topline { left: 16px; right: 16px; }
