@@ -160,9 +160,9 @@
 .fiche-template .public-content .mb-4 {
   color: var(--theme-muted) !important;
 }
-.fiche-template .public-content .bg-\\[\\#eef3f8\\] {
+.fiche-template .public-content .bg-\[\#eef3f8\] {
   background: var(--theme-accent-soft) !important;
-}
+}   
 .fiche-template .link-list {
   display: grid;
   gap: 8px;
@@ -521,7 +521,7 @@
 .fiche-template--signature .public-action:hover {
   background: rgba(201, 164, 106, 0.14);
 }
-.fiche-template--signature .public-content .bg-\\[\\#eef3f8\\] {
+.fiche-template--signature .public-content .bg-\[\#eef3f8\] {
   background: #28231c !important;
 }
 .fiche-template--signature .public-link {
