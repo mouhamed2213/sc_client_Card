@@ -2,7 +2,6 @@
 
 .fiche-template.fiche-template--signature .public-hero {
   position: relative;
-  min-height: 560px;
   padding: 0 22px 28px;
   overflow: hidden;
   isolation: isolate;
@@ -166,7 +165,6 @@
 
 @media (max-width: 420px) {
   .fiche-template.fiche-template--signature .public-hero {
-    min-height: 540px;
     padding-left: 16px;
     padding-right: 16px;
   }
