@@ -102,23 +102,11 @@
   color: #ffffff;
 }
 
-.fiche-template--pro .public-actions > span:has(.public-action-email) {
-  grid-column: 1 / -1;
-}
-
 @media (max-width: 420px) {
   .fiche-template--pro .public-hero {
     min-height: 520px;
     padding-left: 16px;
     padding-right: 16px;
-  }
-
-  .fiche-template--pro .public-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .fiche-template--pro .public-actions > span:has(.public-action-email) {
-    grid-column: auto;
   }
 
   .fiche-template--pro .public-topline {
