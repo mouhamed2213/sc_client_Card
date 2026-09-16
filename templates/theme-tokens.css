@@ -3,6 +3,21 @@
  * Tailwind handles layout/spacing/typography; these variables hold theme identity.
  */
 
+@theme inline {
+  --color-theme-bg: var(--theme-bg);
+  --color-theme-card: var(--theme-card);
+  --color-theme-text: var(--theme-text);
+  --color-theme-muted: var(--theme-muted);
+  --color-theme-accent: var(--theme-accent);
+  --color-theme-accent-soft: var(--theme-accent-soft);
+  --color-theme-line: var(--theme-line);
+  --color-theme-hero: var(--theme-hero);
+  --color-theme-hero-text: var(--theme-hero-text);
+  --color-theme-danger: var(--theme-danger);
+  --color-theme-success-bg: var(--theme-success-bg);
+  --color-theme-success-text: var(--theme-success-text);
+}
+
 .fiche-template {
   --theme-bg: #f4f6f8;
   --theme-card: #ffffff;
