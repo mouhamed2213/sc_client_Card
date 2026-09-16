@@ -1,8 +1,6 @@
 /* SIGNATURE — premium editorial layout.
- *
- * The cover is always constrained to a fixed visual area and clipped by the
- * hero. The logo remains in the identity section and overlaps the cover
- * boundary without ever escaping the card.
+ * The cover is constrained to a fixed frame and clipped by the hero.
+ * The logo remains in the identity section and overlaps the cover boundary.
  */
 
 .fiche-template.fiche-template--signature .public-hero {
@@ -140,6 +138,31 @@
 
 .fiche-template.fiche-template--signature .public-actions > span:has(.public-action-email) {
   grid-column: 1 / -1;
+}
+
+.fiche-template.fiche-template--signature .essential-save-row {
+  padding: 18px 0 4px;
+}
+
+.fiche-template.fiche-template--signature .public-save-contact {
+  display: inline-flex;
+  width: 100%;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(201, 164, 106, 0.62);
+  border-radius: 14px;
+  background: #171717;
+  color: #e4c18c;
+  font-size: 12px;
+  font-weight: 800;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.fiche-template.fiche-template--signature .public-save-contact:hover {
+  border-color: #e4c18c;
+  background: #242018;
 }
 
 .fiche-template.fiche-template--signature .public-content {
