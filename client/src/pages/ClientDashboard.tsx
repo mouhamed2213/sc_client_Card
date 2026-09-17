@@ -7,9 +7,9 @@ import { Badge } from "@/components/ui/badge";
 
 export default function ClientDashboard() {
   const [, navigate] = useLocation();
-  const fiches = trpc.client.myFiches.useQuery();
+  const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
   const ficheId = fiches.data?.length === 1 ? fiches.data[0].id : undefined;
-  const dashboard = trpc.client.dashboard.useQuery({ ficheId: ficheId! }, { enabled: !!ficheId });
+  const dashboard = trpc.clientSpaceRouter.dashboard.useQuery({ ficheId: ficheId! }, { enabled: !!ficheId });
   if (fiches.isLoading) return <div className="p-6 text-sm text-slate-500">Chargement de votre espace…</div>;
   if (!fiches.data?.length) return <ClientLayout><div className="mx-auto max-w-2xl p-6"><Card><CardContent className="py-12 text-center"><h1 className="text-xl font-semibold">Aucune fiche associée</h1><p className="mt-2 text-sm text-slate-500">Votre compte client n'est pas encore rattaché à une fiche.</p></CardContent></Card></div></ClientLayout>;
   if (fiches.data.length > 1) return <ClientLayout><div className="space-y-5 p-4 sm:p-6 lg:p-8"><h1 className="text-2xl font-semibold">Vos fiches</h1>{fiches.data.map(fiche => <button key={fiche.id} onClick={() => navigate(`/espace-client/fiche/${fiche.id}`)} className="block w-full rounded-xl border bg-white p-5 text-left shadow-sm hover:border-slate-400"><p className="font-semibold">{fiche.prenom} {fiche.nom}</p><p className="text-sm text-slate-500">{fiche.entreprise} · {fiche.formule}</p></button>)}</div></ClientLayout>;

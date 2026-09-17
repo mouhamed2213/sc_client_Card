@@ -9,8 +9,8 @@ export default function ClientStats() {
   const { ficheId } = useParams<{ ficheId: string }>();
   const id = Number(ficheId);
   const [days, setDays] = useState<7 | 30 | 90>(30);
-  const fiche = trpc.client.ficheDetail.useQuery({ ficheId: id });
-  const scans = trpc.client.scans.useQuery({ ficheId: id, days });
+  const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
+  const scans = trpc.clientSpaceRouter.scans.useQuery({ ficheId: id, days });
   const total = scans.data?.reduce((sum, item) => sum + item.count, 0) ?? 0;
   const max = Math.max(...(scans.data?.map(item => item.count) ?? [1]), 1);
 

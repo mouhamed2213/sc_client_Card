@@ -164,6 +164,7 @@ export const InvitationClientScalarFieldEnum = {
   token: 'token',
   utilisee: 'utilisee',
   expireLe: 'expireLe',
+  revokedAt: 'revokedAt',
   createdAt: 'createdAt'
 } as const
 
