@@ -1,10 +1,16 @@
 export const ENV = {
-  appId: process.env.VITE_APP_ID ?? "",
   host: process.env.HOST ?? "http://localhost",
   cookieSecret: process.env.JWT_SECRET ?? "",
   databaseUrl: process.env.DATABASE_URL ?? "",
-  oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
+
+  // GOOGLE OAUTH
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? "",
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+  // Must exactly match an "Authorized redirect URI" configured in Google Cloud Console.
+  googleRedirectUri:
+    process.env.GOOGLE_REDIRECT_URI ??
+    `${process.env.HOST ?? "http://localhost:3000"}/api/oauth/callback`,
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
@@ -23,6 +29,4 @@ export const ENV = {
 
   // jwt
   jwt: process.env.JWT_SECRET,
- viteOauthPortalUrl :  process.env.VITE_OAUTH_PORTAL_URL,
-oauthStateCookie : process.env.OAUTH_STATE_COOKIE
 };

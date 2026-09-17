@@ -1,0 +1,815 @@
+From e8d6f4823df6a1b9afef2fff121945b81cca87fd Mon Sep 17 00:00:00 2001
+From: Mouhamed Bassiroou Khouma <Mouhamedbk1002@gmail.com>
+Date: Thu, 17 Sep 2026 22:52:08 +0000
+Subject: [PATCH] feat(auth): replace Manus OAuth with Google OAuth
+
+- server/_core/googleAuth.ts: new Google token exchange + userinfo client (native fetch, no new dep)
+- server/_core/oauth.ts: /api/oauth/callback now talks to Google instead of Manus's WebDevAuthPublicService
+- server/_core/sdk.ts: strip Manus OAuthService/exchangeCodeForToken/getUserInfoWithJwt and the cron-openId bypass; keep only the provider-agnostic JWT session (create/sign/verify) used by both Google login and the existing local admin login
+- server/_core/env.ts: drop OAUTH_SERVER_URL/VITE_APP_ID/VITE_OAUTH_PORTAL_URL, add GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET/GOOGLE_REDIRECT_URI
+- client/src/const.ts: startLogin() now redirects straight to Google's consent screen instead of the Manus app-auth portal
+- client/src/main.tsx, useAuth.ts: drop manus-cookie/manus-runtime-user-info (Manus preview-iframe specific), rely on the first-party session cookie
+- remove server/_core/types/manusTypes.ts (no longer referenced)
+- users are now keyed as openId = google:<sub>, loginMethod = 'google'
+---
+ client/src/_core/hooks/useAuth.ts |  12 +-
+ client/src/const.ts               |  15 +-
+ client/src/main.tsx               |  16 +-
+ server/_core/env.ts               |  12 +-
+ server/_core/googleAuth.ts        | 111 ++++++++++++
+ server/_core/oauth.ts             |  36 ++--
+ server/_core/sdk.ts               | 277 ++++--------------------------
+ server/_core/types/manusTypes.ts  |  71 --------
+ server/tests/auth.logout.test.ts  |   2 +-
+ 9 files changed, 190 insertions(+), 362 deletions(-)
+ create mode 100644 server/_core/googleAuth.ts
+ delete mode 100644 server/_core/types/manusTypes.ts
+
+diff --git a/client/src/_core/hooks/useAuth.ts b/client/src/_core/hooks/useAuth.ts
+index 52637e8..425848e 100644
+--- a/client/src/_core/hooks/useAuth.ts
++++ b/client/src/_core/hooks/useAuth.ts
+@@ -39,22 +39,14 @@ export function useAuth(options?: UseAuthOptions) {
+       }
+       throw error;
+     } finally {
+-      // Clear the Preview auto-login token mirrored into sessionStorage, so
+-      // header-based sessions (Safari ITP / WebView) are logged out too. The
+-      // backend cookie is cleared by the logout mutation.
+-      try {
+-        sessionStorage.removeItem("manus-cookie");
+-      } catch {}
++      // The session cookie itself is cleared server-side by the logout
++      // mutation; just drop our cached copy of the user.
+       utils.auth.me.setData(undefined, null);
+       await utils.auth.me.invalidate();
+     }
+   }, [logoutMutation, utils]);
+ 
+   const state = useMemo(() => {
+-    localStorage.setItem(
+-      "manus-runtime-user-info",
+-      JSON.stringify(meQuery.data)
+-    );
+     return {
+       user: meQuery.data ?? null,
+       loading: meQuery.isLoading || logoutMutation.isPending,
+diff --git a/client/src/const.ts b/client/src/const.ts
+index a0eb883..a183808 100644
+--- a/client/src/const.ts
++++ b/client/src/const.ts
+@@ -3,8 +3,7 @@ import { OAUTH_STATE_COOKIE, encodeOAuthState } from "@shared/const";
+ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+ 
+ export const startLogin = (options?: { invitationToken?: string }) => {
+-  const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
+-  const appId = import.meta.env.VITE_APP_ID;
++  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+   const redirectUri = `${window.location.origin}/api/oauth/callback`;
+ 
+   const nonce = crypto.randomUUID();
+@@ -17,10 +16,14 @@ export const startLogin = (options?: { invitationToken?: string }) => {
+       : {}),
+   });
+ 
+-  const url = new URL(`${oauthPortalUrl}/app-auth`);
+-  url.searchParams.set("appId", appId);
+-  url.searchParams.set("redirectUri", redirectUri);
++  // `redirect_uri` here must byte-for-byte match both GOOGLE_REDIRECT_URI on
++  // the server and an "Authorized redirect URI" in Google Cloud Console.
++  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
++  url.searchParams.set("client_id", googleClientId);
++  url.searchParams.set("redirect_uri", redirectUri);
++  url.searchParams.set("response_type", "code");
++  url.searchParams.set("scope", "openid email profile");
+   url.searchParams.set("state", state);
+-  url.searchParams.set("type", "signIn");
++  url.searchParams.set("prompt", "select_account");
+   window.location.href = url.toString();
+ };
+diff --git a/client/src/main.tsx b/client/src/main.tsx
+index d44fc8a..c92d6ca 100644
+--- a/client/src/main.tsx
++++ b/client/src/main.tsx
+@@ -1,5 +1,5 @@
+ import { trpc } from "@/lib/trpc";
+-import { COOKIE_NAME, UNAUTHED_ERR_MSG } from '@shared/const';
++import { UNAUTHED_ERR_MSG } from '@shared/const';
+ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+ import { httpBatchLink, TRPCClientError } from "@trpc/client";
+ import { createRoot } from "react-dom/client";
+@@ -42,20 +42,6 @@ const trpcClient = trpc.createClient({
+     httpBatchLink({
+       url: "/api/trpc",
+       transformer: superjson,
+-      headers() {
+-        try {
+-          const raw = sessionStorage.getItem("manus-cookie");
+-          if (raw) {
+-            const prefix = `${COOKIE_NAME}=`;
+-            const pair = raw.split(";").find(s => s.trim().startsWith(prefix));
+-            const token = pair?.trim().slice(prefix.length);
+-            if (token) return { Authorization: `Bearer ${token}` };
+-          }
+-        } catch {
+-          // sessionStorage unavailable
+-        }
+-        return {};
+-      },
+       fetch(input, init) {
+         return globalThis.fetch(input, {
+           ...(init ?? {}),
+diff --git a/server/_core/env.ts b/server/_core/env.ts
+index 88b376c..a54c0d5 100644
+--- a/server/_core/env.ts
++++ b/server/_core/env.ts
+@@ -1,10 +1,16 @@
+ export const ENV = {
+-  appId: process.env.VITE_APP_ID ?? "",
+   host: process.env.HOST ?? "http://localhost",
+   cookieSecret: process.env.JWT_SECRET ?? "",
+   databaseUrl: process.env.DATABASE_URL ?? "",
+-  oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
+   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
++
++  // GOOGLE OAUTH
++  googleClientId: process.env.GOOGLE_CLIENT_ID ?? "",
++  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
++  // Must exactly match an "Authorized redirect URI" configured in Google Cloud Console.
++  googleRedirectUri:
++    process.env.GOOGLE_REDIRECT_URI ??
++    `${process.env.HOST ?? "http://localhost:3000"}/api/oauth/callback`,
+   isProduction: process.env.NODE_ENV === "production",
+   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
+   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+@@ -23,6 +29,4 @@ export const ENV = {
+ 
+   // jwt
+   jwt: process.env.JWT_SECRET,
+- viteOauthPortalUrl :  process.env.VITE_OAUTH_PORTAL_URL,
+-oauthStateCookie : process.env.OAUTH_STATE_COOKIE
+ };
+diff --git a/server/_core/googleAuth.ts b/server/_core/googleAuth.ts
+new file mode 100644
+index 0000000..fb13846
+--- /dev/null
++++ b/server/_core/googleAuth.ts
+@@ -0,0 +1,111 @@
++import { AXIOS_TIMEOUT_MS } from "@shared/const";
++import { ENV } from "./env";
++
++const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
++const USERINFO_ENDPOINT = "https://www.googleapis.com/oauth2/v3/userinfo";
++
++export type GoogleTokenResponse = {
++  access_token: string;
++  expires_in: number;
++  id_token?: string;
++  refresh_token?: string;
++  scope: string;
++  token_type: string;
++};
++
++export type GoogleUserInfo = {
++  sub: string; // stable Google user id -> stored as our `openId`
++  email?: string;
++  email_verified?: boolean;
++  name?: string;
++  picture?: string;
++};
++
++function assertConfigured() {
++  if (!ENV.googleClientId || !ENV.googleClientSecret) {
++    throw new Error(
++      "[GoogleAuth] GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are not configured."
++    );
++  }
++}
++
++async function fetchWithTimeout(
++  url: string,
++  init: RequestInit,
++  timeoutMs = AXIOS_TIMEOUT_MS
++): Promise<Response> {
++  const controller = new AbortController();
++  const timer = setTimeout(() => controller.abort(), timeoutMs);
++  try {
++    return await fetch(url, { ...init, signal: controller.signal });
++  } finally {
++    clearTimeout(timer);
++  }
++}
++
++/**
++ * Exchange the authorization `code` Google sent to our redirect URI for an
++ * access token (and, since we request the `openid` scope, an ID token).
++ */
++export async function exchangeCodeForGoogleToken(
++  code: string
++): Promise<GoogleTokenResponse> {
++  assertConfigured();
++
++  const body = new URLSearchParams({
++    code,
++    client_id: ENV.googleClientId,
++    client_secret: ENV.googleClientSecret,
++    redirect_uri: ENV.googleRedirectUri,
++    grant_type: "authorization_code",
++  });
++
++  const res = await fetchWithTimeout(TOKEN_ENDPOINT, {
++    method: "POST",
++    headers: { "Content-Type": "application/x-www-form-urlencoded" },
++    body,
++  });
++
++  if (!res.ok) {
++    const text = await res.text().catch(() => "");
++    throw new Error(
++      `[GoogleAuth] Token exchange failed (${res.status}): ${text}`
++    );
++  }
++
++  return (await res.json()) as GoogleTokenResponse;
++}
++
++/** Fetch the Google profile (id, name, email, avatar) for an access token. */
++export async function getGoogleUserInfo(
++  accessToken: string
++): Promise<GoogleUserInfo> {
++  const res = await fetchWithTimeout(USERINFO_ENDPOINT, {
++    headers: { Authorization: `Bearer ${accessToken}` },
++  });
++
++  if (!res.ok) {
++    const text = await res.text().catch(() => "");
++    throw new Error(
++      `[GoogleAuth] Fetching user info failed (${res.status}): ${text}`
++    );
++  }
++
++  return (await res.json()) as GoogleUserInfo;
++}
++
++/** Builds the URL that starts Google's consent screen, given our CSRF `state`. */
++export function buildGoogleAuthUrl(state: string): string {
++  assertConfigured();
++
++  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
++  url.searchParams.set("client_id", ENV.googleClientId);
++  url.searchParams.set("redirect_uri", ENV.googleRedirectUri);
++  url.searchParams.set("response_type", "code");
++  url.searchParams.set("scope", "openid email profile");
++  url.searchParams.set("state", state);
++  // Show the account chooser every time rather than silently reusing the
++  // last Google session in the browser.
++  url.searchParams.set("prompt", "select_account");
++  return url.toString();
++}
+diff --git a/server/_core/oauth.ts b/server/_core/oauth.ts
+index b56c60a..72fb760 100644
+--- a/server/_core/oauth.ts
++++ b/server/_core/oauth.ts
+@@ -8,6 +8,7 @@ import { parse as parseCookieHeader } from "cookie";
+ import type { Express, Request, Response } from "express";
+ import * as db from "../db";
+ import { getSessionCookieOptions } from "./cookies";
++import { exchangeCodeForGoogleToken, getGoogleUserInfo } from "./googleAuth";
+ import { sdk } from "./sdk";
+ 
+ function getQueryParam(req: Request, key: string): string | undefined {
+@@ -19,6 +20,13 @@ export function registerOAuthRoutes(app: Express) {
+   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
+     const code = getQueryParam(req, "code");
+     const state = getQueryParam(req, "state");
++    const googleError = getQueryParam(req, "error");
++
++    if (googleError) {
++      // e.g. user clicked "Cancel" on Google's consent screen.
++      res.redirect(302, "/?login_error=" + encodeURIComponent(googleError));
++      return;
++    }
+ 
+     if (!code || !state) {
+       res.status(400).json({ error: "code and state are required" });
+@@ -44,23 +52,27 @@ export function registerOAuthRoutes(app: Express) {
+     });
+ 
+     try {
+-      const tokenResponse = await sdk.exchangeCodeForToken(code, state);
+-      const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
++      const tokenResponse = await exchangeCodeForGoogleToken(code);
++      const googleUser = await getGoogleUserInfo(tokenResponse.access_token);
+ 
+-      if (!userInfo.openId) {
+-        res.status(400).json({ error: "openId missing from user info" });
++      if (!googleUser.sub) {
++        res.status(400).json({ error: "Google user id (sub) missing" });
+         return;
+       }
+ 
++      // We use Google's stable `sub` claim as our internal `openId`, prefixed
++      // so it can never collide with an id minted by another login method.
++      const openId = `google:${googleUser.sub}`;
++
+       await db.upsertUser({
+-        openId: userInfo.openId,
+-        name: userInfo.name || null,
+-        email: userInfo.email ?? null,
+-        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
++        openId,
++        name: googleUser.name || null,
++        email: googleUser.email ?? null,
++        loginMethod: "google",
+         lastSignedIn: new Date(),
+       });
+ 
+-      const user = await db.getUserByOpenId(userInfo.openId);
++      const user = await db.getUserByOpenId(openId);
+ 
+       let redirectTo = "/";
+       if (invitationToken && user) {
+@@ -73,8 +85,8 @@ export function registerOAuthRoutes(app: Express) {
+         }
+       }
+ 
+-      const sessionToken = await sdk.createSessionToken(userInfo.openId, {
+-        name: userInfo.name || "",
++      const sessionToken = await sdk.createSessionToken(openId, {
++        name: googleUser.name || "",
+         expiresInMs: ONE_YEAR_MS,
+       });
+ 
+@@ -84,7 +96,7 @@ export function registerOAuthRoutes(app: Express) {
+         maxAge: ONE_YEAR_MS,
+       });
+ 
+-      res.redirect(302, "/");
++      res.redirect(302, redirectTo);
+     } catch (error) {
+       console.error("[OAuth] Callback failed", error);
+       res.status(500).json({ error: "OAuth callback failed" });
+diff --git a/server/_core/sdk.ts b/server/_core/sdk.ts
+index 563df13..58175c9 100644
+--- a/server/_core/sdk.ts
++++ b/server/_core/sdk.ts
+@@ -1,183 +1,59 @@
+ import { ForbiddenError } from "@shared/_core/errors";
+-import {
+-  AXIOS_TIMEOUT_MS,
+-  COOKIE_NAME,
+-  ONE_YEAR_MS,
+-  decodeOAuthState,
+-} from "@shared/const";
+-import axios, { type AxiosInstance } from "axios";
++import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+ import { parse as parseCookieHeader } from "cookie";
+ import type { Request } from "express";
+ import { SignJWT, jwtVerify } from "jose";
+ import type { User } from "../../generated/prisma/client";
+ import * as db from "../db";
+ import { ENV } from "./env";
+-import type {
+-  ExchangeTokenRequest,
+-  ExchangeTokenResponse,
+-  GetUserInfoResponse,
+-  GetUserInfoWithJwtRequest,
+-  GetUserInfoWithJwtResponse,
+-} from "./types/manusTypes";
++
+ // Utility function
+ const isNonEmptyString = (value: unknown): value is string =>
+   typeof value === "string" && value.length > 0;
+ 
+ export type SessionPayload = {
+   openId: string;
+-  appId: string;
+   name: string;
+ };
+ 
+-const EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
+-const GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
+-const GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfoWithJwt`;
+-
+-class OAuthService {
+-  constructor(private client: ReturnType<typeof axios.create>) {
+-    console.log("[OAuth] Initialized with baseURL:", ENV.oAuthServerUrl);
+-    if (!ENV.oAuthServerUrl) {
+-      console.error(
+-        "[OAuth] ERROR: OAUTH_SERVER_URL is not configured! Set OAUTH_SERVER_URL environment variable."
++/**
++ * Signs/verifies our own session JWTs and resolves the authenticated user
++ * for a request. This layer is provider-agnostic: it doesn't know or care
++ * whether the `openId` it was handed came from Google OAuth
++ * (`server/_core/googleAuth.ts`) or the local admin/password login
++ * (`server/_core/adminRoutes.ts`) — both just call `createSessionToken`.
++ */
++class SDKServer {
++  private getSessionSecret() {
++    const secret = ENV.cookieSecret;
++    if (!secret) {
++      throw new Error(
++        "[Auth] JWT_SECRET is not configured — cannot sign/verify sessions."
+       );
+     }
+-  }
+-
+-  private decodeState(state: string): string {
+-    return decodeOAuthState(state).redirectUri;
+-  }
+-
+-  async getTokenByCode(
+-    code: string,
+-    state: string
+-  ): Promise<ExchangeTokenResponse> {
+-    const payload: ExchangeTokenRequest = {
+-      clientId: ENV.appId,
+-      grantType: "authorization_code",
+-      code,
+-      redirectUri: this.decodeState(state),
+-    };
+-
+-    const { data } = await this.client.post<ExchangeTokenResponse>(
+-      EXCHANGE_TOKEN_PATH,
+-      payload
+-    );
+-
+-    return data;
+-  }
+-
+-  async getUserInfoByToken(
+-    token: ExchangeTokenResponse
+-  ): Promise<GetUserInfoResponse> {
+-    const { data } = await this.client.post<GetUserInfoResponse>(
+-      GET_USER_INFO_PATH,
+-      {
+-        accessToken: token.accessToken,
+-      }
+-    );
+-
+-    return data;
+-  }
+-}
+-
+-const createOAuthHttpClient = (): AxiosInstance =>
+-  axios.create({
+-    baseURL: ENV.oAuthServerUrl,
+-    timeout: AXIOS_TIMEOUT_MS,
+-  });
+-
+-class SDKServer {
+-  private readonly client: AxiosInstance;
+-  private readonly oauthService: OAuthService;
+-
+-  constructor(client: AxiosInstance = createOAuthHttpClient()) {
+-    this.client = client;
+-    this.oauthService = new OAuthService(this.client);
+-  }
+-
+-  private deriveLoginMethod(
+-    platforms: unknown,
+-    fallback: string | null | undefined
+-  ): string | null {
+-    if (fallback && fallback.length > 0) return fallback;
+-    if (!Array.isArray(platforms) || platforms.length === 0) return null;
+-    const set = new Set<string>(
+-      platforms.filter((p): p is string => typeof p === "string")
+-    );
+-    if (set.has("REGISTERED_PLATFORM_EMAIL")) return "email";
+-    if (set.has("REGISTERED_PLATFORM_GOOGLE")) return "google";
+-    if (set.has("REGISTERED_PLATFORM_APPLE")) return "apple";
+-    if (
+-      set.has("REGISTERED_PLATFORM_MICROSOFT") ||
+-      set.has("REGISTERED_PLATFORM_AZURE")
+-    )
+-      return "microsoft";
+-    if (set.has("REGISTERED_PLATFORM_GITHUB")) return "github";
+-    const first = Array.from(set)[0];
+-    return first ? first.toLowerCase() : null;
+-  }
+-
+-  /**
+-   * Exchange OAuth authorization code for access token
+-   * @example
+-   * const tokenResponse = await sdk.exchangeCodeForToken(code, state);
+-   */
+-  async exchangeCodeForToken(
+-    code: string,
+-    state: string
+-  ): Promise<ExchangeTokenResponse> {
+-    return this.oauthService.getTokenByCode(code, state);
+-  }
+-
+-  /**
+-   * Get user information using access token
+-   * @example
+-   * const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
+-   */
+-  async getUserInfo(accessToken: string): Promise<GetUserInfoResponse> {
+-    const data = await this.oauthService.getUserInfoByToken({
+-      accessToken,
+-    } as ExchangeTokenResponse);
+-    const loginMethod = this.deriveLoginMethod(
+-      (data as any)?.platforms,
+-      (data as any)?.platform ?? data.platform ?? null
+-    );
+-    return {
+-      ...(data as any),
+-      platform: loginMethod,
+-      loginMethod,
+-    } as GetUserInfoResponse;
++    return new TextEncoder().encode(secret);
+   }
+ 
+   private parseCookies(cookieHeader: string | undefined) {
+     if (!cookieHeader) {
+       return new Map<string, string>();
+     }
+-
+     const parsed = parseCookieHeader(cookieHeader);
+     return new Map(Object.entries(parsed));
+   }
+ 
+-  private getSessionSecret() {
+-    const secret = ENV.cookieSecret;
+-    return new TextEncoder().encode(secret);
+-  }
+-
+   /**
+-   * Create a session token for a Manus user openId
++   * Create a session token for a given `openId` (e.g. `google:<sub>` or
++   * `local_admin:<username>`).
+    * @example
+-   * const sessionToken = await sdk.createSessionToken(userInfo.openId);
++   * const sessionToken = await sdk.createSessionToken(openId, { name });
+    */
+   async createSessionToken(
+     openId: string,
+     options: { expiresInMs?: number; name?: string } = {}
+   ): Promise<string> {
+     return this.signSession(
+-      {
+-        openId,
+-        appId: ENV.appId,
+-        name: options.name || "",
+-      },
++      { openId, name: options.name || "" },
+       options
+     );
+   }
+@@ -193,7 +69,6 @@ class SDKServer {
+ 
+     return new SignJWT({
+       openId: payload.openId,
+-      appId: payload.appId,
+       name: payload.name,
+     })
+       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+@@ -203,7 +78,7 @@ class SDKServer {
+ 
+   async verifySession(
+     cookieValue: string | undefined | null
+-  ): Promise<{ openId: string; appId: string; name: string } | null> {
++  ): Promise<{ openId: string; name: string } | null> {
+     if (!cookieValue) {
+       console.warn("[Auth] Missing session cookie");
+       return null;
+@@ -214,60 +89,27 @@ class SDKServer {
+       const { payload } = await jwtVerify(cookieValue, secretKey, {
+         algorithms: ["HS256"],
+       });
+-      const { openId, appId, name } = payload as Record<string, unknown>;
++      const { openId, name } = payload as Record<string, unknown>;
+ 
+-      if (
+-        !isNonEmptyString(openId) ||
+-        !isNonEmptyString(appId) ||
+-        !isNonEmptyString(name)
+-      ) {
++      if (!isNonEmptyString(openId)) {
+         console.warn("[Auth] Session payload missing required fields");
+         return null;
+       }
+ 
+-      return {
+-        openId,
+-        appId,
+-        name,
+-      };
++      return { openId, name: isNonEmptyString(name) ? name : "" };
+     } catch (error) {
+       console.warn("[Auth] Session verification failed", String(error));
+       return null;
+     }
+   }
+ 
+-  async getUserInfoWithJwt(
+-    jwtToken: string
+-  ): Promise<GetUserInfoWithJwtResponse> {
+-    const payload: GetUserInfoWithJwtRequest = {
+-      jwtToken,
+-      projectId: ENV.appId,
+-    };
+-
+-    const { data } = await this.client.post<GetUserInfoWithJwtResponse>(
+-      GET_USER_INFO_WITH_JWT_PATH,
+-      payload
+-    );
+-
+-    const loginMethod = this.deriveLoginMethod(
+-      (data as any)?.platforms,
+-      (data as any)?.platform ?? data.platform ?? null
+-    );
+-    return {
+-      ...(data as any),
+-      platform: loginMethod,
+-      loginMethod,
+-    } as GetUserInfoWithJwtResponse;
+-  }
+-
+-  async authenticateRequest(req: Request): Promise<AuthenticatedUser> {
+-    // 1. Prefer the session cookie (regular OAuth login).
++  async authenticateRequest(req: Request): Promise<User> {
++    // 1. Prefer the session cookie (regular OAuth/admin login).
+     const cookies = this.parseCookies(req.headers.cookie);
+     let sessionToken = cookies.get(COOKIE_NAME);
+ 
+-    // 2. Fallback to the Authorization header (Preview auto-login via
+-    //    sessionStorage), used when the browser blocks iframe cookies such as
+-    //    Safari ITP, private browsing, or iOS/Android WebView.
++    // 2. Fallback to the Authorization header, used when the browser blocks
++    //    first-party cookies (Safari ITP, private browsing, some WebViews).
+     if (!sessionToken) {
+       const authHeader = req.headers.authorization;
+       if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+@@ -281,39 +123,15 @@ class SDKServer {
+       throw ForbiddenError("Invalid session cookie");
+     }
+ 
+-    if (session.openId.startsWith(CRON_OPEN_ID_PREFIX)) {
+-      const userInfo = await this.getUserInfoWithJwt(sessionToken ?? "");
+-      const taskUid = userInfo.taskUid ?? null;
+-      if (!taskUid) {
+-        throw ForbiddenError("Cron session missing task_uid");
+-      }
+-      return buildCronUser(userInfo);
+-    }
+-
+-    const sessionUserId = session.openId;
+     const signedInAt = new Date();
+-    let user = await db.getUserByOpenId(sessionUserId);
++    const user = await db.getUserByOpenId(session.openId);
+ 
+-    // If user not in DB, sync from OAuth server automatically
++    // Unlike the old Manus-backed flow, there is no external identity server
++    // to fall back on here: if the JWT is valid but the user row is gone
++    // (e.g. DB was reset), the browser needs to sign in again via
++    // /api/oauth/callback (Google) so we can re-create it.
+     if (!user) {
+-      try {
+-        const userInfo = await this.getUserInfoWithJwt(sessionToken ?? "");
+-        await db.upsertUser({
+-          openId: userInfo.openId,
+-          name: userInfo.name || null,
+-          email: userInfo.email ?? null,
+-          loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
+-          lastSignedIn: signedInAt,
+-        });
+-        user = await db.getUserByOpenId(userInfo.openId);
+-      } catch (error) {
+-        console.error("[Auth] Failed to sync user from OAuth:", error);
+-        throw ForbiddenError("Failed to sync user info");
+-      }
+-    }
+-
+-    if (!user) {
+-      throw ForbiddenError("User not found");
++      throw ForbiddenError("User not found — please sign in again");
+     }
+ 
+     await db.upsertUser({
+@@ -325,31 +143,4 @@ class SDKServer {
+   }
+ }
+ 
+-const CRON_OPEN_ID_PREFIX = "cron_";
+-
+-/** Result of `sdk.authenticateRequest`. Cron callbacks set `isCron=true` and `taskUid`; see `/home/ubuntu/skills/webdev-periodic-updates/SKILL.md`. */
+-export type AuthenticatedUser = User & {
+-  taskUid?: string;
+-  isCron?: boolean;
+-};
+-
+-function buildCronUser(
+-  userInfo: GetUserInfoWithJwtResponse
+-): AuthenticatedUser {
+-  const now = new Date();
+-  return {
+-    id: -1,
+-    openId: userInfo.openId,
+-    name: userInfo.name || "Manus Scheduled Task",
+-    email: null,
+-    loginMethod: null,
+-    role: "user",
+-    createdAt: now,
+-    updatedAt: now,
+-    lastSignedIn: now,
+-    taskUid: userInfo.taskUid ?? undefined,
+-    isCron: true,
+-  } as AuthenticatedUser;
+-}
+-
+ export const sdk = new SDKServer();
+diff --git a/server/_core/types/manusTypes.ts b/server/_core/types/manusTypes.ts
+deleted file mode 100644
+index 7f8e300..0000000
+--- a/server/_core/types/manusTypes.ts
++++ /dev/null
+@@ -1,71 +0,0 @@
+-// WebDev Auth TypeScript types
+-// Auto-generated from protobuf definitions
+-// Generated on: 2025-09-24T05:57:57.338Z
+-
+-export interface AuthorizeRequest {
+-  redirectUri: string;
+-  projectId: string;
+-  state: string;
+-  responseType: string;
+-  scope: string;
+-}
+-
+-export interface AuthorizeResponse {
+-  redirectUrl: string;
+-}
+-
+-export interface ExchangeTokenRequest {
+-  grantType: string;
+-  code: string;
+-  refreshToken?: string;
+-  clientId: string;
+-  clientSecret?: string;
+-  redirectUri: string;
+-}
+-
+-export interface ExchangeTokenResponse {
+-  accessToken: string;
+-  tokenType: string;
+-  expiresIn: number;
+-  refreshToken?: string;
+-  scope: string;
+-  idToken: string;
+-}
+-
+-export interface GetUserInfoRequest {
+-  accessToken: string;
+-}
+-
+-export interface GetUserInfoResponse {
+-  openId: string;
+-  projectId: string;
+-  name: string;
+-  email?: string | null;
+-  platform?: string | null;
+-  loginMethod?: string | null;
+-}
+-
+-export interface CanAccessRequest {
+-  openId: string;
+-  projectId: string;
+-}
+-
+-export interface CanAccessResponse {
+-  canAccess: boolean;
+-}
+-
+-export interface GetUserInfoWithJwtRequest {
+-  jwtToken: string;
+-  projectId: string;
+-}
+-
+-export interface GetUserInfoWithJwtResponse {
+-  openId: string;
+-  projectId: string;
+-  name: string;
+-  email?: string | null;
+-  platform?: string | null;
+-  loginMethod?: string | null;
+-  /** Cron-only; references `schedule_task.uid`. */
+-  taskUid?: string | null;
+-}
+diff --git a/server/tests/auth.logout.test.ts b/server/tests/auth.logout.test.ts
+index bff0e4a..8b5b077 100644
+--- a/server/tests/auth.logout.test.ts
++++ b/server/tests/auth.logout.test.ts
+@@ -18,7 +18,7 @@ function createAuthContext(): { ctx: TrpcContext; clearedCookies: CookieCall[] }
+     openId: "sample-user",
+     email: "sample@example.com",
+     name: "Sample User",
+-    loginMethod: "manus",
++    loginMethod: "google",
+     role: "user",
+     createdAt: new Date(),
+     updatedAt: new Date(),
+-- 
+2.43.0
+

@@ -8,6 +8,7 @@ import { parse as parseCookieHeader } from "cookie";
 import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
+import { exchangeCodeForGoogleToken, getGoogleUserInfo } from "./googleAuth";
 import { sdk } from "./sdk";
 
 function getQueryParam(req: Request, key: string): string | undefined {
@@ -19,6 +20,13 @@ export function registerOAuthRoutes(app: Express) {
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
     const code = getQueryParam(req, "code");
     const state = getQueryParam(req, "state");
+    const googleError = getQueryParam(req, "error");
+
+    if (googleError) {
+      // e.g. user clicked "Cancel" on Google's consent screen.
+      res.redirect(302, "/?login_error=" + encodeURIComponent(googleError));
+      return;
+    }
 
     if (!code || !state) {
       res.status(400).json({ error: "code and state are required" });
@@ -44,23 +52,27 @@ export function registerOAuthRoutes(app: Express) {
     });
 
     try {
-      const tokenResponse = await sdk.exchangeCodeForToken(code, state);
-      const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
+      const tokenResponse = await exchangeCodeForGoogleToken(code);
+      const googleUser = await getGoogleUserInfo(tokenResponse.access_token);
 
-      if (!userInfo.openId) {
-        res.status(400).json({ error: "openId missing from user info" });
+      if (!googleUser.sub) {
+        res.status(400).json({ error: "Google user id (sub) missing" });
         return;
       }
 
+      // We use Google's stable `sub` claim as our internal `openId`, prefixed
+      // so it can never collide with an id minted by another login method.
+      const openId = `google:${googleUser.sub}`;
+
       await db.upsertUser({
-        openId: userInfo.openId,
-        name: userInfo.name || null,
-        email: userInfo.email ?? null,
-        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
+        openId,
+        name: googleUser.name || null,
+        email: googleUser.email ?? null,
+        loginMethod: "google",
         lastSignedIn: new Date(),
       });
 
-      const user = await db.getUserByOpenId(userInfo.openId);
+      const user = await db.getUserByOpenId(openId);
 
       let redirectTo = "/";
       if (invitationToken && user) {
@@ -73,8 +85,8 @@ export function registerOAuthRoutes(app: Express) {
         }
       }
 
-      const sessionToken = await sdk.createSessionToken(userInfo.openId, {
-        name: userInfo.name || "",
+      const sessionToken = await sdk.createSessionToken(openId, {
+        name: googleUser.name || "",
         expiresInMs: ONE_YEAR_MS,
       });
 
@@ -84,7 +96,7 @@ export function registerOAuthRoutes(app: Express) {
         maxAge: ONE_YEAR_MS,
       });
 
-      res.redirect(302, "/");
+      res.redirect(302, redirectTo);
     } catch (error) {
       console.error("[OAuth] Callback failed", error);
       res.status(500).json({ error: "OAuth callback failed" });
