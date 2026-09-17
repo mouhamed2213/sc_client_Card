@@ -77,22 +77,3 @@ export async function storageGet(
   return { key, url: publicUrl };
 }
 
-// export async function storageGetSignedUrl(relKey: string): Promise<string> {
-//   const { forgeUrl, forgeKey } = getForgeConfig();
-//   const key = normalizeKey(relKey);
-
-//   const getUrl = new URL("v1/storage/presign/get", forgeUrl + "/");
-//   getUrl.searchParams.set("path", key);
-
-//   const resp = await fetch(getUrl, {
-//     headers: { Authorization: `Bearer ${forgeKey}` },
-//   });
-
-//   if (!resp.ok) {
-//     const msg = await resp.text().catch(() => resp.statusText);
-//     throw new Error(`Storage signed URL failed (${resp.status}): ${msg}`);
-//   }
-
-//   const { url } = (await resp.json()) as { url: string };
-//   return url;
-// }

@@ -66,3 +66,13 @@ export type FicheScan = Prisma.FicheScanModel
  * 
  */
 export type ContactRequest = Prisma.ContactRequestModel
+/**
+ * Model InvitationClient
+ * 
+ */
+export type InvitationClient = Prisma.InvitationClientModel
+/**
+ * Model MembershipCard
+ * 
+ */
+export type MembershipCard = Prisma.MembershipCardModel

@@ -1,8 +1,8 @@
 import { stdin as input, stdout as output } from "node:process";
 import { createInterface } from "node:readline/promises";
 
-import { hashAdminPassword } from "../server/_core/adminAuth";
 import { prisma } from "../prisma/client";
+import { hashAdminPassword } from "../server/_core/adminAuth";
 
 function askHidden(question: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -65,9 +65,7 @@ async function main() {
   const rl = createInterface({ input, output });
 
   try {
-    const username = (
-      await rl.question("Nom d'utilisateur admin : ")
-    ).trim();
+    const username = (await rl.question("Nom d'utilisateur admin : ")).trim();
 
     if (!/^[a-zA-Z0-9._-]{3,64}$/.test(username)) {
       throw new Error(
@@ -104,9 +102,7 @@ async function main() {
     });
 
     if (existingUser) {
-      throw new Error(
-        `Un utilisateur associé à "${username}" existe déjà.`
-      );
+      throw new Error(`Un utilisateur associé à "${username}" existe déjà.`);
     }
 
     const passwordHash = hashAdminPassword(password);
@@ -138,6 +134,7 @@ async function main() {
     console.log(`Username : ${admin.credential.username}`);
     console.log(`User ID  : ${admin.user.id}`);
     console.log(`Role     : ${admin.user.role}`);
+    console.log(`Hashed password     : ${passwordHash}`);
     console.log("\nLe mot de passe n'a pas été enregistré en clair.");
     console.log("Tu peux maintenant utiliser ce compte pour /admin/login.\n");
   } finally {

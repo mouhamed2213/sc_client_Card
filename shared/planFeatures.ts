@@ -7,6 +7,7 @@ export const planFeatures = {
     requiresProfile: false,
     requiresHours: true,
     hasCatalog: false,
+    hasPanel : false
   },
   pro: {
     maxLinks: 10,
@@ -16,6 +17,8 @@ export const planFeatures = {
     requiresProfile: true,
     requiresHours: true,
     hasCatalog: false,
+    hasPanel : false
+
   },
   signature: {
     maxLinks: 10,
@@ -25,6 +28,8 @@ export const planFeatures = {
     requiresProfile: true,
     requiresHours: true,
     hasCatalog: true,
+    hasPanel : true
+
   },
 } as const;
 
