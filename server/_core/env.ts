@@ -20,10 +20,9 @@ export const ENV = {
   publicUrl: process.env.S3_PUBLIC_BASE_URL,
   bucket: process.env.S3_BUCKET_NAME,
 
-  // admin Login
-  adminUserName: process.env.ADMIN_USERNAME,
-  adminPassword: process.env.ADMIN_PASSWORD,
 
   // jwt
   jwt: process.env.JWT_SECRET,
+ viteOauthPortalUrl :  process.env.VITE_OAUTH_PORTAL_URL,
+oauthStateCookie : process.env.OAUTH_STATE_COOKIE
 };

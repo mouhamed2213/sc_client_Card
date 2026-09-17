@@ -7,10 +7,10 @@ export default function FicheClientDetail() {
   const { ficheId } = useParams<{ ficheId: string }>();
   const id = Number(ficheId);
 
-  const ficheQuery = trpc.client.ficheDetail.useQuery({ ficheId: id });
-  const scansQuery = trpc.client.scans.useQuery({ ficheId: id });
-  const requestsQuery = trpc.client.contactRequests.useQuery({ ficheId: id });
-  const cardsQuery = trpc.client.membershipCards.useQuery({ ficheId: id });
+  const ficheQuery = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
+  const scansQuery = trpc.clientSpaceRouter.scans.useQuery({ ficheId: id });
+  const requestsQuery = trpc.clientSpaceRouter.contactRequests.useQuery({ ficheId: id });
+  const cardsQuery = trpc.clientSpaceRouter.membershipCards.useQuery({ ficheId: id });
 
   if (ficheQuery.isLoading) return <p className="p-6 text-sm text-slate-500">Chargement…</p>;
   if (ficheQuery.error) return <p className="p-6 text-sm text-red-600">Fiche introuvable.</p>;

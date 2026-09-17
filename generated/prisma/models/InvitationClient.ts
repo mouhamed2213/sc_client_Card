@@ -42,6 +42,7 @@ export type InvitationClientMinAggregateOutputType = {
   token: string | null
   utilisee: boolean | null
   expireLe: Date | null
+  revokedAt: Date | null
   createdAt: Date | null
 }
 
@@ -51,6 +52,7 @@ export type InvitationClientMaxAggregateOutputType = {
   token: string | null
   utilisee: boolean | null
   expireLe: Date | null
+  revokedAt: Date | null
   createdAt: Date | null
 }
 
@@ -60,6 +62,7 @@ export type InvitationClientCountAggregateOutputType = {
   token: number
   utilisee: number
   expireLe: number
+  revokedAt: number
   createdAt: number
   _all: number
 }
@@ -81,6 +84,7 @@ export type InvitationClientMinAggregateInputType = {
   token?: true
   utilisee?: true
   expireLe?: true
+  revokedAt?: true
   createdAt?: true
 }
 
@@ -90,6 +94,7 @@ export type InvitationClientMaxAggregateInputType = {
   token?: true
   utilisee?: true
   expireLe?: true
+  revokedAt?: true
   createdAt?: true
 }
 
@@ -99,6 +104,7 @@ export type InvitationClientCountAggregateInputType = {
   token?: true
   utilisee?: true
   expireLe?: true
+  revokedAt?: true
   createdAt?: true
   _all?: true
 }
@@ -195,6 +201,7 @@ export type InvitationClientGroupByOutputType = {
   token: string
   utilisee: boolean
   expireLe: Date
+  revokedAt: Date | null
   createdAt: Date
   _count: InvitationClientCountAggregateOutputType | null
   _avg: InvitationClientAvgAggregateOutputType | null
@@ -227,6 +234,7 @@ export type InvitationClientWhereInput = {
   token?: Prisma.StringFilter<"InvitationClient"> | string
   utilisee?: Prisma.BoolFilter<"InvitationClient"> | boolean
   expireLe?: Prisma.DateTimeFilter<"InvitationClient"> | Date | string
+  revokedAt?: Prisma.DateTimeNullableFilter<"InvitationClient"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"InvitationClient"> | Date | string
   fiche?: Prisma.XOR<Prisma.FicheScalarRelationFilter, Prisma.FicheWhereInput>
 }
@@ -237,6 +245,7 @@ export type InvitationClientOrderByWithRelationInput = {
   token?: Prisma.SortOrder
   utilisee?: Prisma.SortOrder
   expireLe?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   fiche?: Prisma.FicheOrderByWithRelationInput
 }
@@ -250,6 +259,7 @@ export type InvitationClientWhereUniqueInput = Prisma.AtLeast<{
   ficheId?: Prisma.IntFilter<"InvitationClient"> | number
   utilisee?: Prisma.BoolFilter<"InvitationClient"> | boolean
   expireLe?: Prisma.DateTimeFilter<"InvitationClient"> | Date | string
+  revokedAt?: Prisma.DateTimeNullableFilter<"InvitationClient"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"InvitationClient"> | Date | string
   fiche?: Prisma.XOR<Prisma.FicheScalarRelationFilter, Prisma.FicheWhereInput>
 }, "id" | "token">
@@ -260,6 +270,7 @@ export type InvitationClientOrderByWithAggregationInput = {
   token?: Prisma.SortOrder
   utilisee?: Prisma.SortOrder
   expireLe?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.InvitationClientCountOrderByAggregateInput
   _avg?: Prisma.InvitationClientAvgOrderByAggregateInput
@@ -277,6 +288,7 @@ export type InvitationClientScalarWhereWithAggregatesInput = {
   token?: Prisma.StringWithAggregatesFilter<"InvitationClient"> | string
   utilisee?: Prisma.BoolWithAggregatesFilter<"InvitationClient"> | boolean
   expireLe?: Prisma.DateTimeWithAggregatesFilter<"InvitationClient"> | Date | string
+  revokedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"InvitationClient"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"InvitationClient"> | Date | string
 }
 
@@ -284,6 +296,7 @@ export type InvitationClientCreateInput = {
   token: string
   utilisee?: boolean
   expireLe: Date | string
+  revokedAt?: Date | string | null
   createdAt?: Date | string
   fiche: Prisma.FicheCreateNestedOneWithoutInvitationsInput
 }
@@ -294,6 +307,7 @@ export type InvitationClientUncheckedCreateInput = {
   token: string
   utilisee?: boolean
   expireLe: Date | string
+  revokedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -301,6 +315,7 @@ export type InvitationClientUpdateInput = {
   token?: Prisma.StringFieldUpdateOperationsInput | string
   utilisee?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expireLe?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fiche?: Prisma.FicheUpdateOneRequiredWithoutInvitationsNestedInput
 }
@@ -311,6 +326,7 @@ export type InvitationClientUncheckedUpdateInput = {
   token?: Prisma.StringFieldUpdateOperationsInput | string
   utilisee?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expireLe?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -320,6 +336,7 @@ export type InvitationClientCreateManyInput = {
   token: string
   utilisee?: boolean
   expireLe: Date | string
+  revokedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -327,6 +344,7 @@ export type InvitationClientUpdateManyMutationInput = {
   token?: Prisma.StringFieldUpdateOperationsInput | string
   utilisee?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expireLe?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -336,6 +354,7 @@ export type InvitationClientUncheckedUpdateManyInput = {
   token?: Prisma.StringFieldUpdateOperationsInput | string
   utilisee?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expireLe?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -355,6 +374,7 @@ export type InvitationClientCountOrderByAggregateInput = {
   token?: Prisma.SortOrder
   utilisee?: Prisma.SortOrder
   expireLe?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -369,6 +389,7 @@ export type InvitationClientMaxOrderByAggregateInput = {
   token?: Prisma.SortOrder
   utilisee?: Prisma.SortOrder
   expireLe?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -378,6 +399,7 @@ export type InvitationClientMinOrderByAggregateInput = {
   token?: Prisma.SortOrder
   utilisee?: Prisma.SortOrder
   expireLe?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -436,6 +458,7 @@ export type InvitationClientCreateWithoutFicheInput = {
   token: string
   utilisee?: boolean
   expireLe: Date | string
+  revokedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -444,6 +467,7 @@ export type InvitationClientUncheckedCreateWithoutFicheInput = {
   token: string
   utilisee?: boolean
   expireLe: Date | string
+  revokedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -482,6 +506,7 @@ export type InvitationClientScalarWhereInput = {
   token?: Prisma.StringFilter<"InvitationClient"> | string
   utilisee?: Prisma.BoolFilter<"InvitationClient"> | boolean
   expireLe?: Prisma.DateTimeFilter<"InvitationClient"> | Date | string
+  revokedAt?: Prisma.DateTimeNullableFilter<"InvitationClient"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"InvitationClient"> | Date | string
 }
 
@@ -490,6 +515,7 @@ export type InvitationClientCreateManyFicheInput = {
   token: string
   utilisee?: boolean
   expireLe: Date | string
+  revokedAt?: Date | string | null
   createdAt?: Date | string
 }
 
@@ -497,6 +523,7 @@ export type InvitationClientUpdateWithoutFicheInput = {
   token?: Prisma.StringFieldUpdateOperationsInput | string
   utilisee?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expireLe?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -505,6 +532,7 @@ export type InvitationClientUncheckedUpdateWithoutFicheInput = {
   token?: Prisma.StringFieldUpdateOperationsInput | string
   utilisee?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expireLe?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -513,6 +541,7 @@ export type InvitationClientUncheckedUpdateManyWithoutFicheInput = {
   token?: Prisma.StringFieldUpdateOperationsInput | string
   utilisee?: Prisma.BoolFieldUpdateOperationsInput | boolean
   expireLe?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -524,6 +553,7 @@ export type InvitationClientSelect<ExtArgs extends runtime.Types.Extensions.Inte
   token?: boolean
   utilisee?: boolean
   expireLe?: boolean
+  revokedAt?: boolean
   createdAt?: boolean
   fiche?: boolean | Prisma.FicheDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invitationClient"]>
@@ -534,6 +564,7 @@ export type InvitationClientSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   token?: boolean
   utilisee?: boolean
   expireLe?: boolean
+  revokedAt?: boolean
   createdAt?: boolean
   fiche?: boolean | Prisma.FicheDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invitationClient"]>
@@ -544,6 +575,7 @@ export type InvitationClientSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   token?: boolean
   utilisee?: boolean
   expireLe?: boolean
+  revokedAt?: boolean
   createdAt?: boolean
   fiche?: boolean | Prisma.FicheDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invitationClient"]>
@@ -554,10 +586,11 @@ export type InvitationClientSelectScalar = {
   token?: boolean
   utilisee?: boolean
   expireLe?: boolean
+  revokedAt?: boolean
   createdAt?: boolean
 }
 
-export type InvitationClientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ficheId" | "token" | "utilisee" | "expireLe" | "createdAt", ExtArgs["result"]["invitationClient"]>
+export type InvitationClientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ficheId" | "token" | "utilisee" | "expireLe" | "revokedAt" | "createdAt", ExtArgs["result"]["invitationClient"]>
 export type InvitationClientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fiche?: boolean | Prisma.FicheDefaultArgs<ExtArgs>
 }
@@ -579,6 +612,7 @@ export type $InvitationClientPayload<ExtArgs extends runtime.Types.Extensions.In
     token: string
     utilisee: boolean
     expireLe: Date
+    revokedAt: Date | null
     createdAt: Date
   }, ExtArgs["result"]["invitationClient"]>
   composites: {}
@@ -1009,6 +1043,7 @@ export interface InvitationClientFieldRefs {
   readonly token: Prisma.FieldRef<"InvitationClient", 'String'>
   readonly utilisee: Prisma.FieldRef<"InvitationClient", 'Boolean'>
   readonly expireLe: Prisma.FieldRef<"InvitationClient", 'DateTime'>
+  readonly revokedAt: Prisma.FieldRef<"InvitationClient", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"InvitationClient", 'DateTime'>
 }
     
