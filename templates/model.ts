@@ -11,6 +11,7 @@ export type TemplateHour = {
 };
 
 export type TemplateImage = {
+  id?: any;
   url: string;
   alt: string;
 };

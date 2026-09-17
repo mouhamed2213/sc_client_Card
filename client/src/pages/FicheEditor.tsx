@@ -1,3 +1,4 @@
+import AdminClientInvitationPanel from "@/components/AdminClientInvitationPanel";
 import { Button } from "@/components/ui/button";
 import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
@@ -17,7 +18,6 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Link, useLocation, useParams } from "wouter";
-
 const planLabels: Record<PlanName, string> = {
   essentiel: "Essentiel",
   pro: "Pro",
@@ -238,8 +238,7 @@ export default function FicheEditor() {
           </div>
           <div className="flex gap-2">
             <Button>
-              <Eye className="h4 w-4"/ > Voir la fiche
-
+              <Eye className="h4 w-4" /> Voir la fiche
             </Button>
 
             <Button
@@ -259,6 +258,10 @@ export default function FicheEditor() {
           </div>
         </div>
       </header>
+      <div className="mx-auto max-w-[1300px] px-5 pt-6">
+        <AdminClientInvitationPanel />
+      </div>
+
       <main className="mx-auto grid max-w-[1300px] gap-6 px-5 py-7 lg:grid-cols-[290px_1fr]">
         <aside className="space-y-5">
           <section className="editor-card sticky top-24">

@@ -80,11 +80,10 @@ model Fiche {
   updatedAt       DateTime          @updatedAt
   scans           FicheScan[]
   contactRequests ContactRequest[]
-
-    ownerId          Int?              // NOUVEAU — nullable : fiche créée par admin, rattachée plus tard
+  ownerId         Int?
   owner            User?             @relation(fields: [ownerId], references: [id])
-  membershipCards  MembershipCard[]  // NOUVEAU
-  invitations      InvitationClient[] // NOUVEAU
+  membershipCards MembershipCard[]
+  invitations     InvitationClient[]
 
   @@map("fiches")
 }
@@ -115,13 +114,13 @@ model ContactRequest {
   @@map("contact_requests")
 }
 
-
 model InvitationClient {
   id         Int      @id @default(autoincrement())
   ficheId    Int
   token      String   @unique
   utilisee   Boolean  @default(false)
   expireLe   DateTime
+  revokedAt  DateTime?
   createdAt  DateTime @default(now())
   fiche      Fiche    @relation(fields: [ficheId], references: [id], onDelete: Cascade)
 
@@ -131,7 +130,7 @@ model InvitationClient {
 model MembershipCard {
   id             Int         @id @default(autoincrement())
   ficheId        Int
-  numero         String      @unique          // ex: "SIG-0007"
+  numero         String      @unique
   statut         CardStatus  @default(active)
   dateActivation DateTime?
   createdAt      DateTime    @default(now())

@@ -1,6 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { mediaRules } from "@shared/mediaRules";
 import { getPlanFeatures } from "@shared/planFeatures";
+import { fichePayload } from "@shared/types/schemas";
 import { TRPCError } from "@trpc/server";
 import { Fiche } from "generated/prisma/client";
 import { imageSize } from "image-size";
@@ -13,6 +14,12 @@ import {
   publicProcedure,
   router,
 } from "./_core/trpc";
+import {
+  listClientDashboard,
+  listInvitationsForFiche,
+  revokeInvitation,
+  updateMembershipCardStatus,
+} from "./clientSpace";
 import {
   createContactRequest,
   createFiche,
@@ -32,9 +39,6 @@ import {
 } from "./db";
 import { validatePlanPayload } from "./planValidation";
 import { storagePut } from "./storage";
-import { fichePayload } from "@shared/types/schemas";
-
-
 
 function parseFiche<T extends { dataJson: string }>(fiche: T) {
   const { dataJson, ...rest } = fiche;
@@ -273,7 +277,6 @@ export const appRouter = router({
         return { ...result, bytes: bytes.byteLength };
       }),
   }),
-
   admin: router({
     inviteOwner: adminProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
@@ -282,7 +285,7 @@ export const appRouter = router({
         if (!fiche)
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: "Fiche introuvable",
+            message: "Fiche introuvable.",
           });
         if (fiche.ownerId)
           throw new TRPCError({
@@ -292,22 +295,122 @@ export const appRouter = router({
         const token = await createInvitation(input.ficheId);
         return { token, url: `/espace-client/invite/${token}` };
       }),
-
+    listInvitations: adminProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        const fiche = await getFicheById(input.ficheId);
+        if (!fiche)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Fiche introuvable.",
+          });
+        return listInvitationsForFiche(input.ficheId);
+      }),
+    revokeInvitation: adminProcedure
+      .input(z.object({ invitationId: z.number().int().positive() }))
+      .mutation(async ({ input }) => {
+        try {
+          return await revokeInvitation(input.invitationId);
+        } catch (error) {
+          if (
+            error instanceof Error &&
+            error.message === "INVITATION_NOT_FOUND"
+          )
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Invitation introuvable.",
+            });
+          if (
+            error instanceof Error &&
+            error.message === "INVITATION_ALREADY_USED"
+          )
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Cette invitation a déjà été utilisée.",
+            });
+          throw error;
+        }
+      }),
+    listMembershipCards: adminProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        const fiche = await getFicheById(input.ficheId);
+        if (!fiche)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Fiche introuvable.",
+          });
+        return listMembershipCards(input.ficheId);
+      }),
     createMembershipCard: adminProcedure
       .input(
         z.object({
           ficheId: z.number().int().positive(),
-          numero: z.string().min(1),
+          numero: z.string().trim().min(1).max(80),
         })
       )
-      .mutation(async ({ input }) => createMembershipCard(input)),
+      .mutation(async ({ input }) => {
+        const fiche = await getFicheById(input.ficheId);
+        if (!fiche)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Fiche introuvable.",
+          });
+        try {
+          return await createMembershipCard(input);
+        } catch (error) {
+          if ((error as { code?: string })?.code === "P2002")
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Ce numéro de carte existe déjà.",
+            });
+          throw error;
+        }
+      }),
+    updateMembershipCardStatus: adminProcedure
+      .input(
+        z.object({
+          cardId: z.number().int().positive(),
+          statut: z.enum(["active", "perdue", "revoquee"]),
+        })
+      )
+      .mutation(async ({ input }) => {
+        try {
+          return await updateMembershipCardStatus(input.cardId, input.statut);
+        } catch (error) {
+          if ((error as { code?: string })?.code === "P2025")
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Carte introuvable.",
+            });
+          throw error;
+        }
+      }),
   }),
-
-  client: router({
+  clientSpaceRouter: router({
     myFiches: clientProcedure.query(({ ctx }) =>
       listFichesByOwner(ctx.user.id)
     ),
-
+    dashboard: clientProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        if (!fiche)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
+        const dashboard = await listClientDashboard(input.ficheId);
+        return {
+          ...dashboard,
+          fiche: dashboard.fiche
+            ? {
+                ...parseFiche(dashboard.fiche),
+                plan: getPlanFeatures(dashboard.fiche.formule),
+              }
+            : null,
+        };
+      }),
     ficheDetail: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
@@ -319,9 +422,15 @@ export const appRouter = router({
           });
         return { ...parseFiche(fiche), plan: getPlanFeatures(fiche.formule) };
       }),
-
     scans: clientProcedure
-      .input(z.object({ ficheId: z.number().int().positive() }))
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          days: z
+            .union([z.literal(7), z.literal(30), z.literal(90)])
+            .optional(),
+        })
+      )
       .query(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
@@ -329,9 +438,8 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "Fiche introuvable.",
           });
-        return listScansForFiche(input.ficheId);
+        return listScansForFiche(input.ficheId, input.days ?? 30);
       }),
-
     contactRequests: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
@@ -343,7 +451,6 @@ export const appRouter = router({
           });
         return listContactRequests(input.ficheId);
       }),
-
     membershipCards: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
