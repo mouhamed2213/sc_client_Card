@@ -249,6 +249,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastSignedIn?: Prisma.DateTimeFilter<"User"> | Date | string
   adminCredential?: Prisma.XOR<Prisma.AdminCredentialNullableScalarRelationFilter, Prisma.AdminCredentialWhereInput> | null
+  fiche?: Prisma.FicheListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -262,6 +263,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   lastSignedIn?: Prisma.SortOrder
   adminCredential?: Prisma.AdminCredentialOrderByWithRelationInput
+  fiche?: Prisma.FicheOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -278,6 +280,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastSignedIn?: Prisma.DateTimeFilter<"User"> | Date | string
   adminCredential?: Prisma.XOR<Prisma.AdminCredentialNullableScalarRelationFilter, Prisma.AdminCredentialWhereInput> | null
+  fiche?: Prisma.FicheListRelationFilter
 }, "id" | "openId">
 
 export type UserOrderByWithAggregationInput = {
@@ -322,6 +325,7 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   lastSignedIn?: Date | string
   adminCredential?: Prisma.AdminCredentialCreateNestedOneWithoutUserInput
+  fiche?: Prisma.FicheCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -335,6 +339,7 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   lastSignedIn?: Date | string
   adminCredential?: Prisma.AdminCredentialUncheckedCreateNestedOneWithoutUserInput
+  fiche?: Prisma.FicheUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUpdateInput = {
@@ -347,6 +352,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   adminCredential?: Prisma.AdminCredentialUpdateOneWithoutUserNestedInput
+  fiche?: Prisma.FicheUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -360,6 +366,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   adminCredential?: Prisma.AdminCredentialUncheckedUpdateOneWithoutUserNestedInput
+  fiche?: Prisma.FicheUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -446,6 +453,11 @@ export type UserScalarRelationFilter = {
   isNot?: Prisma.UserWhereInput
 }
 
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -484,6 +496,22 @@ export type UserUpdateOneRequiredWithoutAdminCredentialNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAdminCredentialInput, Prisma.UserUpdateWithoutAdminCredentialInput>, Prisma.UserUncheckedUpdateWithoutAdminCredentialInput>
 }
 
+export type UserCreateNestedOneWithoutFicheInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFicheInput, Prisma.UserUncheckedCreateWithoutFicheInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFicheInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutFicheNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFicheInput, Prisma.UserUncheckedCreateWithoutFicheInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFicheInput
+  upsert?: Prisma.UserUpsertWithoutFicheInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFicheInput, Prisma.UserUpdateWithoutFicheInput>, Prisma.UserUncheckedUpdateWithoutFicheInput>
+}
+
 export type UserCreateWithoutAdminCredentialInput = {
   openId: string
   name?: string | null
@@ -493,6 +521,7 @@ export type UserCreateWithoutAdminCredentialInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSignedIn?: Date | string
+  fiche?: Prisma.FicheCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutAdminCredentialInput = {
@@ -505,6 +534,7 @@ export type UserUncheckedCreateWithoutAdminCredentialInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSignedIn?: Date | string
+  fiche?: Prisma.FicheUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserCreateOrConnectWithoutAdminCredentialInput = {
@@ -532,6 +562,7 @@ export type UserUpdateWithoutAdminCredentialInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fiche?: Prisma.FicheUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminCredentialInput = {
@@ -544,8 +575,104 @@ export type UserUncheckedUpdateWithoutAdminCredentialInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fiche?: Prisma.FicheUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
+export type UserCreateWithoutFicheInput = {
+  openId: string
+  name?: string | null
+  email?: string | null
+  loginMethod?: string | null
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastSignedIn?: Date | string
+  adminCredential?: Prisma.AdminCredentialCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutFicheInput = {
+  id?: number
+  openId: string
+  name?: string | null
+  email?: string | null
+  loginMethod?: string | null
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastSignedIn?: Date | string
+  adminCredential?: Prisma.AdminCredentialUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutFicheInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutFicheInput, Prisma.UserUncheckedCreateWithoutFicheInput>
+}
+
+export type UserUpsertWithoutFicheInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutFicheInput, Prisma.UserUncheckedUpdateWithoutFicheInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutFicheInput, Prisma.UserUncheckedCreateWithoutFicheInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutFicheInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutFicheInput, Prisma.UserUncheckedUpdateWithoutFicheInput>
+}
+
+export type UserUpdateWithoutFicheInput = {
+  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  adminCredential?: Prisma.AdminCredentialUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutFicheInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  adminCredential?: Prisma.AdminCredentialUncheckedUpdateOneWithoutUserNestedInput
+}
+
+
+/**
+ * Count Type UserCountOutputType
+ */
+
+export type UserCountOutputType = {
+  fiche: number
+}
+
+export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  fiche?: boolean | UserCountOutputTypeCountFicheArgs
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserCountOutputType
+   */
+  select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountFicheArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FicheWhereInput
+}
 
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -559,6 +686,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   lastSignedIn?: boolean
   adminCredential?: boolean | Prisma.User$adminCredentialArgs<ExtArgs>
+  fiche?: boolean | Prisma.User$ficheArgs<ExtArgs>
+  _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -600,6 +729,8 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "openId" | "name" | "email" | "loginMethod" | "role" | "createdAt" | "updatedAt" | "lastSignedIn", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   adminCredential?: boolean | Prisma.User$adminCredentialArgs<ExtArgs>
+  fiche?: boolean | Prisma.User$ficheArgs<ExtArgs>
+  _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -608,6 +739,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     adminCredential: Prisma.$AdminCredentialPayload<ExtArgs> | null
+    fiche: Prisma.$FichePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1014,6 +1146,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   adminCredential<T extends Prisma.User$adminCredentialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminCredentialArgs<ExtArgs>>): Prisma.Prisma__AdminCredentialClient<runtime.Types.Result.GetResult<Prisma.$AdminCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  fiche<T extends Prisma.User$ficheArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ficheArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FichePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1461,6 +1594,30 @@ export type User$adminCredentialArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   include?: Prisma.AdminCredentialInclude<ExtArgs> | null
   where?: Prisma.AdminCredentialWhereInput
+}
+
+/**
+ * User.fiche
+ */
+export type User$ficheArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Fiche
+   */
+  select?: Prisma.FicheSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Fiche
+   */
+  omit?: Prisma.FicheOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FicheInclude<ExtArgs> | null
+  where?: Prisma.FicheWhereInput
+  orderBy?: Prisma.FicheOrderByWithRelationInput | Prisma.FicheOrderByWithRelationInput[]
+  cursor?: Prisma.FicheWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FicheScalarFieldEnum | Prisma.FicheScalarFieldEnum[]
 }
 
 /**
