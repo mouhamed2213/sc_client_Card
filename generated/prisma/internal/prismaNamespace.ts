@@ -401,7 +401,9 @@ export const ModelName = {
   AdminCredential: 'AdminCredential',
   Fiche: 'Fiche',
   FicheScan: 'FicheScan',
-  ContactRequest: 'ContactRequest'
+  ContactRequest: 'ContactRequest',
+  InvitationClient: 'InvitationClient',
+  MembershipCard: 'MembershipCard'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -417,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "adminCredential" | "fiche" | "ficheScan" | "contactRequest"
+    modelProps: "user" | "adminCredential" | "fiche" | "ficheScan" | "contactRequest" | "invitationClient" | "membershipCard"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -791,6 +793,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    InvitationClient: {
+      payload: Prisma.$InvitationClientPayload<ExtArgs>
+      fields: Prisma.InvitationClientFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InvitationClientFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InvitationClientFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload>
+        }
+        findFirst: {
+          args: Prisma.InvitationClientFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InvitationClientFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload>
+        }
+        findMany: {
+          args: Prisma.InvitationClientFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload>[]
+        }
+        create: {
+          args: Prisma.InvitationClientCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload>
+        }
+        createMany: {
+          args: Prisma.InvitationClientCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InvitationClientCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload>[]
+        }
+        delete: {
+          args: Prisma.InvitationClientDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload>
+        }
+        update: {
+          args: Prisma.InvitationClientUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload>
+        }
+        deleteMany: {
+          args: Prisma.InvitationClientDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InvitationClientUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InvitationClientUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload>[]
+        }
+        upsert: {
+          args: Prisma.InvitationClientUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InvitationClientPayload>
+        }
+        aggregate: {
+          args: Prisma.InvitationClientAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInvitationClient>
+        }
+        groupBy: {
+          args: Prisma.InvitationClientGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvitationClientGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InvitationClientCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InvitationClientCountAggregateOutputType> | number
+        }
+      }
+    }
+    MembershipCard: {
+      payload: Prisma.$MembershipCardPayload<ExtArgs>
+      fields: Prisma.MembershipCardFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MembershipCardFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MembershipCardFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload>
+        }
+        findFirst: {
+          args: Prisma.MembershipCardFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MembershipCardFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload>
+        }
+        findMany: {
+          args: Prisma.MembershipCardFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload>[]
+        }
+        create: {
+          args: Prisma.MembershipCardCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload>
+        }
+        createMany: {
+          args: Prisma.MembershipCardCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MembershipCardCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload>[]
+        }
+        delete: {
+          args: Prisma.MembershipCardDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload>
+        }
+        update: {
+          args: Prisma.MembershipCardUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload>
+        }
+        deleteMany: {
+          args: Prisma.MembershipCardDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MembershipCardUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MembershipCardUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload>[]
+        }
+        upsert: {
+          args: Prisma.MembershipCardUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MembershipCardPayload>
+        }
+        aggregate: {
+          args: Prisma.MembershipCardAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMembershipCard>
+        }
+        groupBy: {
+          args: Prisma.MembershipCardGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MembershipCardGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MembershipCardCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MembershipCardCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -881,7 +1031,8 @@ export const FicheScalarFieldEnum = {
   scansTotal: 'scansTotal',
   lastScanAt: 'lastScanAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  ownerId: 'ownerId'
 } as const
 
 export type FicheScalarFieldEnum = (typeof FicheScalarFieldEnum)[keyof typeof FicheScalarFieldEnum]
@@ -909,6 +1060,30 @@ export const ContactRequestScalarFieldEnum = {
 } as const
 
 export type ContactRequestScalarFieldEnum = (typeof ContactRequestScalarFieldEnum)[keyof typeof ContactRequestScalarFieldEnum]
+
+
+export const InvitationClientScalarFieldEnum = {
+  id: 'id',
+  ficheId: 'ficheId',
+  token: 'token',
+  utilisee: 'utilisee',
+  expireLe: 'expireLe',
+  createdAt: 'createdAt'
+} as const
+
+export type InvitationClientScalarFieldEnum = (typeof InvitationClientScalarFieldEnum)[keyof typeof InvitationClientScalarFieldEnum]
+
+
+export const MembershipCardScalarFieldEnum = {
+  id: 'id',
+  ficheId: 'ficheId',
+  numero: 'numero',
+  statut: 'statut',
+  dateActivation: 'dateActivation',
+  createdAt: 'createdAt'
+} as const
+
+export type MembershipCardScalarFieldEnum = (typeof MembershipCardScalarFieldEnum)[keyof typeof MembershipCardScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1022,6 +1197,27 @@ export type EnumStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
  * Reference to a field of type 'Statut[]'
  */
 export type ListEnumStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Statut[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'CardStatus'
+ */
+export type EnumCardStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CardStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CardStatus[]'
+ */
+export type ListEnumCardStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CardStatus[]'>
     
 
 
@@ -1194,6 +1390,8 @@ export type GlobalOmitConfig = {
   fiche?: Prisma.FicheOmit
   ficheScan?: Prisma.FicheScanOmit
   contactRequest?: Prisma.ContactRequestOmit
+  invitationClient?: Prisma.InvitationClientOmit
+  membershipCard?: Prisma.MembershipCardOmit
 }
 
 /* Types for Logging */

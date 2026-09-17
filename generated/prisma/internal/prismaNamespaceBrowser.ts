@@ -55,7 +55,9 @@ export const ModelName = {
   AdminCredential: 'AdminCredential',
   Fiche: 'Fiche',
   FicheScan: 'FicheScan',
-  ContactRequest: 'ContactRequest'
+  ContactRequest: 'ContactRequest',
+  InvitationClient: 'InvitationClient',
+  MembershipCard: 'MembershipCard'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -125,7 +127,8 @@ export const FicheScalarFieldEnum = {
   scansTotal: 'scansTotal',
   lastScanAt: 'lastScanAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  ownerId: 'ownerId'
 } as const
 
 export type FicheScalarFieldEnum = (typeof FicheScalarFieldEnum)[keyof typeof FicheScalarFieldEnum]
@@ -153,6 +156,30 @@ export const ContactRequestScalarFieldEnum = {
 } as const
 
 export type ContactRequestScalarFieldEnum = (typeof ContactRequestScalarFieldEnum)[keyof typeof ContactRequestScalarFieldEnum]
+
+
+export const InvitationClientScalarFieldEnum = {
+  id: 'id',
+  ficheId: 'ficheId',
+  token: 'token',
+  utilisee: 'utilisee',
+  expireLe: 'expireLe',
+  createdAt: 'createdAt'
+} as const
+
+export type InvitationClientScalarFieldEnum = (typeof InvitationClientScalarFieldEnum)[keyof typeof InvitationClientScalarFieldEnum]
+
+
+export const MembershipCardScalarFieldEnum = {
+  id: 'id',
+  ficheId: 'ficheId',
+  numero: 'numero',
+  statut: 'statut',
+  dateActivation: 'dateActivation',
+  createdAt: 'createdAt'
+} as const
+
+export type MembershipCardScalarFieldEnum = (typeof MembershipCardScalarFieldEnum)[keyof typeof MembershipCardScalarFieldEnum]
 
 
 export const SortOrder = {

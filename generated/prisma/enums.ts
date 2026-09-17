@@ -34,3 +34,12 @@ export const Statut = {
 } as const
 
 export type Statut = (typeof Statut)[keyof typeof Statut]
+
+
+export const CardStatus = {
+  active: 'active',
+  perdue: 'perdue',
+  revoquee: 'revoquee'
+} as const
+
+export type CardStatus = (typeof CardStatus)[keyof typeof CardStatus]

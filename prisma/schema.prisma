@@ -36,6 +36,7 @@ model User {
   updatedAt      DateTime         @updatedAt
   lastSignedIn   DateTime         @default(now())
   adminCredential AdminCredential?
+  fiche Fiche[]
 
   @@map("users")
 }
@@ -80,6 +81,11 @@ model Fiche {
   scans           FicheScan[]
   contactRequests ContactRequest[]
 
+    ownerId          Int?              // NOUVEAU — nullable : fiche créée par admin, rattachée plus tard
+  owner            User?             @relation(fields: [ownerId], references: [id])
+  membershipCards  MembershipCard[]  // NOUVEAU
+  invitations      InvitationClient[] // NOUVEAU
+
   @@map("fiches")
 }
 
@@ -107,4 +113,35 @@ model ContactRequest {
 
   @@index([ficheId, createdAt])
   @@map("contact_requests")
+}
+
+
+model InvitationClient {
+  id         Int      @id @default(autoincrement())
+  ficheId    Int
+  token      String   @unique
+  utilisee   Boolean  @default(false)
+  expireLe   DateTime
+  createdAt  DateTime @default(now())
+  fiche      Fiche    @relation(fields: [ficheId], references: [id], onDelete: Cascade)
+
+  @@index([ficheId])
+}
+
+model MembershipCard {
+  id             Int         @id @default(autoincrement())
+  ficheId        Int
+  numero         String      @unique          // ex: "SIG-0007"
+  statut         CardStatus  @default(active)
+  dateActivation DateTime?
+  createdAt      DateTime    @default(now())
+  fiche          Fiche       @relation(fields: [ficheId], references: [id], onDelete: Cascade)
+
+  @@index([ficheId])
+}
+
+enum CardStatus {
+  active
+  perdue
+  revoquee
 }

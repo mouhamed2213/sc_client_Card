@@ -12,10 +12,11 @@
     "test": "vitest run",
     "db:push": "prisma db push",
     "db:generate": "npx prisma generate",
-    "postinstall": "npx prisma generate",
+    "db:migrate": "npx prisma migrate dev ",
     "create:admin": "tsx scripts/create-admin.ts"
   },
   "dependencies": {
+    "@ajayche/trpc-panel": "^2.1.0",
     "@aws-sdk/client-s3": "^3.693.0",
     "@aws-sdk/s3-request-presigner": "^3.693.0",
     "@hookform/resolvers": "^5.2.2",
