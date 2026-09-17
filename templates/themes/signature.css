@@ -2,45 +2,37 @@
 
 .fiche-template.fiche-template--signature .public-hero {
   position: relative;
-  min-height: 560px;
   padding: 0 22px 28px;
   overflow: hidden;
   isolation: isolate;
-  background: #111111;
-}
-
-.fiche-template.fiche-template--signature .public-cover,
-.fiche-template.fiche-template--signature .public-cover img,
-.fiche-template.fiche-template--signature .public-hero-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  background: var(--theme-hero);
 }
 
 .fiche-template.fiche-template--signature .public-cover {
+  position: absolute;
   z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  background: #111111;
+  background: var(--theme-hero);
 }
 
 .fiche-template.fiche-template--signature .public-cover img {
   display: block;
+  width: 100%;
+  height: 100%;
   max-width: 100%;
   object-fit: cover;
   object-position: center;
 }
 
 .fiche-template.fiche-template--signature .public-hero-overlay {
+  position: absolute;
   z-index: 1;
+  inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.12) 0%,
-    rgba(0, 0, 0, 0.24) 36%,
-    rgba(0, 0, 0, 0.7) 72%,
-    rgba(0, 0, 0, 0.82) 100%
-  );
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.26) 42%, rgba(0, 0, 0, 0.72) 100%);
 }
 
 .fiche-template.fiche-template--signature .public-topline {
@@ -58,36 +50,14 @@
 }
 
 .fiche-template.fiche-template--signature .public-nfc {
-  color: rgba(244, 238, 228, 0.62);
+  color: rgba(244, 238, 228, 0.48);
 }
 
 .fiche-template.fiche-template--signature .public-identity {
   position: relative;
   z-index: 3;
-  margin-top: auto;
-  padding-top: 260px;
+  padding-top: 220px;
   text-align: center;
-}
-
-.fiche-template.fiche-template--signature .public-avatar {
-  width: 132px;
-  height: 132px;
-  margin: 0 auto 18px;
-  border: 4px solid #c9a46a;
-  border-radius: 50%;
-  background: #f7f5f0;
-  box-shadow:
-    0 0 0 7px rgba(0, 0, 0, 0.42),
-    0 14px 38px rgba(0, 0, 0, 0.42);
-}
-
-.fiche-template.fiche-template--signature .public-avatar img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-  object-position: center;
 }
 
 .fiche-template.fiche-template--signature .public-name {
@@ -99,12 +69,11 @@
   line-height: 1.12;
   letter-spacing: -0.035em;
   overflow-wrap: anywhere;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
 }
 
 .fiche-template.fiche-template--signature .public-role {
   margin-top: 10px;
-  color: #e4c18c;
+  color: #c9a46a;
   font-size: 12px;
   letter-spacing: 0.025em;
 }
@@ -112,8 +81,6 @@
 .fiche-template.fiche-template--signature .public-actions {
   position: relative;
   z-index: 3;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
   margin-top: 30px;
 }
 
@@ -121,22 +88,16 @@
   min-height: 52px;
   border: 1px solid rgba(201, 164, 106, 0.78);
   border-radius: 15px;
-  background: rgba(18, 18, 18, 0.78);
+  background: rgba(18, 17, 15, 0.68);
   color: #fffaf2;
   font-size: 12px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
 }
 
 .fiche-template.fiche-template--signature .public-action:hover {
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(201, 164, 106, 0.16);
   border-color: #e4c18c;
-}
-
-.fiche-template.fiche-template--signature
-  .public-actions
-  > span:has(.public-action-email) {
-  grid-column: 1 / -1;
 }
 
 .fiche-template.fiche-template--signature .essential-save-row {
@@ -204,7 +165,6 @@
 
 @media (max-width: 420px) {
   .fiche-template.fiche-template--signature .public-hero {
-    min-height: 540px;
     padding-left: 16px;
     padding-right: 16px;
   }
@@ -215,21 +175,6 @@
   }
 
   .fiche-template.fiche-template--signature .public-identity {
-    padding-top: 230px;
-  }
-
-  .fiche-template.fiche-template--signature .public-avatar {
-    width: 116px;
-    height: 116px;
-  }
-
-  .fiche-template.fiche-template--signature .public-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .fiche-template.fiche-template--signature
-    .public-actions
-    > span:has(.public-action-email) {
-    grid-column: auto;
+    padding-top: 205px;
   }
 }
