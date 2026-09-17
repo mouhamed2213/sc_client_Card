@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
-import { Redirect } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { ReactNode } from "react";
+import { Redirect } from "wouter";
 
-export default function AdminGuard({ children }: { children: ReactNode }) {
+export default function ClientGuard({ children }: { children: ReactNode }) {
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
@@ -16,12 +16,9 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!meQuery.data || meQuery.data.role !== "admin") {
-    return <Redirect to="/admin/login" />;
+  if (!meQuery.data || meQuery.data.role !== "user") {
+    return <Redirect to="/espace-client/connexion" />;
   }
 
   return <>{children}</>;
 }
-
-
- 

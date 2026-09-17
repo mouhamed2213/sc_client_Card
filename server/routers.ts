@@ -7,72 +7,34 @@ import { imageSize } from "image-size";
 import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { adminProcedure, publicProcedure, router } from "./_core/trpc";
+import {
+  adminProcedure,
+  clientProcedure,
+  publicProcedure,
+  router,
+} from "./_core/trpc";
 import {
   createContactRequest,
   createFiche,
+  createInvitation,
+  createMembershipCard,
   getFicheById,
   getFicheBySlug,
+  getFicheOwnedBy,
   getOverview,
   listContactRequests,
   listFiches,
+  listFichesByOwner,
+  listMembershipCards,
+  listScansForFiche,
   recordScan,
   updateFiche,
 } from "./db";
 import { validatePlanPayload } from "./planValidation";
 import { storagePut } from "./storage";
+import { fichePayload } from "@shared/types/schemas";
 
-const fichePayload = z.object({
-  slug: z.string().min(3).max(160),
-  formule: z.enum(["essentiel", "pro", "signature"]),
-  statut: z.enum(["active", "suspendue", "supprimee", "brouillon"]),
-  nom: z.string().min(1),
-  prenom: z.string().min(1),
-  fonction: z.string().min(1),
-  entreprise: z.string().min(1),
-  telephone: z.string().min(8),
-  whatsapp: z.string().min(8),
-  email: z.string().optional().default(""),
-  site: z.string().optional().default(""),
-  adresse: z.string().optional().default(""),
-  lienItineraire: z.string().optional().default(""),
-  googlePlaceId: z.string().optional().default(""),
-  photo: z.string().optional().default(""),
-  logo: z.string().optional().default(""),
-  data: z.object({
-    premierBouton: z.enum(["whatsapp", "appel", "contact"]),
-    messageWhatsapp: z.string(),
-    presentation: z.string().optional().default(""),
-    rendezVous: z.object({ label: z.string(), url: z.string() }).optional(),
-    reseauxSociaux: z
-      .array(z.object({ label: z.string(), url: z.string() }))
-      .default([]),
-    liens: z
-      .array(z.object({ label: z.string(), url: z.string() }))
-      .default([]),
-    horaires: z
-      .array(z.object({ jour: z.string(), horaire: z.string() }))
-      .default([]),
-    galerie: z
-      .array(z.object({ url: z.string(), alt: z.string() }))
-      .default([]),
-    sections: z
-      .array(
-        z.object({
-          titre: z.string(),
-          articles: z.array(
-            z.object({
-              nom: z.string(),
-              description: z.string(),
-              prix: z.string(),
-            })
-          ),
-        })
-      )
-      .default([]),
-    notesInternes: z.string().default(""),
-  }),
-});
+
 
 function parseFiche<T extends { dataJson: string }>(fiche: T) {
   const { dataJson, ...rest } = fiche;
@@ -309,6 +271,89 @@ export const appRouter = router({
           input.mimeType
         );
         return { ...result, bytes: bytes.byteLength };
+      }),
+  }),
+
+  admin: router({
+    inviteOwner: adminProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .mutation(async ({ input }) => {
+        const fiche = await getFicheById(input.ficheId);
+        if (!fiche)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Fiche introuvable",
+          });
+        if (fiche.ownerId)
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Cette fiche a déjà un propriétaire.",
+          });
+        const token = await createInvitation(input.ficheId);
+        return { token, url: `/espace-client/invite/${token}` };
+      }),
+
+    createMembershipCard: adminProcedure
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          numero: z.string().min(1),
+        })
+      )
+      .mutation(async ({ input }) => createMembershipCard(input)),
+  }),
+
+  client: router({
+    myFiches: clientProcedure.query(({ ctx }) =>
+      listFichesByOwner(ctx.user.id)
+    ),
+
+    ficheDetail: clientProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        if (!fiche)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
+        return { ...parseFiche(fiche), plan: getPlanFeatures(fiche.formule) };
+      }),
+
+    scans: clientProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        if (!fiche)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
+        return listScansForFiche(input.ficheId);
+      }),
+
+    contactRequests: clientProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        if (!fiche)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
+        return listContactRequests(input.ficheId);
+      }),
+
+    membershipCards: clientProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        if (!fiche)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
+        return listMembershipCards(input.ficheId);
       }),
   }),
 });

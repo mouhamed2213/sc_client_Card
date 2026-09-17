@@ -29,11 +29,13 @@ export type AggregateFiche = {
 export type FicheAvgAggregateOutputType = {
   id: number | null
   scansTotal: number | null
+  ownerId: number | null
 }
 
 export type FicheSumAggregateOutputType = {
   id: number | null
   scansTotal: number | null
+  ownerId: number | null
 }
 
 export type FicheMinAggregateOutputType = {
@@ -61,6 +63,7 @@ export type FicheMinAggregateOutputType = {
   lastScanAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  ownerId: number | null
 }
 
 export type FicheMaxAggregateOutputType = {
@@ -88,6 +91,7 @@ export type FicheMaxAggregateOutputType = {
   lastScanAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  ownerId: number | null
 }
 
 export type FicheCountAggregateOutputType = {
@@ -115,6 +119,7 @@ export type FicheCountAggregateOutputType = {
   lastScanAt: number
   createdAt: number
   updatedAt: number
+  ownerId: number
   _all: number
 }
 
@@ -122,11 +127,13 @@ export type FicheCountAggregateOutputType = {
 export type FicheAvgAggregateInputType = {
   id?: true
   scansTotal?: true
+  ownerId?: true
 }
 
 export type FicheSumAggregateInputType = {
   id?: true
   scansTotal?: true
+  ownerId?: true
 }
 
 export type FicheMinAggregateInputType = {
@@ -154,6 +161,7 @@ export type FicheMinAggregateInputType = {
   lastScanAt?: true
   createdAt?: true
   updatedAt?: true
+  ownerId?: true
 }
 
 export type FicheMaxAggregateInputType = {
@@ -181,6 +189,7 @@ export type FicheMaxAggregateInputType = {
   lastScanAt?: true
   createdAt?: true
   updatedAt?: true
+  ownerId?: true
 }
 
 export type FicheCountAggregateInputType = {
@@ -208,6 +217,7 @@ export type FicheCountAggregateInputType = {
   lastScanAt?: true
   createdAt?: true
   updatedAt?: true
+  ownerId?: true
   _all?: true
 }
 
@@ -322,6 +332,7 @@ export type FicheGroupByOutputType = {
   lastScanAt: Date | null
   createdAt: Date
   updatedAt: Date
+  ownerId: number | null
   _count: FicheCountAggregateOutputType | null
   _avg: FicheAvgAggregateOutputType | null
   _sum: FicheSumAggregateOutputType | null
@@ -372,8 +383,12 @@ export type FicheWhereInput = {
   lastScanAt?: Prisma.DateTimeNullableFilter<"Fiche"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
+  ownerId?: Prisma.IntNullableFilter<"Fiche"> | number | null
   scans?: Prisma.FicheScanListRelationFilter
   contactRequests?: Prisma.ContactRequestListRelationFilter
+  owner?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  membershipCards?: Prisma.MembershipCardListRelationFilter
+  invitations?: Prisma.InvitationClientListRelationFilter
 }
 
 export type FicheOrderByWithRelationInput = {
@@ -401,8 +416,12 @@ export type FicheOrderByWithRelationInput = {
   lastScanAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
   scans?: Prisma.FicheScanOrderByRelationAggregateInput
   contactRequests?: Prisma.ContactRequestOrderByRelationAggregateInput
+  owner?: Prisma.UserOrderByWithRelationInput
+  membershipCards?: Prisma.MembershipCardOrderByRelationAggregateInput
+  invitations?: Prisma.InvitationClientOrderByRelationAggregateInput
 }
 
 export type FicheWhereUniqueInput = Prisma.AtLeast<{
@@ -433,8 +452,12 @@ export type FicheWhereUniqueInput = Prisma.AtLeast<{
   lastScanAt?: Prisma.DateTimeNullableFilter<"Fiche"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
+  ownerId?: Prisma.IntNullableFilter<"Fiche"> | number | null
   scans?: Prisma.FicheScanListRelationFilter
   contactRequests?: Prisma.ContactRequestListRelationFilter
+  owner?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  membershipCards?: Prisma.MembershipCardListRelationFilter
+  invitations?: Prisma.InvitationClientListRelationFilter
 }, "id" | "slug">
 
 export type FicheOrderByWithAggregationInput = {
@@ -462,6 +485,7 @@ export type FicheOrderByWithAggregationInput = {
   lastScanAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.FicheCountOrderByAggregateInput
   _avg?: Prisma.FicheAvgOrderByAggregateInput
   _max?: Prisma.FicheMaxOrderByAggregateInput
@@ -497,6 +521,7 @@ export type FicheScalarWhereWithAggregatesInput = {
   lastScanAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Fiche"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Fiche"> | Date | string
+  ownerId?: Prisma.IntNullableWithAggregatesFilter<"Fiche"> | number | null
 }
 
 export type FicheCreateInput = {
@@ -525,6 +550,9 @@ export type FicheCreateInput = {
   updatedAt?: Date | string
   scans?: Prisma.FicheScanCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestCreateNestedManyWithoutFicheInput
+  owner?: Prisma.UserCreateNestedOneWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardCreateNestedManyWithoutFicheInput
+  invitations?: Prisma.InvitationClientCreateNestedManyWithoutFicheInput
 }
 
 export type FicheUncheckedCreateInput = {
@@ -552,8 +580,11 @@ export type FicheUncheckedCreateInput = {
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ownerId?: number | null
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
+  invitations?: Prisma.InvitationClientUncheckedCreateNestedManyWithoutFicheInput
 }
 
 export type FicheUpdateInput = {
@@ -582,6 +613,9 @@ export type FicheUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   scans?: Prisma.FicheScanUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUpdateManyWithoutFicheNestedInput
+  owner?: Prisma.UserUpdateOneWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUpdateManyWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUpdateManyWithoutFicheNestedInput
 }
 
 export type FicheUncheckedUpdateInput = {
@@ -609,8 +643,11 @@ export type FicheUncheckedUpdateInput = {
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUncheckedUpdateManyWithoutFicheNestedInput
 }
 
 export type FicheCreateManyInput = {
@@ -638,6 +675,7 @@ export type FicheCreateManyInput = {
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ownerId?: number | null
 }
 
 export type FicheUpdateManyMutationInput = {
@@ -691,6 +729,17 @@ export type FicheUncheckedUpdateManyInput = {
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+}
+
+export type FicheListRelationFilter = {
+  every?: Prisma.FicheWhereInput
+  some?: Prisma.FicheWhereInput
+  none?: Prisma.FicheWhereInput
+}
+
+export type FicheOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type FicheCountOrderByAggregateInput = {
@@ -718,11 +767,13 @@ export type FicheCountOrderByAggregateInput = {
   lastScanAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
 }
 
 export type FicheAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
 }
 
 export type FicheMaxOrderByAggregateInput = {
@@ -750,6 +801,7 @@ export type FicheMaxOrderByAggregateInput = {
   lastScanAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
 }
 
 export type FicheMinOrderByAggregateInput = {
@@ -777,16 +829,60 @@ export type FicheMinOrderByAggregateInput = {
   lastScanAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
 }
 
 export type FicheSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
 }
 
 export type FicheScalarRelationFilter = {
   is?: Prisma.FicheWhereInput
   isNot?: Prisma.FicheWhereInput
+}
+
+export type FicheCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.FicheCreateWithoutOwnerInput, Prisma.FicheUncheckedCreateWithoutOwnerInput> | Prisma.FicheCreateWithoutOwnerInput[] | Prisma.FicheUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.FicheCreateOrConnectWithoutOwnerInput | Prisma.FicheCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.FicheCreateManyOwnerInputEnvelope
+  connect?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+}
+
+export type FicheUncheckedCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.FicheCreateWithoutOwnerInput, Prisma.FicheUncheckedCreateWithoutOwnerInput> | Prisma.FicheCreateWithoutOwnerInput[] | Prisma.FicheUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.FicheCreateOrConnectWithoutOwnerInput | Prisma.FicheCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.FicheCreateManyOwnerInputEnvelope
+  connect?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+}
+
+export type FicheUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.FicheCreateWithoutOwnerInput, Prisma.FicheUncheckedCreateWithoutOwnerInput> | Prisma.FicheCreateWithoutOwnerInput[] | Prisma.FicheUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.FicheCreateOrConnectWithoutOwnerInput | Prisma.FicheCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.FicheUpsertWithWhereUniqueWithoutOwnerInput | Prisma.FicheUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.FicheCreateManyOwnerInputEnvelope
+  set?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+  disconnect?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+  delete?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+  connect?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+  update?: Prisma.FicheUpdateWithWhereUniqueWithoutOwnerInput | Prisma.FicheUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.FicheUpdateManyWithWhereWithoutOwnerInput | Prisma.FicheUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.FicheScalarWhereInput | Prisma.FicheScalarWhereInput[]
+}
+
+export type FicheUncheckedUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.FicheCreateWithoutOwnerInput, Prisma.FicheUncheckedCreateWithoutOwnerInput> | Prisma.FicheCreateWithoutOwnerInput[] | Prisma.FicheUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.FicheCreateOrConnectWithoutOwnerInput | Prisma.FicheCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.FicheUpsertWithWhereUniqueWithoutOwnerInput | Prisma.FicheUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.FicheCreateManyOwnerInputEnvelope
+  set?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+  disconnect?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+  delete?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+  connect?: Prisma.FicheWhereUniqueInput | Prisma.FicheWhereUniqueInput[]
+  update?: Prisma.FicheUpdateWithWhereUniqueWithoutOwnerInput | Prisma.FicheUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.FicheUpdateManyWithWhereWithoutOwnerInput | Prisma.FicheUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.FicheScalarWhereInput | Prisma.FicheScalarWhereInput[]
 }
 
 export type EnumFormuleFieldUpdateOperationsInput = {
@@ -799,6 +895,14 @@ export type EnumStatutFieldUpdateOperationsInput = {
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type FicheCreateNestedOneWithoutScansInput = {
@@ -829,6 +933,152 @@ export type FicheUpdateOneRequiredWithoutContactRequestsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.FicheUpdateToOneWithWhereWithoutContactRequestsInput, Prisma.FicheUpdateWithoutContactRequestsInput>, Prisma.FicheUncheckedUpdateWithoutContactRequestsInput>
 }
 
+export type FicheCreateNestedOneWithoutInvitationsInput = {
+  create?: Prisma.XOR<Prisma.FicheCreateWithoutInvitationsInput, Prisma.FicheUncheckedCreateWithoutInvitationsInput>
+  connectOrCreate?: Prisma.FicheCreateOrConnectWithoutInvitationsInput
+  connect?: Prisma.FicheWhereUniqueInput
+}
+
+export type FicheUpdateOneRequiredWithoutInvitationsNestedInput = {
+  create?: Prisma.XOR<Prisma.FicheCreateWithoutInvitationsInput, Prisma.FicheUncheckedCreateWithoutInvitationsInput>
+  connectOrCreate?: Prisma.FicheCreateOrConnectWithoutInvitationsInput
+  upsert?: Prisma.FicheUpsertWithoutInvitationsInput
+  connect?: Prisma.FicheWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FicheUpdateToOneWithWhereWithoutInvitationsInput, Prisma.FicheUpdateWithoutInvitationsInput>, Prisma.FicheUncheckedUpdateWithoutInvitationsInput>
+}
+
+export type FicheCreateNestedOneWithoutMembershipCardsInput = {
+  create?: Prisma.XOR<Prisma.FicheCreateWithoutMembershipCardsInput, Prisma.FicheUncheckedCreateWithoutMembershipCardsInput>
+  connectOrCreate?: Prisma.FicheCreateOrConnectWithoutMembershipCardsInput
+  connect?: Prisma.FicheWhereUniqueInput
+}
+
+export type FicheUpdateOneRequiredWithoutMembershipCardsNestedInput = {
+  create?: Prisma.XOR<Prisma.FicheCreateWithoutMembershipCardsInput, Prisma.FicheUncheckedCreateWithoutMembershipCardsInput>
+  connectOrCreate?: Prisma.FicheCreateOrConnectWithoutMembershipCardsInput
+  upsert?: Prisma.FicheUpsertWithoutMembershipCardsInput
+  connect?: Prisma.FicheWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FicheUpdateToOneWithWhereWithoutMembershipCardsInput, Prisma.FicheUpdateWithoutMembershipCardsInput>, Prisma.FicheUncheckedUpdateWithoutMembershipCardsInput>
+}
+
+export type FicheCreateWithoutOwnerInput = {
+  slug: string
+  formule: $Enums.Formule
+  statut?: $Enums.Statut
+  nom: string
+  prenom: string
+  fonction: string
+  entreprise: string
+  photo?: string | null
+  logo?: string | null
+  telephone: string
+  whatsapp: string
+  email?: string | null
+  site?: string | null
+  adresse?: string | null
+  lienItineraire?: string | null
+  googlePlaceId?: string | null
+  dateCreation?: Date | string
+  dateEcheance: Date | string
+  dataJson: string
+  scansTotal?: number
+  lastScanAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  scans?: Prisma.FicheScanCreateNestedManyWithoutFicheInput
+  contactRequests?: Prisma.ContactRequestCreateNestedManyWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardCreateNestedManyWithoutFicheInput
+  invitations?: Prisma.InvitationClientCreateNestedManyWithoutFicheInput
+}
+
+export type FicheUncheckedCreateWithoutOwnerInput = {
+  id?: number
+  slug: string
+  formule: $Enums.Formule
+  statut?: $Enums.Statut
+  nom: string
+  prenom: string
+  fonction: string
+  entreprise: string
+  photo?: string | null
+  logo?: string | null
+  telephone: string
+  whatsapp: string
+  email?: string | null
+  site?: string | null
+  adresse?: string | null
+  lienItineraire?: string | null
+  googlePlaceId?: string | null
+  dateCreation?: Date | string
+  dateEcheance: Date | string
+  dataJson: string
+  scansTotal?: number
+  lastScanAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
+  contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
+  invitations?: Prisma.InvitationClientUncheckedCreateNestedManyWithoutFicheInput
+}
+
+export type FicheCreateOrConnectWithoutOwnerInput = {
+  where: Prisma.FicheWhereUniqueInput
+  create: Prisma.XOR<Prisma.FicheCreateWithoutOwnerInput, Prisma.FicheUncheckedCreateWithoutOwnerInput>
+}
+
+export type FicheCreateManyOwnerInputEnvelope = {
+  data: Prisma.FicheCreateManyOwnerInput | Prisma.FicheCreateManyOwnerInput[]
+  skipDuplicates?: boolean
+}
+
+export type FicheUpsertWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.FicheWhereUniqueInput
+  update: Prisma.XOR<Prisma.FicheUpdateWithoutOwnerInput, Prisma.FicheUncheckedUpdateWithoutOwnerInput>
+  create: Prisma.XOR<Prisma.FicheCreateWithoutOwnerInput, Prisma.FicheUncheckedCreateWithoutOwnerInput>
+}
+
+export type FicheUpdateWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.FicheWhereUniqueInput
+  data: Prisma.XOR<Prisma.FicheUpdateWithoutOwnerInput, Prisma.FicheUncheckedUpdateWithoutOwnerInput>
+}
+
+export type FicheUpdateManyWithWhereWithoutOwnerInput = {
+  where: Prisma.FicheScalarWhereInput
+  data: Prisma.XOR<Prisma.FicheUpdateManyMutationInput, Prisma.FicheUncheckedUpdateManyWithoutOwnerInput>
+}
+
+export type FicheScalarWhereInput = {
+  AND?: Prisma.FicheScalarWhereInput | Prisma.FicheScalarWhereInput[]
+  OR?: Prisma.FicheScalarWhereInput[]
+  NOT?: Prisma.FicheScalarWhereInput | Prisma.FicheScalarWhereInput[]
+  id?: Prisma.IntFilter<"Fiche"> | number
+  slug?: Prisma.StringFilter<"Fiche"> | string
+  formule?: Prisma.EnumFormuleFilter<"Fiche"> | $Enums.Formule
+  statut?: Prisma.EnumStatutFilter<"Fiche"> | $Enums.Statut
+  nom?: Prisma.StringFilter<"Fiche"> | string
+  prenom?: Prisma.StringFilter<"Fiche"> | string
+  fonction?: Prisma.StringFilter<"Fiche"> | string
+  entreprise?: Prisma.StringFilter<"Fiche"> | string
+  photo?: Prisma.StringNullableFilter<"Fiche"> | string | null
+  logo?: Prisma.StringNullableFilter<"Fiche"> | string | null
+  telephone?: Prisma.StringFilter<"Fiche"> | string
+  whatsapp?: Prisma.StringFilter<"Fiche"> | string
+  email?: Prisma.StringNullableFilter<"Fiche"> | string | null
+  site?: Prisma.StringNullableFilter<"Fiche"> | string | null
+  adresse?: Prisma.StringNullableFilter<"Fiche"> | string | null
+  lienItineraire?: Prisma.StringNullableFilter<"Fiche"> | string | null
+  googlePlaceId?: Prisma.StringNullableFilter<"Fiche"> | string | null
+  dateCreation?: Prisma.DateTimeFilter<"Fiche"> | Date | string
+  dateEcheance?: Prisma.DateTimeFilter<"Fiche"> | Date | string
+  dataJson?: Prisma.StringFilter<"Fiche"> | string
+  scansTotal?: Prisma.IntFilter<"Fiche"> | number
+  lastScanAt?: Prisma.DateTimeNullableFilter<"Fiche"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
+  ownerId?: Prisma.IntNullableFilter<"Fiche"> | number | null
+}
+
 export type FicheCreateWithoutScansInput = {
   slug: string
   formule: $Enums.Formule
@@ -854,6 +1104,9 @@ export type FicheCreateWithoutScansInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   contactRequests?: Prisma.ContactRequestCreateNestedManyWithoutFicheInput
+  owner?: Prisma.UserCreateNestedOneWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardCreateNestedManyWithoutFicheInput
+  invitations?: Prisma.InvitationClientCreateNestedManyWithoutFicheInput
 }
 
 export type FicheUncheckedCreateWithoutScansInput = {
@@ -881,7 +1134,10 @@ export type FicheUncheckedCreateWithoutScansInput = {
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ownerId?: number | null
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
+  invitations?: Prisma.InvitationClientUncheckedCreateNestedManyWithoutFicheInput
 }
 
 export type FicheCreateOrConnectWithoutScansInput = {
@@ -925,6 +1181,9 @@ export type FicheUpdateWithoutScansInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   contactRequests?: Prisma.ContactRequestUpdateManyWithoutFicheNestedInput
+  owner?: Prisma.UserUpdateOneWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUpdateManyWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUpdateManyWithoutFicheNestedInput
 }
 
 export type FicheUncheckedUpdateWithoutScansInput = {
@@ -952,7 +1211,10 @@ export type FicheUncheckedUpdateWithoutScansInput = {
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUncheckedUpdateManyWithoutFicheNestedInput
 }
 
 export type FicheCreateWithoutContactRequestsInput = {
@@ -980,6 +1242,9 @@ export type FicheCreateWithoutContactRequestsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   scans?: Prisma.FicheScanCreateNestedManyWithoutFicheInput
+  owner?: Prisma.UserCreateNestedOneWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardCreateNestedManyWithoutFicheInput
+  invitations?: Prisma.InvitationClientCreateNestedManyWithoutFicheInput
 }
 
 export type FicheUncheckedCreateWithoutContactRequestsInput = {
@@ -1007,7 +1272,10 @@ export type FicheUncheckedCreateWithoutContactRequestsInput = {
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  ownerId?: number | null
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
+  invitations?: Prisma.InvitationClientUncheckedCreateNestedManyWithoutFicheInput
 }
 
 export type FicheCreateOrConnectWithoutContactRequestsInput = {
@@ -1051,6 +1319,9 @@ export type FicheUpdateWithoutContactRequestsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   scans?: Prisma.FicheScanUpdateManyWithoutFicheNestedInput
+  owner?: Prisma.UserUpdateOneWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUpdateManyWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUpdateManyWithoutFicheNestedInput
 }
 
 export type FicheUncheckedUpdateWithoutContactRequestsInput = {
@@ -1078,7 +1349,401 @@ export type FicheUncheckedUpdateWithoutContactRequestsInput = {
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUncheckedUpdateManyWithoutFicheNestedInput
+}
+
+export type FicheCreateWithoutInvitationsInput = {
+  slug: string
+  formule: $Enums.Formule
+  statut?: $Enums.Statut
+  nom: string
+  prenom: string
+  fonction: string
+  entreprise: string
+  photo?: string | null
+  logo?: string | null
+  telephone: string
+  whatsapp: string
+  email?: string | null
+  site?: string | null
+  adresse?: string | null
+  lienItineraire?: string | null
+  googlePlaceId?: string | null
+  dateCreation?: Date | string
+  dateEcheance: Date | string
+  dataJson: string
+  scansTotal?: number
+  lastScanAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  scans?: Prisma.FicheScanCreateNestedManyWithoutFicheInput
+  contactRequests?: Prisma.ContactRequestCreateNestedManyWithoutFicheInput
+  owner?: Prisma.UserCreateNestedOneWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardCreateNestedManyWithoutFicheInput
+}
+
+export type FicheUncheckedCreateWithoutInvitationsInput = {
+  id?: number
+  slug: string
+  formule: $Enums.Formule
+  statut?: $Enums.Statut
+  nom: string
+  prenom: string
+  fonction: string
+  entreprise: string
+  photo?: string | null
+  logo?: string | null
+  telephone: string
+  whatsapp: string
+  email?: string | null
+  site?: string | null
+  adresse?: string | null
+  lienItineraire?: string | null
+  googlePlaceId?: string | null
+  dateCreation?: Date | string
+  dateEcheance: Date | string
+  dataJson: string
+  scansTotal?: number
+  lastScanAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ownerId?: number | null
+  scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
+  contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
+  membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
+}
+
+export type FicheCreateOrConnectWithoutInvitationsInput = {
+  where: Prisma.FicheWhereUniqueInput
+  create: Prisma.XOR<Prisma.FicheCreateWithoutInvitationsInput, Prisma.FicheUncheckedCreateWithoutInvitationsInput>
+}
+
+export type FicheUpsertWithoutInvitationsInput = {
+  update: Prisma.XOR<Prisma.FicheUpdateWithoutInvitationsInput, Prisma.FicheUncheckedUpdateWithoutInvitationsInput>
+  create: Prisma.XOR<Prisma.FicheCreateWithoutInvitationsInput, Prisma.FicheUncheckedCreateWithoutInvitationsInput>
+  where?: Prisma.FicheWhereInput
+}
+
+export type FicheUpdateToOneWithWhereWithoutInvitationsInput = {
+  where?: Prisma.FicheWhereInput
+  data: Prisma.XOR<Prisma.FicheUpdateWithoutInvitationsInput, Prisma.FicheUncheckedUpdateWithoutInvitationsInput>
+}
+
+export type FicheUpdateWithoutInvitationsInput = {
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  formule?: Prisma.EnumFormuleFieldUpdateOperationsInput | $Enums.Formule
+  statut?: Prisma.EnumStatutFieldUpdateOperationsInput | $Enums.Statut
+  nom?: Prisma.StringFieldUpdateOperationsInput | string
+  prenom?: Prisma.StringFieldUpdateOperationsInput | string
+  fonction?: Prisma.StringFieldUpdateOperationsInput | string
+  entreprise?: Prisma.StringFieldUpdateOperationsInput | string
+  photo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsapp?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  site?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adresse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lienItineraire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googlePlaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreation?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataJson?: Prisma.StringFieldUpdateOperationsInput | string
+  scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  scans?: Prisma.FicheScanUpdateManyWithoutFicheNestedInput
+  contactRequests?: Prisma.ContactRequestUpdateManyWithoutFicheNestedInput
+  owner?: Prisma.UserUpdateOneWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUpdateManyWithoutFicheNestedInput
+}
+
+export type FicheUncheckedUpdateWithoutInvitationsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  formule?: Prisma.EnumFormuleFieldUpdateOperationsInput | $Enums.Formule
+  statut?: Prisma.EnumStatutFieldUpdateOperationsInput | $Enums.Statut
+  nom?: Prisma.StringFieldUpdateOperationsInput | string
+  prenom?: Prisma.StringFieldUpdateOperationsInput | string
+  fonction?: Prisma.StringFieldUpdateOperationsInput | string
+  entreprise?: Prisma.StringFieldUpdateOperationsInput | string
+  photo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsapp?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  site?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adresse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lienItineraire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googlePlaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreation?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataJson?: Prisma.StringFieldUpdateOperationsInput | string
+  scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
+  contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
+}
+
+export type FicheCreateWithoutMembershipCardsInput = {
+  slug: string
+  formule: $Enums.Formule
+  statut?: $Enums.Statut
+  nom: string
+  prenom: string
+  fonction: string
+  entreprise: string
+  photo?: string | null
+  logo?: string | null
+  telephone: string
+  whatsapp: string
+  email?: string | null
+  site?: string | null
+  adresse?: string | null
+  lienItineraire?: string | null
+  googlePlaceId?: string | null
+  dateCreation?: Date | string
+  dateEcheance: Date | string
+  dataJson: string
+  scansTotal?: number
+  lastScanAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  scans?: Prisma.FicheScanCreateNestedManyWithoutFicheInput
+  contactRequests?: Prisma.ContactRequestCreateNestedManyWithoutFicheInput
+  owner?: Prisma.UserCreateNestedOneWithoutFicheInput
+  invitations?: Prisma.InvitationClientCreateNestedManyWithoutFicheInput
+}
+
+export type FicheUncheckedCreateWithoutMembershipCardsInput = {
+  id?: number
+  slug: string
+  formule: $Enums.Formule
+  statut?: $Enums.Statut
+  nom: string
+  prenom: string
+  fonction: string
+  entreprise: string
+  photo?: string | null
+  logo?: string | null
+  telephone: string
+  whatsapp: string
+  email?: string | null
+  site?: string | null
+  adresse?: string | null
+  lienItineraire?: string | null
+  googlePlaceId?: string | null
+  dateCreation?: Date | string
+  dateEcheance: Date | string
+  dataJson: string
+  scansTotal?: number
+  lastScanAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  ownerId?: number | null
+  scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
+  contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
+  invitations?: Prisma.InvitationClientUncheckedCreateNestedManyWithoutFicheInput
+}
+
+export type FicheCreateOrConnectWithoutMembershipCardsInput = {
+  where: Prisma.FicheWhereUniqueInput
+  create: Prisma.XOR<Prisma.FicheCreateWithoutMembershipCardsInput, Prisma.FicheUncheckedCreateWithoutMembershipCardsInput>
+}
+
+export type FicheUpsertWithoutMembershipCardsInput = {
+  update: Prisma.XOR<Prisma.FicheUpdateWithoutMembershipCardsInput, Prisma.FicheUncheckedUpdateWithoutMembershipCardsInput>
+  create: Prisma.XOR<Prisma.FicheCreateWithoutMembershipCardsInput, Prisma.FicheUncheckedCreateWithoutMembershipCardsInput>
+  where?: Prisma.FicheWhereInput
+}
+
+export type FicheUpdateToOneWithWhereWithoutMembershipCardsInput = {
+  where?: Prisma.FicheWhereInput
+  data: Prisma.XOR<Prisma.FicheUpdateWithoutMembershipCardsInput, Prisma.FicheUncheckedUpdateWithoutMembershipCardsInput>
+}
+
+export type FicheUpdateWithoutMembershipCardsInput = {
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  formule?: Prisma.EnumFormuleFieldUpdateOperationsInput | $Enums.Formule
+  statut?: Prisma.EnumStatutFieldUpdateOperationsInput | $Enums.Statut
+  nom?: Prisma.StringFieldUpdateOperationsInput | string
+  prenom?: Prisma.StringFieldUpdateOperationsInput | string
+  fonction?: Prisma.StringFieldUpdateOperationsInput | string
+  entreprise?: Prisma.StringFieldUpdateOperationsInput | string
+  photo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsapp?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  site?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adresse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lienItineraire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googlePlaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreation?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataJson?: Prisma.StringFieldUpdateOperationsInput | string
+  scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  scans?: Prisma.FicheScanUpdateManyWithoutFicheNestedInput
+  contactRequests?: Prisma.ContactRequestUpdateManyWithoutFicheNestedInput
+  owner?: Prisma.UserUpdateOneWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUpdateManyWithoutFicheNestedInput
+}
+
+export type FicheUncheckedUpdateWithoutMembershipCardsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  formule?: Prisma.EnumFormuleFieldUpdateOperationsInput | $Enums.Formule
+  statut?: Prisma.EnumStatutFieldUpdateOperationsInput | $Enums.Statut
+  nom?: Prisma.StringFieldUpdateOperationsInput | string
+  prenom?: Prisma.StringFieldUpdateOperationsInput | string
+  fonction?: Prisma.StringFieldUpdateOperationsInput | string
+  entreprise?: Prisma.StringFieldUpdateOperationsInput | string
+  photo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsapp?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  site?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adresse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lienItineraire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googlePlaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreation?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataJson?: Prisma.StringFieldUpdateOperationsInput | string
+  scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
+  contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUncheckedUpdateManyWithoutFicheNestedInput
+}
+
+export type FicheCreateManyOwnerInput = {
+  id?: number
+  slug: string
+  formule: $Enums.Formule
+  statut?: $Enums.Statut
+  nom: string
+  prenom: string
+  fonction: string
+  entreprise: string
+  photo?: string | null
+  logo?: string | null
+  telephone: string
+  whatsapp: string
+  email?: string | null
+  site?: string | null
+  adresse?: string | null
+  lienItineraire?: string | null
+  googlePlaceId?: string | null
+  dateCreation?: Date | string
+  dateEcheance: Date | string
+  dataJson: string
+  scansTotal?: number
+  lastScanAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type FicheUpdateWithoutOwnerInput = {
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  formule?: Prisma.EnumFormuleFieldUpdateOperationsInput | $Enums.Formule
+  statut?: Prisma.EnumStatutFieldUpdateOperationsInput | $Enums.Statut
+  nom?: Prisma.StringFieldUpdateOperationsInput | string
+  prenom?: Prisma.StringFieldUpdateOperationsInput | string
+  fonction?: Prisma.StringFieldUpdateOperationsInput | string
+  entreprise?: Prisma.StringFieldUpdateOperationsInput | string
+  photo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsapp?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  site?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adresse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lienItineraire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googlePlaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreation?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataJson?: Prisma.StringFieldUpdateOperationsInput | string
+  scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  scans?: Prisma.FicheScanUpdateManyWithoutFicheNestedInput
+  contactRequests?: Prisma.ContactRequestUpdateManyWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUpdateManyWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUpdateManyWithoutFicheNestedInput
+}
+
+export type FicheUncheckedUpdateWithoutOwnerInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  formule?: Prisma.EnumFormuleFieldUpdateOperationsInput | $Enums.Formule
+  statut?: Prisma.EnumStatutFieldUpdateOperationsInput | $Enums.Statut
+  nom?: Prisma.StringFieldUpdateOperationsInput | string
+  prenom?: Prisma.StringFieldUpdateOperationsInput | string
+  fonction?: Prisma.StringFieldUpdateOperationsInput | string
+  entreprise?: Prisma.StringFieldUpdateOperationsInput | string
+  photo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsapp?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  site?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adresse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lienItineraire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googlePlaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreation?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataJson?: Prisma.StringFieldUpdateOperationsInput | string
+  scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
+  contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
+  membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
+  invitations?: Prisma.InvitationClientUncheckedUpdateManyWithoutFicheNestedInput
+}
+
+export type FicheUncheckedUpdateManyWithoutOwnerInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  formule?: Prisma.EnumFormuleFieldUpdateOperationsInput | $Enums.Formule
+  statut?: Prisma.EnumStatutFieldUpdateOperationsInput | $Enums.Statut
+  nom?: Prisma.StringFieldUpdateOperationsInput | string
+  prenom?: Prisma.StringFieldUpdateOperationsInput | string
+  fonction?: Prisma.StringFieldUpdateOperationsInput | string
+  entreprise?: Prisma.StringFieldUpdateOperationsInput | string
+  photo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  logo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  telephone?: Prisma.StringFieldUpdateOperationsInput | string
+  whatsapp?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  site?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adresse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lienItineraire?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  googlePlaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateCreation?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dataJson?: Prisma.StringFieldUpdateOperationsInput | string
+  scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -1089,11 +1754,15 @@ export type FicheUncheckedUpdateWithoutContactRequestsInput = {
 export type FicheCountOutputType = {
   scans: number
   contactRequests: number
+  membershipCards: number
+  invitations: number
 }
 
 export type FicheCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   scans?: boolean | FicheCountOutputTypeCountScansArgs
   contactRequests?: boolean | FicheCountOutputTypeCountContactRequestsArgs
+  membershipCards?: boolean | FicheCountOutputTypeCountMembershipCardsArgs
+  invitations?: boolean | FicheCountOutputTypeCountInvitationsArgs
 }
 
 /**
@@ -1118,6 +1787,20 @@ export type FicheCountOutputTypeCountScansArgs<ExtArgs extends runtime.Types.Ext
  */
 export type FicheCountOutputTypeCountContactRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ContactRequestWhereInput
+}
+
+/**
+ * FicheCountOutputType without action
+ */
+export type FicheCountOutputTypeCountMembershipCardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MembershipCardWhereInput
+}
+
+/**
+ * FicheCountOutputType without action
+ */
+export type FicheCountOutputTypeCountInvitationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.InvitationClientWhereInput
 }
 
 
@@ -1146,8 +1829,12 @@ export type FicheSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   lastScanAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ownerId?: boolean
   scans?: boolean | Prisma.Fiche$scansArgs<ExtArgs>
   contactRequests?: boolean | Prisma.Fiche$contactRequestsArgs<ExtArgs>
+  owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
+  membershipCards?: boolean | Prisma.Fiche$membershipCardsArgs<ExtArgs>
+  invitations?: boolean | Prisma.Fiche$invitationsArgs<ExtArgs>
   _count?: boolean | Prisma.FicheCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["fiche"]>
 
@@ -1176,6 +1863,8 @@ export type FicheSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   lastScanAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ownerId?: boolean
+  owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["fiche"]>
 
 export type FicheSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1203,6 +1892,8 @@ export type FicheSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   lastScanAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ownerId?: boolean
+  owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["fiche"]>
 
 export type FicheSelectScalar = {
@@ -1230,22 +1921,33 @@ export type FicheSelectScalar = {
   lastScanAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  ownerId?: boolean
 }
 
-export type FicheOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "formule" | "statut" | "nom" | "prenom" | "fonction" | "entreprise" | "photo" | "logo" | "telephone" | "whatsapp" | "email" | "site" | "adresse" | "lienItineraire" | "googlePlaceId" | "dateCreation" | "dateEcheance" | "dataJson" | "scansTotal" | "lastScanAt" | "createdAt" | "updatedAt", ExtArgs["result"]["fiche"]>
+export type FicheOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "formule" | "statut" | "nom" | "prenom" | "fonction" | "entreprise" | "photo" | "logo" | "telephone" | "whatsapp" | "email" | "site" | "adresse" | "lienItineraire" | "googlePlaceId" | "dateCreation" | "dateEcheance" | "dataJson" | "scansTotal" | "lastScanAt" | "createdAt" | "updatedAt" | "ownerId", ExtArgs["result"]["fiche"]>
 export type FicheInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   scans?: boolean | Prisma.Fiche$scansArgs<ExtArgs>
   contactRequests?: boolean | Prisma.Fiche$contactRequestsArgs<ExtArgs>
+  owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
+  membershipCards?: boolean | Prisma.Fiche$membershipCardsArgs<ExtArgs>
+  invitations?: boolean | Prisma.Fiche$invitationsArgs<ExtArgs>
   _count?: boolean | Prisma.FicheCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type FicheIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type FicheIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type FicheIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
+}
+export type FicheIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
+}
 
 export type $FichePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Fiche"
   objects: {
     scans: Prisma.$FicheScanPayload<ExtArgs>[]
     contactRequests: Prisma.$ContactRequestPayload<ExtArgs>[]
+    owner: Prisma.$UserPayload<ExtArgs> | null
+    membershipCards: Prisma.$MembershipCardPayload<ExtArgs>[]
+    invitations: Prisma.$InvitationClientPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1272,6 +1974,7 @@ export type $FichePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     lastScanAt: Date | null
     createdAt: Date
     updatedAt: Date
+    ownerId: number | null
   }, ExtArgs["result"]["fiche"]>
   composites: {}
 }
@@ -1668,6 +2371,9 @@ export interface Prisma__FicheClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   scans<T extends Prisma.Fiche$scansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fiche$scansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FicheScanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contactRequests<T extends Prisma.Fiche$contactRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fiche$contactRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContactRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  owner<T extends Prisma.Fiche$ownerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fiche$ownerArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  membershipCards<T extends Prisma.Fiche$membershipCardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fiche$membershipCardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MembershipCardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invitations<T extends Prisma.Fiche$invitationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fiche$invitationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitationClientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1721,6 +2427,7 @@ export interface FicheFieldRefs {
   readonly lastScanAt: Prisma.FieldRef<"Fiche", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Fiche", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Fiche", 'DateTime'>
+  readonly ownerId: Prisma.FieldRef<"Fiche", 'Int'>
 }
     
 
@@ -1975,6 +2682,10 @@ export type FicheCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    */
   data: Prisma.FicheCreateManyInput | Prisma.FicheCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FicheIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -2045,6 +2756,10 @@ export type FicheUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many Fiches to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FicheIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -2159,6 +2874,73 @@ export type Fiche$contactRequestsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.ContactRequestScalarFieldEnum | Prisma.ContactRequestScalarFieldEnum[]
+}
+
+/**
+ * Fiche.owner
+ */
+export type Fiche$ownerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * Fiche.membershipCards
+ */
+export type Fiche$membershipCardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MembershipCard
+   */
+  select?: Prisma.MembershipCardSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MembershipCard
+   */
+  omit?: Prisma.MembershipCardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MembershipCardInclude<ExtArgs> | null
+  where?: Prisma.MembershipCardWhereInput
+  orderBy?: Prisma.MembershipCardOrderByWithRelationInput | Prisma.MembershipCardOrderByWithRelationInput[]
+  cursor?: Prisma.MembershipCardWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MembershipCardScalarFieldEnum | Prisma.MembershipCardScalarFieldEnum[]
+}
+
+/**
+ * Fiche.invitations
+ */
+export type Fiche$invitationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InvitationClient
+   */
+  select?: Prisma.InvitationClientSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InvitationClient
+   */
+  omit?: Prisma.InvitationClientOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InvitationClientInclude<ExtArgs> | null
+  where?: Prisma.InvitationClientWhereInput
+  orderBy?: Prisma.InvitationClientOrderByWithRelationInput | Prisma.InvitationClientOrderByWithRelationInput[]
+  cursor?: Prisma.InvitationClientWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.InvitationClientScalarFieldEnum | Prisma.InvitationClientScalarFieldEnum[]
 }
 
 /**
