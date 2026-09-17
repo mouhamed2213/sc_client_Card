@@ -12,3 +12,9 @@ export type {
   UserRole,
 } from "../generated/prisma/client";
 export * from "./_core/errors";
+
+export type OAuthState = {
+  redirectUri: string;
+  nonce?: string;
+  invitationToken?: string;
+};

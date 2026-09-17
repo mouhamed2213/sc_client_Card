@@ -1,15 +1,20 @@
+// ? Centralized database connection file
+
 import type {
   Fiche,
   Prisma,
   PrismaClient as PrismaClientType,
 } from "generated/prisma/client";
+import { randomBytes } from "node:crypto";
 import { prisma } from "../prisma/client";
 import { ENV } from "./_core/env";
+
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClientType };
 
 export type { Fiche, User } from "generated/prisma/client";
 export type InsertFiche = Prisma.FicheUncheckedCreateInput;
 export type InsertUser = Prisma.UserUncheckedCreateInput;
+export type InsertMembershipCard = Prisma.MembershipCardUncheckedCreateInput;
 
 export async function upsertUser(
   user: Partial<InsertUser> & { openId: string }
@@ -28,8 +33,14 @@ export async function upsertUser(
     update: {
       ...(user.name !== undefined ? { name: user.name ?? null } : {}),
       ...(user.email !== undefined ? { email: user.email ?? null } : {}),
-      ...(user.loginMethod !== undefined ? { loginMethod: user.loginMethod ?? null } : {}),
-      ...(user.role !== undefined ? { role: user.role } : user.openId === ENV.ownerOpenId ? { role: "admin" as const } : {}),
+      ...(user.loginMethod !== undefined
+        ? { loginMethod: user.loginMethod ?? null }
+        : {}),
+      ...(user.role !== undefined
+        ? { role: user.role }
+        : user.openId === ENV.ownerOpenId
+          ? { role: "admin" as const }
+          : {}),
       lastSignedIn: user.lastSignedIn ?? new Date(),
     },
   });
@@ -63,7 +74,8 @@ const demoRows: InsertFiche[] = [
     lastScanAt: new Date("2026-09-13T17:30:00Z"),
     dataJson: JSON.stringify({
       premierBouton: "whatsapp",
-      messageWhatsapp: "Bonjour, je souhaite réserver une chambre à l'Hôtel Teranga.",
+      messageWhatsapp:
+        "Bonjour, je souhaite réserver une chambre à l'Hôtel Teranga.",
       liens: [
         { label: "Réserver sur le site", url: "https://hotelteranga.sn" },
         { label: "Instagram", url: "https://instagram.com" },
@@ -82,8 +94,16 @@ const demoRows: InsertFiche[] = [
         {
           titre: "Nos chambres",
           articles: [
-            { nom: "Chambre double", description: "Lit king-size, terrasse et petit déjeuner", prix: "À partir de 45 000 F" },
-            { nom: "Suite Teranga", description: "Vue jardin, salon privé et transfert aéroport", prix: "À partir de 75 000 F" },
+            {
+              nom: "Chambre double",
+              description: "Lit king-size, terrasse et petit déjeuner",
+              prix: "À partir de 45 000 F",
+            },
+            {
+              nom: "Suite Teranga",
+              description: "Vue jardin, salon privé et transfert aéroport",
+              prix: "À partir de 75 000 F",
+            },
           ],
         },
       ],
@@ -113,7 +133,8 @@ const demoRows: InsertFiche[] = [
     lastScanAt: new Date("2026-09-12T10:00:00Z"),
     dataJson: JSON.stringify({
       premierBouton: "contact",
-      messageWhatsapp: "Bonjour Marie, je souhaite échanger sur un bien immobilier.",
+      messageWhatsapp:
+        "Bonjour Marie, je souhaite échanger sur un bien immobilier.",
       liens: [{ label: "Facebook", url: "https://facebook.com" }],
       horaires: [
         { jour: "Lundi", horaire: "09:00 — 18:00" },
@@ -166,7 +187,8 @@ const demoRows: InsertFiche[] = [
 ];
 
 async function ensureDemoFiches() {
-  if ((await prisma.fiche.count()) === 0) await prisma.fiche.createMany({ data: demoRows });
+  if ((await prisma.fiche.count()) === 0)
+    await prisma.fiche.createMany({ data: demoRows });
 }
 export async function listFiches() {
   await ensureDemoFiches();
@@ -182,14 +204,20 @@ export async function getFicheById(id: number) {
 export async function createFiche(value: InsertFiche) {
   return (await prisma.fiche.create({ data: value })).id;
 }
-export async function updateFiche(id: number, value: Prisma.FicheUncheckedUpdateInput) {
+export async function updateFiche(
+  id: number,
+  value: Prisma.FicheUncheckedUpdateInput
+) {
   await prisma.fiche.update({ where: { id }, data: value });
   return true;
 }
 export async function recordScan(fiche: Fiche) {
   const today = new Date().toISOString().slice(0, 10);
   await prisma.$transaction([
-    prisma.fiche.update({ where: { id: fiche.id }, data: { scansTotal: { increment: 1 }, lastScanAt: new Date() } }),
+    prisma.fiche.update({
+      where: { id: fiche.id },
+      data: { scansTotal: { increment: 1 }, lastScanAt: new Date() },
+    }),
     prisma.ficheScan.upsert({
       where: { ficheId_scanDate: { ficheId: fiche.id, scanDate: today } },
       create: { ficheId: fiche.id, scanDate: today, count: 1 },
@@ -197,11 +225,20 @@ export async function recordScan(fiche: Fiche) {
     }),
   ]);
 }
-export async function createContactRequest(input: { ficheId: number; name: string; phone: string; message: string }) {
+export async function createContactRequest(input: {
+  ficheId: number;
+  name: string;
+  phone: string;
+  message: string;
+}) {
   return prisma.contactRequest.create({ data: input });
 }
 export async function listContactRequests(ficheId: number) {
-  return prisma.contactRequest.findMany({ where: { ficheId }, orderBy: { createdAt: "desc" }, take: 50 });
+  return prisma.contactRequest.findMany({
+    where: { ficheId },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
 }
 export async function getOverview() {
   await ensureDemoFiches();
@@ -209,7 +246,72 @@ export async function getOverview() {
     prisma.fiche.count(),
     prisma.fiche.count({ where: { statut: "active" } }),
     prisma.fiche.aggregate({ _sum: { scansTotal: true } }),
-    prisma.fiche.count({ where: { dateEcheance: { lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }, statut: { not: "supprimee" } } }),
+    prisma.fiche.count({
+      where: {
+        dateEcheance: { lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
+        statut: { not: "supprimee" },
+      },
+    }),
   ]);
   return { total, active, scans: scans._sum.scansTotal ?? 0, expiring };
+}
+
+// Espace client
+
+// --- Invitations ---
+export async function createInvitation(ficheId: number, ttlDays = 7) {
+  const token = randomBytes(32).toString("base64url");
+  const expireLe = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+  await prisma.invitationClient.create({ data: { ficheId, token, expireLe } });
+  return token;
+}
+
+export async function getInvitationByToken(token: string) {
+  return prisma.invitationClient.findUnique({ where: { token } });
+}
+
+// Consomme le token et rattache la fiche à l'utilisateur, dans une seule
+// transaction pour éviter une invitation utilisée deux fois en concurrence.
+export async function consumeInvitation(token: string, userId: number) {
+  return prisma.$transaction(async tx => {
+    const invitation = await tx.invitationClient.findUnique({ where: { token } });
+    if (!invitation) throw new Error("INVITATION_NOT_FOUND");
+    if (invitation.utilisee) throw new Error("INVITATION_ALREADY_USED");
+    if (invitation.expireLe < new Date()) throw new Error("INVITATION_EXPIRED");
+
+    const fiche = await tx.fiche.findUnique({ where: { id: invitation.ficheId } });
+    if (!fiche) throw new Error("FICHE_NOT_FOUND");
+    if (fiche.ownerId) throw new Error("FICHE_ALREADY_OWNED");
+
+    await tx.fiche.update({ where: { id: fiche.id }, data: { ownerId: userId } });
+    await tx.invitationClient.update({ where: { id: invitation.id }, data: { utilisee: true } });
+    return fiche;
+  });
+}
+
+// --- Fiches côté client ---
+export async function listFichesByOwner(ownerId: number) {
+  return prisma.fiche.findMany({ where: { ownerId }, orderBy: { updatedAt: "desc" } });
+}
+
+export async function getFicheOwnedBy(id: number, ownerId: number) {
+  return prisma.fiche.findFirst({ where: { id, ownerId } });
+}
+
+// --- Scans agrégés (réutilisé par admin ET client) ---
+export async function listScansForFiche(ficheId: number, days = 30) {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  return prisma.ficheScan.findMany({
+    where: { ficheId, scanDate: { gte: since } },
+    orderBy: { scanDate: "asc" },
+  });
+}
+
+// --- Cartes membres ---
+export async function listMembershipCards(ficheId: number) {
+  return prisma.membershipCard.findMany({ where: { ficheId }, orderBy: { createdAt: "asc" } });
+}
+
+export async function createMembershipCard(input: InsertMembershipCard) {
+  return prisma.membershipCard.create({ data: input });
 }
