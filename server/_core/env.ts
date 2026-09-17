@@ -19,4 +19,7 @@ export const ENV = {
   storageSecretKey: process.env.S3_SECRET_ACCESS_KEY,
   publicUrl: process.env.S3_PUBLIC_BASE_URL,
   bucket: process.env.S3_BUCKET_NAME,
+
+ viteOauthPortalUrl :  process.env.VITE_OAUTH_PORTAL_URL,
+oauthStateCookie : process.env.OAUTH_STATE_COOKIE
 };
