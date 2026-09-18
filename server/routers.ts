@@ -42,7 +42,7 @@ import {
 } from "./db";
 import { validatePlanPayload } from "./planValidation";
 import { storagePut } from "./storage";
-import { generateClientUsername, generateTemporaryClientPassword, hashClientPassword, CLIENT_USERNAME_PATTERN } from "./_core/clientAuth";
+import { generateClientUsername, generateTemporaryClientPassword, hashClientPassword } from "./_core/clientAuth";
 
 function parseFiche<T extends { dataJson: string }>(fiche: T) {
   const { dataJson, ...rest } = fiche;
