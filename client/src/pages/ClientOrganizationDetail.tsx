@@ -48,6 +48,21 @@ export default function ClientOrganizationDetail() {
     onError: error => toast.error("Impossible de retirer l'accès", { description: error.message }),
   });
 
+  const updateMemberRole = trpc.clientSpaceRouter.updateOrganizationMemberRole.useMutation({
+    onSuccess: () => {
+      toast.success("Rôle mis à jour");
+      query.refetch();
+    },
+    onError: error => toast.error("Impossible de modifier le rôle", { description: error.message }),
+  });
+  const removeMember = trpc.clientSpaceRouter.removeOrganizationMember.useMutation({
+    onSuccess: () => {
+      toast.success("Membre retiré de l'organisation");
+      query.refetch();
+    },
+    onError: error => toast.error("Impossible de retirer le membre", { description: error.message }),
+  });
+
   const copyInvite = async () => {
     if (!inviteUrl) return;
     await navigator.clipboard.writeText(inviteUrl);
@@ -147,7 +162,34 @@ export default function ClientOrganizationDetail() {
                       <p className="font-medium text-[#172033]">{member.name || "Utilisateur sans nom"}</p>
                       <p className="text-xs text-[#7d8798]">{member.email || "E-mail non renseigné"} · {roleLabels[member.role] ?? member.role}</p>
                     </div>
-                    <span className="text-xs text-[#7d8798]">{member.ficheIds.length} accès</span>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={member.role}
+                        disabled={updateMemberRole.isPending || removeMember.isPending}
+                        onChange={e => updateMemberRole.mutate({
+                          organizationId,
+                          membershipId: member.id,
+                          role: e.target.value as "ADMIN" | "MEMBER" | "VIEWER",
+                        })}
+                        className="rounded-lg border border-[#dfe3e8] px-2 py-1 text-xs"
+                      >
+                        <option value="MEMBER">Membre</option>
+                        <option value="VIEWER">Lecteur</option>
+                        <option value="ADMIN">Administrateur</option>
+                      </select>
+                      <button
+                        type="button"
+                        disabled={removeMember.isPending}
+                        onClick={() => {
+                          if (window.confirm("Retirer ce membre de l'organisation et tous ses accès aux fiches ?")) {
+                            removeMember.mutate({ organizationId, membershipId: member.id });
+                          }
+                        }}
+                        className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      >
+                        Retirer
+                      </button>
+                    </div>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {organization.fiches.map(fiche => {
