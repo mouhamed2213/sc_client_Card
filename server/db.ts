@@ -311,6 +311,38 @@ export async function getFicheOwnedBy(id: number, ownerId: number) {
   return prisma.fiche.findFirst({ where: { id, ownerId } });
 }
 
+// --- Comptes clients (un compte peut posséder plusieurs fiches) ---
+export async function searchClientUsers(query: string) {
+  const q = query.trim();
+  return prisma.user.findMany({
+    where: {
+      role: "user",
+      ...(q
+        ? {
+            OR: [
+              { name: { contains: q, mode: "insensitive" } },
+              { email: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
+    include: { _count: { select: { fiche: true } } },
+    orderBy: { lastSignedIn: "desc" },
+    take: 15,
+  });
+}
+
+export async function attachFicheToOwner(ficheId: number, ownerId: number) {
+  return prisma.$transaction(async tx => {
+    const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
+    if (!fiche) throw new Error("FICHE_NOT_FOUND");
+    if (fiche.ownerId) throw new Error("FICHE_ALREADY_OWNED");
+    const owner = await tx.user.findUnique({ where: { id: ownerId } });
+    if (!owner || owner.role !== "user") throw new Error("OWNER_NOT_FOUND");
+    return tx.fiche.update({ where: { id: ficheId }, data: { ownerId } });
+  });
+}
+
 // --- Scans agrégés (réutilisé par admin ET client) ---
 export async function listScansForFiche(ficheId: number, days = 30) {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
