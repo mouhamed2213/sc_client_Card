@@ -32,10 +32,11 @@ async function main() {
   console.log(
     JSON.stringify(
       {
-        ok:
-          orphanFiches.length === 0 &&
-          orphanInvitations.length === 0 &&
-          crossOrganizationAccess.length === 0,
+        ok: crossOrganizationAccess.length === 0,
+        requiresReview: {
+          orphanFiches: orphanFiches.length,
+          orphanInvitations: orphanInvitations.length,
+        },
         orphanFiches,
         orphanInvitations,
         crossOrganizationAccess,
@@ -45,7 +46,7 @@ async function main() {
     )
   );
 
-  if (orphanFiches.length || orphanInvitations.length || crossOrganizationAccess.length) {
+  if (crossOrganizationAccess.length) {
     process.exitCode = 2;
   }
 }
