@@ -7,6 +7,7 @@ import {
   assertCanEditFiche,
   assertCanViewFiche,
   assertCanManageOrganizationMembers,
+  assertCanManageOrganization,
   getOrganizationForUser,
   listAccessibleFiches,
   listOrganizationsForUser,
@@ -579,6 +580,71 @@ export const appRouter = router({
             : [],
         };
       }),
+    inviteMember: clientProcedure
+      .input(z.object({
+        organizationId: z.number().int().positive(),
+        role: z.enum(["ADMIN", "MEMBER", "VIEWER"]),
+        ficheId: z.number().int().positive().nullable().optional(),
+        invitedUserId: z.number().int().positive().nullable().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await assertCanManageOrganization(ctx.user.id, input.organizationId);
+        try {
+          const invitation = await createOrganizationInvitation(input);
+          return { token: invitation.token, url: `/espace-client/invite/${invitation.token}` };
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (message === "FICHE_NOT_IN_ORGANIZATION") {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "La fiche n'appartient pas à cette organisation." });
+          }
+          throw error;
+        }
+      }),
+    searchOrganizationUsers: clientProcedure
+      .input(z.object({ query: z.string().max(160).optional().default("") }))
+      .query(async ({ ctx, input }) => {
+        await assertCanManageOrganization(ctx.user.id, input.organizationId);
+        return searchClientUsers(input.query);
+      }),
+    grantOrganizationFicheAccess: clientProcedure
+      .input(z.object({
+        organizationId: z.number().int().positive(),
+        ficheId: z.number().int().positive(),
+        membershipId: z.number().int().positive(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await assertCanManageOrganization(ctx.user.id, input.organizationId);
+        const organization = await getOrganizationForUser(ctx.user.id, input.organizationId);
+        if (!organization || !organization.memberships.some(m => m.id === input.membershipId)) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Membre introuvable dans cette organisation." });
+        }
+        try {
+          await createFicheAccess({ ficheId: input.ficheId, membershipId: input.membershipId });
+          return { ok: true } as const;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (message === "FICHE_NOT_FOUND" || message === "MEMBERSHIP_NOT_FOUND") {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Ressource introuvable." });
+          }
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Accès incompatible avec l'organisation." });
+        }
+      }),
+    revokeOrganizationFicheAccess: clientProcedure
+      .input(z.object({
+        organizationId: z.number().int().positive(),
+        ficheId: z.number().int().positive(),
+        membershipId: z.number().int().positive(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await assertCanManageOrganization(ctx.user.id, input.organizationId);
+        const organization = await getOrganizationForUser(ctx.user.id, input.organizationId);
+        if (!organization || !organization.memberships.some(m => m.id === input.membershipId)) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Membre introuvable dans cette organisation." });
+        }
+        await revokeFicheAccess({ ficheId: input.ficheId, membershipId: input.membershipId });
+        return { ok: true } as const;
+      }),
+
     organizationMembers: clientProcedure
       .input(z.object({ organizationId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
