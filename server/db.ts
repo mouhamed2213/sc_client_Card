@@ -514,7 +514,7 @@ export async function getFicheOwnedBy(id: number, ownerId: number) {
 // --- Comptes clients (un compte peut posséder plusieurs fiches) ---
 export async function searchClientUsers(query: string) {
   const q = query.trim();
-  return prisma.user.findMany({
+  const users = await prisma.user.findMany({
     where: {
       role: "user",
       ...(q
@@ -526,10 +526,27 @@ export async function searchClientUsers(query: string) {
           }
         : {}),
     },
-    include: { _count: { select: { fiche: true } } },
     orderBy: { lastSignedIn: "desc" },
     take: 15,
   });
+
+  return Promise.all(
+    users.map(async user => ({
+      ...user,
+      _count: {
+        fiche: await prisma.fiche.count({
+          where: {
+            organization: {
+              type: "PERSONAL",
+              memberships: {
+                some: { userId: user.id, role: "OWNER" },
+              },
+            },
+          },
+        }),
+      },
+    }))
+  );
 }
 
 export async function assignFicheToClientOrganization(ficheId: number, userId: number) {
