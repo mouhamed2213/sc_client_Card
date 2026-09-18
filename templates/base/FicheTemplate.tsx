@@ -335,14 +335,14 @@ export function FicheTemplate({
             </div>
           )}
           {fiche.formule !== "essentiel" && <ProContent fiche={fiche} />}
-          {links.length || fiche.site ? (
+          {fiche.formule !== "essentiel" && (links.length || fiche.site) ? (
             <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
                 icon={<Globe2 className="h-4 w-4" />}
                 title="Liens utiles"
               />
               <div className="link-list grid gap-2">
-                {fiche.site && (
+                {fiche.formule !== "essentiel" && fiche.site && (
                   <a
                     href={fiche.site}
                     target="_blank"
