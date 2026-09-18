@@ -493,13 +493,15 @@ export const appRouter = router({
             message: "La modification complète est réservée à la formule Signature.",
           });
 
-        const errors = validatePlanPayload({
-          formule: "signature",
-          photo: input.photo || null,
-          logo: input.logo || null,
-          googlePlaceId: input.googlePlaceId || null,
-          data: input.data,
-        });
+        const links = input.data.liens ?? [];
+        const photos = input.data.galerie ?? [];
+        const errors: string[] = [];
+        if (!input.photo?.trim() || !input.logo?.trim())
+          errors.push("Un portrait et un logo sont obligatoires pour une fiche Signature.");
+        if (links.length > 10)
+          errors.push("La formule Signature autorise au maximum 10 liens.");
+        if (photos.length > 8)
+          errors.push("La formule Signature autorise au maximum 8 photos dans la galerie.");
         if (errors.length)
           throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
 
