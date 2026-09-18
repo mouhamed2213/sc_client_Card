@@ -454,13 +454,28 @@ export async function consumeInvitation(token: string, userId: number) {
 // --- Fiches côté client ---
 export async function listFichesByOwner(ownerId: number) {
   return prisma.fiche.findMany({
-    where: { ownerId },
+    where: {
+      organization: {
+        memberships: {
+          some: { userId: ownerId, role: "OWNER" },
+        },
+      },
+    },
     orderBy: { updatedAt: "desc" },
   });
 }
 
 export async function getFicheOwnedBy(id: number, ownerId: number) {
-  return prisma.fiche.findFirst({ where: { id, ownerId } });
+  return prisma.fiche.findFirst({
+    where: {
+      id,
+      organization: {
+        memberships: {
+          some: { userId: ownerId, role: "OWNER" },
+        },
+      },
+    },
+  });
 }
 
 // --- Comptes clients (un compte peut posséder plusieurs fiches) ---
@@ -484,20 +499,23 @@ export async function searchClientUsers(query: string) {
   });
 }
 
-export async function attachFicheToOwner(ficheId: number, ownerId: number) {
+export async function assignFicheToClientOrganization(ficheId: number, userId: number) {
   return prisma.$transaction(async tx => {
     const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
     if (!fiche) throw new Error("FICHE_NOT_FOUND");
-    if (fiche.ownerId) throw new Error("FICHE_ALREADY_OWNED");
+    if (fiche.organizationId) throw new Error("FICHE_ALREADY_ASSIGNED");
 
-    const owner = await tx.user.findUnique({ where: { id: ownerId } });
-    if (!owner || owner.role !== "user") throw new Error("OWNER_NOT_FOUND");
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true, name: true, email: true },
+    });
+    if (!user || user.role !== "user") throw new Error("CLIENT_NOT_FOUND");
 
     let organization = await tx.organization.findFirst({
       where: {
         type: "PERSONAL",
         memberships: {
-          some: { userId: ownerId, role: "OWNER" },
+          some: { userId, role: "OWNER" },
         },
       },
     });
@@ -505,14 +523,14 @@ export async function attachFicheToOwner(ficheId: number, ownerId: number) {
     if (!organization) {
       organization = await tx.organization.create({
         data: {
-          name: owner.name?.trim() || owner.email || `Compte personnel #${ownerId}`,
+          name: user.name?.trim() || user.email || `Compte personnel #${userId}`,
           type: "PERSONAL",
         },
       });
       await tx.organizationMembership.create({
         data: {
           organizationId: organization.id,
-          userId: ownerId,
+          userId,
           role: "OWNER",
         },
       });
@@ -520,10 +538,7 @@ export async function attachFicheToOwner(ficheId: number, ownerId: number) {
 
     return tx.fiche.update({
       where: { id: ficheId },
-      data: {
-        ownerId,
-        organizationId: organization.id,
-      },
+      data: { organizationId: organization.id },
     });
   });
 }
