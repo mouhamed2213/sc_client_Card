@@ -1,4 +1,5 @@
 import { trpc } from "@/lib/trpc";
+import { useActiveOrganization } from "@/contexts/ActiveOrganizationContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   BarChart3,
@@ -25,6 +26,7 @@ export default function ClientLayout({
   const [location, navigate] = useLocation();
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { organizations, activeOrganizationId, setActiveOrganizationId } = useActiveOrganization();
   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
   const fiche = ficheId
     ? trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId })
@@ -101,6 +103,26 @@ export default function ClientLayout({
               {f.prenom} {f.nom} · {f.entreprise}
             </button>
           ))}
+        </div>
+      )}
+
+      {organizations && organizations.length > 0 && (
+        <div className="mt-5 px-1">
+          <label className="eyebrow" style={{ color: "rgba(255,255,255,0.4)" }}>
+            Organisation active
+          </label>
+          <select
+            value={activeOrganizationId ?? ""}
+            onChange={e => setActiveOrganizationId(Number(e.target.value))}
+            className="mt-2 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white outline-none"
+            aria-label="Organisation active"
+          >
+            {organizations.map(org => (
+              <option key={org.id} value={org.id} className="text-slate-900">
+                {org.name} · {org.type}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
