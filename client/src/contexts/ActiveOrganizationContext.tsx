@@ -1,11 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import type { inferRouterOutputs } from "@trpc/server";
+import type { AppRouter } from "../../../server/routers";
 import { trpc } from "@/lib/trpc";
 
+type RouterOutputs = inferRouterOutputs<AppRouter>;
+type Organization = RouterOutputs["clientSpaceRouter"]["myOrganizations"][number];
+
 type ActiveOrganizationContextValue = {
-  organizations: ReturnType<typeof trpc.clientSpaceRouter.myOrganizations.useQuery>["data"];
+  organizations: RouterOutputs["clientSpaceRouter"]["myOrganizations"] | undefined;
   activeOrganizationId: number | null;
   setActiveOrganizationId: (id: number) => void;
-  activeOrganization: NonNullable<ReturnType<typeof trpc.clientSpaceRouter.myOrganizations.useQuery>["data"]>[number] | null;
+  activeOrganization: Organization | null;
   isLoading: boolean;
 };
 
@@ -32,19 +37,28 @@ export function ActiveOrganizationProvider({ children }: { children: ReactNode }
     window.localStorage.setItem(STORAGE_KEY, String(activeOrganization.id));
   }, [activeOrganization, storedId]);
 
-  const value = useMemo<ActiveOrganizationContextValue>(() => ({
-    organizations: query.data,
-    activeOrganizationId: activeOrganization?.id ?? null,
-    setActiveOrganizationId: id => setStoredId(id),
-    activeOrganization,
-    isLoading: query.isLoading,
-  }), [query.data, activeOrganization, query.isLoading]);
+  const value = useMemo<ActiveOrganizationContextValue>(
+    () => ({
+      organizations: query.data,
+      activeOrganizationId: activeOrganization?.id ?? null,
+      setActiveOrganizationId: id => setStoredId(id),
+      activeOrganization,
+      isLoading: query.isLoading,
+    }),
+    [query.data, activeOrganization, query.isLoading]
+  );
 
-  return <ActiveOrganizationContext.Provider value={value}>{children}</ActiveOrganizationContext.Provider>;
+  return (
+    <ActiveOrganizationContext.Provider value={value}>
+      {children}
+    </ActiveOrganizationContext.Provider>
+  );
 }
 
 export function useActiveOrganization() {
   const value = useContext(ActiveOrganizationContext);
-  if (!value) throw new Error("useActiveOrganization must be used inside ActiveOrganizationProvider");
+  if (!value) {
+    throw new Error("useActiveOrganization must be used inside ActiveOrganizationProvider");
+  }
   return value;
 }
