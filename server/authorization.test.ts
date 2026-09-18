@@ -116,7 +116,7 @@ describe("organization authorization", () => {
     });
   });
 
- an explicitly assigned card user, never as organization-wide access", async () => {
+  it("treats ADMIN like an explicitly assigned card user, never as organization-wide access", async () => {
     reset();
     prismaMock.fiche.findUnique.mockResolvedValue({ id: 10, organizationId: 100 });
     prismaMock.organizationMembership.findUnique.mockResolvedValue({
