@@ -81,3 +81,22 @@ export function verifyClientPassword(
     return false;
   }
 }
+
+
+export function generateClientUsername(name: string): string {
+  const base = name
+    .normalize("NFD")
+    .replace(/[\\u0300-\\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ".")
+    .replace(/^\\.|\\.$/g, "")
+    .slice(0, 48);
+
+  const suffix = randomBytes(3).toString("hex");
+  const username = `${base || "client"}-${suffix}`;
+  return username.slice(0, 64);
+}
+
+export function generateTemporaryClientPassword(): string {
+  return `SC-${randomBytes(15).toString("base64url")}`;
+}
