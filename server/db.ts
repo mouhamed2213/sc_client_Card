@@ -433,75 +433,42 @@ export async function attachFicheToOwner(ficheId: number, ownerId: number) {
     const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
     if (!fiche) throw new Error("FICHE_NOT_FOUND");
     if (fiche.ownerId) throw new Error("FICHE_ALREADY_OWNED");
+
     const owner = await tx.user.findUnique({ where: { id: ownerId } });
     if (!owner || owner.role !== "user") throw new Error("OWNER_NOT_FOUND");
-    return tx.fiche.update({ where: { id: ficheId }, data: { ownerId } });
-  });
-}
 
-export async function createOrganization(input: {
-  name: string;
-  type: "PERSONAL" | "BUSINESS";
-}) {
-  return prisma.organization.create({ data: input });
-}
-
-export async function assignFicheToOrganization(
-  ficheId: number,
-  organizationId: number
-) {
-  return prisma.$transaction(async tx => {
-    const organization = await tx.organization.findUnique({
-      where: { id: organizationId },
+    let organization = await tx.organization.findFirst({
+      where: {
+        type: "PERSONAL",
+        memberships: {
+          some: { userId: ownerId, role: "OWNER" },
+        },
+      },
     });
-    if (!organization) throw new Error("ORGANIZATION_NOT_FOUND");
 
-    const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
-    if (!fiche) throw new Error("FICHE_NOT_FOUND");
+    if (!organization) {
+      organization = await tx.organization.create({
+        data: {
+          name: owner.name?.trim() || owner.email || `Compte personnel #${ownerId}`,
+          type: "PERSONAL",
+        },
+      });
+      await tx.organizationMembership.create({
+        data: {
+          organizationId: organization.id,
+          userId: ownerId,
+          role: "OWNER",
+        },
+      });
+    }
 
     return tx.fiche.update({
       where: { id: ficheId },
-      data: { organizationId },
-    });
-  });
-}
-
-export async function createFicheAccess(
-  ficheId: number,
-  membershipId: number
-) {
-  return prisma.$transaction(async tx => {
-    const [fiche, membership] = await Promise.all([
-      tx.fiche.findUnique({ where: { id: ficheId } }),
-      tx.organizationMembership.findUnique({ where: { id: membershipId } }),
-    ]);
-
-    if (!fiche) throw new Error("FICHE_NOT_FOUND");
-    if (!fiche.organizationId) throw new Error("FICHE_NOT_ASSIGNED_TO_ORGANIZATION");
-    if (!membership) throw new Error("MEMBERSHIP_NOT_FOUND");
-    if (membership.organizationId !== fiche.organizationId) {
-      throw new Error("MEMBERSHIP_NOT_IN_FICHE_ORGANIZATION");
-    }
-    if (membership.role === "OWNER") {
-      return null;
-    }
-
-    return tx.ficheAccess.upsert({
-      where: {
-        ficheId_membershipId: { ficheId, membershipId },
+      data: {
+        ownerId,
+        organizationId: organization.id,
       },
-      create: { ficheId, membershipId },
-      update: {},
     });
-  });
-}
-
-export async function revokeFicheAccess(
-  ficheId: number,
-  membershipId: number
-) {
-  return prisma.ficheAccess.deleteMany({
-    where: { ficheId, membershipId },
   });
 }
 
