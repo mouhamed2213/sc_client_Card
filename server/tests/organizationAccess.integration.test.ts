@@ -80,6 +80,29 @@ describe("organization access integration", () => {
     ).rejects.toThrow("FORBIDDEN");
   });
 
+  it("blocks a non-OWNER from changing a member role", async () => {
+    auth.assertCanManageOrganization.mockRejectedValueOnce(new Error("FORBIDDEN"));
+    const caller = appRouter.createCaller(context(9));
+    await expect(
+      caller.clientSpaceRouter.updateOrganizationMemberRole({
+        organizationId: 100,
+        membershipId: 2,
+        role: "VIEWER",
+      })
+    ).rejects.toThrow("FORBIDDEN");
+  });
+
+  it("blocks a non-OWNER from removing an organization member", async () => {
+    auth.assertCanManageOrganization.mockRejectedValueOnce(new Error("FORBIDDEN"));
+    const caller = appRouter.createCaller(context(9));
+    await expect(
+      caller.clientSpaceRouter.removeOrganizationMember({
+        organizationId: 100,
+        membershipId: 2,
+      })
+    ).rejects.toThrow("FORBIDDEN");
+  });
+
   it("blocks organization fiche grants when the membership is outside the organization", async () => {
     auth.assertCanManageOrganization.mockResolvedValueOnce({
       id: 1,
