@@ -18,7 +18,9 @@ export function validatePlanPayload(input: {
   const errors: string[] = [];
   const links = input.data.liens ?? [];
   const photos = input.data.galerie ?? [];
-  if (links.length > features.maxLinks)
+  if (input.formule === "essentiel" && links.length > 0)
+    errors.push("La formule Essentiel ne permet pas de liens personnalisés.");
+  else if (links.length > features.maxLinks)
     errors.push(`${input.formule}: maximum ${features.maxLinks} liens.`);
   if (features.maxPhotos === 0 && photos.length > 0)
     errors.push("La formule Essentiel ne permet pas de galerie photo.");
