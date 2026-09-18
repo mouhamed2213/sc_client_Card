@@ -100,7 +100,7 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
       `Mot de passe temporaire : ${credentials.temporaryPassword}`,
       "",
       "À votre première connexion, le changement du mot de passe sera obligatoire.",
-      "Connexion : /espace-client/connexion",
+      `Connexion : ${window.location.origin}/espace-client/connexion`,
     ].join("\\n");
     try {
       await navigator.clipboard.writeText(text);
@@ -118,7 +118,7 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
       `Identifiant : ${credentials.username}`,
       `Mot de passe temporaire : ${credentials.temporaryPassword}`,
       "",
-      "Connectez-vous ici : /espace-client/connexion",
+      `Connectez-vous ici : ${window.location.origin}/espace-client/connexion`,
       "Le changement du mot de passe sera demandé lors de votre première connexion.",
     ].join("\\n");
     navigator.clipboard?.writeText(text);
