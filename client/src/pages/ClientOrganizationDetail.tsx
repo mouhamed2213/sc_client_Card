@@ -21,28 +21,6 @@ export default function ClientOrganizationDetail() {
     { enabled: Number.isInteger(organizationId) && organizationId > 0 }
   );
 
-  if (query.isLoading) {
-    return <ClientLayout><div className="p-6"><div className="h-48 animate-pulse rounded-2xl bg-white" /></div></ClientLayout>;
-  }
-
-  if (!query.data) {
-    return (
-      <ClientLayout>
-        <div className="p-6">
-          <button onClick={() => navigate("/espace-client/organisations")} className="inline-flex items-center gap-2 text-sm text-[#667085]">
-            <ArrowLeft size={16} /> Organisations
-          </button>
-          <div className="mt-10 rounded-2xl border border-dashed border-[#d9dee6] bg-white p-10 text-center">
-            <Lock className="mx-auto text-[#98a2b3]" size={28} />
-            <h1 className="mt-4 font-semibold text-[#172033]">Organisation inaccessible</h1>
-            <p className="mt-2 text-sm text-[#7d8798]">Cette organisation n'est pas accessible avec votre compte.</p>
-          </div>
-        </div>
-      </ClientLayout>
-    );
-  }
-
-  const organization = query.data;
   const [inviteRole, setInviteRole] = useState<"ADMIN" | "MEMBER" | "VIEWER">("MEMBER");
   const [inviteFicheId, setInviteFicheId] = useState<number | null>(null);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
@@ -75,6 +53,29 @@ export default function ClientOrganizationDetail() {
     await navigator.clipboard.writeText(inviteUrl);
     toast.success("Lien d'invitation copié");
   };
+
+  if (query.isLoading) {
+    return <ClientLayout><div className="p-6"><div className="h-48 animate-pulse rounded-2xl bg-white" /></div></ClientLayout>;
+  }
+
+  if (!query.data) {
+    return (
+      <ClientLayout>
+        <div className="p-6">
+          <button onClick={() => navigate("/espace-client/organisations")} className="inline-flex items-center gap-2 text-sm text-[#667085]">
+            <ArrowLeft size={16} /> Organisations
+          </button>
+          <div className="mt-10 rounded-2xl border border-dashed border-[#d9dee6] bg-white p-10 text-center">
+            <Lock className="mx-auto text-[#98a2b3]" size={28} />
+            <h1 className="mt-4 font-semibold text-[#172033]">Organisation inaccessible</h1>
+            <p className="mt-2 text-sm text-[#7d8798]">Cette organisation n'est pas accessible avec votre compte.</p>
+          </div>
+        </div>
+      </ClientLayout>
+    );
+  }
+
+  const organization = query.data;
 
   return (
     <ClientLayout>
