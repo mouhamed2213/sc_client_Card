@@ -271,10 +271,10 @@ export default function ClientFicheEdit() {
                 <div>
                   <p className="text-sm font-semibold text-[#172033]">Identité</p>
                   <p className="mt-1 text-xs text-[#7d8798]">Les informations principales affichées sur votre fiche.</p>
-                  <div className="mt-4 space-y-4">
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
                     {([
-                      ["nom", "Nom", true],
                       ["prenom", "Prénom", true],
+                      ["nom", "Nom", true],
                       ["fonction", "Fonction", true],
                       ["entreprise", "Entreprise", true],
                     ] as const).map(([key, label, required]) => (
@@ -288,7 +288,7 @@ export default function ClientFicheEdit() {
                 <div>
                   <p className="text-sm font-semibold text-[#172033]">Contact</p>
                   <p className="mt-1 text-xs text-[#7d8798]">Téléphone, messagerie et coordonnées complémentaires.</p>
-                  <div className="mt-4 space-y-4">
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
                     {([
                       ["telephone", "Téléphone", true],
                       ["whatsapp", "WhatsApp", true],
