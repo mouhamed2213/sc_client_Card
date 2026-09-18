@@ -95,21 +95,21 @@ export default function ClientFicheEdit() {
       photo: fiche.data.photo ?? "",
       logo: fiche.data.logo ?? "",
       data: {
-        premierBouton: fiche.data.premierBouton ?? "whatsapp",
-        messageWhatsapp: fiche.data.messageWhatsapp ?? "",
-        presentation: fiche.data.presentation ?? "",
-        rendezVous: fiche.data.rendezVous ?? {
+        premierBouton: fiche.data.data?.premierBouton ?? "whatsapp",
+        messageWhatsapp: fiche.data.data?.messageWhatsapp ?? "",
+        presentation: fiche.data.data?.presentation ?? "",
+        rendezVous: fiche.data.data?.rendezVous ?? {
           label: "Prendre rendez-vous",
           url: "",
         },
-        reseauxSociaux: fiche.data.reseauxSociaux ?? [],
-        liens: fiche.data.liens ?? [],
+        reseauxSociaux: fiche.data.data?.reseauxSociaux ?? [],
+        liens: fiche.data.data?.liens ?? [],
         horaires:
-          fiche.data.horaires?.length === 7
-            ? fiche.data.horaires
+          fiche.data.data?.horaires?.length === 7
+            ? fiche.data.data?.horaires
             : weekdays.map(jour => ({ jour, horaire: "" })),
-        galerie: fiche.data.galerie ?? [],
-        sections: fiche.data.sections ?? [],
+        galerie: fiche.data.data?.galerie ?? [],
+        sections: fiche.data.data?.sections ?? [],
       },
     });
   }, [fiche.data, form]);
@@ -205,7 +205,7 @@ export default function ClientFicheEdit() {
       if (kind === "logo") setField("logo", result.url);
       if (kind === "gallery") {
         setData("galerie", [
-          ...form.data.galerie,
+          ...(form?.data.galerie ?? []),
           { url: result.url, alt: prepared.name },
         ]);
       }
@@ -262,17 +262,17 @@ export default function ClientFicheEdit() {
             <EditorSection title="Identité et contact">
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
-                  ["prenom", "Prénom", true],
-                  ["nom", "Nom", true],
-                  ["fonction", "Fonction", true],
-                  ["entreprise", "Entreprise", true],
-                  ["telephone", "Téléphone", true],
-                  ["whatsapp", "WhatsApp", true],
-                  ["email", "E-mail", false],
-                  ["site", "Site web", false],
-                  ["adresse", "Adresse", false],
-                  ["lienItineraire", "Lien Google Maps", false],
-                  ["googlePlaceId", "Google Place ID", false],
+                  ["prenom", "Prénom", true] as const,
+                  ["nom", "Nom", true] as const,
+                  ["fonction", "Fonction", true] as const,
+                  ["entreprise", "Entreprise", true] as const,
+                  ["telephone", "Téléphone", true] as const,
+                  ["whatsapp", "WhatsApp", true] as const,
+                  ["email", "E-mail", false] as const,
+                  ["site", "Site web", false] as const,
+                  ["adresse", "Adresse", false] as const,
+                  ["lienItineraire", "Lien Google Maps", false] as const,
+                  ["googlePlaceId", "Google Place ID", false] as const,
                 ].map(([key, label, required]) => (
                   <label key={key} className="block">
                     <span className="text-xs font-medium text-[#52607a]">
@@ -432,7 +432,7 @@ export default function ClientFicheEdit() {
                     />
                     <button
                       type="button"
-                      onClick={() => onRemove(index)}
+                      onClick={() => setData("reseauxSociaux", form.data.reseauxSociaux.filter((_, i) => i !== index))}
                       className="rounded-lg border px-3"
                     >
                       <Trash2 size={16} />
@@ -490,7 +490,7 @@ export default function ClientFicheEdit() {
                     />
                     <button
                       type="button"
-                      onClick={() => onRemove(index)}
+                      onClick={() => setData("liens", form.data.liens.filter((_, i) => i !== index))}
                       className="rounded-lg border px-3"
                     >
                       <Trash2 size={16} />
