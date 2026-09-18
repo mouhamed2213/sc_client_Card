@@ -7,6 +7,7 @@ import {
   assertCanEditFiche,
   assertCanViewFiche,
   listAccessibleFiches,
+  listOrganizationsForUser,
 } from "./authorization";
 import { Fiche } from "generated/prisma/client";
 import { imageSize } from "image-size";
@@ -524,6 +525,9 @@ export const appRouter = router({
       }),
   }),
   clientSpaceRouter: router({
+    myOrganizations: clientProcedure.query(({ ctx }) =>
+      listOrganizationsForUser(ctx.user.id)
+    ),
     myFiches: clientProcedure.query(({ ctx }) =>
       listAccessibleFiches(ctx.user.id)
     ),
