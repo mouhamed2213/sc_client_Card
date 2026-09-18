@@ -526,7 +526,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        const { fiche } = await assertCanEditFiche(ctx.user.id, input.ficheId);
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
         if (fiche.formule !== "signature")
@@ -570,7 +570,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        const { fiche } = await assertCanEditFiche(ctx.user.id, input.ficheId);
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
         if (fiche.formule !== "signature")
@@ -663,7 +663,7 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        const { fiche } = await assertCanEditFiche(ctx.user.id, input.ficheId);
         if (!fiche)
           throw new TRPCError({
             code: "FORBIDDEN",
