@@ -110,9 +110,9 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
     }
   }
 
-  function copyWhatsAppMessage() {
-    if (!credentials) return;
-    const text = [
+  function buildWhatsAppMessage() {
+    if (!credentials) return "";
+    return [
       `Bonjour ${prenom}, votre espace client Support Connecté est prêt.`,
       "",
       `Identifiant : ${credentials.username}`,
@@ -121,6 +121,21 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
       `Connectez-vous ici : ${window.location.origin}/espace-client/connexion`,
       "Le changement du mot de passe sera demandé lors de votre première connexion.",
     ].join("\\n");
+  }
+
+  function openWhatsApp() {
+    const message = buildWhatsAppMessage();
+    const phone = whatsapp.replace(/\\D/g, "");
+    if (!phone) {
+      toast.error("Le numéro WhatsApp est vide");
+      return;
+    }
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  }
+
+  function copyWhatsAppMessage() {
+    if (!credentials) return;
+    const text = buildWhatsAppMessage();
     navigator.clipboard?.writeText(text);
     toast.success("Message WhatsApp copié");
   }
@@ -222,8 +237,11 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
                 <Button type="button" variant="outline" onClick={copyCredentials} className="gap-2">
                   <Clipboard className="h-4 w-4" /> Copier les identifiants
                 </Button>
-                <Button type="button" onClick={copyWhatsAppMessage} className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]">
+                <Button type="button" onClick={copyWhatsAppMessage} variant="outline" className="gap-2">
                   <Copy className="h-4 w-4" /> Copier le message WhatsApp
+                </Button>
+                <Button type="button" onClick={openWhatsApp} className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]">
+                  Ouvrir WhatsApp
                 </Button>
               </div>
             </div>
