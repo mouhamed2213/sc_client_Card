@@ -262,7 +262,10 @@ export async function createOrganization(input: { name: string; type: "PERSONAL"
   return prisma.organization.create({ data: input });
 }
 
-export async function createPersonalOrganizationForFiche(ficheId: number, name: string) {
+export async function createPersonalOrganizationInvitationForFiche(
+  ficheId: number,
+  name: string
+) {
   return prisma.$transaction(async tx => {
     const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
     if (!fiche) throw new Error("FICHE_NOT_FOUND");
@@ -277,7 +280,18 @@ export async function createPersonalOrganizationForFiche(ficheId: number, name: 
       data: { organizationId: organization.id },
     });
 
-    return organization;
+    const token = randomBytes(32).toString("base64url");
+    const invitation = await tx.invitationClient.create({
+      data: {
+        organizationId: organization.id,
+        role: "OWNER",
+        ficheId: null,
+        token,
+        expireLe: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    return { organization, invitation };
   });
 }
 
