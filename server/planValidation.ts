@@ -12,6 +12,7 @@ export function validatePlanPayload(input: {
   photo?: string | null;
   logo?: string | null;
   googlePlaceId?: string | null;
+  site?: string | null;
   data: PlanData;
 }) {
   const features = getPlanFeatures(input.formule);
