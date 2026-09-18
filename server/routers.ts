@@ -379,7 +379,7 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         try {
-          await createFicheAccess(input.ficheId, input.membershipId);
+          await createFicheAccess({ ficheId: input.ficheId, membershipId: input.membershipId });
           return { ok: true } as const;
         } catch (error) {
           const message = error instanceof Error ? error.message : "";
@@ -397,7 +397,7 @@ export const appRouter = router({
           membershipId: z.number().int().positive(),
         })
       )
-      .mutation(({ input }) => revokeFicheAccess(input.ficheId, input.membershipId)),
+      .mutation(({ input }) => revokeFicheAccess({ ficheId: input.ficheId, membershipId: input.membershipId })),
 
     searchClientUsers: adminProcedure
       .input(z.object({ query: z.string().max(160).optional().default("") }))
