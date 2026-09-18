@@ -5,7 +5,7 @@ const auth = vi.hoisted(() => ({
   assertCanViewFiche: vi.fn(),
   assertCanEditFiche: vi.fn(),
   assertCanManageOrganization: vi.fn(),
-  getOrganizationForUser: vi.fn(),
+  getOrganizationForUser: vi.fn(async () => ({ memberships: [] })),
 }));
 
 vi.mock("../authorization", () => auth);
