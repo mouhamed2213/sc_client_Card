@@ -341,7 +341,7 @@ export default function Home() {
             <Button
               onClick={() => setIsClientAccountOpen(true)}
               variant="outline"
-              className="hidden gap-2 border-[#d9dde4] sm:flex"
+              className="flex gap-2 border-[#d9dde4]"
             >
               <UserPlus className="h-4 w-4" />
               <span>Nouveau compte client</span>
