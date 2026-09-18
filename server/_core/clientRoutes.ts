@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../../prisma/client";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
+import { ENV } from "./env";
 import { verifyClientPassword } from "./clientAuth";
 
 const loginSchema = z.object({
@@ -62,7 +63,7 @@ export function registerClientRoutes(app: Express): void {
       });
     }
 
-    if (!process.env.COOKIE_SECRET && !process.env.JWT_SECRET) {
+    if (!ENV.cookieSecret) {
       return res.status(500).json({
         message: "Le serveur d'authentification n'est pas configuré.",
       });
