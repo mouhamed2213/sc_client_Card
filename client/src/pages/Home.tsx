@@ -971,11 +971,11 @@ function CreateModal({
                   e.currentTarget.value = "";
                 }}
               />
-              {selectedGalleryFiles.length > 0 && (
+              {(form.galleryFiles?.length ?? 0) > 0 && (
                 <p className="mt-1.5 text-xs font-medium text-[#42506a]">
-                  {selectedGalleryFiles.length} photo
-                  {selectedGalleryFiles.length > 1 ? "s" : ""} sélectionnée
-                  {selectedGalleryFiles.length > 1 ? "s" : ""}.
+                  {form.galleryFiles?.length ?? 0} photo
+                  {(form.galleryFiles?.length ?? 0) > 1 ? "s" : ""} sélectionnée
+                  {(form.galleryFiles?.length ?? 0) > 1 ? "s" : ""}.
                 </p>
               )}
               <p className="mt-1 text-xs text-[#9aa3b1]">
