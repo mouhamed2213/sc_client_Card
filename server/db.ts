@@ -306,6 +306,10 @@ export async function createOrganizationInvitation(input: {
   invitedUserId?: number | null;
   ttlDays?: number;
 }) {
+  if (input.role === "OWNER" && input.ficheId != null) {
+    throw new Error("OWNER_INVITATION_CANNOT_TARGET_FICHE");
+  }
+
   const token = randomBytes(32).toString("base64url");
   const expireLe = new Date(
     Date.now() + (input.ttlDays ?? 7) * 24 * 60 * 60 * 1000
