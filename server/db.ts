@@ -331,6 +331,48 @@ export async function revokeFicheAccess(input: { ficheId: number; membershipId: 
   });
 }
 
+export async function updateOrganizationMemberRole(
+  organizationId: number,
+  membershipId: number,
+  role: "ADMIN" | "MEMBER" | "VIEWER"
+) {
+  const membership = await prisma.organizationMembership.findUnique({
+    where: { id: membershipId },
+    select: { id: true, organizationId: true, role: true },
+  });
+  if (!membership || membership.organizationId !== organizationId) {
+    throw new Error("MEMBERSHIP_NOT_FOUND");
+  }
+  if (membership.role === "OWNER") {
+    throw new Error("OWNER_CANNOT_CHANGE_ROLE");
+  }
+  return prisma.organizationMembership.update({
+    where: { id: membershipId },
+    data: { role },
+  });
+}
+
+export async function removeOrganizationMember(
+  organizationId: number,
+  membershipId: number
+) {
+  return prisma.$transaction(async tx => {
+    const membership = await tx.organizationMembership.findUnique({
+      where: { id: membershipId },
+      select: { id: true, organizationId: true, role: true },
+    });
+    if (!membership || membership.organizationId !== organizationId) {
+      throw new Error("MEMBERSHIP_NOT_FOUND");
+    }
+    if (membership.role === "OWNER") {
+      throw new Error("OWNER_CANNOT_BE_REMOVED");
+    }
+
+    await tx.ficheAccess.deleteMany({ where: { membershipId } });
+    return tx.organizationMembership.delete({ where: { id: membershipId } });
+  });
+}
+
 // --- Invitations ---
 export async function createOrganizationInvitation(input: {
   organizationId: number;
