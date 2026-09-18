@@ -3,6 +3,11 @@ import { mediaRules } from "@shared/mediaRules";
 import { getPlanFeatures } from "@shared/planFeatures";
 import { fichePayload } from "@shared/types/schemas";
 import { TRPCError } from "@trpc/server";
+import {
+  assertCanEditFiche,
+  assertCanViewFiche,
+  listAccessibleFiches,
+} from "./authorization";
 import { Fiche } from "generated/prisma/client";
 import { imageSize } from "image-size";
 import { z } from "zod";
@@ -427,12 +432,12 @@ export const appRouter = router({
   }),
   clientSpaceRouter: router({
     myFiches: clientProcedure.query(({ ctx }) =>
-      listFichesByOwner(ctx.user.id)
+      listAccessibleFiches(ctx.user.id)
     ),
     dashboard: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
-        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        const { fiche } = await assertCanViewFiche(ctx.user.id, input.ficheId);
         if (!fiche)
           throw new TRPCError({
             code: "FORBIDDEN",
