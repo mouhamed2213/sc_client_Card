@@ -439,6 +439,72 @@ export async function attachFicheToOwner(ficheId: number, ownerId: number) {
   });
 }
 
+export async function createOrganization(input: {
+  name: string;
+  type: "PERSONAL" | "BUSINESS";
+}) {
+  return prisma.organization.create({ data: input });
+}
+
+export async function assignFicheToOrganization(
+  ficheId: number,
+  organizationId: number
+) {
+  return prisma.$transaction(async tx => {
+    const organization = await tx.organization.findUnique({
+      where: { id: organizationId },
+    });
+    if (!organization) throw new Error("ORGANIZATION_NOT_FOUND");
+
+    const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
+    if (!fiche) throw new Error("FICHE_NOT_FOUND");
+
+    return tx.fiche.update({
+      where: { id: ficheId },
+      data: { organizationId },
+    });
+  });
+}
+
+export async function createFicheAccess(
+  ficheId: number,
+  membershipId: number
+) {
+  return prisma.$transaction(async tx => {
+    const [fiche, membership] = await Promise.all([
+      tx.fiche.findUnique({ where: { id: ficheId } }),
+      tx.organizationMembership.findUnique({ where: { id: membershipId } }),
+    ]);
+
+    if (!fiche) throw new Error("FICHE_NOT_FOUND");
+    if (!fiche.organizationId) throw new Error("FICHE_NOT_ASSIGNED_TO_ORGANIZATION");
+    if (!membership) throw new Error("MEMBERSHIP_NOT_FOUND");
+    if (membership.organizationId !== fiche.organizationId) {
+      throw new Error("MEMBERSHIP_NOT_IN_FICHE_ORGANIZATION");
+    }
+    if (membership.role === "OWNER") {
+      return null;
+    }
+
+    return tx.ficheAccess.upsert({
+      where: {
+        ficheId_membershipId: { ficheId, membershipId },
+      },
+      create: { ficheId, membershipId },
+      update: {},
+    });
+  });
+}
+
+export async function revokeFicheAccess(
+  ficheId: number,
+  membershipId: number
+) {
+  return prisma.ficheAccess.deleteMany({
+    where: { ficheId, membershipId },
+  });
+}
+
 // --- Scans agrégés (réutilisé par admin ET client) ---
 export async function listScansForFiche(ficheId: number, days = 30) {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
