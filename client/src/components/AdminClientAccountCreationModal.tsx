@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { getPlanFeatures } from "@shared/planFeatures";
 import { Check, Clipboard, Copy, CreditCard, Loader2, UserPlus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -14,7 +13,6 @@ type Props = {
 
 export default function AdminClientAccountCreationModal({ open, onClose }: Props) {
   const utils = trpc.useUtils();
-  const features = getPlanFeatures("essentiel");
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
   const [entreprise, setEntreprise] = useState("");
@@ -140,7 +138,7 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
       email: email.trim(),
       formule: "essentiel",
       createCard,
-      cardNumero: cardNumero.trim() || undefined,
+      cardNumero: createCard ? cardNumero.trim() : undefined,
       fiche: {
         slug: finalSlug,
         formule: "essentiel",
