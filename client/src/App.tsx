@@ -6,6 +6,7 @@ import { Route, Switch } from "wouter";
 import AdminGuard from "./components/AdminGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { ActiveOrganizationProvider } from "./contexts/ActiveOrganizationContext";
 import ClientDashboard from "./pages/ClientDashboard";
 import FicheClientDetail from "./pages/FicheClientDetail";
 import ClientStats from "./pages/ClientStats";
@@ -24,4 +25,4 @@ const AdminLogin = lazy(() => import("@/pages/AdminLogin"));
 function AdminRoute({ children }: { children: ReactNode }) { return <AdminGuard>{children}</AdminGuard>; }
 function ClientRoute({ children }: { children: ReactNode }) { return <ClientGuard>{children}</ClientGuard>; }
 function Router() { return <Suspense fallback={<div className="public-loading"><div className="loading-pulse" /><p>Chargement…</p></div>}><Switch><Route path="/admin/login" component={AdminLogin} /><Route path="/fiche/:slug" component={PublicFiche} /><Route path="/" component={() => <AdminRoute><Home /></AdminRoute>} /><Route path="/studio/fiche/:slug" component={() => <AdminRoute><FicheEditor /></AdminRoute>} /><Route path="/espace-client/connexion" component={ClientLogin} /><Route path="/espace-client/invite/:token" component={InviteConsume} /><Route path="/espace-client" component={() => <ClientRoute><ClientDashboard /></ClientRoute>} /><Route path="/espace-client/organisations" component={() => <ClientRoute><ClientOrganizations /></ClientRoute>} /><Route path="/espace-client/organisation/:organizationId" component={() => <ClientRoute><ClientOrganizationDetail /></ClientRoute>} /><Route path="/espace-client/fiche/:ficheId/statistiques" component={() => <ClientRoute><ClientStats /></ClientRoute>} /><Route path="/espace-client/fiche/:ficheId/demandes" component={() => <ClientRoute><ClientRequests /></ClientRoute>} /><Route path="/espace-client/fiche/:ficheId/cartes" component={() => <ClientRoute><ClientCards /></ClientRoute>} /><Route path="/espace-client/fiche/:ficheId/modifier" component={() => <ClientRoute><ClientFicheEdit /></ClientRoute>} /><Route path="/espace-client/fiche/:ficheId" component={() => <ClientRoute><FicheClientDetail /></ClientRoute>} /><Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch></Suspense>; }
-export default function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster /><Router /></TooltipProvider></ThemeProvider></ErrorBoundary>; }
+export default function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster /><ActiveOrganizationProvider><Router /></ActiveOrganizationProvider></TooltipProvider></ThemeProvider></ErrorBoundary>; }
