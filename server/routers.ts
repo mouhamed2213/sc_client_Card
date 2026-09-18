@@ -6,6 +6,8 @@ import { TRPCError } from "@trpc/server";
 import {
   assertCanEditFiche,
   assertCanViewFiche,
+  assertCanManageOrganizationMembers,
+  getOrganizationForUser,
   listAccessibleFiches,
   listOrganizationsForUser,
 } from "./authorization";
@@ -531,6 +533,60 @@ export const appRouter = router({
     myFiches: clientProcedure.query(({ ctx }) =>
       listAccessibleFiches(ctx.user.id)
     ),
+    organization: clientProcedure
+      .input(z.object({ organizationId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        const organization = await getOrganizationForUser(ctx.user.id, input.organizationId);
+        if (!organization) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Vous n'avez pas accès à cette organisation.",
+          });
+        }
+        const membership = organization.memberships.find(m => m.user.id === ctx.user.id);
+        if (!membership) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Accès refusé." });
+        }
+        return {
+          id: organization.id,
+          name: organization.name,
+          type: organization.type,
+          createdAt: organization.createdAt,
+          role: membership.role,
+          canManage: membership.role === "OWNER",
+          fiches: organization.fiches,
+          members: membership.role === "OWNER"
+            ? organization.memberships.map(m => ({
+                id: m.id,
+                userId: m.user.id,
+                name: m.user.name,
+                email: m.user.email,
+                role: m.role,
+                createdAt: m.createdAt,
+                accessCount: m.ficheAccess.length,
+                ficheIds: m.ficheAccess.map(a => a.ficheId),
+              }))
+            : [],
+        };
+      }),
+    organizationMembers: clientProcedure
+      .input(z.object({ organizationId: z.number().int().positive() }))
+      .query(async ({ ctx, input }) => {
+        await assertCanManageOrganizationMembers(ctx.user.id, input.organizationId);
+        const organization = await getOrganizationForUser(ctx.user.id, input.organizationId);
+        if (!organization) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Accès refusé." });
+        }
+        return organization.memberships.map(m => ({
+          id: m.id,
+          userId: m.user.id,
+          name: m.user.name,
+          email: m.user.email,
+          role: m.role,
+          createdAt: m.createdAt,
+          ficheIds: m.ficheAccess.map(a => a.ficheId),
+        }));
+      }),
     dashboard: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
@@ -572,7 +628,7 @@ export const appRouter = router({
         })
       )
       .query(async ({ ctx, input }) => {
-        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        const { fiche } = await assertCanViewFiche(ctx.user.id, input.ficheId);
         if (!fiche)
           throw new TRPCError({
             code: "FORBIDDEN",
