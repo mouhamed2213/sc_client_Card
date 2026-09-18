@@ -8,7 +8,7 @@ const prismaMock = vi.hoisted(() => ({
 
 vi.mock("../prisma/client", () => ({ prisma: prismaMock }));
 
-const { assertCanViewFiche, assertCanEditFiche } = await import("./authorization");
+const { assertCanViewFiche, assertCanEditFiche, listAccessibleFiches } = await import("./authorization");
 
 function reset() {
   prismaMock.fiche.findUnique.mockReset();
@@ -153,4 +153,30 @@ describe("organization authorization", () => {
       membership: { role: "OWNER" },
     });
     expect(prismaMock.ficheAccess.findUnique).not.toHaveBeenCalled();
+  });
+
+
+  it("lists all organization fiches for OWNER and only explicit grants for other memberships", async () => {
+    reset();
+    prismaMock.organizationMembership.findMany.mockResolvedValue([
+      { id: 1, organizationId: 100, role: "OWNER" },
+      { id: 2, organizationId: 200, role: "MEMBER" },
+    ]);
+    prismaMock.fiche.findMany.mockResolvedValue([
+      { id: 10, organizationId: 100 },
+      { id: 20, organizationId: 200 },
+    ]);
+
+    await listAccessibleFiches(7);
+
+    expect(prismaMock.fiche.findMany).toHaveBeenCalledWith({
+      where: {
+        organizationId: { not: null },
+        OR: [
+          { organizationId: { in: [100] } },
+          { accessGrants: { some: { membershipId: { in: [1, 2] } } } },
+        ],
+      },
+      orderBy: { updatedAt: "desc" },
+    });
   });
