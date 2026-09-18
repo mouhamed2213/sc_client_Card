@@ -27,20 +27,20 @@ export function ActiveOrganizationProvider({ children }: { children: ReactNode }
 
   const activeOrganization = useMemo(() => {
     const organizations = query.data ?? [];
-    const selected = organizations.find(org => org.id === storedId);
+    const selected = organizations.find(org => org.organizationId === storedId);
     return selected ?? organizations[0] ?? null;
   }, [query.data, storedId]);
 
   useEffect(() => {
     if (!activeOrganization) return;
-    if (activeOrganization.id !== storedId) setStoredId(activeOrganization.id);
-    window.localStorage.setItem(STORAGE_KEY, String(activeOrganization.id));
+    if (activeOrganization.organizationId !== storedId) setStoredId(activeOrganization.id);
+    window.localStorage.setItem(STORAGE_KEY, String(activeOrganization.organizationId));
   }, [activeOrganization, storedId]);
 
   const value = useMemo<ActiveOrganizationContextValue>(
     () => ({
       organizations: query.data,
-      activeOrganizationId: activeOrganization?.id ?? null,
+      activeOrganizationId: activeOrganization?.organizationId ?? null,
       setActiveOrganizationId: id => setStoredId(id),
       activeOrganization,
       isLoading: query.isLoading,
