@@ -17,7 +17,7 @@ const s3Client = new S3Client({
   forcePathStyle: true, // Requis pour SeaweedFS et la plupart des S3 auto-hébergés
 });
 
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || "my-bucket";
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || "fiches";
 
 function normalizeKey(relKey: string): string {
   return relKey.replace(/^\/+/, "");
@@ -47,7 +47,6 @@ export async function storagePut(
   });
 
   try {
-    
     await s3Client.send(command);
 
     // Génération de l'URL publique ou d'accès selon l'environnement
@@ -59,7 +58,6 @@ export async function storagePut(
   } catch (error) {
     console.error("[Storage] S3 Put failed:", error);
     throw new Error(`Storage upload failed: ${String(error)}`);
-    
   }
 }
 
@@ -76,4 +74,3 @@ export async function storageGet(
 
   return { key, url: publicUrl };
 }
-

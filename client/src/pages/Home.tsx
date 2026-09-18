@@ -966,7 +966,7 @@ function CreateModal({
                     0,
                     features.maxPhotos
                   );
-                  setSelectedGalleryFiles(files);
+                  // setSelectedGalleryFiles(files);
                   setForm("galleryFiles", files);
                   e.currentTarget.value = "";
                 }}
