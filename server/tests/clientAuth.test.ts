@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   CLIENT_USERNAME_PATTERN,
+  generateClientUsername,
+  generateTemporaryClientPassword,
   hashClientPassword,
   verifyClientPassword,
 } from "../_core/clientAuth";
@@ -27,5 +29,25 @@ describe("client authentication primitives", () => {
     expect(CLIENT_USERNAME_PATTERN.test("client_2026")).toBe(true);
     expect(CLIENT_USERNAME_PATTERN.test("ab")).toBe(false);
     expect(CLIENT_USERNAME_PATTERN.test("client name")).toBe(false);
+  });
+});
+
+
+describe("generated client credentials", () => {
+  it("generates a valid unique-looking username", () => {
+    const username = generateClientUsername("Mouhamed Xumaa");
+
+    expect(CLIENT_USERNAME_PATTERN.test(username)).toBe(true);
+    expect(username.startsWith("mouhamed.xumaa-")).toBe(true);
+    expect(username.length).toBeLessThanOrEqual(42);
+  });
+
+  it("generates a temporary password that is never the stored hash", () => {
+    const password = generateTemporaryClientPassword();
+    const hash = hashClientPassword(password);
+
+    expect(password.length).toBeGreaterThanOrEqual(16);
+    expect(hash).not.toContain(password);
+    expect(verifyClientPassword(password, hash)).toBe(true);
   });
 });
