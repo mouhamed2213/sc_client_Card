@@ -279,7 +279,7 @@ export default function ClientFicheEdit() {
                 </label>
               ))}
             </div>
-          </Section>
+          </EditorSection>
 
           <EditorSection title="Portrait et logo" note="Le traitement d’image et les limites Signature restent contrôlés par le serveur.">
             <div className="grid gap-5 md:grid-cols-2">
@@ -298,7 +298,7 @@ export default function ClientFicheEdit() {
                 onRemove={() => setField("logo", "")}
               />
             </div>
-          </Section>
+          </EditorSection>
 
           <EditorSection title="Présentation et action principale">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -327,7 +327,7 @@ export default function ClientFicheEdit() {
                 onChange={e => setData("presentation", e.target.value)}
               />
             </Field>
-          </Section>
+          </EditorSection>
 
           <EditorSection title="Rendez-vous">
             <div className="grid gap-4 sm:grid-cols-2">
@@ -349,7 +349,7 @@ export default function ClientFicheEdit() {
                 />
               </Field>
             </div>
-          </Section>
+          </EditorSection>
 
           <EditorSection title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}>
             <Repeater
@@ -391,7 +391,7 @@ export default function ClientFicheEdit() {
                 </div>
               )}
             />
-          </Section>
+          </EditorSection>
 
           <EditorSection title={`Liens personnalisés (${form.data.liens.length}/10)`} note="Maximum Signature : 10 liens.">
             <Repeater
@@ -426,7 +426,7 @@ export default function ClientFicheEdit() {
                 </div>
               )}
             />
-          </Section>
+          </EditorSection>
 
           <EditorSection title={`Galerie (${form.data.galerie.length}/8)`} note="Maximum Signature : 8 photos.">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -468,7 +468,7 @@ export default function ClientFicheEdit() {
                 </label>
               )}
             </div>
-          </Section>
+          </EditorSection>
 
           <EditorSection title="Horaires" note="Les 7 jours sont conservés et validés côté serveur.">
             <div className="space-y-2">
@@ -484,7 +484,7 @@ export default function ClientFicheEdit() {
                 </div>
               ))}
             </div>
-          </Section>
+          </EditorSection>
 
           <EditorSection title="Avis Google">
             <Field label="Google Place ID">
@@ -494,14 +494,14 @@ export default function ClientFicheEdit() {
                 placeholder="ChIJ…"
               />
             </Field>
-          </Section>
+          </EditorSection>
 
           <EditorSection title="Catalogue / menu / tarifs" note="Signature peut gérer ses sections et articles.">
             <CatalogEditor
               sections={form.data.sections}
               onChange={sections => setData("sections", sections)}
             />
-          </Section>
+          </EditorSection>
 
           <div className="flex justify-end">
             <button
