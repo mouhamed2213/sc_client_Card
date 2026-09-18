@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Settings,
   SquareArrowOutUpRight,
+  Building2,
   X,
 } from "lucide-react";
 import { ReactNode, useState } from "react";
@@ -104,6 +105,14 @@ export default function ClientLayout({
       )}
 
       <nav className="mt-6 flex-1 space-y-1">
+        <Link
+          href="/espace-client/organisations"
+          onClick={() => setOpen(false)}
+          className={`sidebar-link ${location.startsWith("/espace-client/organisation") || location === "/espace-client/organisations" ? "sidebar-link-active" : ""}`}
+        >
+          <Building2 size={17} />
+          Organisations
+        </Link>
         {nav.map(item => {
           const Icon = item.icon;
           const active = location === item.href;
