@@ -1,7 +1,9 @@
-import { ArrowLeft, Building2, Check, Lock, Users } from "lucide-react";
+import { ArrowLeft, Building2, Check, Clipboard, Lock, Plus, Users, X } from "lucide-react";
 import { useLocation, useRoute } from "wouter";
 import ClientLayout from "@/components/ClientLayout";
 import { trpc } from "@/lib/trpc";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const roleLabels: Record<string, string> = {
   OWNER: "Directeur / propriétaire",
@@ -41,6 +43,38 @@ export default function ClientOrganizationDetail() {
   }
 
   const organization = query.data;
+  const [inviteRole, setInviteRole] = useState<"ADMIN" | "MEMBER" | "VIEWER">("MEMBER");
+  const [inviteFicheId, setInviteFicheId] = useState<number | null>(null);
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+
+  const inviteMember = trpc.clientSpaceRouter.inviteMember.useMutation({
+    onSuccess: result => {
+      setInviteUrl(new URL(result.url, window.location.origin).toString());
+      toast.success("Invitation créée");
+      query.refetch();
+    },
+    onError: error => toast.error("Impossible de créer l'invitation", { description: error.message }),
+  });
+  const grantAccess = trpc.clientSpaceRouter.grantOrganizationFicheAccess.useMutation({
+    onSuccess: () => {
+      toast.success("Accès accordé");
+      query.refetch();
+    },
+    onError: error => toast.error("Impossible d'accorder l'accès", { description: error.message }),
+  });
+  const revokeAccess = trpc.clientSpaceRouter.revokeOrganizationFicheAccess.useMutation({
+    onSuccess: () => {
+      toast.success("Accès retiré");
+      query.refetch();
+    },
+    onError: error => toast.error("Impossible de retirer l'accès", { description: error.message }),
+  });
+
+  const copyInvite = async () => {
+    if (!inviteUrl) return;
+    await navigator.clipboard.writeText(inviteUrl);
+    toast.success("Lien d'invitation copié");
+  };
 
   return (
     <ClientLayout>
@@ -65,6 +99,84 @@ export default function ClientOrganizationDetail() {
             </span>
           </div>
         </section>
+
+        {organization.canManage && (
+          <section className="space-y-4">
+            <div className="rounded-2xl border border-[#e6e8ec] bg-white p-5">
+              <div className="flex items-center gap-2">
+                <Plus size={18} className="text-[#52607a]" />
+                <h2 className="font-semibold text-[#172033]">Inviter un membre</h2>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <select value={inviteRole} onChange={e => setInviteRole(e.target.value as typeof inviteRole)} className="rounded-lg border border-[#dfe3e8] px-3 py-2 text-sm">
+                  <option value="MEMBER">Membre</option>
+                  <option value="VIEWER">Lecteur</option>
+                  <option value="ADMIN">Administrateur</option>
+                </select>
+                <select value={inviteFicheId ?? ""} onChange={e => setInviteFicheId(e.target.value ? Number(e.target.value) : null)} className="rounded-lg border border-[#dfe3e8] px-3 py-2 text-sm">
+                  <option value="">Sans fiche pour l'instant</option>
+                  {organization.fiches.map(fiche => (
+                    <option key={fiche.id} value={fiche.id}>{fiche.prenom} {fiche.nom}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  disabled={inviteMember.isPending}
+                  onClick={() => inviteMember.mutate({ organizationId, role: inviteRole, ficheId: inviteFicheId })}
+                  className="rounded-lg bg-[#172033] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  Créer le lien
+                </button>
+              </div>
+              {inviteUrl && (
+                <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#f8f9fb] p-3">
+                  <input readOnly value={inviteUrl} className="min-w-0 flex-1 bg-transparent text-xs text-[#344054] outline-none" />
+                  <button type="button" onClick={copyInvite} className="inline-flex items-center gap-1 rounded-lg border border-[#dfe3e8] bg-white px-3 py-2 text-xs font-medium">
+                    <Clipboard size={14} /> Copier
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+              {organization.members.filter(member => member.role !== "OWNER").map(member => (
+                <div key={member.id} className="rounded-2xl border border-[#e6e8ec] bg-white p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-[#172033]">{member.name || "Utilisateur sans nom"}</p>
+                      <p className="text-xs text-[#7d8798]">{member.email || "E-mail non renseigné"} · {roleLabels[member.role] ?? member.role}</p>
+                    </div>
+                    <span className="text-xs text-[#7d8798]">{member.ficheIds.length} accès</span>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {organization.fiches.map(fiche => {
+                      const granted = member.ficheIds.includes(fiche.id);
+                      return (
+                        <button
+                          key={fiche.id}
+                          type="button"
+                          disabled={grantAccess.isPending || revokeAccess.isPending}
+                          onClick={() => granted
+                            ? revokeAccess.mutate({ organizationId, ficheId: fiche.id, membershipId: member.id })
+                            : grantAccess.mutate({ organizationId, ficheId: fiche.id, membershipId: member.id })}
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${granted ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-[#dfe3e8] bg-white text-[#667085]"}`}
+                        >
+                          {granted ? <Check size={13} /> : <Plus size={13} />}
+                          {fiche.prenom} {fiche.nom}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+              {organization.members.filter(member => member.role !== "OWNER").length === 0 && (
+                <div className="rounded-2xl border border-dashed border-[#d9dee6] bg-white p-6 text-sm text-[#667085]">
+                  Aucun membre à gérer pour le moment.
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         <section>
           <div className="mb-3 flex items-center gap-2">
