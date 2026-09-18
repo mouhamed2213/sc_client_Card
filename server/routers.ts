@@ -24,12 +24,12 @@ import {
 } from "./_core/trpc";
 import {
   listClientDashboard,
-  listInvitationsForFiche,
+  listInvitationsForOrganization,
   revokeInvitation,
   updateMembershipCardStatus,
 } from "./clientSpace";
 import {
-  attachFicheToOwner,
+  assignFicheToClientOrganization,
   assignFicheToOrganization,
   createContactRequest,
   createFicheAccess,
@@ -401,48 +401,32 @@ export const appRouter = router({
     searchClientUsers: adminProcedure
       .input(z.object({ query: z.string().max(160).optional().default("") }))
       .query(({ input }) => searchClientUsers(input.query)),
-    attachFicheToOwner: adminProcedure
+    assignFicheToClientOrganization: adminProcedure
       .input(
         z.object({
           ficheId: z.number().int().positive(),
-          ownerId: z.number().int().positive(),
+          userId: z.number().int().positive(),
         })
       )
       .mutation(async ({ input }) => {
-        const fiche = await getFicheById(input.ficheId);
-        if (!fiche)
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Fiche introuvable.",
-          });
-        if (fiche.ownerId)
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Cette fiche a déjà un propriétaire.",
-          });
         try {
-          await attachFicheToOwner(input.ficheId, input.ownerId);
+          await assignFicheToClientOrganization(input.ficheId, input.userId);
+          return { ok: true } as const;
         } catch (err) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message:
-              err instanceof Error && err.message === "OWNER_NOT_FOUND"
-                ? "Compte client introuvable."
-                : "Impossible de rattacher cette fiche.",
-          });
+          const message = err instanceof Error ? err.message : "";
+          if (message === "FICHE_NOT_FOUND" || message === "CLIENT_NOT_FOUND") {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Ressource introuvable." });
+          }
+          if (message === "FICHE_ALREADY_ASSIGNED") {
+            throw new TRPCError({ code: "CONFLICT", message: "Cette fiche est déjà affectée à une organisation." });
+          }
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Impossible d'affecter la fiche." });
         }
-        return { ok: true } as const;
       }),
     listInvitations: adminProcedure
-      .input(z.object({ ficheId: z.number().int().positive() }))
+      .input(z.object({ organizationId: z.number().int().positive() }))
       .query(async ({ input }) => {
-        const fiche = await getFicheById(input.ficheId);
-        if (!fiche)
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Fiche introuvable.",
-          });
-        return listInvitationsForFiche(input.ficheId);
+        return listInvitationsForOrganization(input.organizationId);
       }),
     revokeInvitation: adminProcedure
       .input(z.object({ invitationId: z.number().int().positive() }))
