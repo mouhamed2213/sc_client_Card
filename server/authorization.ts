@@ -130,6 +130,58 @@ export async function assertCanManageOrganization(
   return membership;
 }
 
+
+
+export async function getOrganizationForUser(userId: number, organizationId: number) {
+  return prisma.organization.findFirst({
+    where: {
+      id: organizationId,
+      memberships: { some: { userId } },
+    },
+    include: {
+      memberships: {
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          ficheAccess: {
+            include: {
+              fiche: {
+                select: {
+                  id: true,
+                  prenom: true,
+                  nom: true,
+                  entreprise: true,
+                  slug: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { createdAt: "asc" },
+      },
+      fiches: {
+        select: {
+          id: true,
+          slug: true,
+          prenom: true,
+          nom: true,
+          entreprise: true,
+          statut: true,
+          formule: true,
+          updatedAt: true,
+        },
+        orderBy: { updatedAt: "desc" },
+      },
+    },
+  });
+}
+
+export async function assertCanManageOrganizationMembers(
+  userId: number,
+  organizationId: number
+) {
+  return assertCanManageOrganization(userId, organizationId);
+}
+
 export function isOrganizationRole(
   role: string
 ): role is OrganizationMembershipRole {
