@@ -258,6 +258,46 @@ export async function getOverview() {
 
 // Espace client
 
+export async function createOrganization(input: { name: string; type: "PERSONAL" | "BUSINESS" }) {
+  return prisma.organization.create({ data: input });
+}
+
+export async function assignFicheToOrganization(ficheId: number, organizationId: number) {
+  const [fiche, organization] = await Promise.all([
+    prisma.fiche.findUnique({ where: { id: ficheId } }),
+    prisma.organization.findUnique({ where: { id: organizationId } }),
+  ]);
+  if (!fiche) throw new Error("FICHE_NOT_FOUND");
+  if (!organization) throw new Error("ORGANIZATION_NOT_FOUND");
+  return prisma.fiche.update({
+    where: { id: ficheId },
+    data: { organizationId },
+  });
+}
+
+export async function createFicheAccess(input: { ficheId: number; membershipId: number }) {
+  const [fiche, membership] = await Promise.all([
+    prisma.fiche.findUnique({ where: { id: input.ficheId }, select: { id: true, organizationId: true } }),
+    prisma.organizationMembership.findUnique({ where: { id: input.membershipId }, select: { id: true, organizationId: true, role: true } }),
+  ]);
+  if (!fiche) throw new Error("FICHE_NOT_FOUND");
+  if (!membership) throw new Error("MEMBERSHIP_NOT_FOUND");
+  if (!fiche.organizationId) throw new Error("FICHE_NOT_ASSIGNED_TO_ORGANIZATION");
+  if (fiche.organizationId !== membership.organizationId) throw new Error("ORGANIZATION_MISMATCH");
+  if (membership.role === "OWNER") return null;
+  return prisma.ficheAccess.upsert({
+    where: { ficheId_membershipId: { ficheId: input.ficheId, membershipId: input.membershipId } },
+    create: { ficheId: input.ficheId, membershipId: input.membershipId },
+    update: {},
+  });
+}
+
+export async function revokeFicheAccess(input: { ficheId: number; membershipId: number }) {
+  return prisma.ficheAccess.deleteMany({
+    where: { ficheId: input.ficheId, membershipId: input.membershipId },
+  });
+}
+
 // --- Invitations ---
 export async function createOrganizationInvitation(input: {
   organizationId: number;
