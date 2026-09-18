@@ -108,7 +108,6 @@ export default function AdminClientInvitationPanel() {
     return null;
   }
 
-  const organizationId = ficheQuery.data.organizationId as number | null | undefined;
   const hasOrganization = Boolean(organizationId);
 
   async function copyLink(url: string) {
