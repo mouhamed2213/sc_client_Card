@@ -672,7 +672,6 @@ export const appRouter = router({
           site: z.string().optional().default(""),
           adresse: z.string().optional().default(""),
           lienItineraire: z.string().optional().default(""),
-          googlePlaceId: z.string().optional().default(""),
           photo: z.string().optional().default(""),
           logo: z.string().optional().default(""),
           data: fichePayload.shape.data,
