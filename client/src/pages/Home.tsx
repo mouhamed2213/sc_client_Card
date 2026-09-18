@@ -140,7 +140,7 @@ export default function Home() {
       await utils.fiches.list.invalidate();
       await utils.fiches.overview.invalidate();
       setIsCreateOpen(false);
-      setForm(emptyForm);\n
+      setForm(emptyForm);
       toast.success("Fiche créée", {
         description: `/${slug} est prête à être complétée.`,
       });
@@ -174,7 +174,7 @@ export default function Home() {
   );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
-  const [form, setForm] = useState<CreateForm>(emptyForm);\n
+  const [form, setForm] = useState<CreateForm>(emptyForm);
 
   const filteredFiches = useMemo(
     () =>
