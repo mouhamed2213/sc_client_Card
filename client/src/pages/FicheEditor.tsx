@@ -567,6 +567,8 @@ export default function FicheEditor() {
               </EditorSection>
             </>
           )}
+          {features.maxLinks > 0 && (
+            <>
           <EditorSection
             title={`Liens personnalisés (${form.data.liens.length}/${features.maxLinks})`}
             note="Le serveur refuse tout dépassement du plafond"
@@ -621,6 +623,8 @@ export default function FicheEditor() {
               )}
             />
           </EditorSection>
+            </>
+          )}
           {features.maxPhotos > 0 && (
             <EditorSection
               title={`Galerie (${form.data.galerie.length}/${features.maxPhotos})`}
