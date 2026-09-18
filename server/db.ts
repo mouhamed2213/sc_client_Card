@@ -282,7 +282,6 @@ export async function consumeInvitation(token: string, userId: number) {
     const fiche = await tx.fiche.findUnique({ where: { id: invitation.ficheId } });
     if (!fiche) throw new Error("FICHE_NOT_FOUND");
     if (fiche.ownerId) throw new Error("FICHE_ALREADY_OWNED");
-    if (fiche.formule !== "signature") throw new Error("FICHE_NOT_ELIGIBLE");
 
     await tx.fiche.update({ where: { id: fiche.id }, data: { ownerId: userId } });
     await tx.invitationClient.update({ where: { id: invitation.id }, data: { utilisee: true } });
@@ -292,16 +291,11 @@ export async function consumeInvitation(token: string, userId: number) {
 
 // --- Fiches côté client ---
 export async function listFichesByOwner(ownerId: number) {
-  return prisma.fiche.findMany({
-    where: { ownerId, formule: "signature" },
-    orderBy: { updatedAt: "desc" },
-  });
+  return prisma.fiche.findMany({ where: { ownerId }, orderBy: { updatedAt: "desc" } });
 }
 
 export async function getFicheOwnedBy(id: number, ownerId: number) {
-  return prisma.fiche.findFirst({
-    where: { id, ownerId, formule: "signature" },
-  });
+  return prisma.fiche.findFirst({ where: { id, ownerId } });
 }
 
 // --- Scans agrégés (réutilisé par admin ET client) ---

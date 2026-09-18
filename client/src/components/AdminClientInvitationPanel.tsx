@@ -82,7 +82,6 @@ export default function AdminClientInvitationPanel() {
   }
 
   const hasOwner = Boolean(ficheQuery.data.ownerId);
-  const isSignature = ficheQuery.data.formule === "signature";
 
   async function copyLink(url: string) {
     try {
@@ -91,22 +90,6 @@ export default function AdminClientInvitationPanel() {
     } catch {
       toast.error("Impossible de copier le lien");
     }
-  }
-
-  if (!isSignature) {
-    return (
-      <div className="fixed bottom-5 right-5 z-40">
-        <Button
-          type="button"
-          disabled
-          title="L'espace client est réservé aux fiches de formule Signature."
-          className="gap-2 rounded-full bg-[#e5e7eb] px-5 text-[#98a2b3] shadow-none"
-        >
-          <UserPlus className="h-4 w-4" />
-          Accès client — Signature uniquement
-        </Button>
-      </div>
-    );
   }
 
   return (
