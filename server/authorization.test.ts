@@ -115,3 +115,42 @@ describe("organization authorization", () => {
     });
   });
 });
+
+
+  it("treats ADMIN like an explicitly assigned card user, never as organization-wide access", async () => {
+    reset();
+    prismaMock.fiche.findUnique.mockResolvedValue({ id: 10, organizationId: 100 });
+    prismaMock.organizationMembership.findUnique.mockResolvedValue({
+      id: 4,
+      organizationId: 100,
+      userId: 11,
+      role: "ADMIN",
+    });
+    prismaMock.ficheAccess.findUnique.mockResolvedValue(null);
+
+    await expect(assertCanViewFiche(11, 10)).rejects.toMatchObject({ code: "FORBIDDEN" });
+    expect(prismaMock.ficheAccess.findUnique).toHaveBeenCalledWith({
+      where: {
+        ficheId_membershipId: {
+          ficheId: 10,
+          membershipId: 4,
+        },
+      },
+    });
+  });
+
+  it("allows OWNER editing without a fiche-level access grant", async () => {
+    reset();
+    prismaMock.fiche.findUnique.mockResolvedValue({ id: 10, organizationId: 100 });
+    prismaMock.organizationMembership.findUnique.mockResolvedValue({
+      id: 1,
+      organizationId: 100,
+      userId: 7,
+      role: "OWNER",
+    });
+
+    await expect(assertCanEditFiche(7, 10)).resolves.toMatchObject({
+      membership: { role: "OWNER" },
+    });
+    expect(prismaMock.ficheAccess.findUnique).not.toHaveBeenCalled();
+  });
