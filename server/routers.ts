@@ -36,7 +36,6 @@ import {
   createOrganization,
   createOrganizationInvitation,
   createFiche,
-  createInvitation,
   createMembershipCard,
   getFicheById,
   getFicheBySlug,
@@ -293,21 +292,21 @@ export const appRouter = router({
   }),
   admin: router({
     inviteOwner: adminProcedure
-      .input(z.object({ ficheId: z.number().int().positive() }))
+      .input(z.object({ organizationId: z.number().int().positive() }))
       .mutation(async ({ input }) => {
-        const fiche = await getFicheById(input.ficheId);
-        if (!fiche)
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Fiche introuvable.",
+        try {
+          const invitation = await createOrganizationInvitation({
+            organizationId: input.organizationId,
+            role: "OWNER",
+            ficheId: null,
           });
-        if (fiche.ownerId)
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Cette fiche a déjà un propriétaire.",
-          });
-        const token = await createInvitation(input.ficheId);
-        return { token, url: `/espace-client/invite/${token}` };
+          return { token: invitation.token, url: `/espace-client/invite/${invitation.token}` };
+        } catch (error) {
+          if (error instanceof Error && error.message === "ORGANIZATION_NOT_FOUND") {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Organisation introuvable." });
+          }
+          throw error;
+        }
       }),
     createOrganization: adminProcedure
       .input(
