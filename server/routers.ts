@@ -547,6 +547,11 @@ export const appRouter = router({
         if (!membership) {
           throw new TRPCError({ code: "FORBIDDEN", message: "Accès refusé." });
         }
+        const accessibleFicheIds =
+          membership.role === "OWNER"
+            ? null
+            : new Set(membership.ficheAccess.map(access => access.ficheId));
+
         return {
           id: organization.id,
           name: organization.name,
@@ -554,7 +559,10 @@ export const appRouter = router({
           createdAt: organization.createdAt,
           role: membership.role,
           canManage: membership.role === "OWNER",
-          fiches: organization.fiches,
+          fiches:
+            accessibleFicheIds === null
+              ? organization.fiches
+              : organization.fiches.filter(fiche => accessibleFicheIds.has(fiche.id)),
           members: membership.role === "OWNER"
             ? organization.memberships.map(m => ({
                 id: m.id,
