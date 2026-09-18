@@ -140,7 +140,7 @@ export default function Home() {
       await utils.fiches.list.invalidate();
       await utils.fiches.overview.invalidate();
       setIsCreateOpen(false);
-      setForm(emptyForm);
+      setForm(emptyForm);\n      setSelectedGalleryFiles([]);
       toast.success("Fiche créée", {
         description: `/${slug} est prête à être complétée.`,
       });
@@ -174,7 +174,7 @@ export default function Home() {
   );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
-  const [form, setForm] = useState<CreateForm>(emptyForm);
+  const [form, setForm] = useState<CreateForm>(emptyForm);\n  const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
 
   const filteredFiches = useMemo(
     () =>
@@ -582,7 +582,10 @@ export default function Home() {
         <CreateModal
           form={form}
           setForm={updateField}
-          onClose={() => setIsCreateOpen(false)}
+          onClose={() => {
+            setIsCreateOpen(false);
+            setSelectedGalleryFiles([]);
+          }}
           onSubmit={submitCreate}
           isPending={createMutation.isPending}
         />
@@ -959,18 +962,26 @@ function CreateModal({
                 multiple
                 accept="image/jpeg,image/png,image/webp"
                 type="file"
-                onChange={e =>
-                  setForm(
-                    "galleryFiles",
-                    Array.from(e.target.files ?? []).slice(
-                      0,
-                      features.maxPhotos
-                    )
-                  )
-                }
+                onChange={e => {
+                  const files = Array.from(e.target.files ?? []).slice(
+                    0,
+                    features.maxPhotos
+                  );
+                  setSelectedGalleryFiles(files);
+                  setForm("galleryFiles", files);
+                  e.currentTarget.value = "";
+                }}
               />
+              {selectedGalleryFiles.length > 0 && (
+                <p className="mt-1.5 text-xs font-medium text-[#42506a]">
+                  {selectedGalleryFiles.length} photo
+                  {selectedGalleryFiles.length > 1 ? "s" : ""} sélectionnée
+                  {selectedGalleryFiles.length > 1 ? "s" : ""}.
+                </p>
+              )}
               <p className="mt-1 text-xs text-[#9aa3b1]">
-                Chaque photo : maximum 80 ko après préparation.
+                Sélectionnez plusieurs photos en une seule fois. Chaque photo :
+                maximum 80 ko après préparation.
               </p>
             </Field>
           )}
