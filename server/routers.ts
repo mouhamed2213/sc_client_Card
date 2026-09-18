@@ -49,6 +49,8 @@ import {
   recordScan,
   revokeFicheAccess,
   searchClientUsers,
+  removeOrganizationMember,
+  updateOrganizationMemberRole,
   updateFiche,
 } from "./db";
 import { validatePlanPayload } from "./planValidation";
@@ -643,6 +645,49 @@ export const appRouter = router({
         }
         await revokeFicheAccess({ ficheId: input.ficheId, membershipId: input.membershipId });
         return { ok: true } as const;
+      }),
+    updateOrganizationMemberRole: clientProcedure
+      .input(z.object({
+        organizationId: z.number().int().positive(),
+        membershipId: z.number().int().positive(),
+        role: z.enum(["ADMIN", "MEMBER", "VIEWER"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await assertCanManageOrganization(ctx.user.id, input.organizationId);
+        try {
+          await updateOrganizationMemberRole(input.organizationId, input.membershipId, input.role);
+          return { ok: true } as const;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (message === "MEMBERSHIP_NOT_FOUND") {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Membre introuvable dans cette organisation." });
+          }
+          if (message === "OWNER_CANNOT_CHANGE_ROLE") {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Le rôle du directeur ne peut pas être modifié ici." });
+          }
+          throw error;
+        }
+      }),
+    removeOrganizationMember: clientProcedure
+      .input(z.object({
+        organizationId: z.number().int().positive(),
+        membershipId: z.number().int().positive(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await assertCanManageOrganization(ctx.user.id, input.organizationId);
+        try {
+          await removeOrganizationMember(input.organizationId, input.membershipId);
+          return { ok: true } as const;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (message === "MEMBERSHIP_NOT_FOUND") {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Membre introuvable dans cette organisation." });
+          }
+          if (message === "OWNER_CANNOT_BE_REMOVED") {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Le directeur ne peut pas être retiré de son organisation." });
+          }
+          throw error;
+        }
       }),
 
     organizationMembers: clientProcedure
