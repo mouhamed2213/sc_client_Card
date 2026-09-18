@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
-import { useParams } from "wouter";
+import ClientLayout from "@/components/ClientLayout";
+import { formuleLabels } from "@/lib/ficheStatus";
+import { prepareImage } from "@/lib/imageProcessing";
+import { trpc } from "@/lib/trpc";
+import type { MediaKind } from "@shared/mediaRules";
 import {
   ImagePlus,
   Loader2,
@@ -10,12 +13,9 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { trpc } from "@/lib/trpc";
-import ClientLayout from "@/components/ClientLayout";
-import { formuleLabels } from "@/lib/ficheStatus";
-import { prepareImage } from "@/lib/imageProcessing";
-import type { MediaKind } from "@shared/mediaRules";
+import { useParams } from "wouter";
 
 type LinkItem = { label: string; url: string };
 type SocialItem = { label: string; url: string };
@@ -144,7 +144,10 @@ export default function ClientFicheEdit() {
     return (
       <ClientLayout ficheId={id}>
         <div className="p-4 sm:p-6 lg:p-8">
-          <div className="id-card mx-auto max-w-md text-center" style={{ padding: "34px 28px" }}>
+          <div
+            className="id-card mx-auto max-w-md text-center"
+            style={{ padding: "34px 28px" }}
+          >
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
               <Lock size={20} />
             </div>
@@ -152,8 +155,9 @@ export default function ClientFicheEdit() {
               Passez à la carte Signature
             </p>
             <p className="id-card-role">
-              L’édition complète depuis l’espace client est réservée à la formule Signature.
-              Votre fiche est actuellement en {formuleLabels[fiche.data.formule] ?? fiche.data.formule}.
+              L’édition complète depuis l’espace client est réservée à la
+              formule Signature. Votre fiche est actuellement en{" "}
+              {formuleLabels[fiche.data.formule] ?? fiche.data.formule}.
             </p>
             <a
               href={`https://wa.me/?text=${encodeURIComponent(
@@ -181,7 +185,9 @@ export default function ClientFicheEdit() {
     value: FormState["data"][K]
   ) =>
     setForm(current =>
-      current ? { ...current, data: { ...current.data, [key]: value } } : current
+      current
+        ? { ...current, data: { ...current.data, [key]: value } }
+        : current
     );
 
   async function uploadImage(file: File, kind: MediaKind) {
@@ -206,7 +212,8 @@ export default function ClientFicheEdit() {
       toast.success("Image ajoutée");
     } catch (error) {
       toast.error("Image refusée", {
-        description: error instanceof Error ? error.message : "Le traitement a échoué.",
+        description:
+          error instanceof Error ? error.message : "Le traitement a échoué.",
       });
     } finally {
       setUploading(null);
@@ -221,305 +228,423 @@ export default function ClientFicheEdit() {
 
   return (
     <ClientLayout ficheId={id}>
-      <div className="min-h-screen bg-[#f5f6f8] text-[#172033] p-4 sm:p-6 lg:p-8"><div className="mx-auto max-w-[1300px] space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#c98a4e]">
-              Formule Signature
-            </p>
-            <h1 className="mt-1 text-xl font-semibold text-[#172033]">Modifier ma fiche</h1>
-            <p className="mt-1 max-w-2xl text-sm text-[#7d8798]">
-              Vous pouvez modifier le contenu public de votre fiche. Les paramètres
-              d’administration restent réservés au studio.
-            </p>
-          </div>
-          <button
-            type="submit"
-            form="signature-fiche-form"
-            disabled={save.isPending || uploading !== null}
-            className="flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-          >
-            <Save size={15} />
-            {save.isPending ? "Enregistrement…" : "Enregistrer"}
-          </button>
-        </div>
-
-        <form id="signature-fiche-form" onSubmit={saveChanges} className="space-y-6">
-          <EditorSection title="Identité et contact">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                ["prenom", "Prénom", true],
-                ["nom", "Nom", true],
-                ["fonction", "Fonction", true],
-                ["entreprise", "Entreprise", true],
-                ["telephone", "Téléphone", true],
-                ["whatsapp", "WhatsApp", true],
-                ["email", "E-mail", false],
-                ["site", "Site web", false],
-                ["adresse", "Adresse", false],
-                ["lienItineraire", "Lien Google Maps", false],
-                ["googlePlaceId", "Google Place ID", false],
-              ].map(([key, label, required]) => (
-                <label key={key} className="block">
-                  <span className="text-xs font-medium text-[#52607a]">
-                    {label}{required ? " *" : ""}
-                  </span>
-                  <input
-                    required={Boolean(required)}
-                    type={key === "email" ? "email" : "text"}
-                    value={form[key as keyof Omit<FormState, "data">] as string}
-                    onChange={event =>
-                      setField(
-                        key as keyof Omit<FormState, "data">,
-                        event.target.value
-                      )
-                    }
-                    className="editor-input mt-1.5"
-                  />
-                </label>
-              ))}
+      <div className="min-h-screen bg-[#f5f6f8] text-[#172033] p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-[1300px] space-y-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#c98a4e]">
+                Formule Signature
+              </p>
+              <h1 className="mt-1 text-xl font-semibold text-[#172033]">
+                Modifier ma fiche
+              </h1>
+              <p className="mt-1 max-w-2xl text-sm text-[#7d8798]">
+                Vous pouvez modifier le contenu public de votre fiche. Les
+                paramètres d’administration restent réservés au studio.
+              </p>
             </div>
-          </EditorSection>
-
-          <EditorSection title="Portrait et logo" note="Le traitement d’image et les limites Signature restent contrôlés par le serveur.">
-            <div className="grid gap-5 md:grid-cols-2">
-              <MediaCard
-                title="Portrait"
-                value={form.photo}
-                loading={uploading === "profile"}
-                onPick={file => uploadImage(file, "profile")}
-                onRemove={() => setField("photo", "")}
-              />
-              <MediaCard
-                title="Logo"
-                value={form.logo}
-                loading={uploading === "logo"}
-                onPick={file => uploadImage(file, "logo")}
-                onRemove={() => setField("logo", "")}
-              />
-            </div>
-          </EditorSection>
-
-          <EditorSection title="Présentation et action principale">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Action prioritaire">
-                <select
-                  value={form.data.premierBouton}
-                  onChange={e =>
-                    setData("premierBouton", e.target.value as FormState["data"]["premierBouton"])
-                  }
-                >
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="appel">Appeler</option>
-                  <option value="contact">Formulaire de contact</option>
-                </select>
-              </Field>
-              <Field label="Message WhatsApp prérempli">
-                <input
-                  value={form.data.messageWhatsapp}
-                  onChange={e => setData("messageWhatsapp", e.target.value)}
-                />
-              </Field>
-            </div>
-            <Field label="Présentation">
-              <textarea className="editor-input mt-1.5" rows={6}
-                value={form.data.presentation}
-                onChange={e => setData("presentation", e.target.value)}
-              />
-            </Field>
-          </EditorSection>
-
-          <EditorSection title="Rendez-vous">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Libellé du bouton">
-                <input
-                  value={form.data.rendezVous.label}
-                  onChange={e =>
-                    setData("rendezVous", { ...form.data.rendezVous, label: e.target.value })
-                  }
-                />
-              </Field>
-              <Field label="URL de réservation">
-                <input className="editor-input mt-1.5"\n                  type="url"
-                  value={form.data.rendezVous.url}
-                  onChange={e =>
-                    setData("rendezVous", { ...form.data.rendezVous, url: e.target.value })
-                  }
-                  placeholder="https://…"
-                />
-              </Field>
-            </div>
-          </EditorSection>
-
-          <EditorSection title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}>
-            <Repeater
-              items={form.data.reseauxSociaux}
-              onAdd={() =>
-                setData("reseauxSociaux", [...form.data.reseauxSociaux, { label: "", url: "" }])
-              }
-              onRemove={index =>
-                setData("reseauxSociaux", form.data.reseauxSociaux.filter((_, i) => i !== index))
-              }
-              render={(item, index) => (
-                <div className="grid gap-2 sm:grid-cols-[180px_1fr_auto]">
-                  <input className="editor-input"\n                    placeholder="Instagram, LinkedIn…"
-                    value={item.label}
-                    onChange={e =>
-                      setData(
-                        "reseauxSociaux",
-                        form.data.reseauxSociaux.map((x, i) =>
-                          i === index ? { ...x, label: e.target.value } : x
-                        )
-                      )
-                    }
-                  />
-                  <input className="editor-input"\n                    type="url"
-                    placeholder="https://…"
-                    value={item.url}
-                    onChange={e =>
-                      setData(
-                        "reseauxSociaux",
-                        form.data.reseauxSociaux.map((x, i) =>
-                          i === index ? { ...x, url: e.target.value } : x
-                        )
-                      )
-                    }
-                  />
-                  <button type="button" onClick={() => onRemove(index)} className="rounded-lg border px-3">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              )}
-            />
-          </EditorSection>
-
-          <EditorSection title={`Liens personnalisés (${form.data.liens.length}/10)`} note="Maximum Signature : 10 liens.">
-            <Repeater
-              items={form.data.liens}
-              onAdd={() => {
-                if (form.data.liens.length < 10)
-                  setData("liens", [...form.data.liens, { label: "", url: "" }]);
-              }}
-              onRemove={index =>
-                setData("liens", form.data.liens.filter((_, i) => i !== index))
-              }
-              render={(item, index) => (
-                <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-                  <input
-                    placeholder="Libellé"
-                    value={item.label}
-                    onChange={e =>
-                      setData("liens", form.data.liens.map((x, i) => i === index ? { ...x, label: e.target.value } : x))
-                    }
-                  />
-                  <input
-                    type="url"
-                    placeholder="https://…"
-                    value={item.url}
-                    onChange={e =>
-                      setData("liens", form.data.liens.map((x, i) => i === index ? { ...x, url: e.target.value } : x))
-                    }
-                  />
-                  <button type="button" onClick={() => onRemove(index)} className="rounded-lg border px-3">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              )}
-            />
-          </EditorSection>
-
-          <EditorSection title={`Galerie (${form.data.galerie.length}/8)`} note="Maximum Signature : 8 photos.">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {form.data.galerie.map((image, index) => (
-                <div key={image.url} className="rounded-xl border border-[#e5e8ed] p-2">
-                  <img src={image.url} alt={image.alt} className="h-32 w-full rounded-lg object-cover" />
-                  <input
-                    className="mt-2 w-full rounded-lg border px-2 py-1.5 text-xs"
-                    aria-label={`Texte alternatif ${index + 1}`}
-                    value={image.alt}
-                    onChange={e =>
-                      setData("galerie", form.data.galerie.map((x, i) => i === index ? { ...x, alt: e.target.value } : x))
-                    }
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setData("galerie", form.data.galerie.filter((_, i) => i !== index))}
-                    className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-xs"
-                  >
-                    <Trash2 size={14} /> Supprimer
-                  </button>
-                </div>
-              ))}
-              {form.data.galerie.length < 8 && (
-                <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#cfd5dd] text-sm text-[#667085]">
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    disabled={uploading === "gallery"}
-                    onChange={async e => {
-                      const file = e.target.files?.[0];
-                      if (file) await uploadImage(file, "gallery");
-                      e.currentTarget.value = "";
-                    }}
-                  />
-                  {uploading === "gallery" ? <Loader2 className="animate-spin" /> : <ImagePlus />}
-                  Ajouter une photo
-                </label>
-              )}
-            </div>
-          </EditorSection>
-
-          <EditorSection title="Horaires" note="Les 7 jours sont conservés et validés côté serveur.">
-            <div className="space-y-2">
-              {form.data.horaires.map((row, index) => (
-                <div key={row.jour} className="grid gap-2 sm:grid-cols-[150px_1fr]">
-                  <div className="flex items-center text-sm font-medium">{row.jour}</div>
-                  <input className="editor-input"\n                    value={row.horaire}
-                    placeholder="09:00 — 18:00 ou Fermé"
-                    onChange={e =>
-                      setData("horaires", form.data.horaires.map((x, i) => i === index ? { ...x, horaire: e.target.value } : x))
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          </EditorSection>
-
-          <EditorSection title="Avis Google">
-            <Field label="Google Place ID">
-              <input
-                value={form.googlePlaceId}
-                onChange={e => setField("googlePlaceId", e.target.value)}
-                placeholder="ChIJ…"
-              />
-            </Field>
-          </EditorSection>
-
-          <EditorSection title="Catalogue / menu / tarifs" note="Signature peut gérer ses sections et articles.">
-            <CatalogEditor
-              sections={form.data.sections}
-              onChange={sections => setData("sections", sections)}
-            />
-          </EditorSection>
-
-          <div className="flex justify-end">
             <button
               type="submit"
+              form="signature-fiche-form"
               disabled={save.isPending || uploading !== null}
               className="flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
             >
               <Save size={15} />
-              {save.isPending ? "Enregistrement…" : "Enregistrer les modifications"}
+              {save.isPending ? "Enregistrement…" : "Enregistrer"}
             </button>
           </div>
-        </form>
-      </div></div>
+
+          <form
+            id="signature-fiche-form"
+            onSubmit={saveChanges}
+            className="space-y-6"
+          >
+            <EditorSection title="Identité et contact">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[
+                  ["prenom", "Prénom", true],
+                  ["nom", "Nom", true],
+                  ["fonction", "Fonction", true],
+                  ["entreprise", "Entreprise", true],
+                  ["telephone", "Téléphone", true],
+                  ["whatsapp", "WhatsApp", true],
+                  ["email", "E-mail", false],
+                  ["site", "Site web", false],
+                  ["adresse", "Adresse", false],
+                  ["lienItineraire", "Lien Google Maps", false],
+                  ["googlePlaceId", "Google Place ID", false],
+                ].map(([key, label, required]) => (
+                  <label key={key} className="block">
+                    <span className="text-xs font-medium text-[#52607a]">
+                      {label}
+                      {required ? " *" : ""}
+                    </span>
+                    <input
+                      required={Boolean(required)}
+                      type={key === "email" ? "email" : "text"}
+                      value={
+                        form[key as keyof Omit<FormState, "data">] as string
+                      }
+                      onChange={event =>
+                        setField(
+                          key as keyof Omit<FormState, "data">,
+                          event.target.value
+                        )
+                      }
+                      className="editor-input mt-1.5"
+                    />
+                  </label>
+                ))}
+              </div>
+            </EditorSection>
+
+            <EditorSection
+              title="Portrait et logo"
+              note="Le traitement d’image et les limites Signature restent contrôlés par le serveur."
+            >
+              <div className="grid gap-5 md:grid-cols-2">
+                <MediaCard
+                  title="Portrait"
+                  value={form.photo}
+                  loading={uploading === "profile"}
+                  onPick={file => uploadImage(file, "profile")}
+                  onRemove={() => setField("photo", "")}
+                />
+                <MediaCard
+                  title="Logo"
+                  value={form.logo}
+                  loading={uploading === "logo"}
+                  onPick={file => uploadImage(file, "logo")}
+                  onRemove={() => setField("logo", "")}
+                />
+              </div>
+            </EditorSection>
+
+            <EditorSection title="Présentation et action principale">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Action prioritaire">
+                  <select
+                    value={form.data.premierBouton}
+                    onChange={e =>
+                      setData(
+                        "premierBouton",
+                        e.target.value as FormState["data"]["premierBouton"]
+                      )
+                    }
+                  >
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="appel">Appeler</option>
+                    <option value="contact">Formulaire de contact</option>
+                  </select>
+                </Field>
+                <Field label="Message WhatsApp prérempli">
+                  <input
+                    value={form.data.messageWhatsapp}
+                    onChange={e => setData("messageWhatsapp", e.target.value)}
+                  />
+                </Field>
+              </div>
+              <Field label="Présentation">
+                <textarea
+                  className="editor-input mt-1.5"
+                  rows={6}
+                  value={form.data.presentation}
+                  onChange={e => setData("presentation", e.target.value)}
+                />
+              </Field>
+            </EditorSection>
+
+            <EditorSection title="Rendez-vous">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Libellé du bouton">
+                  <input
+                    value={form.data.rendezVous.label}
+                    onChange={e =>
+                      setData("rendezVous", {
+                        ...form.data.rendezVous,
+                        label: e.target.value,
+                      })
+                    }
+                  />
+                </Field>
+                <Field label="URL de réservation">
+                  <input
+                    className="editor-input mt-1.5"
+                    type="url"
+                    value={form.data.rendezVous.url}
+                    onChange={e =>
+                      setData("rendezVous", {
+                        ...form.data.rendezVous,
+                        url: e.target.value,
+                      })
+                    }
+                    placeholder="https://…"
+                  />
+                </Field>
+              </div>
+            </EditorSection>
+
+            <EditorSection
+              title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}
+            >
+              <Repeater
+                items={form.data.reseauxSociaux}
+                onAdd={() =>
+                  setData("reseauxSociaux", [
+                    ...form.data.reseauxSociaux,
+                    { label: "", url: "" },
+                  ])
+                }
+                onRemove={index =>
+                  setData(
+                    "reseauxSociaux",
+                    form.data.reseauxSociaux.filter((_, i) => i !== index)
+                  )
+                }
+                render={(item, index) => (
+                  <div className="grid gap-2 sm:grid-cols-[180px_1fr_auto]">
+                    <input
+                      className="editor-input"
+                      placeholder="Instagram, LinkedIn…"
+                      value={item.label}
+                      onChange={e =>
+                        setData(
+                          "reseauxSociaux",
+                          form.data.reseauxSociaux.map((x, i) =>
+                            i === index ? { ...x, label: e.target.value } : x
+                          )
+                        )
+                      }
+                    />
+                    <input
+                      className="editor-input"
+                      type="url"
+                      placeholder="https://…"
+                      value={item.url}
+                      onChange={e =>
+                        setData(
+                          "reseauxSociaux",
+                          form.data.reseauxSociaux.map((x, i) =>
+                            i === index ? { ...x, url: e.target.value } : x
+                          )
+                        )
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() => onRemove(index)}
+                      className="rounded-lg border px-3"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                )}
+              />
+            </EditorSection>
+
+            <EditorSection
+              title={`Liens personnalisés (${form.data.liens.length}/10)`}
+              note="Maximum Signature : 10 liens."
+            >
+              <Repeater
+                items={form.data.liens}
+                onAdd={() => {
+                  if (form.data.liens.length < 10)
+                    setData("liens", [
+                      ...form.data.liens,
+                      { label: "", url: "" },
+                    ]);
+                }}
+                onRemove={index =>
+                  setData(
+                    "liens",
+                    form.data.liens.filter((_, i) => i !== index)
+                  )
+                }
+                render={(item, index) => (
+                  <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                    <input
+                      placeholder="Libellé"
+                      value={item.label}
+                      onChange={e =>
+                        setData(
+                          "liens",
+                          form.data.liens.map((x, i) =>
+                            i === index ? { ...x, label: e.target.value } : x
+                          )
+                        )
+                      }
+                    />
+                    <input
+                      type="url"
+                      placeholder="https://…"
+                      value={item.url}
+                      onChange={e =>
+                        setData(
+                          "liens",
+                          form.data.liens.map((x, i) =>
+                            i === index ? { ...x, url: e.target.value } : x
+                          )
+                        )
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() => onRemove(index)}
+                      className="rounded-lg border px-3"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                )}
+              />
+            </EditorSection>
+
+            <EditorSection
+              title={`Galerie (${form.data.galerie.length}/8)`}
+              note="Maximum Signature : 8 photos."
+            >
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {form.data.galerie.map((image, index) => (
+                  <div
+                    key={image.url}
+                    className="rounded-xl border border-[#e5e8ed] p-2"
+                  >
+                    <img
+                      src={image.url}
+                      alt={image.alt}
+                      className="h-32 w-full rounded-lg object-cover"
+                    />
+                    <input
+                      className="mt-2 w-full rounded-lg border px-2 py-1.5 text-xs"
+                      aria-label={`Texte alternatif ${index + 1}`}
+                      value={image.alt}
+                      onChange={e =>
+                        setData(
+                          "galerie",
+                          form.data.galerie.map((x, i) =>
+                            i === index ? { ...x, alt: e.target.value } : x
+                          )
+                        )
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setData(
+                          "galerie",
+                          form.data.galerie.filter((_, i) => i !== index)
+                        )
+                      }
+                      className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-xs"
+                    >
+                      <Trash2 size={14} /> Supprimer
+                    </button>
+                  </div>
+                ))}
+                {form.data.galerie.length < 8 && (
+                  <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#cfd5dd] text-sm text-[#667085]">
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      disabled={uploading === "gallery"}
+                      onChange={async e => {
+                        const file = e.target.files?.[0];
+                        if (file) await uploadImage(file, "gallery");
+                        e.currentTarget.value = "";
+                      }}
+                    />
+                    {uploading === "gallery" ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <ImagePlus />
+                    )}
+                    Ajouter une photo
+                  </label>
+                )}
+              </div>
+            </EditorSection>
+
+            <EditorSection
+              title="Horaires"
+              note="Les 7 jours sont conservés et validés côté serveur."
+            >
+              <div className="space-y-2">
+                {form.data.horaires.map((row, index) => (
+                  <div
+                    key={row.jour}
+                    className="grid gap-2 sm:grid-cols-[150px_1fr]"
+                  >
+                    <div className="flex items-center text-sm font-medium">
+                      {row.jour}
+                    </div>
+                    <input
+                      className="editor-input"
+                      value={row.horaire}
+                      placeholder="09:00 — 18:00 ou Fermé"
+                      onChange={e =>
+                        setData(
+                          "horaires",
+                          form.data.horaires.map((x, i) =>
+                            i === index ? { ...x, horaire: e.target.value } : x
+                          )
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </EditorSection>
+
+            <EditorSection title="Avis Google">
+              <Field label="Google Place ID">
+                <input
+                  value={form.googlePlaceId}
+                  onChange={e => setField("googlePlaceId", e.target.value)}
+                  placeholder="ChIJ…"
+                />
+              </Field>
+            </EditorSection>
+
+            <EditorSection
+              title="Catalogue / menu / tarifs"
+              note="Signature peut gérer ses sections et articles."
+            >
+              <CatalogEditor
+                sections={form.data.sections}
+                onChange={sections => setData("sections", sections)}
+              />
+            </EditorSection>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={save.isPending || uploading !== null}
+                className="flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                <Save size={15} />
+                {save.isPending
+                  ? "Enregistrement…"
+                  : "Enregistrer les modifications"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </ClientLayout>
   );
 }
 
-function EditorSection({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
+function EditorSection({
+  title,
+  note,
+  children,
+}: {
+  title: string;
+  note?: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="editor-card">
       <div className="mb-5">
@@ -531,7 +656,13 @@ function EditorSection({ title, note, children }: { title: string; note?: string
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <span className="text-xs font-medium text-[#52607a]">{label}</span>
@@ -588,12 +719,18 @@ function MediaCard({
         {value ? (
           <img src={value} alt={title} className="h-48 w-full object-contain" />
         ) : (
-          <div className="flex h-48 items-center justify-center text-sm text-[#9aa3b1]">Aucune image</div>
+          <div className="flex h-48 items-center justify-center text-sm text-[#9aa3b1]">
+            Aucune image
+          </div>
         )}
       </div>
       <div className="mt-3 flex justify-end gap-2">
         {value && (
-          <button type="button" onClick={onRemove} className="rounded-lg border px-3 py-2 text-xs">
+          <button
+            type="button"
+            onClick={onRemove}
+            className="rounded-lg border px-3 py-2 text-xs"
+          >
             <Trash2 size={14} />
           </button>
         )}
@@ -605,7 +742,11 @@ function MediaCard({
             disabled={loading}
             onChange={e => e.target.files?.[0] && onPick(e.target.files[0])}
           />
-          {loading ? <Loader2 className="animate-spin" size={14} /> : <Upload size={14} />}
+          {loading ? (
+            <Loader2 className="animate-spin" size={14} />
+          ) : (
+            <Upload size={14} />
+          )}
           Choisir
         </label>
       </div>
@@ -623,59 +764,115 @@ function CatalogEditor({
   return (
     <div className="space-y-4">
       {sections.map((section, sectionIndex) => (
-        <div key={sectionIndex} className="rounded-xl border border-[#e5e8ed] p-4">
+        <div
+          key={sectionIndex}
+          className="rounded-xl border border-[#e5e8ed] p-4"
+        >
           <div className="flex gap-2">
             <input
               className="flex-1"
               placeholder="Nom de la section"
               value={section.titre}
               onChange={e =>
-                onChange(sections.map((x, i) => i === sectionIndex ? { ...x, titre: e.target.value } : x))
+                onChange(
+                  sections.map((x, i) =>
+                    i === sectionIndex ? { ...x, titre: e.target.value } : x
+                  )
+                )
               }
             />
-            <button type="button" onClick={() => onChange(sections.filter((_, i) => i !== sectionIndex))} className="rounded-lg border px-3">
+            <button
+              type="button"
+              onClick={() =>
+                onChange(sections.filter((_, i) => i !== sectionIndex))
+              }
+              className="rounded-lg border px-3"
+            >
               <Trash2 size={16} />
             </button>
           </div>
           <div className="mt-3 space-y-2">
             {section.articles.map((article, articleIndex) => (
-              <div key={articleIndex} className="grid gap-2 md:grid-cols-[1fr_1.5fr_120px_auto]">
-                <input className="editor-input"\n                  placeholder="Article / prestation"
+              <div
+                key={articleIndex}
+                className="grid gap-2 md:grid-cols-[1fr_1.5fr_120px_auto]"
+              >
+                <input
+                  className="editor-input"
+                  placeholder="Article / prestation"
                   value={article.nom}
                   onChange={e =>
-                    onChange(sections.map((x, i) => i === sectionIndex ? {
-                      ...x,
-                      articles: x.articles.map((a, ai) => ai === articleIndex ? { ...a, nom: e.target.value } : a),
-                    } : x))
+                    onChange(
+                      sections.map((x, i) =>
+                        i === sectionIndex
+                          ? {
+                              ...x,
+                              articles: x.articles.map((a, ai) =>
+                                ai === articleIndex
+                                  ? { ...a, nom: e.target.value }
+                                  : a
+                              ),
+                            }
+                          : x
+                      )
+                    )
                   }
                 />
                 <input
                   placeholder="Description"
                   value={article.description}
                   onChange={e =>
-                    onChange(sections.map((x, i) => i === sectionIndex ? {
-                      ...x,
-                      articles: x.articles.map((a, ai) => ai === articleIndex ? { ...a, description: e.target.value } : a),
-                    } : x))
+                    onChange(
+                      sections.map((x, i) =>
+                        i === sectionIndex
+                          ? {
+                              ...x,
+                              articles: x.articles.map((a, ai) =>
+                                ai === articleIndex
+                                  ? { ...a, description: e.target.value }
+                                  : a
+                              ),
+                            }
+                          : x
+                      )
+                    )
                   }
                 />
                 <input
                   placeholder="Prix"
                   value={article.prix}
                   onChange={e =>
-                    onChange(sections.map((x, i) => i === sectionIndex ? {
-                      ...x,
-                      articles: x.articles.map((a, ai) => ai === articleIndex ? { ...a, prix: e.target.value } : a),
-                    } : x))
+                    onChange(
+                      sections.map((x, i) =>
+                        i === sectionIndex
+                          ? {
+                              ...x,
+                              articles: x.articles.map((a, ai) =>
+                                ai === articleIndex
+                                  ? { ...a, prix: e.target.value }
+                                  : a
+                              ),
+                            }
+                          : x
+                      )
+                    )
                   }
                 />
                 <button
                   type="button"
                   onClick={() =>
-                    onChange(sections.map((x, i) => i === sectionIndex ? {
-                      ...x,
-                      articles: x.articles.filter((_, ai) => ai !== articleIndex),
-                    } : x))
+                    onChange(
+                      sections.map((x, i) =>
+                        i === sectionIndex
+                          ? {
+                              ...x,
+                              articles: x.articles.filter(
+                                (_, ai) => ai !== articleIndex
+                              ),
+                            }
+                          : x
+                      )
+                    )
                   }
                   className="rounded-lg border px-3"
                 >
@@ -686,10 +883,19 @@ function CatalogEditor({
             <button
               type="button"
               onClick={() =>
-                onChange(sections.map((x, i) => i === sectionIndex ? {
-                  ...x,
-                  articles: [...x.articles, { nom: "", description: "", prix: "" }],
-                } : x))
+                onChange(
+                  sections.map((x, i) =>
+                    i === sectionIndex
+                      ? {
+                          ...x,
+                          articles: [
+                            ...x.articles,
+                            { nom: "", description: "", prix: "" },
+                          ],
+                        }
+                      : x
+                  )
+                )
               }
               className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold"
             >
@@ -701,7 +907,10 @@ function CatalogEditor({
       <button
         type="button"
         onClick={() =>
-          onChange([...sections, { titre: "", articles: [{ nom: "", description: "", prix: "" }] }])
+          onChange([
+            ...sections,
+            { titre: "", articles: [{ nom: "", description: "", prix: "" }] },
+          ])
         }
         className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold"
       >
