@@ -12,7 +12,7 @@ export const planFeatures = {
   pro: {
     maxLinks: 10,
     maxPhotos: 8,
-    hasForm: true,
+    hasForm: false,
     hasGoogleReview: true,
     requiresProfile: true,
     requiresHours: true,
