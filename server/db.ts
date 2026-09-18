@@ -274,24 +274,37 @@ export async function getInvitationByToken(token: string) {
 // transaction pour éviter une invitation utilisée deux fois en concurrence.
 export async function consumeInvitation(token: string, userId: number) {
   return prisma.$transaction(async tx => {
-    const invitation = await tx.invitationClient.findUnique({ where: { token } });
+    const invitation = await tx.invitationClient.findUnique({
+      where: { token },
+    });
     if (!invitation) throw new Error("INVITATION_NOT_FOUND");
     if (invitation.utilisee) throw new Error("INVITATION_ALREADY_USED");
     if (invitation.expireLe < new Date()) throw new Error("INVITATION_EXPIRED");
 
-    const fiche = await tx.fiche.findUnique({ where: { id: invitation.ficheId } });
+    const fiche = await tx.fiche.findUnique({
+      where: { id: invitation.ficheId },
+    });
     if (!fiche) throw new Error("FICHE_NOT_FOUND");
     if (fiche.ownerId) throw new Error("FICHE_ALREADY_OWNED");
 
-    await tx.fiche.update({ where: { id: fiche.id }, data: { ownerId: userId } });
-    await tx.invitationClient.update({ where: { id: invitation.id }, data: { utilisee: true } });
+    await tx.fiche.update({
+      where: { id: fiche.id },
+      data: { ownerId: userId },
+    });
+    await tx.invitationClient.update({
+      where: { id: invitation.id },
+      data: { utilisee: true },
+    });
     return fiche;
   });
 }
 
 // --- Fiches côté client ---
 export async function listFichesByOwner(ownerId: number) {
-  return prisma.fiche.findMany({ where: { ownerId }, orderBy: { updatedAt: "desc" } });
+  return prisma.fiche.findMany({
+    where: { ownerId },
+    orderBy: { updatedAt: "desc" },
+  });
 }
 
 export async function getFicheOwnedBy(id: number, ownerId: number) {
@@ -300,7 +313,9 @@ export async function getFicheOwnedBy(id: number, ownerId: number) {
 
 // --- Scans agrégés (réutilisé par admin ET client) ---
 export async function listScansForFiche(ficheId: number, days = 30) {
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
   return prisma.ficheScan.findMany({
     where: { ficheId, scanDate: { gte: since } },
     orderBy: { scanDate: "asc" },
@@ -309,7 +324,10 @@ export async function listScansForFiche(ficheId: number, days = 30) {
 
 // --- Cartes membres ---
 export async function listMembershipCards(ficheId: number) {
-  return prisma.membershipCard.findMany({ where: { ficheId }, orderBy: { createdAt: "asc" } });
+  return prisma.membershipCard.findMany({
+    where: { ficheId },
+    orderBy: { createdAt: "asc" },
+  });
 }
 
 export async function createMembershipCard(input: InsertMembershipCard) {
