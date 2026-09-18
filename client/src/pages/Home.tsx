@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
 import { getPlanFeatures } from "@shared/planFeatures";
+import AdminClientAccountCreationModal from "@/components/AdminClientAccountCreationModal";
 import {
   ArrowUpRight,
   Bell,
@@ -22,6 +23,7 @@ import {
   SlidersHorizontal,
   Sparkles,
   Users,
+  UserPlus,
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -173,6 +175,7 @@ export default function Home() {
     "all"
   );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isClientAccountOpen, setIsClientAccountOpen] = useState(false);
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
   const [form, setForm] = useState<CreateForm>(emptyForm);
 
@@ -335,6 +338,14 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setIsClientAccountOpen(true)}
+              variant="outline"
+              className="hidden gap-2 border-[#d9dde4] sm:flex"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>Nouveau compte client</span>
+            </Button>
             <button
               className="icon-button hidden sm:flex"
               aria-label="Notifications"
@@ -590,6 +601,10 @@ export default function Home() {
         />
       )}
       {qrFiche && <QrModal fiche={qrFiche} onClose={() => setQrFiche(null)} />}
+      <AdminClientAccountCreationModal
+        open={isClientAccountOpen}
+        onClose={() => setIsClientAccountOpen(false)}
+      />
     </div>
   );
 }
