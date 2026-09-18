@@ -423,12 +423,14 @@ export default function FicheEditor() {
                   onChange={e => setField("email", e.target.value)}
                 />
               </EditorField>
-              <EditorField label="Site">
-                <input
-                  value={form.site}
-                  onChange={e => setField("site", e.target.value)}
-                />
-              </EditorField>
+              {form.formule !== "essentiel" && (
+                <EditorField label="Site">
+                  <input
+                    value={form.site}
+                    onChange={e => setField("site", e.target.value)}
+                  />
+                </EditorField>
+              )}
               <EditorField label="Adresse">
                 <input
                   value={form.adresse}
