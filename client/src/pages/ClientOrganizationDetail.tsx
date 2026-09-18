@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, Check, Clipboard, Lock, Plus, Users, X } from "lucide-react";
+import { ArrowLeft, Building2, Check, Clipboard, Lock, Plus, Users } from "lucide-react";
 import { useLocation, useRoute } from "wouter";
 import ClientLayout from "@/components/ClientLayout";
 import { trpc } from "@/lib/trpc";
