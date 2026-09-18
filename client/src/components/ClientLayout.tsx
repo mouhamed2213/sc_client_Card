@@ -118,7 +118,7 @@ export default function ClientLayout({
             aria-label="Organisation active"
           >
             {organizations.map(org => (
-              <option key={org.id} value={org.id} className="text-slate-900">
+              <option key={org.organizationId} value={org.organizationId} className="text-slate-900">
                 {org.name} · {org.type}
               </option>
             ))}
