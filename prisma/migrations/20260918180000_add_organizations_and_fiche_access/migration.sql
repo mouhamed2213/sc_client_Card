@@ -99,10 +99,6 @@ WHERE i."ficheId" = f."id";
 
 DROP TABLE "_personal_org_map";
 
-ALTER TABLE "organizations"
-  ADD CONSTRAINT "organizations_updatedAt_default_check"
-  CHECK ("updatedAt" IS NOT NULL);
-
 ALTER TABLE "organization_memberships"
   ADD CONSTRAINT "organization_memberships_organizationId_fkey"
   FOREIGN KEY ("organizationId") REFERENCES "organizations"("id")
