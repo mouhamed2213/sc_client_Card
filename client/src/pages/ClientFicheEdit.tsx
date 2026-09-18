@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "wouter";
 import {
   ImagePlus,
-  Link as LinkIcon,
   Loader2,
   Lock,
   Plus,
