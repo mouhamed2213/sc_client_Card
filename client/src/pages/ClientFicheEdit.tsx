@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useParams } from "wouter";
+import { useLocation, useParams } from "wouter";
 
 type LinkItem = { label: string; url: string };
 type SocialItem = { label: string; url: string };
@@ -72,11 +72,13 @@ function fileToDataUrl(file: File) {
 
 export default function ClientFicheEdit() {
   const { ficheId } = useParams<{ ficheId: string }>();
+  const [, navigate] = useLocation();
   const id = Number(ficheId);
   const utils = trpc.useUtils();
   const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
   const [form, setForm] = useState<FormState | null>(null);
   const [uploading, setUploading] = useState<MediaKind | null>(null);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (!fiche.data || form) return;
@@ -117,6 +119,7 @@ export default function ClientFicheEdit() {
   const save = trpc.clientSpaceRouter.updateSignature.useMutation({
     onSuccess: async () => {
       toast.success("Fiche Signature mise à jour");
+      setSaved(true);
       await Promise.all([
         utils.clientSpaceRouter.ficheDetail.invalidate({ ficheId: id }),
         utils.clientSpaceRouter.dashboard.invalidate({ ficheId: id }),
@@ -223,6 +226,10 @@ export default function ClientFicheEdit() {
   function saveChanges(event: React.FormEvent) {
     event.preventDefault();
     if (!form) return;
+    if (!form.photo || !form.logo) {
+      toast.error("Portrait et logo obligatoires", { description: "Ajoutez un portrait et un logo avant d’enregistrer la fiche." });
+      return;
+    }
     save.mutate({ ficheId: id, ...form });
   }
 
