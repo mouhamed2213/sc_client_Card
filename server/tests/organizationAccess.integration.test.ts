@@ -68,13 +68,8 @@ describe("organization access integration", () => {
     expect(auth.assertCanViewFiche).toHaveBeenCalledWith(8, 10);
   });
 
-  it("allows only the OWNER to invite organization members", async () => {
-    auth.assertCanManageOrganization.mockResolvedValueOnce({
-      id: 1,
-      organizationId: 100,
-      userId: 8,
-      role: "OWNER",
-    });
+  it("blocks a non-OWNER from inviting organization members", async () => {
+    auth.assertCanManageOrganization.mockRejectedValueOnce(new Error("FORBIDDEN"));
     const caller = appRouter.createCaller(context(8));
     await expect(
       caller.clientSpaceRouter.inviteMember({
@@ -82,7 +77,7 @@ describe("organization access integration", () => {
         role: "MEMBER",
         ficheId: 10,
       })
-    ).rejects.toThrow();
+    ).rejects.toThrow("FORBIDDEN");
   });
 
   it("blocks organization fiche grants when the membership is outside the organization", async () => {
