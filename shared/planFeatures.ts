@@ -1,6 +1,6 @@
 export const planFeatures = {
   essentiel: {
-    maxLinks: 3,
+    maxLinks: 0,
     maxPhotos: 0,
     hasForm: false,
     hasGoogleReview: false,
