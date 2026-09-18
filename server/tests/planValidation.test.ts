@@ -6,6 +6,7 @@ const base = {
   photo: "",
   logo: "",
   googlePlaceId: "",
+  site: "",
   data: { liens: [], galerie: [], horaires: [], sections: [] },
 };
 const items = (count: number) => Array.from({ length: count }, () => ({}));
@@ -31,7 +32,8 @@ describe("planFeatures architecture", () => {
 
   it("Essentiel does not include custom links and rejects gallery photos", () => {
     expect(validatePlanPayload({ formule: "essentiel", ...base, data: { ...base.data, horaires: hours, liens: [] } })).toEqual([]);
-    expect(validatePlanPayload({ formule: "essentiel", ...base, data: { ...base.data, horaires: hours, liens: items(1), galerie: items(1) } })).toEqual([
+    expect(validatePlanPayload({ formule: "essentiel", ...base, site: "https://example.com", data: { ...base.data, horaires: hours, liens: items(1), galerie: items(1) } })).toEqual([
+      "La formule Essentiel ne permet pas de site internet.",
       "La formule Essentiel ne permet pas de liens personnalisés.",
       "La formule Essentiel ne permet pas de galerie photo.",
     ]);
