@@ -98,9 +98,10 @@ export const appRouter = router({
           : [];
       if (errors.length)
         throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
+      const { data, ...fields } = input;
       const id = await createFiche({
-        ...input,
-        dataJson: JSON.stringify(input.data),
+        ...fields,
+        dataJson: JSON.stringify(data),
         dateCreation: createdAt,
         dateEcheance,
       });
