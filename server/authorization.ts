@@ -20,6 +20,16 @@ export async function getMembershipForUser(
   });
 }
 
+export async function listOrganizationsForUser(userId: number) {
+  return prisma.organizationMembership.findMany({
+    where: { userId },
+    include: {
+      organization: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
 export async function listAccessibleFiches(userId: number) {
   const memberships = await prisma.organizationMembership.findMany({
     where: { userId },
