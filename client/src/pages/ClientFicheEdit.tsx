@@ -35,7 +35,6 @@ type FormState = {
   site: string;
   adresse: string;
   lienItineraire: string;
-  googlePlaceId: string;
   photo: string;
   logo: string;
   data: {
@@ -93,7 +92,6 @@ export default function ClientFicheEdit() {
       site: fiche.data.site ?? "",
       adresse: fiche.data.adresse ?? "",
       lienItineraire: fiche.data.lienItineraire ?? "",
-      googlePlaceId: fiche.data.googlePlaceId ?? "",
       photo: fiche.data.photo ?? "",
       logo: fiche.data.logo ?? "",
       data: {
@@ -605,16 +603,6 @@ export default function ClientFicheEdit() {
                   </div>
                 ))}
               </div>
-            </EditorSection>
-
-            <EditorSection title="Avis Google">
-              <Field label="Google Place ID">
-                <input
-                  value={form.googlePlaceId}
-                  onChange={e => setField("googlePlaceId", e.target.value)}
-                  placeholder="ChIJ…"
-                />
-              </Field>
             </EditorSection>
 
             <EditorSection
