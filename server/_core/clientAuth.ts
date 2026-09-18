@@ -90,11 +90,11 @@ export function generateClientUsername(name: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ".")
     .replace(/^\\.|\\.$/g, "")
-    .slice(0, 48);
+    .slice(0, 42);
 
   const suffix = randomBytes(3).toString("hex");
   const username = `${base || "client"}-${suffix}`;
-  return username.slice(0, 64);
+  return username.slice(0, 42);
 }
 
 export function generateTemporaryClientPassword(): string {
