@@ -140,7 +140,7 @@ export default function Home() {
       await utils.fiches.list.invalidate();
       await utils.fiches.overview.invalidate();
       setIsCreateOpen(false);
-      setForm(emptyForm);\n      setSelectedGalleryFiles([]);
+      setForm(emptyForm);\n
       toast.success("Fiche créée", {
         description: `/${slug} est prête à être complétée.`,
       });
@@ -174,7 +174,7 @@ export default function Home() {
   );
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
-  const [form, setForm] = useState<CreateForm>(emptyForm);\n  const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
+  const [form, setForm] = useState<CreateForm>(emptyForm);\n
 
   const filteredFiches = useMemo(
     () =>
@@ -584,8 +584,7 @@ export default function Home() {
           setForm={updateField}
           onClose={() => {
             setIsCreateOpen(false);
-            setSelectedGalleryFiles([]);
-          }}
+            }}
           onSubmit={submitCreate}
           isPending={createMutation.isPending}
         />
