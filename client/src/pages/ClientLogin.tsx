@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { CreditCard, MessageSquare, ScanLine } from "lucide-react";
+import { CreditCard, MessageSquare, ScanLine, TriangleAlert } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { startLogin } from "@/const";
+
+const ERROR_MESSAGES: Record<string, string> = {
+  invitation_not_eligible:
+    "L'espace client est réservé aux fiches de formule Signature. Contactez votre conseiller si vous pensez qu'il s'agit d'une erreur.",
+  invitation_invalid:
+    "Ce lien d'invitation n'est plus valable — il a peut-être déjà été utilisé ou a expiré. Demandez un nouveau lien à votre conseiller.",
+};
 
 export default function ClientLogin() {
   const [, navigate] = useLocation();
@@ -11,6 +18,9 @@ export default function ClientLogin() {
     retry: false,
     refetchOnWindowFocus: false,
   });
+
+  const errorCode = new URLSearchParams(window.location.search).get("error");
+  const errorMessage = errorCode ? ERROR_MESSAGES[errorCode] : undefined;
 
   useEffect(() => {
     if (me.data?.role === "user") navigate("/espace-client");
@@ -35,6 +45,13 @@ export default function ClientLogin() {
             Suivez votre fiche, vos scans et vos demandes.
           </p>
         </div>
+
+        {errorMessage && (
+          <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-[#f3d9c9] bg-[#fdf1e2] p-4 text-sm text-[#9a5c10]">
+            <TriangleAlert size={16} className="mt-0.5 shrink-0" />
+            <p>{errorMessage}</p>
+          </div>
+        )}
 
         <div className="mt-5 rounded-2xl border border-[#e6e8ec] bg-white p-6">
           <div className="grid grid-cols-3 gap-3 text-center">

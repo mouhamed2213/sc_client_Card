@@ -292,6 +292,12 @@ export const appRouter = router({
             code: "CONFLICT",
             message: "Cette fiche a déjà un propriétaire.",
           });
+        if (fiche.formule !== "signature")
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "L'espace client est réservé aux fiches de formule Signature.",
+          });
         const token = await createInvitation(input.ficheId);
         return { token, url: `/espace-client/invite/${token}` };
       }),

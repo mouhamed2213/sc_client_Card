@@ -81,7 +81,11 @@ export function registerOAuthRoutes(app: Express) {
           redirectTo = "/espace-client";
         } catch (err) {
           console.error("[OAuth] Invitation consumption failed", err);
-          redirectTo = "/espace-client/invite/erreur";
+          const reason =
+            err instanceof Error && err.message === "FICHE_NOT_ELIGIBLE"
+              ? "invitation_not_eligible"
+              : "invitation_invalid";
+          redirectTo = `/espace-client/connexion?error=${reason}`;
         }
       }
 
