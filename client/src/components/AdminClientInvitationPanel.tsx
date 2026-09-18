@@ -109,7 +109,8 @@ export default function AdminClientInvitationPanel() {
     return null;
   }
 
-  const hasOwner = Boolean(ficheQuery.data.ownerId);
+  const organizationId = ficheQuery.data.organizationId as number | null | undefined;
+  const hasOrganization = Boolean(organizationId);
 
   async function copyLink(url: string) {
     try {
@@ -159,7 +160,7 @@ export default function AdminClientInvitationPanel() {
             </div>
 
             <div className="space-y-5 px-6 py-6">
-              {!hasOwner && (
+              {!hasOrganization && (
                 <div className="flex gap-1.5 rounded-lg border border-[#e5e7eb] bg-[#f8f9fb] p-1">
                   <button
                     type="button"
@@ -186,7 +187,7 @@ export default function AdminClientInvitationPanel() {
                 </div>
               )}
 
-              {!hasOwner && attachMode === "existing" ? (
+              {!hasOrganization && attachMode === "existing" ? (
                 <div className="space-y-3">
                   <p className="text-sm text-[#667085]">
                     Rattachez cette fiche à un compte client déjà créé — utile
@@ -250,7 +251,7 @@ export default function AdminClientInvitationPanel() {
                     )}
                   </div>
                 </div>
-              ) : hasOwner ? (
+              ) : hasOrganization ? (
                 <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-800">
                   Cette fiche est déjà rattachée à un compte client. Une nouvelle invitation ne peut pas être créée.
                 </div>
@@ -290,7 +291,7 @@ export default function AdminClientInvitationPanel() {
                   </p>
                   <Button
                     type="button"
-                    onClick={() => createMutation.mutate({ ficheId: ficheId! })}
+                    onClick={() => createMutation.mutate({ organizationId: organizationId! })}
                     disabled={createMutation.isPending}
                     className="mt-4 gap-2 bg-[#172033] text-white hover:bg-[#27334a]"
                   >
