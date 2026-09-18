@@ -4,6 +4,7 @@ import type { TrpcContext } from "../_core/context";
 const auth = vi.hoisted(() => ({
   assertCanViewFiche: vi.fn(),
   assertCanEditFiche: vi.fn(),
+  assertCanManageOrganization: vi.fn(),
 }));
 
 vi.mock("../authorization", () => auth);
@@ -65,6 +66,40 @@ describe("organization access integration", () => {
 
     expect(result.fiche?.id).toBe(10);
     expect(auth.assertCanViewFiche).toHaveBeenCalledWith(8, 10);
+  });
+
+  it("allows only the OWNER to invite organization members", async () => {
+    auth.assertCanManageOrganization.mockResolvedValueOnce({
+      id: 1,
+      organizationId: 100,
+      userId: 8,
+      role: "OWNER",
+    });
+    const caller = appRouter.createCaller(context(8));
+    await expect(
+      caller.clientSpaceRouter.inviteMember({
+        organizationId: 100,
+        role: "MEMBER",
+        ficheId: 10,
+      })
+    ).rejects.toThrow();
+  });
+
+  it("blocks organization fiche grants when the membership is outside the organization", async () => {
+    auth.assertCanManageOrganization.mockResolvedValueOnce({
+      id: 1,
+      organizationId: 100,
+      userId: 8,
+      role: "OWNER",
+    });
+    const caller = appRouter.createCaller(context(8));
+    await expect(
+      caller.clientSpaceRouter.grantOrganizationFicheAccess({
+        organizationId: 100,
+        ficheId: 10,
+        membershipId: 999,
+      })
+    ).rejects.toThrow("Membre introuvable dans cette organisation.");
   });
 
   it("prevents a VIEWER from reaching the edit endpoint", async () => {
