@@ -66,7 +66,6 @@ export default function AdminClientInvitationPanel() {
         description: error.message,
       }),
   });
-  const inviteOwnerMutation = trpc.admin.inviteOwner.useMutation({
     onSuccess: async result => {
       const absoluteUrl = new URL(result.url, window.location.origin).toString();
       setCreatedUrl(absoluteUrl);
@@ -301,10 +300,10 @@ export default function AdminClientInvitationPanel() {
                   <Button
                     type="button"
                     onClick={() => createOrganizationMutation.mutate({ ficheId: ficheId!, name: `${ficheQuery.data.prenom} ${ficheQuery.data.nom}`.trim() })}
-                    disabled={createOrganizationMutation.isPending || inviteOwnerMutation.isPending}
+                    disabled={createOrganizationMutation.isPending}
                     className="mt-4 gap-2 bg-[#172033] text-white hover:bg-[#27334a]"
                   >
-                    {createOrganizationMutation.isPending || inviteOwnerMutation.isPending ? (
+                    {createOrganizationMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <UserPlus className="h-4 w-4" />
