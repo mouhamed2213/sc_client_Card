@@ -582,7 +582,9 @@ export default function Home() {
         <CreateModal
           form={form}
           setForm={updateField}
-          onClose={() => setIsCreateOpen(false)}
+          onClose={() => {
+            setIsCreateOpen(false);
+            }}
           onSubmit={submitCreate}
           isPending={createMutation.isPending}
         />
@@ -959,18 +961,26 @@ function CreateModal({
                 multiple
                 accept="image/jpeg,image/png,image/webp"
                 type="file"
-                onChange={e =>
-                  setForm(
-                    "galleryFiles",
-                    Array.from(e.target.files ?? []).slice(
-                      0,
-                      features.maxPhotos
-                    )
-                  )
-                }
+                onChange={e => {
+                  const files = Array.from(e.target.files ?? []).slice(
+                    0,
+                    features.maxPhotos
+                  );
+                  setSelectedGalleryFiles(files);
+                  setForm("galleryFiles", files);
+                  e.currentTarget.value = "";
+                }}
               />
+              {(form.galleryFiles?.length ?? 0) > 0 && (
+                <p className="mt-1.5 text-xs font-medium text-[#42506a]">
+                  {form.galleryFiles?.length ?? 0} photo
+                  {(form.galleryFiles?.length ?? 0) > 1 ? "s" : ""} sélectionnée
+                  {(form.galleryFiles?.length ?? 0) > 1 ? "s" : ""}.
+                </p>
+              )}
               <p className="mt-1 text-xs text-[#9aa3b1]">
-                Chaque photo : maximum 80 ko après préparation.
+                Sélectionnez plusieurs photos en une seule fois. Chaque photo :
+                maximum 80 ko après préparation.
               </p>
             </Field>
           )}

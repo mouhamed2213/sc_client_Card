@@ -182,10 +182,20 @@ export default function FicheEditor() {
       if (kind === "profile") setField("photo", result.url);
       if (kind === "logo") setField("logo", result.url);
       if (kind === "gallery")
-        setData("galerie", [
-          ...form.data.galerie,
-          { url: result.url, alt: prepared.name },
-        ]);
+        setForm(current =>
+          current
+            ? {
+                ...current,
+                data: {
+                  ...current.data,
+                  galerie: [
+                    ...current.data.galerie,
+                    { url: result.url, alt: prepared.name },
+                  ].slice(0, getPlanFeatures(current.formule).maxPhotos),
+                },
+              }
+            : current
+        );
       toast.success("Image préparée et enregistrée", {
         description: `${Math.round(result.bytes / 1024)} ko`,
       });
@@ -650,22 +660,28 @@ export default function FicheEditor() {
                 {form.data.galerie.length < features.maxPhotos && (
                   <label className="gallery-add">
                     <input
-                      aria-label="Ajouter une photo à la galerie"
+                      aria-label="Ajouter des photos à la galerie"
                       className="hidden"
                       type="file"
                       accept="image/*"
+                      multiple
                       disabled={uploading === "gallery"}
-                      onChange={e =>
-                        e.target.files?.[0] &&
-                        upload(e.target.files[0], "gallery")
-                      }
+                      onChange={async e => {
+                        const files = Array.from(e.target.files ?? []);
+                        const remaining =
+                          features.maxPhotos - form.data.galerie.length;
+                        for (const file of files.slice(0, remaining)) {
+                          await upload(file, "gallery");
+                        }
+                        e.currentTarget.value = "";
+                      }}
                     />
                     {uploading === "gallery" ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
                       <ImagePlus className="h-5 w-5" />
                     )}
-                    <span>Ajouter une photo</span>
+                    <span>Ajouter une ou plusieurs photos</span>
                   </label>
                 )}
               </div>
