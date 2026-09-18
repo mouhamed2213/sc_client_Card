@@ -267,41 +267,44 @@ export default function ClientFicheEdit() {
             className="space-y-6"
           >
             <EditorSection title="Identité et contact">
-              <div className="grid gap-4 sm:grid-cols-2">
-                {[
-                  ["prenom", "Prénom", true] as const,
-                  ["nom", "Nom", true] as const,
-                  ["fonction", "Fonction", true] as const,
-                  ["entreprise", "Entreprise", true] as const,
-                  ["telephone", "Téléphone", true] as const,
-                  ["whatsapp", "WhatsApp", true] as const,
-                  ["email", "E-mail", false] as const,
-                  ["site", "Site web", false] as const,
-                  ["adresse", "Adresse", false] as const,
-                  ["lienItineraire", "Lien Google Maps", false] as const,
-                  ["googlePlaceId", "Google Place ID", false] as const,
-                ].map(([key, label, required]) => (
-                  <label key={key} className="block">
-                    <span className="text-xs font-medium text-[#52607a]">
-                      {label}
-                      {required ? " *" : ""}
-                    </span>
-                    <input
-                      required={Boolean(required)}
-                      type={key === "email" ? "email" : "text"}
-                      value={
-                        form[key as keyof Omit<FormState, "data">] as string
-                      }
-                      onChange={event =>
-                        setField(
-                          key as keyof Omit<FormState, "data">,
-                          event.target.value
-                        )
-                      }
-                      className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
-                    />
-                  </label>
-                ))}
+              <div className="space-y-6">
+                <div>
+                  <p className="text-sm font-semibold text-[#172033]">Identité</p>
+                  <p className="mt-1 text-xs text-[#7d8798]">Les informations principales affichées sur votre fiche.</p>
+                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                    {([
+                      ["prenom", "Prénom", true],
+                      ["nom", "Nom", true],
+                      ["fonction", "Fonction", true],
+                      ["entreprise", "Entreprise", true],
+                    ] as const).map(([key, label, required]) => (
+                      <label key={key} className="block">
+                        <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
+                        <input required={required} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#172033]">Contact</p>
+                  <p className="mt-1 text-xs text-[#7d8798]">Téléphone, messagerie et coordonnées complémentaires.</p>
+                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                    {([
+                      ["telephone", "Téléphone", true],
+                      ["whatsapp", "WhatsApp", true],
+                      ["email", "E-mail", false],
+                      ["site", "Site web", false],
+                      ["adresse", "Adresse", false],
+                      ["lienItineraire", "Lien Google Maps", false],
+                      ["googlePlaceId", "Google Place ID", false],
+                    ] as const).map(([key, label, required]) => (
+                      <label key={key} className="block">
+                        <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
+                        <input required={required} type={key === "email" ? "email" : "text"} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
+                      </label>
+                    ))}
+                  </div>
+                </div>
               </div>
             </EditorSection>
 
