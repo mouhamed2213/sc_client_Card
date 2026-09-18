@@ -62,7 +62,9 @@ describe("organization invitation security", () => {
         findUnique: vi.fn().mockResolvedValue({ id: 100 }),
       },
       organizationMembership: {
-        upsert: vi.fn().mockResolvedValue({ id: 7, organizationId: 100, userId: 8, role: "MEMBER" }),
+        findUnique: vi.fn().mockResolvedValue(null),
+        create: vi.fn().mockResolvedValue({ id: 7, organizationId: 100, userId: 8, role: "MEMBER" }),
+        update: vi.fn(),
       },
       fiche: {
         findFirst: vi.fn().mockResolvedValue({ id: 10, organizationId: 100 }),
@@ -91,7 +93,9 @@ describe("organization invitation security", () => {
       },
       organization: { findUnique: vi.fn().mockResolvedValue({ id: 100 }) },
       organizationMembership: {
-        upsert: vi.fn().mockResolvedValue({ id: 1, organizationId: 100, userId: 8, role: "OWNER" }),
+        findUnique: vi.fn().mockResolvedValue(null),
+        create: vi.fn().mockResolvedValue({ id: 1, organizationId: 100, userId: 8, role: "OWNER" }),
+        update: vi.fn(),
       },
       ficheAccess: { upsert: vi.fn() },
     };
@@ -102,3 +106,34 @@ describe("organization invitation security", () => {
     expect(tx.ficheAccess.upsert).not.toHaveBeenCalled();
   });
 });
+
+
+  it("applies an OWNER invitation to an existing non-owner membership", async () => {
+    const tx = {
+      invitationClient: {
+        findUnique: vi.fn().mockResolvedValue(invitation({ role: "OWNER", ficheId: null })),
+        update: vi.fn().mockResolvedValue({}),
+      },
+      organization: { findUnique: vi.fn().mockResolvedValue({ id: 100 }) },
+      organizationMembership: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 7, organizationId: 100, userId: 8, role: "MEMBER",
+        }),
+        update: vi.fn().mockResolvedValue({
+          id: 7, organizationId: 100, userId: 8, role: "OWNER",
+        }),
+        create: vi.fn(),
+      },
+      ficheAccess: { upsert: vi.fn() },
+    };
+    prismaMock.$transaction.mockImplementation(async (callback: any) => callback(tx));
+
+    const result = await consumeInvitation("token", 8);
+
+    expect(result).toMatchObject({ id: 7, role: "OWNER" });
+    expect(tx.organizationMembership.update).toHaveBeenCalledWith({
+      where: { id: 7 },
+      data: { role: "OWNER" },
+    });
+    expect(tx.organizationMembership.create).not.toHaveBeenCalled();
+  });
