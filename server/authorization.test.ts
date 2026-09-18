@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-const prismaMock = {
+const prismaMock = vi.hoisted(() => ({
   fiche: { findUnique: vi.fn() },
   organizationMembership: { findUnique: vi.fn(), findMany: vi.fn() },
   ficheAccess: { findUnique: vi.fn() },
-};
+}));
 
 vi.mock("../prisma/client", () => ({ prisma: prismaMock }));
 
