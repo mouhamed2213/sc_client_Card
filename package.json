@@ -13,7 +13,10 @@
     "db:push": "prisma db push",
     "db:generate": "npx prisma generate",
     "db:migrate": "npx prisma migrate dev ",
-    "create:admin": "tsx scripts/create-admin.ts"
+    "create:admin": "tsx scripts/create-admin.ts",
+    "precheck": "prisma generate",
+    "prebuild": "prisma generate",
+    "validate:organizations": "tsx scripts/validate-organization-migration.ts"
   },
   "dependencies": {
     "@ajayche/trpc-panel": "^2.1.0",
