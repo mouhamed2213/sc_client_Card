@@ -101,7 +101,7 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
       "",
       "À votre première connexion, le changement du mot de passe sera obligatoire.",
       `Connexion : ${window.location.origin}/espace-client/connexion`,
-    ].join("\\n");
+    ].join("\n");
     try {
       await navigator.clipboard.writeText(text);
       toast.success("Identifiants copiés");
@@ -120,12 +120,12 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
       "",
       `Connectez-vous ici : ${window.location.origin}/espace-client/connexion`,
       "Le changement du mot de passe sera demandé lors de votre première connexion.",
-    ].join("\\n");
+    ].join("\n");
   }
 
   function openWhatsApp() {
     const message = buildWhatsAppMessage();
-    const phone = whatsapp.replace(/\\D/g, "");
+    const phone = whatsapp.replace(/\D/g, "");
     if (!phone) {
       toast.error("Le numéro WhatsApp est vide");
       return;
