@@ -294,7 +294,6 @@ export default function ClientFicheEdit() {
                       ["site", "Site web", false],
                       ["adresse", "Adresse", false],
                       ["lienItineraire", "Lien Google Maps", false],
-                      ["googlePlaceId", "Google Place ID", false],
                     ] as const).map(([key, label, required]) => (
                       <label key={key} className="block">
                         <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
