@@ -298,7 +298,7 @@ export default function ClientFicheEdit() {
                           event.target.value
                         )
                       }
-                      className="editor-input mt-1.5"
+                      className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
                     />
                   </label>
                 ))}
@@ -353,7 +353,7 @@ export default function ClientFicheEdit() {
               </div>
               <Field label="Présentation">
                 <textarea
-                  className="editor-input mt-1.5"
+                  className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
                   rows={6}
                   value={form.data.presentation}
                   onChange={e => setData("presentation", e.target.value)}
@@ -376,7 +376,7 @@ export default function ClientFicheEdit() {
                 </Field>
                 <Field label="URL de réservation">
                   <input
-                    className="editor-input mt-1.5"
+                    className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
                     type="url"
                     value={form.data.rendezVous.url}
                     onChange={e =>
@@ -411,7 +411,7 @@ export default function ClientFicheEdit() {
                 render={(item, index) => (
                   <div className="grid gap-2 sm:grid-cols-[180px_1fr_auto]">
                     <input
-                      className="editor-input"
+                      className="editor-input rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
                       placeholder="Instagram, LinkedIn…"
                       value={item.label}
                       onChange={e =>
@@ -424,7 +424,7 @@ export default function ClientFicheEdit() {
                       }
                     />
                     <input
-                      className="editor-input"
+                      className="editor-input rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
                       type="url"
                       placeholder="https://…"
                       value={item.url}
@@ -587,7 +587,7 @@ export default function ClientFicheEdit() {
                       {row.jour}
                     </div>
                     <input
-                      className="editor-input"
+                      className="editor-input rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
                       value={row.horaire}
                       placeholder="09:00 — 18:00 ou Fermé"
                       onChange={e =>
@@ -805,7 +805,7 @@ function CatalogEditor({
                 className="grid gap-2 md:grid-cols-[1fr_1.5fr_120px_auto]"
               >
                 <input
-                  className="editor-input"
+                  className="editor-input rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
                   placeholder="Article / prestation"
                   value={article.nom}
                   onChange={e =>
