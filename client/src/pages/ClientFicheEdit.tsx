@@ -267,20 +267,20 @@ export default function ClientFicheEdit() {
             className="space-y-6"
           >
             <EditorSection title="Identité et contact">
-              <div className="space-y-6">
+              <div className="space-y-7">
                 <div>
                   <p className="text-sm font-semibold text-[#172033]">Identité</p>
                   <p className="mt-1 text-xs text-[#7d8798]">Les informations principales affichées sur votre fiche.</p>
-                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <div className="mt-4 space-y-4">
                     {([
-                      ["prenom", "Prénom", true],
                       ["nom", "Nom", true],
+                      ["prenom", "Prénom", true],
                       ["fonction", "Fonction", true],
                       ["entreprise", "Entreprise", true],
                     ] as const).map(([key, label, required]) => (
                       <label key={key} className="block">
-                        <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
-                        <input required={required} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
+                        <span className="text-sm font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
+                        <input required={required} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 w-full rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
                       </label>
                     ))}
                   </div>
@@ -288,7 +288,7 @@ export default function ClientFicheEdit() {
                 <div>
                   <p className="text-sm font-semibold text-[#172033]">Contact</p>
                   <p className="mt-1 text-xs text-[#7d8798]">Téléphone, messagerie et coordonnées complémentaires.</p>
-                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <div className="mt-4 space-y-4">
                     {([
                       ["telephone", "Téléphone", true],
                       ["whatsapp", "WhatsApp", true],
@@ -299,8 +299,8 @@ export default function ClientFicheEdit() {
                       ["googlePlaceId", "Google Place ID", false],
                     ] as const).map(([key, label, required]) => (
                       <label key={key} className="block">
-                        <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
-                        <input required={required} type={key === "email" ? "email" : "text"} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
+                        <span className="text-sm font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
+                        <input required={required} type={key === "email" ? "email" : "text"} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 w-full rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
                       </label>
                     ))}
                   </div>
