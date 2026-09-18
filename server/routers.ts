@@ -21,6 +21,7 @@ import {
   updateMembershipCardStatus,
 } from "./clientSpace";
 import {
+  attachFicheToOwner,
   createContactRequest,
   createFiche,
   createInvitation,
@@ -35,6 +36,7 @@ import {
   listMembershipCards,
   listScansForFiche,
   recordScan,
+  searchClientUsers,
   updateFiche,
 } from "./db";
 import { validatePlanPayload } from "./planValidation";
@@ -294,6 +296,41 @@ export const appRouter = router({
           });
         const token = await createInvitation(input.ficheId);
         return { token, url: `/espace-client/invite/${token}` };
+      }),
+    searchClientUsers: adminProcedure
+      .input(z.object({ query: z.string().max(160).optional().default("") }))
+      .query(({ input }) => searchClientUsers(input.query)),
+    attachFicheToOwner: adminProcedure
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          ownerId: z.number().int().positive(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const fiche = await getFicheById(input.ficheId);
+        if (!fiche)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Fiche introuvable.",
+          });
+        if (fiche.ownerId)
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Cette fiche a déjà un propriétaire.",
+          });
+        try {
+          await attachFicheToOwner(input.ficheId, input.ownerId);
+        } catch (err) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message:
+              err instanceof Error && err.message === "OWNER_NOT_FOUND"
+                ? "Compte client introuvable."
+                : "Impossible de rattacher cette fiche.",
+          });
+        }
+        return { ok: true } as const;
       }),
     listInvitations: adminProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
