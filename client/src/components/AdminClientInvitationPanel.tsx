@@ -47,31 +47,40 @@ export default function AdminClientInvitationPanel() {
     { enabled: location.startsWith("/studio/fiche/") && !!slug }
   );
   const ficheId = ficheQuery.data?.id;
+  const organizationId = ficheQuery.data?.organizationId as number | null | undefined;
   const invitationsQuery = trpc.admin.listInvitations.useQuery(
-    { ficheId: ficheId! },
-    { enabled: open && !!ficheId && attachMode === "invite" }
+    { organizationId: organizationId! },
+    { enabled: open && !!organizationId && attachMode === "invite" }
   );
   const clientUsersQuery = trpc.admin.searchClientUsers.useQuery(
     { query: attachQuery },
     { enabled: open && attachMode === "existing" }
   );
-  const createMutation = trpc.admin.inviteOwner.useMutation({
-    onSuccess: async result => {
-      const absoluteUrl = new URL(result.url, window.location.origin).toString();
-      setCreatedUrl(absoluteUrl);
-      await utils.admin.listInvitations.invalidate({ ficheId: ficheId! });
-      toast.success("Invitation client créée", {
-        description: "Le lien est prêt à être envoyé au client.",
-      });
+  const createOrganizationMutation = trpc.admin.createPersonalOrganizationForFiche.useMutation({
+    onSuccess: async organization => {
+      await utils.fiches.getBySlug.invalidate({ slug });
+      inviteOwnerMutation.mutate({ organizationId: organization.id });
     },
     onError: error =>
       toast.error("Impossible de créer l’invitation", {
         description: error.message,
       }),
   });
+  const inviteOwnerMutation = trpc.admin.inviteOwner.useMutation({
+    onSuccess: async result => {
+      const absoluteUrl = new URL(result.url, window.location.origin).toString();
+      setCreatedUrl(absoluteUrl);
+      await utils.admin.listInvitations.invalidate({ organizationId: organizationId! });
+      toast.success("Invitation client créée", {
+        description: "Le lien est prêt à être envoyé au client.",
+      });
+    },
+    onError: error => toast.error("Impossible de créer l'invitation", { description: error.message }),
+  });
+
   const revokeMutation = trpc.admin.revokeInvitation.useMutation({
     onSuccess: async () => {
-      await utils.admin.listInvitations.invalidate({ ficheId: ficheId! });
+      await utils.admin.listInvitations.invalidate({ organizationId: organizationId! });
       toast.success("Invitation révoquée");
     },
     onError: error =>
@@ -79,7 +88,7 @@ export default function AdminClientInvitationPanel() {
         description: error.message,
       }),
   });
-  const attachMutation = trpc.admin.attachFicheToOwner.useMutation({
+  const attachMutation = trpc.admin.assignFicheToClientOrganization.useMutation({
     onSuccess: async () => {
       toast.success("Fiche rattachée au compte", {
         description: "Ce client verra maintenant plusieurs fiches dans son espace.",
@@ -239,7 +248,7 @@ export default function AdminClientInvitationPanel() {
                             onClick={() =>
                               attachMutation.mutate({
                                 ficheId: ficheId!,
-                                ownerId: user.id,
+                                userId: user.id,
                               })
                             }
                             className="shrink-0 bg-[#172033] text-white hover:bg-[#27334a]"
@@ -291,11 +300,11 @@ export default function AdminClientInvitationPanel() {
                   </p>
                   <Button
                     type="button"
-                    onClick={() => createMutation.mutate({ organizationId: organizationId! })}
-                    disabled={createMutation.isPending}
+                    onClick={() => createOrganizationMutation.mutate({ ficheId: ficheId!, name: `${ficheQuery.data.prenom} ${ficheQuery.data.nom}`.trim() })}
+                    disabled={createOrganizationMutation.isPending || inviteOwnerMutation.isPending}
                     className="mt-4 gap-2 bg-[#172033] text-white hover:bg-[#27334a]"
                   >
-                    {createMutation.isPending ? (
+                    {createOrganizationMutation.isPending || inviteOwnerMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <UserPlus className="h-4 w-4" />
