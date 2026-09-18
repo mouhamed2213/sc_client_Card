@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 const prismaMock = vi.hoisted(() => ({
-  fiche: { findUnique: vi.fn() },
+  fiche: { findUnique: vi.fn(), findMany: vi.fn() },
   organizationMembership: { findUnique: vi.fn(), findMany: vi.fn() },
   ficheAccess: { findUnique: vi.fn() },
 }));
@@ -12,6 +12,7 @@ const { assertCanViewFiche, assertCanEditFiche, listAccessibleFiches } = await i
 
 function reset() {
   prismaMock.fiche.findUnique.mockReset();
+  prismaMock.fiche.findMany.mockReset();
   prismaMock.organizationMembership.findUnique.mockReset();
   prismaMock.organizationMembership.findMany.mockReset();
   prismaMock.ficheAccess.findUnique.mockReset();
