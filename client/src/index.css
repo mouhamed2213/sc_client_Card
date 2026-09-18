@@ -206,6 +206,239 @@ button:active {
   border-radius: 50%;
   background: #e5a86b;
 }
+
+/* ---------- Espace client ---------- */
+
+.client-shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f5f7;
+}
+.client-sidebar {
+  display: flex;
+  width: 264px;
+  flex: 0 0 264px;
+  flex-direction: column;
+  background: #172033;
+  padding: 26px 18px 22px;
+  color: white;
+}
+.client-main {
+  min-width: 0;
+  flex: 1;
+}
+.client-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #e6e8ec;
+  background: rgba(247, 248, 250, 0.92);
+  padding: 12px 20px;
+  backdrop-filter: blur(8px);
+}
+
+/* The physical NFC card, rendered as data — this is what the client actually
+   owns. Proportioned close to a real card (≈1.586:1) on wide screens, and
+   the visual anchor of the whole dashboard. */
+.id-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 160% at 100% 0%, rgba(229, 168, 107, 0.16), transparent 60%),
+    linear-gradient(155deg, #1b2436 0%, #172033 55%, #121a2a 100%);
+  padding: 26px 26px 22px;
+  color: white;
+  box-shadow: 0 20px 45px rgba(15, 21, 35, 0.28);
+}
+.id-card::before {
+  position: absolute;
+  right: -60px;
+  top: -70px;
+  height: 220px;
+  width: 220px;
+  border: 1px solid rgba(229, 168, 107, 0.22);
+  border-radius: 50%;
+  content: "";
+}
+.id-card::after {
+  position: absolute;
+  right: -28px;
+  top: -34px;
+  height: 150px;
+  width: 150px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  content: "";
+}
+.id-card-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.id-card-chip {
+  display: flex;
+  height: 30px;
+  width: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: linear-gradient(155deg, #e5a86b, #c98a4e);
+}
+.id-card-brand {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+.id-card-name {
+  position: relative;
+  z-index: 1;
+  margin-top: 22px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.id-card-role {
+  position: relative;
+  z-index: 1;
+  margin-top: 3px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.id-card-foot {
+  position: relative;
+  z-index: 1;
+  margin-top: 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.id-card-slug {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.client-kpis {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (min-width: 768px) {
+  .client-kpis {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.kpi-tile {
+  border: 1px solid #e6e8ec;
+  border-radius: 16px;
+  background: white;
+  padding: 18px 18px 16px;
+  text-align: left;
+}
+.kpi-tile-value {
+  margin-top: 10px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #172033;
+}
+.kpi-tile-label {
+  margin-top: 3px;
+  font-size: 12.5px;
+  color: #7d8798;
+}
+
+.panel {
+  border: 1px solid #e6e8ec;
+  border-radius: 16px;
+  background: white;
+  padding: 20px 20px 18px;
+}
+.panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #172033;
+}
+.panel-sub {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: #7d8798;
+}
+
+.activity-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #f0f1f3;
+  padding: 13px 0;
+}
+.activity-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.activity-row:first-child {
+  padding-top: 0;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 10px 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status-pill::before {
+  height: 6px;
+  width: 6px;
+  border-radius: 50%;
+  content: "";
+}
+.status-pill-ok {
+  background: #e9f5ee;
+  color: #216a48;
+}
+.status-pill-ok::before {
+  background: #2f9e63;
+}
+.status-pill-warn {
+  background: #fdf1e2;
+  color: #9a5c10;
+}
+.status-pill-warn::before {
+  background: #e0942c;
+}
+.status-pill-danger {
+  background: #fbebe9;
+  color: #a3392f;
+}
+.status-pill-danger::before {
+  background: #d1483c;
+}
+.status-pill-neutral {
+  background: #eef2f6;
+  color: #52607a;
+}
+.status-pill-neutral::before {
+  background: #8b97ab;
+}
+
 .hero-panel {
   position: relative;
   min-height: 250px;

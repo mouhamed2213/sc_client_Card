@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useParams } from "wouter";
 import { startLogin } from "@/const";
+import ClientSplash from "@/components/client-space/ClientSplash";
 
 export default function InviteConsume() {
   const { token } = useParams<{ token: string }>();
@@ -10,9 +11,5 @@ export default function InviteConsume() {
     startLogin({ invitationToken: token });
   }, [token]);
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-      <p className="text-sm text-slate-300">Connexion à votre espace client…</p>
-    </div>
-  );
+  return <ClientSplash label="Activation de votre invitation…" />;
 }

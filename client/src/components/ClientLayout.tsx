@@ -1,11 +1,13 @@
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 import {
   BarChart3,
   CreditCard,
-  ExternalLink,
   LayoutDashboard,
+  LogOut,
   Menu,
   MessageSquare,
+  SquareArrowOutUpRight,
   X,
 } from "lucide-react";
 import { ReactNode, useState } from "react";
@@ -18,12 +20,14 @@ export default function ClientLayout({
   children: ReactNode;
   ficheId?: number;
 }) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [open, setOpen] = useState(false);
-  const me = trpc.auth.me.useQuery();
+  const { user, logout } = useAuth();
+  const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
   const fiche = ficheId
     ? trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId })
     : undefined;
+
   const nav = ficheId
     ? [
         {
@@ -49,116 +53,153 @@ export default function ClientLayout({
       ]
     : [];
 
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
+  const initials = (user?.name || user?.email || "?")
+    .trim()
+    .split(/\s+/)
+    .map(part => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const sidebarContent = (
+    <>
+      <div className="flex items-center gap-2.5 px-1">
+        <div className="brand-mark">
+          <span className="text-sm font-bold">SC</span>
+        </div>
+        <div>
+          <p className="text-sm font-semibold leading-tight">Espace client</p>
+          <p className="text-[11px] text-white/45">Support Connecté</p>
+        </div>
+      </div>
+
+      {fiches.data && fiches.data.length > 1 && (
+        <div className="mt-6 space-y-1 px-1">
+          <p className="eyebrow" style={{ color: "rgba(255,255,255,0.4)" }}>
+            Mes fiches
+          </p>
+          {fiches.data.map(f => (
             <button
-              className="rounded-lg p-2 hover:bg-slate-100 lg:hidden"
-              onClick={() => setOpen(true)}
-              aria-label="Ouvrir le menu"
+              key={f.id}
+              onClick={() => {
+                navigate(`/espace-client/fiche/${f.id}`);
+                setOpen(false);
+              }}
+              className={`w-full truncate rounded-lg px-3 py-2 text-left text-[13px] transition ${
+                f.id === ficheId
+                  ? "bg-white/10 font-medium text-white"
+                  : "text-white/55 hover:bg-white/5 hover:text-white"
+              }`}
             >
-              <Menu size={20} />
+              {f.prenom} {f.nom} · {f.entreprise}
             </button>
+          ))}
+        </div>
+      )}
+
+      <nav className="mt-6 flex-1 space-y-1">
+        {nav.map(item => {
+          const Icon = item.icon;
+          const active = location === item.href;
+          return (
             <Link
-              href="/espace-client"
-              className="font-semibold tracking-tight"
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className={`sidebar-link ${active ? "sidebar-link-active" : ""}`}
             >
-              Espace client
+              <Icon size={17} />
+              {item.label}
             </Link>
+          );
+        })}
+      </nav>
+
+      <div className="mt-6 border-t border-white/10 pt-4">
+        <div className="flex items-center gap-2.5 px-1">
+          <div className="avatar avatar-small" style={{ background: "#26334a" }}>
+            {initials}
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            {fiche?.data && (
-              <a
-                href={`/fiche/${fiche.data.slug}`}
-                target="_blank"
-                rel="noreferrer"
-                className="hidden items-center gap-1.5 rounded-lg border px-3 py-2 hover:bg-slate-50 sm:flex"
-              >
-                <ExternalLink size={15} /> Voir ma fiche
-              </a>
-            )}
-            <span className="hidden text-slate-500 md:inline">
-              {me.data?.name || me.data?.email}
-            </span>
+          <div className="min-w-0">
+            <p className="truncate text-[13px] font-medium text-white">
+              {user?.name || "Mon compte"}
+            </p>
+            <p className="truncate text-[11px] text-white/45">{user?.email}</p>
           </div>
         </div>
-      </header>
+        <button
+          onClick={() => logout()}
+          className="sidebar-link mt-2 w-full"
+          style={{ color: "rgba(255,255,255,0.55)" }}
+        >
+          <LogOut size={17} />
+          Se déconnecter
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="client-shell">
+      <aside className="client-sidebar hidden lg:flex">{sidebarContent}</aside>
+
       {open && (
         <div
-          className="fixed inset-0 z-50 bg-slate-950/30 lg:hidden"
+          className="fixed inset-0 z-50 bg-slate-950/40 lg:hidden"
           onClick={() => setOpen(false)}
         >
           <aside
-            className="h-full w-80 bg-white p-5 shadow-xl"
+            className="client-sidebar h-full w-72"
             onClick={e => e.stopPropagation()}
           >
-            <div className="mb-6 flex items-center justify-between">
-              <span className="font-semibold">Navigation</span>
-              <button onClick={() => setOpen(false)} aria-label="Fermer">
-                <X />
+            <div className="mb-2 flex justify-end">
+              <button
+                onClick={() => setOpen(false)}
+                aria-label="Fermer le menu"
+                className="text-white/60 hover:text-white"
+              >
+                <X size={20} />
               </button>
             </div>
-            <ClientNav
-              items={nav}
-              location={location}
-              onNavigate={() => setOpen(false)}
-            />
+            {sidebarContent}
           </aside>
         </div>
       )}
-      <div className="mx-auto flex max-w-7xl">
-        {ficheId && (
-          <aside className="hidden w-64 shrink-0 border-r bg-white px-4 py-6 lg:block">
-            <div className="mb-6 rounded-xl bg-slate-50 p-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Fiche
-              </p>
-              <p className="mt-1 font-semibold">
+
+      <div className="client-main">
+        <header className="client-topbar">
+          <div className="flex items-center gap-3">
+            <button
+              className="icon-button lg:hidden"
+              onClick={() => setOpen(true)}
+              aria-label="Ouvrir le menu"
+            >
+              <Menu size={18} />
+            </button>
+            <div>
+              <p className="text-[15px] font-semibold text-[#172033]">
                 {fiche?.data
                   ? `${fiche.data.prenom} ${fiche.data.nom}`
-                  : "Chargement…"}
+                  : "Bonjour" + (user?.name ? `, ${user.name.split(" ")[0]}` : "")}
               </p>
-              <p className="text-sm text-slate-500">
-                {fiche?.data?.entreprise}
-              </p>
+              {fiche?.data && (
+                <p className="text-xs text-[#7d8798]">{fiche.data.entreprise}</p>
+              )}
             </div>
-            <ClientNav items={nav} location={location} />
-          </aside>
-        )}
-        <main className="min-w-0 flex-1">{children}</main>
+          </div>
+          {fiche?.data && (
+            <a
+              href={`/fiche/${fiche.data.slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden items-center gap-1.5 rounded-lg border border-[#e6e8ec] px-3 py-2 text-sm font-medium text-[#172033] hover:bg-[#f6f8fa] sm:flex"
+            >
+              <SquareArrowOutUpRight size={15} /> Fiche publique
+            </a>
+          )}
+        </header>
+        <main className="min-w-0">{children}</main>
       </div>
     </div>
-  );
-}
-
-function ClientNav({
-  items,
-  location,
-  onNavigate,
-}: {
-  items: { href: string; label: string; icon: typeof LayoutDashboard }[];
-  location: string;
-  onNavigate?: () => void;
-}) {
-  return (
-    <nav className="space-y-1">
-      {items.map(item => {
-        const Icon = item.icon;
-        const active = location === item.href;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onNavigate}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
-          >
-            <Icon size={18} />
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
   );
 }

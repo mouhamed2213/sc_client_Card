@@ -3,21 +3,90 @@ import { useParams } from "wouter";
 import { BarChart3, ScanLine } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import ClientLayout from "@/components/ClientLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ScanChart from "@/components/client-space/ScanChart";
+
+const RANGES = [
+  { value: 7 as const, label: "7 jours" },
+  { value: 30 as const, label: "30 jours" },
+  { value: 90 as const, label: "90 jours" },
+];
 
 export default function ClientStats() {
   const { ficheId } = useParams<{ ficheId: string }>();
   const id = Number(ficheId);
   const [days, setDays] = useState<7 | 30 | 90>(30);
-  const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
   const scans = trpc.clientSpaceRouter.scans.useQuery({ ficheId: id, days });
-  const total = scans.data?.reduce((sum, item) => sum + item.count, 0) ?? 0;
-  const max = Math.max(...(scans.data?.map(item => item.count) ?? [1]), 1);
 
-  return <ClientLayout ficheId={id}><div className="space-y-6 p-4 sm:p-6 lg:p-8">
-    <div><p className="text-sm text-slate-500">{fiche.data?.entreprise}</p><h1 className="text-2xl font-semibold">Statistiques</h1><p className="mt-1 text-sm text-slate-500">Suivez les scans de votre fiche publique.</p></div>
-    <div className="flex flex-wrap gap-2">{([7,30,90] as const).map(value => <button key={value} onClick={() => setDays(value)} className={`rounded-lg px-4 py-2 text-sm font-medium ${days === value ? "bg-slate-900 text-white" : "border bg-white text-slate-600 hover:bg-slate-50"}`}>{value} jours</button>)}</div>
-    <Card><CardHeader><CardTitle className="flex items-center gap-2"><ScanLine size={18}/> Scans — {days} jours</CardTitle></CardHeader><CardContent><p className="text-4xl font-semibold">{total}</p><p className="text-sm text-slate-500">scans enregistrés</p></CardContent></Card>
-    <Card><CardHeader><CardTitle className="flex items-center gap-2"><BarChart3 size={18}/> Évolution quotidienne</CardTitle></CardHeader><CardContent>{scans.isLoading ? <p className="py-8 text-sm text-slate-500">Chargement…</p> : !scans.data?.length ? <p className="py-8 text-sm text-slate-500">Aucun scan sur cette période.</p> : <div className="flex h-64 items-end gap-1 overflow-x-auto border-b pb-2">{scans.data.map(item => <div key={item.scanDate} className="group flex h-full min-w-6 flex-1 flex-col justify-end" title={`${item.scanDate}: ${item.count}`}><div className="rounded-t bg-slate-800 transition group-hover:bg-slate-600" style={{ height: `${Math.max((item.count / max) * 90, 4)}%` }} /><span className="mt-2 truncate text-center text-[10px] text-slate-400">{item.scanDate.slice(5)}</span></div>)}</div>}</CardContent></Card>
-  </div></ClientLayout>;
+  const total = scans.data?.reduce((sum, item) => sum + item.count, 0) ?? 0;
+  const daysCount = scans.data?.length || days;
+  const average = daysCount ? Math.round((total / daysCount) * 10) / 10 : 0;
+  const best = scans.data?.reduce(
+    (top, item) => (item.count > (top?.count ?? -1) ? item : top),
+    undefined as NonNullable<typeof scans.data>[number] | undefined
+  );
+
+  return (
+    <ClientLayout ficheId={id}>
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <h1 className="text-xl font-semibold text-[#172033]">Statistiques</h1>
+            <p className="mt-1 text-sm text-[#7d8798]">
+              Suivez les scans de votre fiche publique dans le temps.
+            </p>
+          </div>
+          <div className="flex gap-1.5 rounded-lg border border-[#e6e8ec] bg-white p-1">
+            {RANGES.map(range => (
+              <button
+                key={range.value}
+                onClick={() => setDays(range.value)}
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                  days === range.value
+                    ? "bg-[#172033] text-white"
+                    : "text-[#52607a] hover:bg-[#f4f5f7]"
+                }`}
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="client-kpis" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+          <div className="kpi-tile">
+            <ScanLine size={17} className="text-[#7d8798]" />
+            <p className="kpi-tile-value">{total}</p>
+            <p className="kpi-tile-label">Scans sur la période</p>
+          </div>
+          <div className="kpi-tile">
+            <BarChart3 size={17} className="text-[#7d8798]" />
+            <p className="kpi-tile-value">{average}</p>
+            <p className="kpi-tile-label">Moyenne par jour</p>
+          </div>
+          <div className="kpi-tile">
+            <ScanLine size={17} className="text-[#7d8798]" />
+            <p className="kpi-tile-value">{best?.count ?? 0}</p>
+            <p className="kpi-tile-label">
+              Meilleur jour
+              {best ? ` · ${best.scanDate.slice(5).split("-").reverse().join("/")}` : ""}
+            </p>
+          </div>
+        </div>
+
+        <div className="panel">
+          <p className="panel-title">Évolution quotidienne</p>
+          <p className="panel-sub">{RANGES.find(r => r.value === days)?.label}</p>
+          <div className="mt-4">
+            {scans.isLoading ? (
+              <div className="flex h-[260px] items-center justify-center text-sm text-[#7d8798]">
+                Chargement…
+              </div>
+            ) : (
+              <ScanChart data={scans.data ?? []} height={260} />
+            )}
+          </div>
+        </div>
+      </div>
+    </ClientLayout>
+  );
 }
