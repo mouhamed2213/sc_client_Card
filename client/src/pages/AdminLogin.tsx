@@ -16,6 +16,8 @@ export default function AdminLogin() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (loading) return;
+
     setLoading(true);
 
     try {
@@ -34,11 +36,17 @@ export default function AdminLogin() {
         throw new Error(body.message || "Connexion impossible.");
       }
 
+      // The login endpoint has just created the session cookie. Invalidate
+      // the auth query, then force a navigation so AdminGuard reads the new
+      // session instead of leaving the login page mounted with stale state.
       await utils.auth.me.invalidate();
       toast.success("Connexion administrateur réussie.");
-      navigate("/");
+
+      window.location.replace("/");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Connexion impossible.");
+      toast.error(
+        error instanceof Error ? error.message : "Connexion impossible."
+      );
     } finally {
       setLoading(false);
     }
