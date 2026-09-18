@@ -13,13 +13,6 @@ async function main() {
       orderBy: { id: "asc" },
     }),
     prisma.ficheAccess.findMany({
-      where: {
-        NOT: {
-          fiche: {
-            organizationId: { equals: undefined as never },
-          },
-        },
-      },
       select: {
         id: true,
         ficheId: true,
