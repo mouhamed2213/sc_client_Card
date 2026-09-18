@@ -34,7 +34,7 @@ import {
   createContactRequest,
   createFicheAccess,
   createOrganization,
-  createPersonalOrganizationForFiche,
+  createPersonalOrganizationInvitationForFiche,
   createOrganizationInvitation,
   createFiche,
   createMembershipCard,
@@ -318,11 +318,16 @@ export const appRouter = router({
       )
       .mutation(({ input }) => createOrganization(input)),
 
-    createPersonalOrganizationForFiche: adminProcedure
+    createPersonalOrganizationInvitationForFiche: adminProcedure
       .input(z.object({ ficheId: z.number().int().positive(), name: z.string().trim().min(1).max(180) }))
       .mutation(async ({ input }) => {
         try {
-          return await createPersonalOrganizationForFiche(input.ficheId, input.name);
+          const result = await createPersonalOrganizationInvitationForFiche(input.ficheId, input.name);
+          return {
+            organizationId: result.organization.id,
+            token: result.invitation.token,
+            url: `/espace-client/invite/${result.invitation.token}`,
+          };
         } catch (error) {
           const message = error instanceof Error ? error.message : "";
           if (message === "FICHE_NOT_FOUND") throw new TRPCError({ code: "NOT_FOUND", message: "Fiche introuvable." });
