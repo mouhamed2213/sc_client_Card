@@ -381,27 +381,39 @@ export async function consumeInvitation(token: string, userId: number) {
     });
     if (!organization) throw new Error("ORGANIZATION_NOT_FOUND");
 
-    const membership = await tx.organizationMembership.upsert({
+    const invitedRole =
+      invitation.role === "OWNER"
+        ? "OWNER"
+        : invitation.role === "ADMIN"
+          ? "ADMIN"
+          : invitation.role === "VIEWER"
+            ? "VIEWER"
+            : "MEMBER";
+
+    const existingMembership = await tx.organizationMembership.findUnique({
       where: {
         organizationId_userId: {
           organizationId: organization.id,
           userId,
         },
       },
-      create: {
-        organizationId: organization.id,
-        userId,
-        role:
-          invitation.role === "OWNER"
-            ? "OWNER"
-            : invitation.role === "ADMIN"
-              ? "ADMIN"
-              : invitation.role === "VIEWER"
-                ? "VIEWER"
-                : "MEMBER",
-      },
-      update: {},
     });
+
+    const membership = existingMembership
+      ? await tx.organizationMembership.update({
+          where: { id: existingMembership.id },
+          data:
+            existingMembership.role === "OWNER"
+              ? {}
+              : { role: invitedRole },
+        })
+      : await tx.organizationMembership.create({
+          data: {
+            organizationId: organization.id,
+            userId,
+            role: invitedRole,
+          },
+        });
 
     if (invitation.role !== "OWNER" && invitation.ficheId) {
       const fiche = await tx.fiche.findFirst({
