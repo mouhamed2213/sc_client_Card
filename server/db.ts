@@ -259,19 +259,63 @@ export async function getOverview() {
 // Espace client
 
 // --- Invitations ---
-export async function createInvitation(ficheId: number, ttlDays = 7) {
+export async function createOrganizationInvitation(input: {
+  organizationId: number;
+  role: "OWNER" | "ADMIN" | "MEMBER" | "VIEWER";
+  ficheId?: number | null;
+  invitedUserId?: number | null;
+  ttlDays?: number;
+}) {
   const token = randomBytes(32).toString("base64url");
-  const expireLe = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
-  await prisma.invitationClient.create({ data: { ficheId, token, expireLe } });
-  return token;
+  const expireLe = new Date(
+    Date.now() + (input.ttlDays ?? 7) * 24 * 60 * 60 * 1000
+  );
+
+  const organization = await prisma.organization.findUnique({
+    where: { id: input.organizationId },
+  });
+  if (!organization) throw new Error("ORGANIZATION_NOT_FOUND");
+
+  if (input.ficheId != null) {
+    const fiche = await prisma.fiche.findFirst({
+      where: {
+        id: input.ficheId,
+        organizationId: input.organizationId,
+      },
+    });
+    if (!fiche) throw new Error("FICHE_NOT_IN_ORGANIZATION");
+  }
+
+  return prisma.invitationClient.create({
+    data: {
+      organizationId: input.organizationId,
+      ficheId: input.ficheId ?? null,
+      role: input.role,
+      invitedUserId: input.invitedUserId ?? null,
+      token,
+      expireLe,
+    },
+  });
+}
+
+// Transitional compatibility helper. New callers should create invitations
+// from the organization context, not from ownerId.
+export async function createInvitation(ficheId: number, ttlDays = 7) {
+  const fiche = await prisma.fiche.findUnique({ where: { id: ficheId } });
+  if (!fiche?.organizationId) throw new Error("FICHE_NOT_ASSIGNED_TO_ORGANIZATION");
+  const invitation = await createOrganizationInvitation({
+    organizationId: fiche.organizationId,
+    role: "OWNER",
+    ficheId: null,
+    ttlDays,
+  });
+  return invitation.token;
 }
 
 export async function getInvitationByToken(token: string) {
   return prisma.invitationClient.findUnique({ where: { token } });
 }
 
-// Consomme le token et rattache la fiche à l'utilisateur, dans une seule
-// transaction pour éviter une invitation utilisée deux fois en concurrence.
 export async function consumeInvitation(token: string, userId: number) {
   return prisma.$transaction(async tx => {
     const invitation = await tx.invitationClient.findUnique({
@@ -279,23 +323,75 @@ export async function consumeInvitation(token: string, userId: number) {
     });
     if (!invitation) throw new Error("INVITATION_NOT_FOUND");
     if (invitation.utilisee) throw new Error("INVITATION_ALREADY_USED");
+    if (invitation.revokedAt) throw new Error("INVITATION_REVOKED");
     if (invitation.expireLe < new Date()) throw new Error("INVITATION_EXPIRED");
+    if (invitation.invitedUserId && invitation.invitedUserId !== userId) {
+      throw new Error("INVITATION_USER_MISMATCH");
+    }
+    if (!invitation.organizationId) {
+      throw new Error("INVITATION_ORGANIZATION_MISSING");
+    }
 
-    const fiche = await tx.fiche.findUnique({
-      where: { id: invitation.ficheId },
+    const organization = await tx.organization.findUnique({
+      where: { id: invitation.organizationId },
     });
-    if (!fiche) throw new Error("FICHE_NOT_FOUND");
-    if (fiche.ownerId) throw new Error("FICHE_ALREADY_OWNED");
+    if (!organization) throw new Error("ORGANIZATION_NOT_FOUND");
 
-    await tx.fiche.update({
-      where: { id: fiche.id },
-      data: { ownerId: userId },
+    const membership = await tx.organizationMembership.upsert({
+      where: {
+        organizationId_userId: {
+          organizationId: organization.id,
+          userId,
+        },
+      },
+      create: {
+        organizationId: organization.id,
+        userId,
+        role:
+          invitation.role === "OWNER"
+            ? "OWNER"
+            : invitation.role === "ADMIN"
+              ? "ADMIN"
+              : invitation.role === "VIEWER"
+                ? "VIEWER"
+                : "MEMBER",
+      },
+      update: {},
     });
+
+    if (invitation.role !== "OWNER" && invitation.ficheId) {
+      const fiche = await tx.fiche.findFirst({
+        where: {
+          id: invitation.ficheId,
+          organizationId: organization.id,
+        },
+      });
+      if (!fiche) throw new Error("FICHE_NOT_IN_ORGANIZATION");
+
+      await tx.ficheAccess.upsert({
+        where: {
+          ficheId_membershipId: {
+            ficheId: fiche.id,
+            membershipId: membership.id,
+          },
+        },
+        create: {
+          ficheId: fiche.id,
+          membershipId: membership.id,
+        },
+        update: {},
+      });
+    }
+
     await tx.invitationClient.update({
       where: { id: invitation.id },
-      data: { utilisee: true },
+      data: {
+        utilisee: true,
+        acceptedAt: new Date(),
+      },
     });
-    return fiche;
+
+    return membership;
   });
 }
 
