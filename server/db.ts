@@ -262,6 +262,25 @@ export async function createOrganization(input: { name: string; type: "PERSONAL"
   return prisma.organization.create({ data: input });
 }
 
+export async function createPersonalOrganizationForFiche(ficheId: number, name: string) {
+  return prisma.$transaction(async tx => {
+    const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
+    if (!fiche) throw new Error("FICHE_NOT_FOUND");
+    if (fiche.organizationId) throw new Error("FICHE_ALREADY_ASSIGNED");
+
+    const organization = await tx.organization.create({
+      data: { name: name.trim().slice(0, 180), type: "PERSONAL" },
+    });
+
+    await tx.fiche.update({
+      where: { id: ficheId },
+      data: { organizationId: organization.id },
+    });
+
+    return organization;
+  });
+}
+
 export async function assignFicheToOrganization(ficheId: number, organizationId: number) {
   const [fiche, organization] = await Promise.all([
     prisma.fiche.findUnique({ where: { id: ficheId } }),
