@@ -1,9 +1,9 @@
 import { randomBytes } from "node:crypto";
 import { prisma } from "../prisma/client";
 
-export async function listInvitationsForFiche(ficheId: number) {
+export async function listInvitationsForOrganization(organizationId: number) {
   return prisma.invitationClient.findMany({
-    where: { ficheId },
+    where: { organizationId },
     orderBy: { createdAt: "desc" },
   });
 }
