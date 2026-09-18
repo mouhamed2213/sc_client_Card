@@ -34,6 +34,7 @@ import {
   createContactRequest,
   createFicheAccess,
   createOrganization,
+  createPersonalOrganizationForFiche,
   createOrganizationInvitation,
   createFiche,
   createMembershipCard,
@@ -316,6 +317,19 @@ export const appRouter = router({
         })
       )
       .mutation(({ input }) => createOrganization(input)),
+
+    createPersonalOrganizationForFiche: adminProcedure
+      .input(z.object({ ficheId: z.number().int().positive(), name: z.string().trim().min(1).max(180) }))
+      .mutation(async ({ input }) => {
+        try {
+          return await createPersonalOrganizationForFiche(input.ficheId, input.name);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (message === "FICHE_NOT_FOUND") throw new TRPCError({ code: "NOT_FOUND", message: "Fiche introuvable." });
+          if (message === "FICHE_ALREADY_ASSIGNED") throw new TRPCError({ code: "CONFLICT", message: "Cette fiche est déjà affectée à une organisation." });
+          throw error;
+        }
+      }),
 
     assignFicheToOrganization: adminProcedure
       .input(
