@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync } from "node:crypto";
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 const SCRYPT_N = 16384;
 const SCRYPT_R = 8;
@@ -33,28 +33,52 @@ export function verifyAdminPassword(
   encodedHash: string
 ): boolean {
   try {
-    const [algorithm, n, r, p, saltHex, keyHex] = encodedHash.split("$");
+    const [algorithm, nRaw, rRaw, pRaw, saltHex, keyHex] =
+      encodedHash.split("$");
 
-    if (algorithm !== "scrypt" || !n || !r || !p || !saltHex || !keyHex) {
+    if (
+      algorithm !== "scrypt" ||
+      !nRaw ||
+      !rRaw ||
+      !pRaw ||
+      !saltHex ||
+      !keyHex
+    ) {
+      return false;
+    }
+
+    const n = Number(nRaw);
+    const r = Number(rRaw);
+    const p = Number(pRaw);
+
+    if (
+      !Number.isSafeInteger(n) ||
+      !Number.isSafeInteger(r) ||
+      !Number.isSafeInteger(p) ||
+      n <= 1 ||
+      r <= 0 ||
+      p <= 0
+    ) {
       return false;
     }
 
     const salt = Buffer.from(saltHex, "hex");
     const expectedKey = Buffer.from(keyHex, "hex");
 
-    if (!salt.length || !expectedKey.length) return false;
+    if (salt.length !== SALT_BYTES || expectedKey.length !== KEY_LENGTH) {
+      return false;
+    }
 
     const derivedKey = scryptSync(password, salt, expectedKey.length, {
-      N: Number(n),
-      r: Number(r),
-      p: Number(p),
+      N: n,
+      r,
+      p,
     });
-    return true;
-    // ! TO UNCOMMENTE
-    // return (
-    //   derivedKey.length === expectedKey.length &&
-    //   timingSafeEqual(derivedKey, expectedKey)
-    // );
+
+    return (
+      derivedKey.length === expectedKey.length &&
+      timingSafeEqual(derivedKey, expectedKey)
+    );
   } catch {
     return false;
   }

@@ -1,13 +1,14 @@
 import { COOKIE_NAME } from "@shared/const";
 import type { Express, Request } from "express";
 import { z } from "zod";
-import { upsertUser } from "../db";
+import { prisma } from "../../prisma/client";
 import { getSessionCookieOptions } from "./cookies";
 import { ENV } from "./env";
 import { sdk } from "./sdk";
+import { verifyAdminPassword } from "./adminAuth";
 
 const loginSchema = z.object({
-  username: z.string().trim().min(1).max(120),
+  username: z.string().trim().min(1).max(64),
   password: z.string().min(1).max(200),
 });
 
@@ -63,38 +64,46 @@ export function registerAdminRoutes(app: Express): void {
       });
     }
 
-    // const parsed = loginSchema.safeParse(req.body);
-    // if (!parsed.success) {
-    //   recordFailure(key);
-    //   return res.status(400).json({ message: "Identifiants invalides." });
-    // }
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) {
+      recordFailure(key);
+      return res.status(400).json({ message: "Identifiants invalides." });
+    }
 
-    // const { username, password } = parsed.data;
+    const { username, password } = parsed.data;
 
-    // if (
-    //   !ENV.adminUsername ||
-    //   !ENV.adminPasswordHash ||
-    //   !ENV.cookieSecret ||
-    //   username !== ENV.adminUsername ||
-    //   !verifyAdminPassword(password, ENV.adminPasswordHash)
-    // ) {
-    //   recordFailure(key);
-    //   return res.status(401).json({ message: "Identifiants invalides." });
-    // }
+    if (!ENV.cookieSecret) {
+      return res.status(500).json({
+        message: "Le serveur d'authentification n'est pas configuré.",
+      });
+    }
 
-    const openId = `local_admin:${ENV.adminUsername}`;
-    await upsertUser({
-      openId,
-      name: ENV.adminUsername,
-      loginMethod: "password",
-      role: "admin",
-      lastSignedIn: new Date(),
+    const credential = await prisma.adminCredential.findUnique({
+      where: { username },
+      include: { user: true },
     });
 
-    const sessionToken = await sdk.createSessionToken(openId, {
-      expiresInMs: 8 * 60 * 60 * 1000,
-      name: ENV.adminUsername,
+    if (
+      !credential ||
+      credential.user.role !== "admin" ||
+      !verifyAdminPassword(password, credential.passwordHash)
+    ) {
+      recordFailure(key);
+      return res.status(401).json({ message: "Identifiants invalides." });
+    }
+
+    await prisma.user.update({
+      where: { id: credential.userId },
+      data: { lastSignedIn: new Date() },
     });
+
+    const sessionToken = await sdk.createSessionToken(
+      credential.user.openId,
+      {
+        expiresInMs: 8 * 60 * 60 * 1000,
+        name: credential.user.name || credential.username,
+      }
+    );
 
     res.cookie(COOKIE_NAME, sessionToken, {
       ...adminCookieOptions(req),
@@ -102,7 +111,7 @@ export function registerAdminRoutes(app: Express): void {
     });
 
     clearFailures(key);
-    return res.json({ success: true, username: ENV.adminUsername });
+    return res.json({ success: true, username: credential.username });
   });
 
   app.post("/api/admin/logout", (req, res) => {
