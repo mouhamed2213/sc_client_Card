@@ -221,7 +221,7 @@ export default function ClientFicheEdit() {
 
   return (
     <ClientLayout ficheId={id}>
-      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-[#f5f6f8] text-[#172033] p-4 sm:p-6 lg:p-8"><div className="mx-auto max-w-[1300px] space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#c98a4e]">
@@ -245,7 +245,7 @@ export default function ClientFicheEdit() {
         </div>
 
         <form id="signature-fiche-form" onSubmit={saveChanges} className="space-y-6">
-          <Section title="Identité et contact">
+          <EditorSection title="Identité et contact">
             <div className="grid gap-4 sm:grid-cols-2">
               {[
                 ["prenom", "Prénom", true],
@@ -274,14 +274,14 @@ export default function ClientFicheEdit() {
                         event.target.value
                       )
                     }
-                    className="mt-1.5 w-full rounded-lg border border-[#e0e4e9] px-3 py-2 text-sm text-[#172033] outline-none focus:border-[#c98a4e]"
+                    className="editor-input mt-1.5"
                   />
                 </label>
               ))}
             </div>
           </Section>
 
-          <Section title="Portrait et logo" note="Le traitement d’image et les limites Signature restent contrôlés par le serveur.">
+          <EditorSection title="Portrait et logo" note="Le traitement d’image et les limites Signature restent contrôlés par le serveur.">
             <div className="grid gap-5 md:grid-cols-2">
               <MediaCard
                 title="Portrait"
@@ -300,7 +300,7 @@ export default function ClientFicheEdit() {
             </div>
           </Section>
 
-          <Section title="Présentation et action principale">
+          <EditorSection title="Présentation et action principale">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Action prioritaire">
                 <select
@@ -322,15 +322,14 @@ export default function ClientFicheEdit() {
               </Field>
             </div>
             <Field label="Présentation">
-              <textarea
-                rows={6}
+              <textarea className="editor-input mt-1.5" rows={6}
                 value={form.data.presentation}
                 onChange={e => setData("presentation", e.target.value)}
               />
             </Field>
           </Section>
 
-          <Section title="Rendez-vous">
+          <EditorSection title="Rendez-vous">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Libellé du bouton">
                 <input
@@ -341,8 +340,7 @@ export default function ClientFicheEdit() {
                 />
               </Field>
               <Field label="URL de réservation">
-                <input
-                  type="url"
+                <input className="editor-input mt-1.5"\n                  type="url"
                   value={form.data.rendezVous.url}
                   onChange={e =>
                     setData("rendezVous", { ...form.data.rendezVous, url: e.target.value })
@@ -353,7 +351,7 @@ export default function ClientFicheEdit() {
             </div>
           </Section>
 
-          <Section title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}>
+          <EditorSection title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}>
             <Repeater
               items={form.data.reseauxSociaux}
               onAdd={() =>
@@ -364,8 +362,7 @@ export default function ClientFicheEdit() {
               }
               render={(item, index) => (
                 <div className="grid gap-2 sm:grid-cols-[180px_1fr_auto]">
-                  <input
-                    placeholder="Instagram, LinkedIn…"
+                  <input className="editor-input"\n                    placeholder="Instagram, LinkedIn…"
                     value={item.label}
                     onChange={e =>
                       setData(
@@ -376,8 +373,7 @@ export default function ClientFicheEdit() {
                       )
                     }
                   />
-                  <input
-                    type="url"
+                  <input className="editor-input"\n                    type="url"
                     placeholder="https://…"
                     value={item.url}
                     onChange={e =>
@@ -397,7 +393,7 @@ export default function ClientFicheEdit() {
             />
           </Section>
 
-          <Section title={`Liens personnalisés (${form.data.liens.length}/10)`} note="Maximum Signature : 10 liens.">
+          <EditorSection title={`Liens personnalisés (${form.data.liens.length}/10)`} note="Maximum Signature : 10 liens.">
             <Repeater
               items={form.data.liens}
               onAdd={() => {
@@ -432,7 +428,7 @@ export default function ClientFicheEdit() {
             />
           </Section>
 
-          <Section title={`Galerie (${form.data.galerie.length}/8)`} note="Maximum Signature : 8 photos.">
+          <EditorSection title={`Galerie (${form.data.galerie.length}/8)`} note="Maximum Signature : 8 photos.">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {form.data.galerie.map((image, index) => (
                 <div key={image.url} className="rounded-xl border border-[#e5e8ed] p-2">
@@ -474,13 +470,12 @@ export default function ClientFicheEdit() {
             </div>
           </Section>
 
-          <Section title="Horaires" note="Les 7 jours sont conservés et validés côté serveur.">
+          <EditorSection title="Horaires" note="Les 7 jours sont conservés et validés côté serveur.">
             <div className="space-y-2">
               {form.data.horaires.map((row, index) => (
                 <div key={row.jour} className="grid gap-2 sm:grid-cols-[150px_1fr]">
                   <div className="flex items-center text-sm font-medium">{row.jour}</div>
-                  <input
-                    value={row.horaire}
+                  <input className="editor-input"\n                    value={row.horaire}
                     placeholder="09:00 — 18:00 ou Fermé"
                     onChange={e =>
                       setData("horaires", form.data.horaires.map((x, i) => i === index ? { ...x, horaire: e.target.value } : x))
@@ -491,7 +486,7 @@ export default function ClientFicheEdit() {
             </div>
           </Section>
 
-          <Section title="Avis Google">
+          <EditorSection title="Avis Google">
             <Field label="Google Place ID">
               <input
                 value={form.googlePlaceId}
@@ -501,7 +496,7 @@ export default function ClientFicheEdit() {
             </Field>
           </Section>
 
-          <Section title="Catalogue / menu / tarifs" note="Signature peut gérer ses sections et articles.">
+          <EditorSection title="Catalogue / menu / tarifs" note="Signature peut gérer ses sections et articles.">
             <CatalogEditor
               sections={form.data.sections}
               onChange={sections => setData("sections", sections)}
@@ -519,14 +514,14 @@ export default function ClientFicheEdit() {
             </button>
           </div>
         </form>
-      </div>
+      </div></div>
     </ClientLayout>
   );
 }
 
-function Section({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
+function EditorSection({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
   return (
-    <section className="panel">
+    <section className="editor-card">
       <div className="mb-5">
         <h2 className="text-base font-semibold text-[#172033]">{title}</h2>
         {note && <p className="mt-1 text-xs text-[#7d8798]">{note}</p>}
@@ -645,8 +640,7 @@ function CatalogEditor({
           <div className="mt-3 space-y-2">
             {section.articles.map((article, articleIndex) => (
               <div key={articleIndex} className="grid gap-2 md:grid-cols-[1fr_1.5fr_120px_auto]">
-                <input
-                  placeholder="Article / prestation"
+                <input className="editor-input"\n                  placeholder="Article / prestation"
                   value={article.nom}
                   onChange={e =>
                     onChange(sections.map((x, i) => i === sectionIndex ? {
