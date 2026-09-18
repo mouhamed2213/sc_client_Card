@@ -198,9 +198,6 @@ model InvitationClient {
   organization   Organization?              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   fiche          Fiche?                     @relation(fields: [ficheId], references: [id], onDelete: Cascade)
   invitedUser    User?                      @relation("InvitationTargetUser", fields: [invitedUserId], references: [id], onDelete: SetNull)
-  createdMembership OrganizationMembership? @relation("InvitationCreatedMembership", fields: [createdMembershipId], references: [id], onDelete: SetNull)
-  createdMembershipId Int?
-
   @@index([organizationId])
   @@index([ficheId])
   @@index([invitedUserId])
