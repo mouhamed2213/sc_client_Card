@@ -7,6 +7,7 @@ import {
   LogOut,
   Menu,
   MessageSquare,
+  Settings,
   SquareArrowOutUpRight,
   X,
 } from "lucide-react";
@@ -49,6 +50,11 @@ export default function ClientLayout({
           href: `/espace-client/fiche/${ficheId}/cartes`,
           label: "Cartes membres",
           icon: CreditCard,
+        },
+        {
+          href: `/espace-client/fiche/${ficheId}/modifier`,
+          label: "Modifier ma fiche",
+          icon: Settings,
         },
       ]
     : [];

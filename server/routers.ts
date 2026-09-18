@@ -462,6 +462,39 @@ export const appRouter = router({
           });
         return listMembershipCards(input.ficheId);
       }),
+    updateContact: clientProcedure
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          nom: z.string().min(1),
+          prenom: z.string().min(1),
+          fonction: z.string().min(1),
+          entreprise: z.string().min(1),
+          telephone: z.string().min(8),
+          whatsapp: z.string().min(8),
+          email: z.string().optional().default(""),
+          site: z.string().optional().default(""),
+          adresse: z.string().optional().default(""),
+          lienItineraire: z.string().optional().default(""),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        if (!fiche)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
+        if (fiche.formule !== "signature")
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "La modification de la fiche est réservée à la formule Signature.",
+          });
+        const { ficheId, ...fields } = input;
+        await updateFiche(ficheId, fields);
+        return { ok: true } as const;
+      }),
   }),
 });
 

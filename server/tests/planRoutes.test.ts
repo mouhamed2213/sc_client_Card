@@ -40,14 +40,25 @@ describe("plan-aware routes", () => {
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
-  it("persists a real callback request for Pro", async () => {
-    const fiche = await getFicheBySlug("marie-diallo");
+  it("refuses a callback form for Pro (Signature-only feature)", async () => {
+    await expect(
+      caller().fiches.contact({
+        slug: "marie-diallo",
+        name: "Client Test",
+        phone: "+221771234567",
+        message: "Rappelez-moi",
+      })
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("persists a real callback request for Signature", async () => {
+    const fiche = await getFicheBySlug("hotel-teranga");
     const before = await prisma.contactRequest.count({
       where: { ficheId: fiche!.id },
     });
     await expect(
       caller().fiches.contact({
-        slug: "marie-diallo",
+        slug: "hotel-teranga",
         name: "Client Test",
         phone: "+221771234567",
         message: "Je souhaite être rappelé",
