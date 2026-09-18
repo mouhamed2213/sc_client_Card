@@ -56,16 +56,7 @@ export default function AdminClientInvitationPanel() {
     { query: attachQuery },
     { enabled: open && attachMode === "existing" }
   );
-  const createOrganizationMutation = trpc.admin.createPersonalOrganizationForFiche.useMutation({
-    onSuccess: async organization => {
-      await utils.fiches.getBySlug.invalidate({ slug });
-      inviteOwnerMutation.mutate({ organizationId: organization.id });
-    },
-    onError: error =>
-      toast.error("Impossible de créer l’invitation", {
-        description: error.message,
-      }),
-  });
+  const createOrganizationMutation = trpc.admin.createPersonalOrganizationInvitationForFiche.useMutation({
     onSuccess: async result => {
       const absoluteUrl = new URL(result.url, window.location.origin).toString();
       setCreatedUrl(absoluteUrl);
