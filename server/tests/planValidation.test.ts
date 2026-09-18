@@ -23,18 +23,19 @@ const validSignatureData = {
 describe("planFeatures architecture", () => {
   it("declares the exact capabilities of the three formulas", () => {
     expect(planFeatures).toEqual({
-      essentiel: { maxLinks: 3, maxPhotos: 0, hasForm: false, hasGoogleReview: false, requiresProfile: false, requiresHours: true, hasCatalog: false },
+      essentiel: { maxLinks: 0, maxPhotos: 0, hasForm: false, hasGoogleReview: false, requiresProfile: false, requiresHours: true, hasCatalog: false },
       pro: { maxLinks: 10, maxPhotos: 8, hasForm: true, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: false },
       signature: { maxLinks: 10, maxPhotos: 8, hasForm: true, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true },
     });
   });
 
-  it("Essentiel requires seven days, accepts three links and rejects gallery photos", () => {
-    expect(validatePlanPayload({ formule: "essentiel", ...base, data: { ...base.data, horaires: hours, liens: items(3) } })).toEqual([]);
-    expect(validatePlanPayload({ formule: "essentiel", ...base, data: { ...base.data, horaires: hours, liens: items(4), galerie: items(1) } })).toEqual([
-      "essentiel: maximum 3 liens.",
+  it("Essentiel does not include custom links and rejects gallery photos", () => {
+    expect(validatePlanPayload({ formule: "essentiel", ...base, data: { ...base.data, horaires: hours, liens: [] } })).toEqual([]);
+    expect(validatePlanPayload({ formule: "essentiel", ...base, data: { ...base.data, horaires: hours, liens: items(1), galerie: items(1) } })).toEqual([
+      "La formule Essentiel ne permet pas de liens personnalisés.",
       "La formule Essentiel ne permet pas de galerie photo.",
     ]);
+    expect(getPlanFeatures("essentiel").maxLinks).toBe(0);
     expect(getPlanFeatures("essentiel").hasForm).toBe(false);
   });
 
