@@ -42,7 +42,7 @@ import {
 } from "./db";
 import { validatePlanPayload } from "./planValidation";
 import { storagePut } from "./storage";
-import { hashClientPassword, CLIENT_USERNAME_PATTERN } from "./_core/clientAuth";
+import { generateClientUsername, generateTemporaryClientPassword, hashClientPassword, CLIENT_USERNAME_PATTERN } from "./_core/clientAuth";
 
 function parseFiche<T extends { dataJson: string }>(fiche: T) {
   const { dataJson, ...rest } = fiche;
@@ -286,12 +286,11 @@ export const appRouter = router({
     createClientAccountWithFiche: adminProcedure
       .input(
         z.object({
-          username: z.string().trim().regex(CLIENT_USERNAME_PATTERN),
-          temporaryPassword: z.string().min(12).max(200),
           name: z.string().trim().min(1).max(160),
           email: z.string().trim().email().max(320).optional().or(z.literal("")),
           formule: z.enum(["essentiel", "pro", "signature"]),
           fiche: fichePayload,
+          createCard: z.boolean().default(false),
           cardNumero: z.string().trim().max(80).optional(),
         })
       )
@@ -316,17 +315,20 @@ export const appRouter = router({
           throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
         }
 
+        const username = generateClientUsername(input.name);
+        const temporaryPassword = generateTemporaryClientPassword();
+
         try {
           const result = await createClientAccountWithFiche({
             user: {
-              openId: `local-client:${input.username}`,
+              openId: `local-client:${username}`,
               name: input.name,
               email: input.email || null,
               formule: input.formule,
             },
             credential: {
-              username: input.username,
-              passwordHash: hashClientPassword(input.temporaryPassword),
+              username,
+              passwordHash: hashClientPassword(temporaryPassword),
             },
             fiche: {
               ...fields,
@@ -334,7 +336,7 @@ export const appRouter = router({
               dateCreation: createdAt,
               dateEcheance,
             },
-            cardNumero: input.cardNumero,
+            cardNumero: input.createCard ? input.cardNumero : undefined,
           });
 
           return {
@@ -342,6 +344,7 @@ export const appRouter = router({
             userId: result.user.id,
             ficheId: result.fiche.id,
             username: result.credential.username,
+            temporaryPassword,
             mustChangePassword: result.credential.mustChangePassword,
             cardId: result.card?.id ?? null,
           };
@@ -350,7 +353,7 @@ export const appRouter = router({
             throw new TRPCError({ code: "CONFLICT", message: "Ce compte client existe déjà." });
           }
           if (error instanceof Error && error.message === "CLIENT_USERNAME_EXISTS") {
-            throw new TRPCError({ code: "CONFLICT", message: "Ce nom d'utilisateur existe déjà." });
+            throw new TRPCError({ code: "CONFLICT", message: "Impossible de générer un identifiant unique. Réessayez." });
           }
           throw error;
         }
