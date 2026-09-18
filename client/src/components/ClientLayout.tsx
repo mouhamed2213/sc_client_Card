@@ -119,7 +119,7 @@ export default function ClientLayout({
           >
             {organizations.map(org => (
               <option key={org.organizationId} value={org.organizationId} className="text-slate-900">
-                {org.name} · {org.type}
+                {org.organization.name} · {org.organization.type}
               </option>
             ))}
           </select>
