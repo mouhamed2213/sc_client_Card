@@ -311,11 +311,12 @@ export async function createClientAccountWithFiche(input: {
     });
 
     let card = null;
-    if (input.cardNumero?.trim()) {
+    if (input.cardNumero !== undefined) {
+      const numero = input.cardNumero.trim() || `SC-${randomBytes(6).toString("hex").toUpperCase()}`;
       card = await tx.membershipCard.create({
         data: {
           ficheId: fiche.id,
-          numero: input.cardNumero.trim(),
+          numero,
         },
       });
     }
