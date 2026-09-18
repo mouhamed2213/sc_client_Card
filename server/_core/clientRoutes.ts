@@ -14,6 +14,7 @@ const loginSchema = z.object({
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILURES = 5;
+const SESSION_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
 const failures = new Map<string, { count: number; resetAt: number }>();
 
 function getClientKey(req: Request, username: string): string {
@@ -92,13 +93,13 @@ export function registerClientRoutes(app: Express): void {
     });
 
     const sessionToken = await sdk.createSessionToken(credential.user.openId, {
-      expiresInMs: 365 * 24 * 60 * 60 * 1000,
+      expiresInMs: SESSION_MAX_AGE_MS,
       name: credential.user.name || username,
     });
 
     res.cookie(COOKIE_NAME, sessionToken, {
       ...getSessionCookieOptions(req),
-      maxAge: 365 * 24 * 60 * 60 * 1000,
+      maxAge: SESSION_MAX_AGE_MS,
     });
 
     clearFailures(key);
