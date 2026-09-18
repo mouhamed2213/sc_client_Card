@@ -137,7 +137,6 @@ model OrganizationMembership {
   organization   Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
   ficheAccess    FicheAccess[]
-  invitations    InvitationClient[]         @relation("InvitationCreatedMembership")
 
   @@unique([organizationId, userId])
   @@index([userId])
