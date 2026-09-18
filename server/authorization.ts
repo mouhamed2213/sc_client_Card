@@ -20,6 +20,36 @@ export async function getMembershipForUser(
   });
 }
 
+export async function listAccessibleFiches(userId: number) {
+  const memberships = await prisma.organizationMembership.findMany({
+    where: { userId },
+    select: { id: true, organizationId: true, role: true },
+  });
+  if (!memberships.length) return [];
+
+  const ownerOrganizationIds = memberships
+    .filter(m => m.role === "OWNER")
+    .map(m => m.organizationId);
+  const membershipIds = memberships.map(m => m.id);
+
+  return prisma.fiche.findMany({
+    where: {
+      organizationId: { not: null },
+      OR: [
+        ...(ownerOrganizationIds.length
+          ? [{ organizationId: { in: ownerOrganizationIds } }]
+          : []),
+        {
+          accessGrants: {
+            some: { membershipId: { in: membershipIds } },
+          },
+        },
+      ],
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+}
+
 export async function getAccessibleFiche(userId: number, ficheId: number) {
   const fiche = await prisma.fiche.findUnique({
     where: { id: ficheId },
