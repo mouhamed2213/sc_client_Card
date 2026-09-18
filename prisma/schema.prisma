@@ -12,6 +12,25 @@ enum UserRole {
   admin
 }
 
+enum OrganizationType {
+  PERSONAL
+  BUSINESS
+}
+
+enum OrganizationMembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum InvitationRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
 enum Formule {
   essentiel
   pro
@@ -37,6 +56,8 @@ model User {
   lastSignedIn   DateTime         @default(now())
   adminCredential AdminCredential?
   fiche Fiche[]
+  memberships OrganizationMembership[]
+  invitationsReceived InvitationClient[] @relation("InvitationTargetUser")
 
   @@map("users")
 }
@@ -82,10 +103,58 @@ model Fiche {
   contactRequests ContactRequest[]
   ownerId         Int?
   owner            User?             @relation(fields: [ownerId], references: [id])
+  organizationId  Int?
+  organization    Organization?     @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  accessGrants    FicheAccess[]
   membershipCards MembershipCard[]
   invitations     InvitationClient[]
 
+  @@index([organizationId])
   @@map("fiches")
+}
+
+model Organization {
+  id          Int              @id @default(autoincrement())
+  name        String           @db.VarChar(180)
+  type        OrganizationType
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  memberships OrganizationMembership[]
+  fiches      Fiche[]
+  invitations InvitationClient[]
+
+  @@index([type])
+  @@map("organizations")
+}
+
+model OrganizationMembership {
+  id             Int                        @id @default(autoincrement())
+  organizationId Int
+  userId         Int
+  role           OrganizationMembershipRole
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  organization   Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ficheAccess    FicheAccess[]
+  invitations    InvitationClient[]         @relation("InvitationCreatedMembership")
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("organization_memberships")
+}
+
+model FicheAccess {
+  id           Int                    @id @default(autoincrement())
+  ficheId      Int
+  membershipId Int
+  createdAt    DateTime               @default(now())
+  fiche        Fiche                  @relation(fields: [ficheId], references: [id], onDelete: Cascade)
+  membership   OrganizationMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([ficheId, membershipId])
+  @@index([membershipId])
+  @@map("fiche_access")
 }
 
 model FicheScan {
@@ -115,16 +184,26 @@ model ContactRequest {
 }
 
 model InvitationClient {
-  id         Int      @id @default(autoincrement())
-  ficheId    Int
-  token      String   @unique
-  utilisee   Boolean  @default(false)
-  expireLe   DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime @default(now())
-  fiche      Fiche    @relation(fields: [ficheId], references: [id], onDelete: Cascade)
+  id             Int                        @id @default(autoincrement())
+  organizationId Int?
+  ficheId        Int?
+  role           InvitationRole             @default(MEMBER)
+  token          String                     @unique
+  invitedUserId  Int?
+  utilisee       Boolean                    @default(false)
+  acceptedAt     DateTime?
+  expireLe       DateTime
+  revokedAt      DateTime?
+  createdAt      DateTime                   @default(now())
+  organization   Organization?              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fiche          Fiche?                     @relation(fields: [ficheId], references: [id], onDelete: Cascade)
+  invitedUser    User?                      @relation("InvitationTargetUser", fields: [invitedUserId], references: [id], onDelete: SetNull)
+  createdMembership OrganizationMembership? @relation("InvitationCreatedMembership", fields: [createdMembershipId], references: [id], onDelete: SetNull)
+  createdMembershipId Int?
 
+  @@index([organizationId])
   @@index([ficheId])
+  @@index([invitedUserId])
 }
 
 model MembershipCard {
