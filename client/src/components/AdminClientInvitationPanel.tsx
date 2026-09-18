@@ -70,7 +70,7 @@ export default function AdminClientInvitationPanel() {
     onSuccess: async result => {
       const absoluteUrl = new URL(result.url, window.location.origin).toString();
       setCreatedUrl(absoluteUrl);
-      await utils.admin.listInvitations.invalidate({ organizationId: organizationId! });
+      await utils.fiches.getBySlug.invalidate({ slug });
       toast.success("Invitation client créée", {
         description: "Le lien est prêt à être envoyé au client.",
       });
