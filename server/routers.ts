@@ -601,7 +601,7 @@ export const appRouter = router({
         }
       }),
     searchOrganizationUsers: clientProcedure
-      .input(z.object({ query: z.string().max(160).optional().default("") }))
+      .input(z.object({ organizationId: z.number().int().positive(), query: z.string().max(160).optional().default("") }))
       .query(async ({ ctx, input }) => {
         await assertCanManageOrganization(ctx.user.id, input.organizationId);
         return searchClientUsers(input.query);
