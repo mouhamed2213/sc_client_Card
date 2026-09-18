@@ -257,6 +257,73 @@ export async function getOverview() {
 }
 
 // Espace client
+// --- Comptes clients : création atomique compte + fiche ---
+export async function createClientAccountWithFiche(input: {
+  user: {
+    openId: string;
+    name?: string | null;
+    email?: string | null;
+    formule: "essentiel" | "pro" | "signature";
+  };
+  credential: {
+    username: string;
+    passwordHash: string;
+  };
+  fiche: Omit<InsertFiche, "ownerId">;
+  cardNumero?: string;
+}) {
+  return prisma.$transaction(async tx => {
+    const existingUser = await tx.user.findUnique({
+      where: { openId: input.user.openId },
+    });
+    if (existingUser) throw new Error("CLIENT_ACCOUNT_EXISTS");
+
+    const existingUsername = await tx.clientCredential.findUnique({
+      where: { username: input.credential.username },
+    });
+    if (existingUsername) throw new Error("CLIENT_USERNAME_EXISTS");
+
+    const user = await tx.user.create({
+      data: {
+        openId: input.user.openId,
+        name: input.user.name ?? null,
+        email: input.user.email ?? null,
+        loginMethod: "local-client",
+        role: "user",
+        formule: input.user.formule,
+      },
+    });
+
+    const fiche = await tx.fiche.create({
+      data: {
+        ...input.fiche,
+        ownerId: user.id,
+      },
+    });
+
+    const credential = await tx.clientCredential.create({
+      data: {
+        userId: user.id,
+        username: input.credential.username,
+        passwordHash: input.credential.passwordHash,
+        mustChangePassword: true,
+      },
+    });
+
+    let card = null;
+    if (input.cardNumero?.trim()) {
+      card = await tx.membershipCard.create({
+        data: {
+          ficheId: fiche.id,
+          numero: input.cardNumero.trim(),
+        },
+      });
+    }
+
+    return { user, fiche, credential, card };
+  });
+}
+
 
 // --- Invitations ---
 export async function createInvitation(ficheId: number, ttlDays = 7) {
