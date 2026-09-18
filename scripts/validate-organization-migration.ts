@@ -1,0 +1,67 @@
+import { prisma } from "../prisma/client";
+
+async function main() {
+  const [orphanFiches, orphanInvitations, invalidAccess] = await Promise.all([
+    prisma.fiche.findMany({
+      where: { organizationId: null },
+      select: { id: true, slug: true, ownerId: true, entreprise: true },
+      orderBy: { id: "asc" },
+    }),
+    prisma.invitationClient.findMany({
+      where: { organizationId: null },
+      select: { id: true, ficheId: true, token: true },
+      orderBy: { id: "asc" },
+    }),
+    prisma.ficheAccess.findMany({
+      where: {
+        NOT: {
+          fiche: {
+            organizationId: { equals: undefined as never },
+          },
+        },
+      },
+      select: {
+        id: true,
+        ficheId: true,
+        membershipId: true,
+        fiche: { select: { organizationId: true } },
+        membership: { select: { organizationId: true } },
+      },
+    }),
+  ]);
+
+  const crossOrganizationAccess = invalidAccess.filter(
+    row =>
+      row.fiche.organizationId !== null &&
+      row.membership.organizationId !== row.fiche.organizationId
+  );
+
+  console.log(
+    JSON.stringify(
+      {
+        ok:
+          orphanFiches.length === 0 &&
+          orphanInvitations.length === 0 &&
+          crossOrganizationAccess.length === 0,
+        orphanFiches,
+        orphanInvitations,
+        crossOrganizationAccess,
+      },
+      null,
+      2
+    )
+  );
+
+  if (orphanFiches.length || orphanInvitations.length || crossOrganizationAccess.length) {
+    process.exitCode = 2;
+  }
+}
+
+main()
+  .catch(error => {
+    console.error(error);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
