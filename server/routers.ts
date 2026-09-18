@@ -639,7 +639,7 @@ export const appRouter = router({
     contactRequests: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
-        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        const { fiche } = await assertCanViewFiche(ctx.user.id, input.ficheId);
         if (!fiche)
           throw new TRPCError({
             code: "FORBIDDEN",
@@ -650,7 +650,7 @@ export const appRouter = router({
     membershipCards: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
-        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        const { fiche } = await assertCanViewFiche(ctx.user.id, input.ficheId);
         if (!fiche)
           throw new TRPCError({
             code: "FORBIDDEN",
