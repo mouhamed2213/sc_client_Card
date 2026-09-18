@@ -27,7 +27,11 @@ import {
 } from "./clientSpace";
 import {
   attachFicheToOwner,
+  assignFicheToOrganization,
   createContactRequest,
+  createFicheAccess,
+  createOrganization,
+  createOrganizationInvitation,
   createFiche,
   createInvitation,
   createMembershipCard,
@@ -41,6 +45,7 @@ import {
   listMembershipCards,
   listScansForFiche,
   recordScan,
+  revokeFicheAccess,
   searchClientUsers,
   updateFiche,
 } from "./db";
@@ -303,6 +308,96 @@ export const appRouter = router({
         const token = await createInvitation(input.ficheId);
         return { token, url: `/espace-client/invite/${token}` };
       }),
+    createOrganization: adminProcedure
+      .input(
+        z.object({
+          name: z.string().trim().min(1).max(180),
+          type: z.enum(["PERSONAL", "BUSINESS"]),
+        })
+      )
+      .mutation(({ input }) => createOrganization(input)),
+
+    assignFicheToOrganization: adminProcedure
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          organizationId: z.number().int().positive(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        try {
+          await assignFicheToOrganization(input.ficheId, input.organizationId);
+          return { ok: true } as const;
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "ASSIGNMENT_FAILED";
+          if (message === "FICHE_NOT_FOUND" || message === "ORGANIZATION_NOT_FOUND") {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Ressource introuvable." });
+          }
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Impossible d'affecter la fiche." });
+        }
+      }),
+
+    inviteOrganizationMember: adminProcedure
+      .input(
+        z.object({
+          organizationId: z.number().int().positive(),
+          role: z.enum(["OWNER", "ADMIN", "MEMBER", "VIEWER"]),
+          ficheId: z.number().int().positive().nullable().optional(),
+          invitedUserId: z.number().int().positive().nullable().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        if (input.role === "OWNER" && input.ficheId) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Une invitation OWNER est au niveau de l'organisation et ne cible pas une fiche.",
+          });
+        }
+        try {
+          const invitation = await createOrganizationInvitation(input);
+          return {
+            token: invitation.token,
+            url: `/espace-client/invite/${invitation.token}`,
+          };
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (message === "ORGANIZATION_NOT_FOUND" || message === "FICHE_NOT_IN_ORGANIZATION") {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Organisation ou fiche introuvable." });
+          }
+          throw error;
+        }
+      }),
+
+    grantFicheAccess: adminProcedure
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          membershipId: z.number().int().positive(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        try {
+          await createFicheAccess(input.ficheId, input.membershipId);
+          return { ok: true } as const;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "";
+          if (message === "FICHE_NOT_FOUND" || message === "MEMBERSHIP_NOT_FOUND") {
+            throw new TRPCError({ code: "NOT_FOUND", message: "Ressource introuvable." });
+          }
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Accès incompatible avec l'organisation." });
+        }
+      }),
+
+    revokeFicheAccess: adminProcedure
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          membershipId: z.number().int().positive(),
+        })
+      )
+      .mutation(({ input }) => revokeFicheAccess(input.ficheId, input.membershipId)),
+
     searchClientUsers: adminProcedure
       .input(z.object({ query: z.string().max(160).optional().default("") }))
       .query(({ input }) => searchClientUsers(input.query)),
