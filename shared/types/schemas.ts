@@ -19,7 +19,7 @@ export const fichePayload = z.object({
   photo: z.string().optional().default(""),
   logo: z.string().optional().default(""),
   data: z.object({
-    premierBouton: z.enum(["whatsapp", "appel", "contact"]),
+    premierBouton: z.enum(["whatsapp", "appel", "email"]),
     messageWhatsapp: z.string(),
     presentation: z.string().optional().default(""),
     rendezVous: z.object({ label: z.string(), url: z.string() }).optional(),
