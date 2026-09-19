@@ -12,7 +12,7 @@ const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.length > 0;
 
 export type SessionPayload = {
-  openId: string;
+  userId: number;
   name: string;
 };
 
@@ -43,17 +43,16 @@ class SDKServer {
   }
 
   /**
-   * Create a session token for a given `openId` (e.g. `google:<sub>` or
-   * `local_admin:<username>`).
+   * Create a session token for the canonical database `User.id`.
    * @example
    * const sessionToken = await sdk.createSessionToken(openId, { name });
    */
   async createSessionToken(
-    openId: string,
+    userId: number,
     options: { expiresInMs?: number; name?: string } = {}
   ): Promise<string> {
     return this.signSession(
-      { openId, name: options.name || "" },
+      { userId, name: options.name || "" },
       options
     );
   }
@@ -68,7 +67,7 @@ class SDKServer {
     const secretKey = this.getSessionSecret();
 
     return new SignJWT({
-      openId: payload.openId,
+      userId: payload.userId,
       name: payload.name,
     })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
@@ -78,25 +77,22 @@ class SDKServer {
 
   async verifySession(
     cookieValue: string | undefined | null
-  ): Promise<{ openId: string; name: string } | null> {
-    if (!cookieValue) {
-      console.warn("[Auth] Missing session cookie");
-      return null;
-    }
-
+  ): Promise<{ userId: number; name: string; legacyOpenId?: string } | null> {
+    if (!cookieValue) return null;
     try {
       const secretKey = this.getSessionSecret();
-      const { payload } = await jwtVerify(cookieValue, secretKey, {
-        algorithms: ["HS256"],
-      });
-      const { openId, name } = payload as Record<string, unknown>;
-
-      if (!isNonEmptyString(openId)) {
-        console.warn("[Auth] Session payload missing required fields");
-        return null;
+      const { payload } = await jwtVerify(cookieValue, secretKey, { algorithms: ["HS256"] });
+      const { userId, openId, name } = payload as Record<string, unknown>;
+      if (typeof userId === "number" && Number.isSafeInteger(userId) && userId > 0) {
+        return { userId, name: isNonEmptyString(name) ? name : "" };
       }
-
-      return { openId, name: isNonEmptyString(name) ? name : "" };
+      // Temporary compatibility for sessions issued before the User.id migration.
+      if (isNonEmptyString(openId)) {
+        const legacyUser = await db.getUserByOpenId(openId);
+        if (!legacyUser) return null;
+        return { userId: legacyUser.id, name: isNonEmptyString(name) ? name : legacyUser.name ?? "", legacyOpenId: openId };
+      }
+      return null;
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));
       return null;
@@ -124,20 +120,9 @@ class SDKServer {
     }
 
     const signedInAt = new Date();
-    const user = await db.getUserByOpenId(session.openId);
-
-    // Unlike the old Manus-backed flow, there is no external identity server
-    // to fall back on here: if the JWT is valid but the user row is gone
-    // (e.g. DB was reset), the browser needs to sign in again via
-    // /api/oauth/callback (Google) so we can re-create it.
-    if (!user) {
-      throw ForbiddenError("User not found — please sign in again");
-    }
-
-    await db.upsertUser({
-      openId: user.openId,
-      lastSignedIn: signedInAt,
-    });
+    const user = await db.getUserById(session.userId);
+    if (!user) throw ForbiddenError("User not found — please sign in again");
+    await db.updateUserLastSignedIn(user.id, signedInAt);
 
     return user;
   }
