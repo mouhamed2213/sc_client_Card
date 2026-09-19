@@ -780,7 +780,7 @@ export const appRouter = router({
           });
         }
 
-        const raw = input.contentBase64.replace(/^data:[^;]+;base64, "");
+        const raw = input.contentBase64.replace(/^data:[^;]+;base64,/, "");
         const bytes = Buffer.from(raw, "base64");
         const maxBytes = mediaRules[input.kind].maxBytes;
         if (bytes.byteLength > maxBytes)
