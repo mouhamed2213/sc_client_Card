@@ -2,7 +2,6 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   BarChart3,
-  CreditCard,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -46,11 +45,6 @@ export default function ClientLayout({
           href: `/espace-client/fiche/${ficheId}/demandes`,
           label: "Demandes reçues",
           icon: MessageSquare,
-        },
-        {
-          href: `/espace-client/fiche/${ficheId}/cartes`,
-          label: "Cartes membres",
-          icon: CreditCard,
         },
         {
           href: `/espace-client/fiche/${ficheId}/modifier`,
