@@ -5,6 +5,7 @@ import { trpc } from "@/lib/trpc";
 import type { MediaKind } from "@shared/mediaRules";
 import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
 import {
+  Crown,
   ImagePlus,
   Loader2,
   Plus,
@@ -274,12 +275,46 @@ export default function ClientFicheEdit() {
                       ["adresse", "Adresse", false],
                       ["lienItineraire", "Lien Google Maps", false],
                       ["googlePlaceId", "Google Place ID", false],
-                    ] as const).map(([key, label, required]) => (
-                      <label key={key} className="block">
-                        <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
-                        <input required={required} disabled={(key === "site" && !capabilities.site.editable) || (key === "googlePlaceId" && !capabilities.googleReview.editable)} type={key === "email" ? "email" : "text"} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
-                      </label>
-                    ))}
+                    ] as const).map(([key, label, required]) => {
+                      const upgradeKey =
+                        key === "site"
+                          ? "site"
+                          : key === "googlePlaceId"
+                            ? "googleReview"
+                            : null;
+
+                      return (
+                        <div key={key}>
+                          <label className="block">
+                            <span className="text-xs font-medium text-[#52607a]">
+                              {label}
+                              {required ? " *" : ""}
+                            </span>
+                            <input
+                              required={required}
+                              disabled={
+                                (key === "site" && !capabilities.site.editable) ||
+                                (key === "googlePlaceId" &&
+                                  !capabilities.googleReview.editable)
+                              }
+                              type={key === "email" ? "email" : "text"}
+                              value={form[key]}
+                              onChange={e => setField(key, e.target.value)}
+                              className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
+                            />
+                          </label>
+                          {upgradeKey &&
+                            !capabilities[upgradeKey].editable && (
+                              <div className="mt-2">
+                                <UpgradeNotice
+                                  message={lockedMessage(upgradeKey)!}
+                                  compact
+                                />
+                              </div>
+                            )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -331,17 +366,28 @@ export default function ClientFicheEdit() {
                   />
                 </Field>
               </div>
-              <Field label={lockedMessage("presentation") ? `Présentation — ${lockedMessage("presentation")}` : "Présentation"}>
-                <textarea disabled={!capabilities.presentation.editable}
-                  className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
-                  rows={6}
-                  value={form.data.presentation}
-                  onChange={e => setData("presentation", e.target.value)}
-                />
-              </Field>
+              <div>
+                <Field label="Présentation">
+                  <textarea
+                    disabled={!capabilities.presentation.editable}
+                    className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
+                    rows={6}
+                    value={form.data.presentation}
+                    onChange={e => setData("presentation", e.target.value)}
+                  />
+                </Field>
+                {lockedMessage("presentation") && (
+                  <div className="mt-2">
+                    <UpgradeNotice
+                      message={lockedMessage("presentation")!}
+                      compact
+                    />
+                  </div>
+                )}
+              </div>
             </EditorSection>
 
-            <EditorSection title="Rendez-vous" note={lockedMessage("rendezVous")}>
+            <EditorSection title="Rendez-vous" upgradeMessage={lockedMessage("rendezVous")}>
               <fieldset disabled={!capabilities.rendezVous.editable} className="grid gap-4 sm:grid-cols-2 disabled:opacity-60">
                 <Field label="Libellé du bouton">
                   <input
@@ -373,7 +419,7 @@ export default function ClientFicheEdit() {
 
             <EditorSection
               title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}
-              note={lockedMessage("socials")}
+              upgradeMessage={lockedMessage("socials")}
             >
               <fieldset disabled={!capabilities.socials.editable} className="disabled:opacity-60">
               <Repeater
@@ -434,7 +480,8 @@ export default function ClientFicheEdit() {
 
             <EditorSection
               title={`Liens personnalisés (${form.data.liens.length}/${capabilities.links.maxItems ?? fiche.data.plan.maxLinks})`}
-              note={lockedMessage("links") ?? `Maximum ${capabilities.links.maxItems ?? fiche.data.plan.maxLinks} liens.`}
+              note={capabilities.links.editable ? `Maximum ${capabilities.links.maxItems ?? fiche.data.plan.maxLinks} liens.` : undefined}
+              upgradeMessage={lockedMessage("links")}
             >
               <fieldset disabled={!capabilities.links.editable} className="disabled:opacity-60">
               <Repeater
@@ -494,7 +541,8 @@ export default function ClientFicheEdit() {
 
             <EditorSection
               title={`Galerie (${form.data.galerie.length}/${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos})`}
-              note={lockedMessage("gallery") ?? `Maximum ${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos} photos.`}
+              note={capabilities.gallery.editable ? `Maximum ${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos} photos.` : undefined}
+              upgradeMessage={lockedMessage("gallery")}
             >
               <fieldset disabled={!capabilities.gallery.editable} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 disabled:opacity-60">
                 {form.data.galerie.map((image, index) => (
@@ -589,7 +637,7 @@ export default function ClientFicheEdit() {
               </div>
             </EditorSection>
 
-            <EditorSection title="Avis Google" note={lockedMessage("googleReview")}>
+            <EditorSection title="Avis Google" upgradeMessage={lockedMessage("googleReview")}>
               <fieldset disabled={!capabilities.googleReview.editable} className="disabled:opacity-60">
               <Field label="Google Place ID">
                 <input
@@ -603,7 +651,8 @@ export default function ClientFicheEdit() {
 
             <EditorSection
               title="Catalogue / menu / tarifs"
-              note={lockedMessage("catalog") ?? "Vous pouvez gérer vos sections et articles."}
+              note={capabilities.catalog.editable ? "Vous pouvez gérer vos sections et articles." : undefined}
+              upgradeMessage={lockedMessage("catalog")}
             >
               <fieldset disabled={!capabilities.catalog.editable} className="disabled:opacity-60">
               <CatalogEditor
@@ -635,20 +684,59 @@ export default function ClientFicheEdit() {
 function EditorSection({
   title,
   note,
+  upgradeMessage,
   children,
 }: {
   title: string;
   note?: string;
+  upgradeMessage?: string;
   children: React.ReactNode;
 }) {
   return (
     <section className="editor-card">
       <div className="mb-5">
         <h2 className="text-base font-semibold text-[#172033]">{title}</h2>
-        {note && <p className="mt-1 text-xs text-[#7d8798]">{note}</p>}
+        {upgradeMessage ? (
+          <div className="mt-2">
+            <UpgradeNotice message={upgradeMessage} />
+          </div>
+        ) : (
+          note && <p className="mt-1 text-xs text-[#7d8798]">{note}</p>
+        )}
       </div>
       {children}
     </section>
+  );
+}
+
+function UpgradeNotice({
+  message,
+  compact = false,
+}: {
+  message: string;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      role="note"
+      className={
+        compact
+          ? "flex items-start gap-2 rounded-lg border border-[#ead8b8] bg-[#fff9ef] px-3 py-2 text-xs text-[#7a5a22]"
+          : "flex items-start gap-3 rounded-xl border border-[#ead8b8] bg-gradient-to-r from-[#fff9ef] via-[#fffdf8] to-white px-3.5 py-3 text-xs text-[#7a5a22] shadow-sm"
+      }
+    >
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#e6c993] bg-white text-[#b6792f] shadow-sm">
+        <Crown size={14} strokeWidth={1.9} />
+      </span>
+      <div className="min-w-0">
+        <p className="font-semibold text-[#6f4a18]">
+          Fonction premium
+        </p>
+        <p className={compact ? "mt-0.5 leading-4" : "mt-1 leading-4"}>
+          {message}
+        </p>
+      </div>
+    </div>
   );
 }
 
