@@ -29,8 +29,8 @@ export function validatePlanPayload(input: {
     errors.push(
       `${input.formule}: maximum ${features.maxPhotos} photo${features.maxPhotos > 1 ? "s" : ""}.`
     );
-  if (features.requiresProfile && !input.photo && !input.logo)
-    errors.push(`${input.formule}: un portrait ou un logo est obligatoire.`);
+  if (features.requiresProfile && (!input.photo || !input.logo))
+    errors.push(`${input.formule}: le portrait et le logo sont obligatoires.`);
   if (features.hasGoogleReview && !input.googlePlaceId)
     errors.push(
       `${input.formule}: google_place_id est obligatoire pour l'avis Google.`
