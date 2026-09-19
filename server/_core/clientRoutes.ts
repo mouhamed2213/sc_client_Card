@@ -1,6 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import type { Express, Request } from "express";
 import { z } from "zod";
+import { parse as parseCookieHeader } from "cookie";
 import { prisma } from "../../prisma/client";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
@@ -12,7 +13,16 @@ const loginSchema = z.object({
   password: z.string().min(1).max(200),
 });
 
-const passwordChangeSchema = z.object({ currentPassword: z.string().min(1).max(200), newPassword: z.string().min(12).max(200) });
+const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1).max(200),
+  newPassword: z
+    .string()
+    .min(12)
+    .max(200)
+    .regex(/[A-Z]/, "Le nouveau mot de passe doit contenir une majuscule.")
+    .regex(/[a-z]/, "Le nouveau mot de passe doit contenir une minuscule.")
+    .regex(/[0-9]/, "Le nouveau mot de passe doit contenir un chiffre."),
+});
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILURES = 5;
@@ -86,11 +96,6 @@ export function registerClientRoutes(app: Express): void {
       return res.status(401).json({ message: "Identifiants invalides." });
     }
 
-    if (credential.user.mustChangePassword) {
-      // Keep the user signed in so the frontend can force the first-password
-      // change without exposing any credential material.
-    }
-
     await prisma.user.update({
       where: { id: credential.userId },
       data: {
@@ -123,7 +128,8 @@ export function registerClientRoutes(app: Express): void {
       return res.status(400).json({ message: "Mot de passe invalide." });
     }
 
-    const session = req.cookies?.[COOKIE_NAME];
+    const cookies = parseCookieHeader(req.headers.cookie || "");
+    const session = cookies[COOKIE_NAME];
     if (!session) {
       return res.status(401).json({ message: "Session requise." });
     }
@@ -142,7 +148,13 @@ export function registerClientRoutes(app: Express): void {
       return res.status(403).json({ message: "Accès refusé." });
     }
 
+    const key = getClientKey(req, user.clientCredential.username);
+    if (isRateLimited(key)) {
+      return res.status(429).json({ message: "Trop de tentatives. Réessayez plus tard." });
+    }
+
     if (!verifyClientPassword(parsed.data.currentPassword, user.clientCredential.passwordHash)) {
+      recordFailure(key);
       return res.status(401).json({ message: "Mot de passe actuel incorrect." });
     }
 
@@ -158,6 +170,7 @@ export function registerClientRoutes(app: Express): void {
       },
     });
 
+    clearFailures(key);
     return res.json({ success: true });
   });
 }
