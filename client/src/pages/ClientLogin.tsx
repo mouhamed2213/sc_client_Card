@@ -81,8 +81,24 @@ export default function ClientLogin() {
   async function handleChangePassword(event: React.FormEvent) {
     event.preventDefault();
     setChangeError("");
-    if (newPassword.length < 12) {
-      setChangeError("Le nouveau mot de passe doit contenir au moins 12 caractères.");
+    if (newPassword.length < 8) {
+      setChangeError("Le nouveau mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      setChangeError("Le nouveau mot de passe doit contenir une majuscule.");
+      return;
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      setChangeError("Le nouveau mot de passe doit contenir une minuscule.");
+      return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      setChangeError("Le nouveau mot de passe doit contenir un chiffre.");
+      return;
+    }
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      setChangeError("Le nouveau mot de passe doit contenir un caractère spécial.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -97,7 +113,6 @@ export default function ClientLogin() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          currentPassword: password,
           newPassword,
         }),
       });
@@ -188,7 +203,7 @@ export default function ClientLogin() {
           ) : (
             <form onSubmit={handleChangePassword} className="mt-6 space-y-4">
               <div className="rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm leading-5 text-amber-900">
-                Pour sécuriser votre compte, vous devez remplacer le mot de passe temporaire avant d'accéder à votre espace client.
+                Pour sécuriser votre compte, vous devez remplacer le mot de passe temporaire avant d'accéder à votre espace client. Il doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.
               </div>
 
               <Field label="Nouveau mot de passe">
@@ -198,7 +213,7 @@ export default function ClientLogin() {
                   visible={showNewPassword}
                   onToggle={() => setShowNewPassword(value => !value)}
                   autoComplete="new-password"
-                  placeholder="12 caractères minimum"
+                  placeholder="8 caractères minimum"
                 />
               </Field>
 
