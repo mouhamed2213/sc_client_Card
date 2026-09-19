@@ -555,7 +555,6 @@ export default function ClientFicheEdit() {
                     Ajouter une photo
                   </label>
                 )}
-              </div>
               </fieldset>
             </EditorSection>
 
