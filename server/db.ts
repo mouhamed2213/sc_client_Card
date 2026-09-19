@@ -27,7 +27,7 @@ export async function upsertLegacyOAuthUser(
       name: user.name ?? null,
       email: user.email ?? null,
       loginMethod: user.loginMethod ?? null,
-      role: user.role ?? (user.openId === ENV.ownerOpenId ? "admin" : "user"),
+      role: user.role ?? (user.openId === ENV.legacyOwnerOpenId ? "admin" : "user"),
       lastSignedIn: user.lastSignedIn ?? new Date(),
     },
     update: {
