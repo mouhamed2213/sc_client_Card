@@ -2,6 +2,10 @@ import { OAUTH_STATE_COOKIE, encodeOAuthState } from "@shared/const";
 
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
+// "/" is the public landing page. The admin studio lives here: every redirect
+// or link that means "back to the studio" must use this constant, not "/".
+export const ADMIN_HOME_PATH = "/studio";
+
 export const startLogin = (options?: { invitationToken?: string }) => {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const redirectUri = `${window.location.origin}/api/oauth/callback`;

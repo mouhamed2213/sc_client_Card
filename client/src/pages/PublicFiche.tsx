@@ -74,7 +74,7 @@ export default function PublicFiche() {
             href="/"
             className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#244775]"
           >
-            Retour au studio <ArrowUpRight className="h-4 w-4" />
+            Retour à l’accueil <ArrowUpRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
