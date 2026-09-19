@@ -50,6 +50,14 @@ export async function getUserByOpenId(openId: string) {
   return prisma.user.findUnique({ where: { openId } });
 }
 
+export async function getUserById(id: number) {
+  return prisma.user.findUnique({ where: { id } });
+}
+
+export async function updateUserLastSignedIn(id: number, lastSignedIn = new Date()) {
+  await prisma.user.update({ where: { id }, data: { lastSignedIn } });
+}
+
 const demoRows: InsertFiche[] = [
   {
     slug: "hotel-teranga",
@@ -260,7 +268,6 @@ export async function getOverview() {
 // --- Comptes clients : création atomique compte + fiche ---
 export async function createClientAccountWithFiche(input: {
   user: {
-    openId: string;
     name?: string | null;
     email?: string | null;
     formule: "essentiel" | "pro" | "signature";
@@ -273,11 +280,6 @@ export async function createClientAccountWithFiche(input: {
   cardNumero?: string;
 }) {
   return prisma.$transaction(async tx => {
-    const existingUser = await tx.user.findUnique({
-      where: { openId: input.user.openId },
-    });
-    if (existingUser) throw new Error("CLIENT_ACCOUNT_EXISTS");
-
     const existingUsername = await tx.clientCredential.findUnique({
       where: { username: input.credential.username },
     });
@@ -285,7 +287,6 @@ export async function createClientAccountWithFiche(input: {
 
     const user = await tx.user.create({
       data: {
-        openId: input.user.openId,
         name: input.user.name ?? null,
         email: input.user.email ?? null,
         loginMethod: "local-client",
