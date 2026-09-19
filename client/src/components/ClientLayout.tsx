@@ -25,9 +25,10 @@ export default function ClientLayout({
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
-  const fiche = ficheId
-    ? trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId })
-    : undefined;
+  const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery(
+    { ficheId: ficheId ?? 0 },
+    { enabled: ficheId !== undefined }
+  );
 
   const nav = ficheId
     ? [
