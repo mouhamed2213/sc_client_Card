@@ -837,7 +837,6 @@ export const appRouter = router({
           telephone: z.string().min(8),
           whatsapp: z.string().min(8),
           email: z.string().optional().default(""),
-          site: z.string().optional().default(""),
           adresse: z.string().optional().default(""),
           lienItineraire: z.string().optional().default(""),
         })
