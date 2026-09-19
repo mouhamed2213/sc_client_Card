@@ -96,21 +96,11 @@ async function main() {
       throw new Error(`Le nom d'utilisateur "${username}" existe déjà.`);
     }
 
-    const openId = `local_admin_${username}`;
-    const existingUser = await prisma.user.findUnique({
-      where: { openId },
-    });
-
-    if (existingUser) {
-      throw new Error(`Un utilisateur associé à "${username}" existe déjà.`);
-    }
-
     const passwordHash = hashAdminPassword(password);
 
     const admin = await prisma.$transaction(async tx => {
       const user = await tx.user.create({
         data: {
-          openId,
           name: username,
           role: "admin",
           loginMethod: "local-admin",
