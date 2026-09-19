@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useLocation, useParams } from "wouter";
+import { useParams } from "wouter";
 
 type LinkItem = { label: string; url: string };
 type SocialItem = { label: string; url: string };
@@ -73,13 +73,13 @@ function fileToDataUrl(file: File) {
 
 export default function ClientFicheEdit() {
   const { ficheId } = useParams<{ ficheId: string }>();
-  const [, navigate] = useLocation();
+
   const id = Number(ficheId);
   const utils = trpc.useUtils();
   const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
   const [form, setForm] = useState<FormState | null>(null);
   const [uploading, setUploading] = useState<MediaKind | null>(null);
-  const [saved, setSaved] = useState(false);
+
 
   useEffect(() => {
     if (!fiche.data || form) return;
@@ -168,7 +168,7 @@ export default function ClientFicheEdit() {
 
   async function uploadImage(file: File, kind: MediaKind) {
     try {
-      setUploading(kind);
+      const capability = kind === "gallery" ? capabilities.gallery : capabilities.profile;\n      if (!capability.editable) {\n        toast.error("Fonction verrouillée", { description: lockedMessage(kind === "gallery" ? "gallery" : "profile") });\n        return;\n      }\n      setUploading(kind);
       const prepared = await prepareImage(file, kind);
       const result = await upload.mutateAsync({
         ficheId: id,
@@ -213,7 +213,7 @@ export default function ClientFicheEdit() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#c98a4e]">
-                Formule Signature
+                Formule {formuleLabels[plan] ?? plan}
               </p>
               <h1 className="mt-1 text-xl font-semibold text-[#172033]">
                 Modifier ma fiche
@@ -531,7 +531,7 @@ export default function ClientFicheEdit() {
                       type="file"
                       className="hidden"
                       accept="image/*"
-                      disabled={uploading === "gallery"}
+                      disabled={uploading === "gallery" || !capabilities.gallery.editable}
                       onChange={async e => {
                         const file = e.target.files?.[0];
                         if (file) await uploadImage(file, "gallery");
