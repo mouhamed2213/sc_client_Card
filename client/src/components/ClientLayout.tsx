@@ -1,3 +1,4 @@
+import { RENEWAL_WHATSAPP_NUMBER } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
@@ -191,13 +192,17 @@ export default function ClientLayout({
           </div>
           {fiche?.data && (
             <div className="hidden items-center gap-2 sm:flex">
-              <button
-                type="button"
+              <a
+                href={`https://wa.me/${RENEWAL_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                  `Bonjour, je souhaite renouveler ma fiche Support Connecté (${fiche.data.prenom} ${fiche.data.nom} - ${fiche.data.entreprise}).`
+                )}`}
+                target="_blank"
+                rel="noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-lg border border-[#e3c89e] bg-[#fff9ef] px-3 py-2 text-sm font-semibold text-[#8b5e20] shadow-sm hover:bg-[#fff4df]"
-                aria-label="Renouveler"
+                aria-label="Renouveler via WhatsApp"
               >
                 <RefreshCw size={15} /> Renouveler
-              </button>
+              </a>
               <a
                 href={`/fiche/${fiche.data.slug}`}
                 target="_blank"
