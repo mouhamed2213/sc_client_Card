@@ -7,10 +7,8 @@ import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
 import {
   ImagePlus,
   Loader2,
-  Lock,
   Plus,
   Save,
-  Sparkles,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -120,7 +118,6 @@ export default function ClientFicheEdit() {
   const save = trpc.clientSpaceRouter.updateSignature.useMutation({
     onSuccess: async () => {
       toast.success("Fiche mise à jour");
-      setSaved(true);
       await Promise.all([
         utils.clientSpaceRouter.ficheDetail.invalidate({ ficheId: id }),
         utils.clientSpaceRouter.dashboard.invalidate({ ficheId: id }),
@@ -273,7 +270,7 @@ export default function ClientFicheEdit() {
                     ] as const).map(([key, label, required]) => (
                       <label key={key} className="block">
                         <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
-                        <input required={required} disabled={key === "site" && !capabilities.site.editable || key === "googlePlaceId" && !capabilities.googleReview.editable} type={key === "email" ? "email" : "text"} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
+                        <input required={required} disabled={(key === "site" && !capabilities.site.editable) || (key === "googlePlaceId" && !capabilities.googleReview.editable)} type={key === "email" ? "email" : "text"} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
                       </label>
                     ))}
                   </div>
@@ -283,9 +280,9 @@ export default function ClientFicheEdit() {
 
             <EditorSection
               title="Portrait et logo"
-              note="Le traitement d’image et les limites Signature restent contrôlés par le serveur."
+              note={lockedMessage("profile") ?? "Le traitement d’image et les limites du plan restent contrôlés par le serveur."}
             >
-              <div className="grid gap-5 md:grid-cols-2">
+              <fieldset disabled={!capabilities.profile.editable} className="grid gap-5 md:grid-cols-2 disabled:opacity-60">
                 <MediaCard
                   title="Portrait"
                   value={form.photo}
@@ -300,7 +297,7 @@ export default function ClientFicheEdit() {
                   onPick={file => uploadImage(file, "logo")}
                   onRemove={() => setField("logo", "")}
                 />
-              </div>
+              </fieldset>
             </EditorSection>
 
             <EditorSection title="Présentation et action principale">
@@ -327,8 +324,8 @@ export default function ClientFicheEdit() {
                   />
                 </Field>
               </div>
-              <Field label="Présentation">
-                <textarea
+              <Field label={lockedMessage("presentation") ? `Présentation — ${lockedMessage("presentation")}` : "Présentation"}>
+                <textarea disabled={!capabilities.presentation.editable}
                   className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
                   rows={6}
                   value={form.data.presentation}
@@ -337,8 +334,8 @@ export default function ClientFicheEdit() {
               </Field>
             </EditorSection>
 
-            <EditorSection title="Rendez-vous">
-              <div className="grid gap-4 sm:grid-cols-2">
+            <EditorSection title="Rendez-vous" note={lockedMessage("rendezVous")}>
+              <fieldset disabled={!capabilities.rendezVous.editable} className="grid gap-4 sm:grid-cols-2 disabled:opacity-60">
                 <Field label="Libellé du bouton">
                   <input
                     value={form.data.rendezVous.label}
@@ -364,12 +361,14 @@ export default function ClientFicheEdit() {
                     placeholder="https://…"
                   />
                 </Field>
-              </div>
+              </fieldset>
             </EditorSection>
 
             <EditorSection
               title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}
+              note={lockedMessage("socials")}
             >
+              <fieldset disabled={!capabilities.socials.editable} className="disabled:opacity-60">
               <Repeater
                 items={form.data.reseauxSociaux}
                 onAdd={() =>
@@ -423,12 +422,14 @@ export default function ClientFicheEdit() {
                   </div>
                 )}
               />
+              </fieldset>
             </EditorSection>
 
             <EditorSection
-              title={`Liens personnalisés (${form.data.liens.length}/10)`}
-              note="Maximum Signature : 10 liens."
+              title={`Liens personnalisés (${form.data.liens.length}/${capabilities.links.maxItems ?? fiche.data.plan.maxLinks})`}
+              note={lockedMessage("links") ?? `Maximum ${capabilities.links.maxItems ?? fiche.data.plan.maxLinks} liens.`}
             >
+              <fieldset disabled={!capabilities.links.editable} className="disabled:opacity-60">
               <Repeater
                 items={form.data.liens}
                 onAdd={() => {
@@ -484,8 +485,8 @@ export default function ClientFicheEdit() {
             </EditorSection>
 
             <EditorSection
-              title={`Galerie (${form.data.galerie.length}/8)`}
-              note="Maximum Signature : 8 photos."
+              title={`Galerie (${form.data.galerie.length}/${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos})`}
+              note={lockedMessage("gallery") ?? `Maximum ${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos} photos.`}
             >
               <fieldset disabled={!capabilities.gallery.editable} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 disabled:opacity-60">
                 {form.data.galerie.map((image, index) => (
@@ -580,7 +581,8 @@ export default function ClientFicheEdit() {
               </div>
             </EditorSection>
 
-            <EditorSection title="Avis Google">
+            <EditorSection title="Avis Google" note={lockedMessage("googleReview")}>
+              <fieldset disabled={!capabilities.googleReview.editable} className="disabled:opacity-60">
               <Field label="Google Place ID">
                 <input
                   value={form.googlePlaceId}
@@ -588,16 +590,19 @@ export default function ClientFicheEdit() {
                   placeholder="ChIJ…"
                 />
               </Field>
+              </fieldset>
             </EditorSection>
 
             <EditorSection
               title="Catalogue / menu / tarifs"
-              note="Signature peut gérer ses sections et articles."
+              note={lockedMessage("catalog") ?? "Vous pouvez gérer vos sections et articles."}
             >
+              <fieldset disabled={!capabilities.catalog.editable} className="disabled:opacity-60">
               <CatalogEditor
                 sections={form.data.sections}
                 onChange={sections => setData("sections", sections)}
               />
+              </fieldset>
             </EditorSection>
 
             <div className="flex justify-end">
