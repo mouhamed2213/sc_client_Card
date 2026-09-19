@@ -67,6 +67,7 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
 
 function Hero({ fiche, actions }: FicheTemplateProps) {
   const identityImage = fiche.logo;
+  const preferredAction = actions.buttonOrder[0];
   const hasAction = (key: "appel" | "whatsapp" | "email") =>
     actions.buttonOrder.includes(key);
   const buttons = {
@@ -74,11 +75,17 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
       <a href={actions.phoneHref} className="public-action public-action-call">
         <Phone className="h-5 w-5" />
         <span>Appeler</span>
+        {preferredAction === "appel" && (
+          <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
+        )}
       </a>
     ) : (
       <div className="public-action public-action--missing" role="status">
         <Phone className="h-5 w-5" />
         <span>Numéro non fourni</span>
+        {preferredAction === "appel" && (
+          <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
+        )}
       </div>
     ),
     whatsapp: hasAction("whatsapp") ? (
@@ -88,11 +95,17 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
       >
         <MessageCircle className="h-5 w-5" />
         <span>WhatsApp</span>
+        {preferredAction === "whatsapp" && (
+          <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
+        )}
       </a>
     ) : (
       <div className="public-action public-action--missing" role="status">
         <MessageCircle className="h-5 w-5" />
         <span>WhatsApp non fourni</span>
+        {preferredAction === "whatsapp" && (
+          <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
+        )}
       </div>
     ),
     email:
@@ -103,11 +116,17 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
         >
           <Mail className="h-5 w-5" />
           <span>E-mail</span>
+          {preferredAction === "email" && (
+            <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
+          )}
         </a>
       ) : (
         <div className="public-action public-action--missing" role="status">
           <Mail className="h-5 w-5" />
           <span>E-mail non fourni</span>
+          {preferredAction === "email" && (
+            <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
+          )}
         </div>
       ),
   } as const;
