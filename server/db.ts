@@ -27,7 +27,8 @@ export async function upsertLegacyOAuthUser(
       name: user.name ?? null,
       email: user.email ?? null,
       loginMethod: user.loginMethod ?? null,
-      role: user.role ?? (user.openId === ENV.legacyOwnerOpenId ? "admin" : "user"),
+      role:
+        user.role ?? (user.openId === ENV.legacyOwnerOpenId ? "admin" : "user"),
       lastSignedIn: user.lastSignedIn ?? new Date(),
     },
     update: {
@@ -54,7 +55,10 @@ export async function getUserById(id: number) {
   return prisma.user.findUnique({ where: { id } });
 }
 
-export async function updateUserLastSignedIn(id: number, lastSignedIn = new Date()) {
+export async function updateUserLastSignedIn(
+  id: number,
+  lastSignedIn = new Date()
+) {
   await prisma.user.update({ where: { id }, data: { lastSignedIn } });
 }
 
@@ -313,7 +317,9 @@ export async function createClientAccountWithFiche(input: {
 
     let card = null;
     if (input.cardNumero !== undefined) {
-      const numero = input.cardNumero.trim() || `SC-${randomBytes(6).toString("hex").toUpperCase()}`;
+      const numero =
+        input.cardNumero.trim() ||
+        `SC-${randomBytes(6).toString("hex").toUpperCase()}`;
       card = await tx.membershipCard.create({
         data: {
           ficheId: fiche.id,
@@ -325,7 +331,6 @@ export async function createClientAccountWithFiche(input: {
     return { user, fiche, credential, card };
   });
 }
-
 
 // --- Invitations ---
 export async function createInvitation(ficheId: number, ttlDays = 7) {

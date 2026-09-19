@@ -399,6 +399,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   AdminCredential: 'AdminCredential',
+  ClientCredential: 'ClientCredential',
   Fiche: 'Fiche',
   FicheScan: 'FicheScan',
   ContactRequest: 'ContactRequest',
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "adminCredential" | "fiche" | "ficheScan" | "contactRequest" | "invitationClient" | "membershipCard"
+    modelProps: "user" | "adminCredential" | "clientCredential" | "fiche" | "ficheScan" | "contactRequest" | "invitationClient" | "membershipCard"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -568,6 +569,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AdminCredentialCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AdminCredentialCountAggregateOutputType> | number
+        }
+      }
+    }
+    ClientCredential: {
+      payload: Prisma.$ClientCredentialPayload<ExtArgs>
+      fields: Prisma.ClientCredentialFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ClientCredentialFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ClientCredentialFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload>
+        }
+        findFirst: {
+          args: Prisma.ClientCredentialFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ClientCredentialFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload>
+        }
+        findMany: {
+          args: Prisma.ClientCredentialFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload>[]
+        }
+        create: {
+          args: Prisma.ClientCredentialCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload>
+        }
+        createMany: {
+          args: Prisma.ClientCredentialCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ClientCredentialCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload>[]
+        }
+        delete: {
+          args: Prisma.ClientCredentialDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload>
+        }
+        update: {
+          args: Prisma.ClientCredentialUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload>
+        }
+        deleteMany: {
+          args: Prisma.ClientCredentialDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ClientCredentialUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ClientCredentialUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload>[]
+        }
+        upsert: {
+          args: Prisma.ClientCredentialUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ClientCredentialPayload>
+        }
+        aggregate: {
+          args: Prisma.ClientCredentialAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateClientCredential>
+        }
+        groupBy: {
+          args: Prisma.ClientCredentialGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClientCredentialGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ClientCredentialCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ClientCredentialCountAggregateOutputType> | number
         }
       }
     }
@@ -989,7 +1064,8 @@ export const UserScalarFieldEnum = {
   role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  lastSignedIn: 'lastSignedIn'
+  lastSignedIn: 'lastSignedIn',
+  formule: 'formule'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1005,6 +1081,19 @@ export const AdminCredentialScalarFieldEnum = {
 } as const
 
 export type AdminCredentialScalarFieldEnum = (typeof AdminCredentialScalarFieldEnum)[keyof typeof AdminCredentialScalarFieldEnum]
+
+
+export const ClientCredentialScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  username: 'username',
+  passwordHash: 'passwordHash',
+  mustChangePassword: 'mustChangePassword',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClientCredentialScalarFieldEnum = (typeof ClientCredentialScalarFieldEnum)[keyof typeof ClientCredentialScalarFieldEnum]
 
 
 export const FicheScalarFieldEnum = {
@@ -1188,6 +1277,13 @@ export type ListEnumFormuleFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'Statut'
  */
 export type EnumStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Statut'>
@@ -1198,13 +1294,6 @@ export type EnumStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
  * Reference to a field of type 'Statut[]'
  */
 export type ListEnumStatutFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Statut[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -1388,6 +1477,7 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   adminCredential?: Prisma.AdminCredentialOmit
+  clientCredential?: Prisma.ClientCredentialOmit
   fiche?: Prisma.FicheOmit
   ficheScan?: Prisma.FicheScanOmit
   contactRequest?: Prisma.ContactRequestOmit

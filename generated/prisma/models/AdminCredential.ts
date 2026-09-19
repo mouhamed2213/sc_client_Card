@@ -413,6 +413,10 @@ export type AdminCredentialUncheckedUpdateOneWithoutUserNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AdminCredentialUpdateToOneWithWhereWithoutUserInput, Prisma.AdminCredentialUpdateWithoutUserInput>, Prisma.AdminCredentialUncheckedUpdateWithoutUserInput>
 }
 
+export type StringFieldUpdateOperationsInput = {
+  set?: string
+}
+
 export type AdminCredentialCreateWithoutUserInput = {
   username: string
   passwordHash: string

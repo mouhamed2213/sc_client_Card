@@ -1,17 +1,36 @@
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Check, Clipboard, Copy, CreditCard, Loader2, UserPlus, X } from "lucide-react";
+import {
+  Check,
+  Clipboard,
+  Copy,
+  CreditCard,
+  Loader2,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+const days = [
+  "Lundi",
+  "Mardi",
+  "Mercredi",
+  "Jeudi",
+  "Vendredi",
+  "Samedi",
+  "Dimanche",
+];
 
 type Props = {
   open: boolean;
   onClose: () => void;
 };
 
-export default function AdminClientAccountCreationModal({ open, onClose }: Props) {
+export default function AdminClientAccountCreationModal({
+  open,
+  onClose,
+}: Props) {
   const utils = trpc.useUtils();
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");
@@ -130,7 +149,11 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
       toast.error("Le numéro WhatsApp est vide");
       return;
     }
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+    window.open(
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
   }
 
   function copyWhatsAppMessage() {
@@ -189,19 +212,33 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
 
   if (credentials) {
     return (
-      <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="client-account-created-title">
+      <div
+        className="modal-backdrop"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="client-account-created-title"
+      >
         <div className="modal-panel max-w-xl">
           <div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5">
             <div>
               <p className="eyebrow text-emerald-600">Création terminée</p>
-              <h2 id="client-account-created-title" className="mt-1 text-xl font-semibold">
+              <h2
+                id="client-account-created-title"
+                className="mt-1 text-xl font-semibold"
+              >
                 Compte client Essentiel créé
               </h2>
               <p className="mt-1 text-sm text-[#7d8798]">
-                Les identifiants temporaires sont affichés maintenant pour être transmis au client.
+                Les identifiants temporaires sont affichés maintenant pour être
+                transmis au client.
               </p>
             </div>
-            <button type="button" onClick={close} className="icon-button" aria-label="Fermer">
+            <button
+              type="button"
+              onClick={close}
+              className="icon-button"
+              aria-label="Fermer"
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -214,10 +251,16 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <Credential label="Identifiant" value={credentials.username} />
-                <Credential label="Mot de passe temporaire" value={credentials.temporaryPassword} secret />
+                <Credential
+                  label="Mot de passe temporaire"
+                  value={credentials.temporaryPassword}
+                  secret
+                />
               </div>
               <p className="mt-4 text-xs leading-5 text-emerald-800">
-                Le mot de passe n'est pas stocké en clair. Il vient d'être généré par le serveur et doit être transmis au client maintenant.
+                Le mot de passe n'est pas stocké en clair. Il vient d'être
+                généré par le serveur et doit être transmis au client
+                maintenant.
               </p>
             </div>
 
@@ -229,25 +272,46 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
             )}
 
             <div className="rounded-xl border border-[#e6e8ec] p-4">
-              <p className="text-sm font-semibold text-[#172033]">Transmission au client</p>
+              <p className="text-sm font-semibold text-[#172033]">
+                Transmission au client
+              </p>
               <p className="mt-1 text-sm text-[#7d8798]">
-                Copiez les identifiants ou le message complet avant de fermer cette fenêtre.
+                Copiez les identifiants ou le message complet avant de fermer
+                cette fenêtre.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button type="button" variant="outline" onClick={copyCredentials} className="gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={copyCredentials}
+                  className="gap-2"
+                >
                   <Clipboard className="h-4 w-4" /> Copier les identifiants
                 </Button>
-                <Button type="button" onClick={copyWhatsAppMessage} variant="outline" className="gap-2">
+                <Button
+                  type="button"
+                  onClick={copyWhatsAppMessage}
+                  variant="outline"
+                  className="gap-2"
+                >
                   <Copy className="h-4 w-4" /> Copier le message WhatsApp
                 </Button>
-                <Button type="button" onClick={openWhatsApp} className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]">
+                <Button
+                  type="button"
+                  onClick={openWhatsApp}
+                  className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]"
+                >
                   Ouvrir WhatsApp
                 </Button>
               </div>
             </div>
 
             <div className="flex justify-end border-t border-[#edf0f2] pt-5">
-              <Button type="button" onClick={close} className="bg-[#172033] text-white hover:bg-[#27334a]">
+              <Button
+                type="button"
+                onClick={close}
+                className="bg-[#172033] text-white hover:bg-[#27334a]"
+              >
                 Terminer
               </Button>
             </div>
@@ -258,19 +322,33 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
   }
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="new-client-account-title">
+    <div
+      className="modal-backdrop overflow-scroll"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="new-client-account-title"
+    >
       <div className="modal-panel">
         <div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5">
           <div>
             <p className="eyebrow">Nouveau compte client</p>
-            <h2 id="new-client-account-title" className="mt-1 text-xl font-semibold">
+            <h2
+              id="new-client-account-title"
+              className="mt-1 text-xl font-semibold"
+            >
               Compte + fiche Essentiel
             </h2>
             <p className="mt-1 text-sm text-[#7d8798]">
-              Le serveur génère l'identifiant et le mot de passe temporaire. La fiche et le compte sont créés dans la même transaction.
+              Le serveur génère l'identifiant et le mot de passe temporaire. La
+              fiche et le compte sont créés dans la même transaction.
             </p>
           </div>
-          <button type="button" onClick={close} className="icon-button" aria-label="Fermer">
+          <button
+            type="button"
+            onClick={close}
+            className="icon-button"
+            aria-label="Fermer"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -282,31 +360,71 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Prénom">
-              <input required value={prenom} onChange={e => setPrenom(e.target.value)} placeholder="Marie" autoComplete="given-name" />
+              <input
+                required
+                value={prenom}
+                onChange={e => setPrenom(e.target.value)}
+                placeholder="Marie"
+                autoComplete="given-name"
+              />
             </Field>
             <Field label="Nom">
-              <input required value={nom} onChange={e => setNom(e.target.value)} placeholder="Diallo" autoComplete="family-name" />
+              <input
+                required
+                value={nom}
+                onChange={e => setNom(e.target.value)}
+                placeholder="Diallo"
+                autoComplete="family-name"
+              />
             </Field>
             <Field label="Entreprise">
-              <input required value={entreprise} onChange={e => setEntreprise(e.target.value)} placeholder="Saly Immo Conseil" />
+              <input
+                required
+                value={entreprise}
+                onChange={e => setEntreprise(e.target.value)}
+                placeholder="Saly Immo Conseil"
+              />
             </Field>
             <Field label="Fonction">
-              <input required value={fonction} onChange={e => setFonction(e.target.value)} placeholder="Conseillère immobilière" />
+              <input
+                required
+                value={fonction}
+                onChange={e => setFonction(e.target.value)}
+                placeholder="Conseillère immobilière"
+              />
             </Field>
             <Field label="Téléphone">
-              <input required value={telephone} onChange={e => setTelephone(e.target.value)} autoComplete="tel" />
+              <input
+                required
+                value={telephone}
+                onChange={e => setTelephone(e.target.value)}
+                autoComplete="tel"
+              />
             </Field>
             <Field label="WhatsApp">
-              <input required value={whatsapp} onChange={e => setWhatsapp(e.target.value)} autoComplete="tel" />
+              <input
+                required
+                value={whatsapp}
+                onChange={e => setWhatsapp(e.target.value)}
+                autoComplete="tel"
+              />
             </Field>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="E-mail du compte (optionnel)">
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" />
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                autoComplete="email"
+              />
             </Field>
             <Field label="Adresse (optionnelle)">
-              <input value={adresse} onChange={e => setAdresse(e.target.value)} />
+              <input
+                value={adresse}
+                onChange={e => setAdresse(e.target.value)}
+              />
             </Field>
           </div>
 
@@ -319,7 +437,8 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
               pattern="[a-zA-Z0-9-]{3,160}"
             />
             <p className="mt-1.5 text-xs text-[#9aa3b1]">
-              La fiche sera accessible sur /fiche/{slug || generatedSlug || "votre-slug"}.
+              La fiche sera accessible sur /fiche/
+              {slug || generatedSlug || "votre-slug"}.
             </p>
           </Field>
 
@@ -333,40 +452,66 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
                 className="mt-1 h-4 w-4"
               />
               <label htmlFor="create-card" className="text-sm">
-                <span className="font-semibold text-[#172033]">Créer la carte maintenant</span>
+                <span className="font-semibold text-[#172033]">
+                  Créer la carte maintenant
+                </span>
                 <span className="mt-1 block text-xs leading-5 text-[#7d8798]">
-                  Si elle existe déjà physiquement, indiquez son numéro. Sinon laissez le champ vide et la plateforme créera un numéro.
+                  Si elle existe déjà physiquement, indiquez son numéro. Sinon
+                  laissez le champ vide et la plateforme créera un numéro.
                 </span>
               </label>
             </div>
             {createCard && (
               <div className="mt-4">
                 <Field label="Numéro de carte (optionnel)">
-                  <input value={cardNumero} onChange={e => setCardNumero(e.target.value)} placeholder="NFC-000123" />
+                  <input
+                    value={cardNumero}
+                    onChange={e => setCardNumero(e.target.value)}
+                    placeholder="NFC-000123"
+                  />
                 </Field>
               </div>
             )}
           </div>
 
           <div className="rounded-xl border border-[#e6e8ec] p-4">
-            <p className="text-sm font-semibold text-[#172033]">Horaires Essentiel</p>
+            <p className="text-sm font-semibold text-[#172033]">
+              Horaires Essentiel
+            </p>
             <p className="mt-1 text-xs text-[#7d8798]">
-              Les 7 jours sont initialisés pour satisfaire la règle de la formule.
+              Les 7 jours sont initialisés pour satisfaire la règle de la
+              formule.
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {hours.map((row, index) => (
-                <label key={row.jour} className="grid grid-cols-[90px_1fr] items-center gap-2 text-xs">
+                <label
+                  key={row.jour}
+                  className="grid grid-cols-[90px_1fr] items-center gap-2 text-xs"
+                >
                   <span className="font-medium text-[#52607a]">{row.jour}</span>
-                  <input value={row.horaire} onChange={e => updateHour(index, e.target.value)} />
+                  <input
+                    value={row.horaire}
+                    onChange={e => updateHour(index, e.target.value)}
+                  />
                 </label>
               ))}
             </div>
           </div>
 
           <div className="flex justify-end gap-2 border-t border-[#edf0f2] pt-5">
-            <Button type="button" variant="outline" onClick={close}>Annuler</Button>
-            <Button type="submit" disabled={mutation.isPending} className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]">
-              {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+            <Button type="button" variant="outline" onClick={close}>
+              Annuler
+            </Button>
+            <Button
+              type="submit"
+              disabled={mutation.isPending}
+              className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]"
+            >
+              {mutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <UserPlus className="h-4 w-4" />
+              )}
               {mutation.isPending ? "Création…" : "Créer le compte + la fiche"}
             </Button>
           </div>
@@ -376,19 +521,41 @@ export default function AdminClientAccountCreationModal({ open, onClose }: Props
   );
 }
 
-function Credential({ label, value, secret }: { label: string; value: string; secret?: boolean }) {
+function Credential({
+  label,
+  value,
+  secret,
+}: {
+  label: string;
+  value: string;
+  secret?: boolean;
+}) {
   return (
     <div className="rounded-xl border border-emerald-200 bg-white p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#7d8798]">{label}</p>
-      <p className={`mt-1 break-all font-mono text-sm font-semibold text-[#172033] ${secret ? "select-all" : ""}`}>{value}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#7d8798]">
+        {label}
+      </p>
+      <p
+        className={`mt-1 break-all font-mono text-sm font-semibold text-[#172033] ${secret ? "select-all" : ""}`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-[#7d8798]">{label}</span>
+      <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-[#7d8798]">
+        {label}
+      </span>
       {children}
     </label>
   );

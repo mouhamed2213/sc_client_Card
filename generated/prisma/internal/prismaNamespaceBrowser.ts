@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   AdminCredential: 'AdminCredential',
+  ClientCredential: 'ClientCredential',
   Fiche: 'Fiche',
   FicheScan: 'FicheScan',
   ContactRequest: 'ContactRequest',
@@ -85,7 +86,8 @@ export const UserScalarFieldEnum = {
   role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  lastSignedIn: 'lastSignedIn'
+  lastSignedIn: 'lastSignedIn',
+  formule: 'formule'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -101,6 +103,19 @@ export const AdminCredentialScalarFieldEnum = {
 } as const
 
 export type AdminCredentialScalarFieldEnum = (typeof AdminCredentialScalarFieldEnum)[keyof typeof AdminCredentialScalarFieldEnum]
+
+
+export const ClientCredentialScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  username: 'username',
+  passwordHash: 'passwordHash',
+  mustChangePassword: 'mustChangePassword',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ClientCredentialScalarFieldEnum = (typeof ClientCredentialScalarFieldEnum)[keyof typeof ClientCredentialScalarFieldEnum]
 
 
 export const FicheScalarFieldEnum = {

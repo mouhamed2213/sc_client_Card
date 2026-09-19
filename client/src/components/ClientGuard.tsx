@@ -4,6 +4,8 @@ import { Redirect } from "wouter";
 import ClientSplash from "./client-space/ClientSplash";
 
 export default function ClientGuard({ children }: { children: ReactNode }) {
+  // get connected use informations
+  // ? useQuery : get data from server 
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,

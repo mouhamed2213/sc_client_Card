@@ -450,10 +450,6 @@ export type InvitationClientUncheckedUpdateManyWithoutFicheNestedInput = {
   deleteMany?: Prisma.InvitationClientScalarWhereInput | Prisma.InvitationClientScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type InvitationClientCreateWithoutFicheInput = {
   token: string
   utilisee?: boolean

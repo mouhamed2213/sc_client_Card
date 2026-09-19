@@ -60,6 +60,7 @@ function clearFailures(key: string): void {
 }
 
 export function registerClientRoutes(app: Express): void {
+  
   app.post("/api/client/login", async (req, res) => {
     const parsed = loginSchema.safeParse(req.body);
 

@@ -41,7 +41,7 @@ export type FicheTemplateData = {
 
 export type FicheIdentity = {
   slug: string;
-  formule: Formule;
+  formule: any;
   nom: string;
   prenom: string;
   fonction: string;

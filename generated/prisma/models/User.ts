@@ -44,6 +44,7 @@ export type UserMinAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   lastSignedIn: Date | null
+  formule: $Enums.Formule | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -56,6 +57,7 @@ export type UserMaxAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   lastSignedIn: Date | null
+  formule: $Enums.Formule | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -68,6 +70,7 @@ export type UserCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   lastSignedIn: number
+  formule: number
   _all: number
 }
 
@@ -90,6 +93,7 @@ export type UserMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   lastSignedIn?: true
+  formule?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -102,6 +106,7 @@ export type UserMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   lastSignedIn?: true
+  formule?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -114,6 +119,7 @@ export type UserCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   lastSignedIn?: true
+  formule?: true
   _all?: true
 }
 
@@ -205,7 +211,7 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 
 export type UserGroupByOutputType = {
   id: number
-  openId: string
+  openId: string | null
   name: string | null
   email: string | null
   loginMethod: string | null
@@ -213,6 +219,7 @@ export type UserGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   lastSignedIn: Date
+  formule: $Enums.Formule | null
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -240,7 +247,7 @@ export type UserWhereInput = {
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.IntFilter<"User"> | number
-  openId?: Prisma.StringFilter<"User"> | string
+  openId?: Prisma.StringNullableFilter<"User"> | string | null
   name?: Prisma.StringNullableFilter<"User"> | string | null
   email?: Prisma.StringNullableFilter<"User"> | string | null
   loginMethod?: Prisma.StringNullableFilter<"User"> | string | null
@@ -248,13 +255,15 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastSignedIn?: Prisma.DateTimeFilter<"User"> | Date | string
+  formule?: Prisma.EnumFormuleNullableFilter<"User"> | $Enums.Formule | null
   adminCredential?: Prisma.XOR<Prisma.AdminCredentialNullableScalarRelationFilter, Prisma.AdminCredentialWhereInput> | null
+  clientCredential?: Prisma.XOR<Prisma.ClientCredentialNullableScalarRelationFilter, Prisma.ClientCredentialWhereInput> | null
   fiche?: Prisma.FicheListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  openId?: Prisma.SortOrder
+  openId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   loginMethod?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -262,7 +271,9 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSignedIn?: Prisma.SortOrder
+  formule?: Prisma.SortOrderInput | Prisma.SortOrder
   adminCredential?: Prisma.AdminCredentialOrderByWithRelationInput
+  clientCredential?: Prisma.ClientCredentialOrderByWithRelationInput
   fiche?: Prisma.FicheOrderByRelationAggregateInput
 }
 
@@ -279,13 +290,15 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   lastSignedIn?: Prisma.DateTimeFilter<"User"> | Date | string
+  formule?: Prisma.EnumFormuleNullableFilter<"User"> | $Enums.Formule | null
   adminCredential?: Prisma.XOR<Prisma.AdminCredentialNullableScalarRelationFilter, Prisma.AdminCredentialWhereInput> | null
+  clientCredential?: Prisma.XOR<Prisma.ClientCredentialNullableScalarRelationFilter, Prisma.ClientCredentialWhereInput> | null
   fiche?: Prisma.FicheListRelationFilter
 }, "id" | "openId">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  openId?: Prisma.SortOrder
+  openId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
   loginMethod?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -293,6 +306,7 @@ export type UserOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSignedIn?: Prisma.SortOrder
+  formule?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -305,7 +319,7 @@ export type UserScalarWhereWithAggregatesInput = {
   OR?: Prisma.UserScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"User"> | number
-  openId?: Prisma.StringWithAggregatesFilter<"User"> | string
+  openId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   email?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   loginMethod?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
@@ -313,10 +327,11 @@ export type UserScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   lastSignedIn?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  formule?: Prisma.EnumFormuleNullableWithAggregatesFilter<"User"> | $Enums.Formule | null
 }
 
 export type UserCreateInput = {
-  openId: string
+  openId?: string | null
   name?: string | null
   email?: string | null
   loginMethod?: string | null
@@ -324,13 +339,15 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSignedIn?: Date | string
+  formule?: $Enums.Formule | null
   adminCredential?: Prisma.AdminCredentialCreateNestedOneWithoutUserInput
+  clientCredential?: Prisma.ClientCredentialCreateNestedOneWithoutUserInput
   fiche?: Prisma.FicheCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateInput = {
   id?: number
-  openId: string
+  openId?: string | null
   name?: string | null
   email?: string | null
   loginMethod?: string | null
@@ -338,12 +355,14 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSignedIn?: Date | string
+  formule?: $Enums.Formule | null
   adminCredential?: Prisma.AdminCredentialUncheckedCreateNestedOneWithoutUserInput
+  clientCredential?: Prisma.ClientCredentialUncheckedCreateNestedOneWithoutUserInput
   fiche?: Prisma.FicheUncheckedCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUpdateInput = {
-  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -351,13 +370,15 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
   adminCredential?: Prisma.AdminCredentialUpdateOneWithoutUserNestedInput
+  clientCredential?: Prisma.ClientCredentialUpdateOneWithoutUserNestedInput
   fiche?: Prisma.FicheUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -365,13 +386,15 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
   adminCredential?: Prisma.AdminCredentialUncheckedUpdateOneWithoutUserNestedInput
+  clientCredential?: Prisma.ClientCredentialUncheckedUpdateOneWithoutUserNestedInput
   fiche?: Prisma.FicheUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateManyInput = {
   id?: number
-  openId: string
+  openId?: string | null
   name?: string | null
   email?: string | null
   loginMethod?: string | null
@@ -379,10 +402,11 @@ export type UserCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSignedIn?: Date | string
+  formule?: $Enums.Formule | null
 }
 
 export type UserUpdateManyMutationInput = {
-  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -390,11 +414,12 @@ export type UserUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
 }
 
 export type UserUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -402,6 +427,7 @@ export type UserUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -414,6 +440,7 @@ export type UserCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSignedIn?: Prisma.SortOrder
+  formule?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -430,6 +457,7 @@ export type UserMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSignedIn?: Prisma.SortOrder
+  formule?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -442,6 +470,7 @@ export type UserMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   lastSignedIn?: Prisma.SortOrder
+  formule?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -458,10 +487,6 @@ export type UserNullableScalarRelationFilter = {
   isNot?: Prisma.UserWhereInput | null
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
-}
-
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
@@ -472,6 +497,10 @@ export type EnumUserRoleFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type NullableEnumFormuleFieldUpdateOperationsInput = {
+  set?: $Enums.Formule | null
 }
 
 export type IntFieldUpdateOperationsInput = {
@@ -496,6 +525,20 @@ export type UserUpdateOneRequiredWithoutAdminCredentialNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAdminCredentialInput, Prisma.UserUpdateWithoutAdminCredentialInput>, Prisma.UserUncheckedUpdateWithoutAdminCredentialInput>
 }
 
+export type UserCreateNestedOneWithoutClientCredentialInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutClientCredentialInput, Prisma.UserUncheckedCreateWithoutClientCredentialInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutClientCredentialInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutClientCredentialNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutClientCredentialInput, Prisma.UserUncheckedCreateWithoutClientCredentialInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutClientCredentialInput
+  upsert?: Prisma.UserUpsertWithoutClientCredentialInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutClientCredentialInput, Prisma.UserUpdateWithoutClientCredentialInput>, Prisma.UserUncheckedUpdateWithoutClientCredentialInput>
+}
+
 export type UserCreateNestedOneWithoutFicheInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutFicheInput, Prisma.UserUncheckedCreateWithoutFicheInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutFicheInput
@@ -513,7 +556,7 @@ export type UserUpdateOneWithoutFicheNestedInput = {
 }
 
 export type UserCreateWithoutAdminCredentialInput = {
-  openId: string
+  openId?: string | null
   name?: string | null
   email?: string | null
   loginMethod?: string | null
@@ -521,12 +564,14 @@ export type UserCreateWithoutAdminCredentialInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSignedIn?: Date | string
+  formule?: $Enums.Formule | null
+  clientCredential?: Prisma.ClientCredentialCreateNestedOneWithoutUserInput
   fiche?: Prisma.FicheCreateNestedManyWithoutOwnerInput
 }
 
 export type UserUncheckedCreateWithoutAdminCredentialInput = {
   id?: number
-  openId: string
+  openId?: string | null
   name?: string | null
   email?: string | null
   loginMethod?: string | null
@@ -534,6 +579,8 @@ export type UserUncheckedCreateWithoutAdminCredentialInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSignedIn?: Date | string
+  formule?: $Enums.Formule | null
+  clientCredential?: Prisma.ClientCredentialUncheckedCreateNestedOneWithoutUserInput
   fiche?: Prisma.FicheUncheckedCreateNestedManyWithoutOwnerInput
 }
 
@@ -554,7 +601,7 @@ export type UserUpdateToOneWithWhereWithoutAdminCredentialInput = {
 }
 
 export type UserUpdateWithoutAdminCredentialInput = {
-  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -562,12 +609,14 @@ export type UserUpdateWithoutAdminCredentialInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
+  clientCredential?: Prisma.ClientCredentialUpdateOneWithoutUserNestedInput
   fiche?: Prisma.FicheUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminCredentialInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -575,11 +624,87 @@ export type UserUncheckedUpdateWithoutAdminCredentialInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
+  clientCredential?: Prisma.ClientCredentialUncheckedUpdateOneWithoutUserNestedInput
+  fiche?: Prisma.FicheUncheckedUpdateManyWithoutOwnerNestedInput
+}
+
+export type UserCreateWithoutClientCredentialInput = {
+  openId?: string | null
+  name?: string | null
+  email?: string | null
+  loginMethod?: string | null
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastSignedIn?: Date | string
+  formule?: $Enums.Formule | null
+  adminCredential?: Prisma.AdminCredentialCreateNestedOneWithoutUserInput
+  fiche?: Prisma.FicheCreateNestedManyWithoutOwnerInput
+}
+
+export type UserUncheckedCreateWithoutClientCredentialInput = {
+  id?: number
+  openId?: string | null
+  name?: string | null
+  email?: string | null
+  loginMethod?: string | null
+  role?: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastSignedIn?: Date | string
+  formule?: $Enums.Formule | null
+  adminCredential?: Prisma.AdminCredentialUncheckedCreateNestedOneWithoutUserInput
+  fiche?: Prisma.FicheUncheckedCreateNestedManyWithoutOwnerInput
+}
+
+export type UserCreateOrConnectWithoutClientCredentialInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutClientCredentialInput, Prisma.UserUncheckedCreateWithoutClientCredentialInput>
+}
+
+export type UserUpsertWithoutClientCredentialInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutClientCredentialInput, Prisma.UserUncheckedUpdateWithoutClientCredentialInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutClientCredentialInput, Prisma.UserUncheckedCreateWithoutClientCredentialInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutClientCredentialInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutClientCredentialInput, Prisma.UserUncheckedUpdateWithoutClientCredentialInput>
+}
+
+export type UserUpdateWithoutClientCredentialInput = {
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
+  adminCredential?: Prisma.AdminCredentialUpdateOneWithoutUserNestedInput
+  fiche?: Prisma.FicheUpdateManyWithoutOwnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutClientCredentialInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
+  adminCredential?: Prisma.AdminCredentialUncheckedUpdateOneWithoutUserNestedInput
   fiche?: Prisma.FicheUncheckedUpdateManyWithoutOwnerNestedInput
 }
 
 export type UserCreateWithoutFicheInput = {
-  openId: string
+  openId?: string | null
   name?: string | null
   email?: string | null
   loginMethod?: string | null
@@ -587,12 +712,14 @@ export type UserCreateWithoutFicheInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSignedIn?: Date | string
+  formule?: $Enums.Formule | null
   adminCredential?: Prisma.AdminCredentialCreateNestedOneWithoutUserInput
+  clientCredential?: Prisma.ClientCredentialCreateNestedOneWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFicheInput = {
   id?: number
-  openId: string
+  openId?: string | null
   name?: string | null
   email?: string | null
   loginMethod?: string | null
@@ -600,7 +727,9 @@ export type UserUncheckedCreateWithoutFicheInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   lastSignedIn?: Date | string
+  formule?: $Enums.Formule | null
   adminCredential?: Prisma.AdminCredentialUncheckedCreateNestedOneWithoutUserInput
+  clientCredential?: Prisma.ClientCredentialUncheckedCreateNestedOneWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFicheInput = {
@@ -620,7 +749,7 @@ export type UserUpdateToOneWithWhereWithoutFicheInput = {
 }
 
 export type UserUpdateWithoutFicheInput = {
-  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -628,12 +757,14 @@ export type UserUpdateWithoutFicheInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
   adminCredential?: Prisma.AdminCredentialUpdateOneWithoutUserNestedInput
+  clientCredential?: Prisma.ClientCredentialUpdateOneWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFicheInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  openId?: Prisma.StringFieldUpdateOperationsInput | string
+  openId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   loginMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -641,7 +772,9 @@ export type UserUncheckedUpdateWithoutFicheInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   lastSignedIn?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  formule?: Prisma.NullableEnumFormuleFieldUpdateOperationsInput | $Enums.Formule | null
   adminCredential?: Prisma.AdminCredentialUncheckedUpdateOneWithoutUserNestedInput
+  clientCredential?: Prisma.ClientCredentialUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -685,7 +818,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   lastSignedIn?: boolean
+  formule?: boolean
   adminCredential?: boolean | Prisma.User$adminCredentialArgs<ExtArgs>
+  clientCredential?: boolean | Prisma.User$clientCredentialArgs<ExtArgs>
   fiche?: boolean | Prisma.User$ficheArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -700,6 +835,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   lastSignedIn?: boolean
+  formule?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -712,6 +848,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   lastSignedIn?: boolean
+  formule?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -724,11 +861,13 @@ export type UserSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   lastSignedIn?: boolean
+  formule?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "openId" | "name" | "email" | "loginMethod" | "role" | "createdAt" | "updatedAt" | "lastSignedIn", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "openId" | "name" | "email" | "loginMethod" | "role" | "createdAt" | "updatedAt" | "lastSignedIn" | "formule", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   adminCredential?: boolean | Prisma.User$adminCredentialArgs<ExtArgs>
+  clientCredential?: boolean | Prisma.User$clientCredentialArgs<ExtArgs>
   fiche?: boolean | Prisma.User$ficheArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -739,11 +878,12 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     adminCredential: Prisma.$AdminCredentialPayload<ExtArgs> | null
+    clientCredential: Prisma.$ClientCredentialPayload<ExtArgs> | null
     fiche: Prisma.$FichePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    openId: string
+    openId: string | null
     name: string | null
     email: string | null
     loginMethod: string | null
@@ -751,6 +891,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     createdAt: Date
     updatedAt: Date
     lastSignedIn: Date
+    formule: $Enums.Formule | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1146,6 +1287,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   adminCredential<T extends Prisma.User$adminCredentialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$adminCredentialArgs<ExtArgs>>): Prisma.Prisma__AdminCredentialClient<runtime.Types.Result.GetResult<Prisma.$AdminCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  clientCredential<T extends Prisma.User$clientCredentialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$clientCredentialArgs<ExtArgs>>): Prisma.Prisma__ClientCredentialClient<runtime.Types.Result.GetResult<Prisma.$ClientCredentialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   fiche<T extends Prisma.User$ficheArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ficheArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FichePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1185,6 +1327,7 @@ export interface UserFieldRefs {
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly lastSignedIn: Prisma.FieldRef<"User", 'DateTime'>
+  readonly formule: Prisma.FieldRef<"User", 'Formule'>
 }
     
 
@@ -1594,6 +1737,25 @@ export type User$adminCredentialArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   include?: Prisma.AdminCredentialInclude<ExtArgs> | null
   where?: Prisma.AdminCredentialWhereInput
+}
+
+/**
+ * User.clientCredential
+ */
+export type User$clientCredentialArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClientCredential
+   */
+  select?: Prisma.ClientCredentialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClientCredential
+   */
+  omit?: Prisma.ClientCredentialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClientCredentialInclude<ExtArgs> | null
+  where?: Prisma.ClientCredentialWhereInput
 }
 
 /**

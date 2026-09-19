@@ -6,6 +6,12 @@ import { TRPCError } from "@trpc/server";
 import { Fiche } from "generated/prisma/client";
 import { imageSize } from "image-size";
 import { z } from "zod";
+import { prisma } from "../prisma/client";
+import {
+  generateClientUsername,
+  generateTemporaryClientPassword,
+  hashClientPassword,
+} from "./_core/clientAuth";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import {
@@ -22,9 +28,9 @@ import {
 } from "./clientSpace";
 import {
   attachFicheToOwner,
+  createClientAccountWithFiche,
   createContactRequest,
   createFiche,
-  createClientAccountWithFiche,
   createInvitation,
   createMembershipCard,
   getFicheById,
@@ -42,7 +48,6 @@ import {
 } from "./db";
 import { validatePlanPayload } from "./planValidation";
 import { storagePut } from "./storage";
-import { generateClientUsername, generateTemporaryClientPassword, hashClientPassword } from "./_core/clientAuth";
 
 function parseFiche<T extends { dataJson: string }>(fiche: T) {
   const { dataJson, ...rest } = fiche;
@@ -298,7 +303,13 @@ export const appRouter = router({
       .input(
         z.object({
           name: z.string().trim().min(1).max(160),
-          email: z.string().trim().email().max(320).optional().or(z.literal("")),
+          email: z
+            .string()
+            .trim()
+            .email()
+            .max(320)
+            .optional()
+            .or(z.literal("")),
           formule: z.enum(["essentiel", "pro", "signature"]),
           fiche: fichePayload,
           createCard: z.boolean().default(false),
@@ -314,7 +325,8 @@ export const appRouter = router({
         if (fields.formule !== input.formule) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "La formule du compte et de la fiche doivent être identiques.",
+            message:
+              "La formule du compte et de la fiche doivent être identiques.",
           });
         }
 
@@ -323,7 +335,10 @@ export const appRouter = router({
             ? validatePlanPayload({ ...fields, data })
             : [];
         if (errors.length) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: errors.join(" "),
+          });
         }
 
         const username = generateClientUsername(input.name);
@@ -359,11 +374,24 @@ export const appRouter = router({
             cardId: result.card?.id ?? null,
           };
         } catch (error) {
-          if (error instanceof Error && error.message === "CLIENT_ACCOUNT_EXISTS") {
-            throw new TRPCError({ code: "CONFLICT", message: "Ce compte client existe déjà." });
+          if (
+            error instanceof Error &&
+            error.message === "CLIENT_ACCOUNT_EXISTS"
+          ) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Ce compte client existe déjà.",
+            });
           }
-          if (error instanceof Error && error.message === "CLIENT_USERNAME_EXISTS") {
-            throw new TRPCError({ code: "CONFLICT", message: "Impossible de générer un identifiant unique. Réessayez." });
+          if (
+            error instanceof Error &&
+            error.message === "CLIENT_USERNAME_EXISTS"
+          ) {
+            throw new TRPCError({
+              code: "CONFLICT",
+              message:
+                "Impossible de générer un identifiant unique. Réessayez.",
+            });
           }
           throw error;
         }
@@ -610,24 +638,35 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
-          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
         if (fiche.formule !== "signature")
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "La modification complète est réservée à la formule Signature.",
+            message:
+              "La modification complète est réservée à la formule Signature.",
           });
 
         const links = input.data.liens ?? [];
         const photos = input.data.galerie ?? [];
         const errors: string[] = [];
         if (!input.photo?.trim() || !input.logo?.trim())
-          errors.push("Un portrait et un logo sont obligatoires pour une fiche Signature.");
+          errors.push(
+            "Un portrait et un logo sont obligatoires pour une fiche Signature."
+          );
         if (links.length > 10)
           errors.push("La formule Signature autorise au maximum 10 liens.");
         if (photos.length > 8)
-          errors.push("La formule Signature autorise au maximum 8 photos dans la galerie.");
+          errors.push(
+            "La formule Signature autorise au maximum 8 photos dans la galerie."
+          );
         if (errors.length)
-          throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: errors.join(" "),
+          });
 
         const { ficheId, data, ...fields } = input;
         await updateFiche(ficheId, {
@@ -635,7 +674,8 @@ export const appRouter = router({
           dataJson: JSON.stringify({
             ...JSON.parse(fiche.dataJson || "{}"),
             ...data,
-            notesInternes: JSON.parse(fiche.dataJson || "{}").notesInternes ?? "",
+            notesInternes:
+              JSON.parse(fiche.dataJson || "{}").notesInternes ?? "",
           }),
         });
         return { ok: true } as const;
@@ -654,18 +694,25 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
-          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
         if (fiche.formule !== "signature")
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "L’envoi de médias depuis l’espace client est réservé à la formule Signature.",
+            message:
+              "L’envoi de médias depuis l’espace client est réservé à la formule Signature.",
           });
 
         const currentData = JSON.parse(fiche.dataJson || "{}") as {
           galerie?: unknown[];
         };
         const maxPhotos = getPlanFeatures("signature").maxPhotos;
-        if (input.kind === "gallery" && (currentData.galerie?.length ?? 0) >= maxPhotos)
+        if (
+          input.kind === "gallery" &&
+          (currentData.galerie?.length ?? 0) >= maxPhotos
+        )
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: `La galerie Signature est limitée à ${maxPhotos} photos.`,
@@ -691,7 +738,9 @@ export const appRouter = router({
         }
 
         const expectedType =
-          input.mimeType === "image/jpeg" ? "jpg" : input.mimeType.split("/")[1];
+          input.mimeType === "image/jpeg"
+            ? "jpg"
+            : input.mimeType.split("/")[1];
         if (dimensions.type !== expectedType)
           throw new TRPCError({
             code: "BAD_REQUEST",

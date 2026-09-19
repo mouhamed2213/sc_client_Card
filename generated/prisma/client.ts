@@ -52,6 +52,11 @@ export type User = Prisma.UserModel
  */
 export type AdminCredential = Prisma.AdminCredentialModel
 /**
+ * Model ClientCredential
+ * 
+ */
+export type ClientCredential = Prisma.ClientCredentialModel
+/**
  * Model Fiche
  * 
  */
