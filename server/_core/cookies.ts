@@ -28,3 +28,23 @@ export function getSessionCookieOptions(
     secure,
   };
 }
+
+/**
+ * Cookie options for the local admin session.
+ *
+ * `Secure` must follow the protocol of the *current request*, not NODE_ENV.
+ * A `Secure` cookie sent over plain HTTP is silently discarded by the browser
+ * (everywhere except http://localhost in Chrome/Firefox): the login endpoint
+ * answers 200, but the next request has no session, so AdminGuard bounces the
+ * admin straight back to /admin/login.
+ */
+export function getAdminSessionCookieOptions(
+  req: Request
+): Pick<CookieOptions, "domain" | "httpOnly" | "path" | "sameSite" | "secure"> {
+  return {
+    httpOnly: true,
+    path: "/",
+    sameSite: "lax",
+    secure: isSecureRequest(req),
+  };
+}

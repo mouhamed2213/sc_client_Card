@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import type { Express, Request } from "express";
 import { z } from "zod";
 import { prisma } from "../../prisma/client";
-import { getSessionCookieOptions } from "./cookies";
+import { getAdminSessionCookieOptions } from "./cookies";
 import { ENV } from "./env";
 import { sdk } from "./sdk";
 import { verifyAdminPassword } from "./adminAuth";
@@ -47,11 +47,7 @@ function clearFailures(key: string): void {
 }
 
 function adminCookieOptions(req: Request) {
-  return {
-    ...getSessionCookieOptions(req),
-    sameSite: "lax" as const,
-    secure: ENV.isProduction,
-  };
+  return getAdminSessionCookieOptions(req);
 }
 
 export function registerAdminRoutes(app: Express): void {
