@@ -84,6 +84,11 @@ export function registerClientRoutes(app: Express): void {
       return res.status(401).json({ message: "Identifiants invalides." });
     }
 
+    if (credential.user.mustChangePassword) {
+      // Keep the user signed in so the frontend can force the first-password
+      // change without exposing any credential material.
+    }
+
     await prisma.user.update({
       where: { id: credential.userId },
       data: {
