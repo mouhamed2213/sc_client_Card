@@ -39,3 +39,9 @@ export type PlanFeatures = (typeof planFeatures)[PlanName];
 export function getPlanFeatures(plan: PlanName) {
   return planFeatures[plan];
 }
+
+export const planLabels: Record<PlanName, string> = {
+  essentiel: "Essentiel",
+  pro: "Pro",
+  signature: "Signature",
+};
