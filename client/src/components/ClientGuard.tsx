@@ -17,5 +17,9 @@ export default function ClientGuard({ children }: { children: ReactNode }) {
     return <Redirect to="/espace-client/connexion" />;
   }
 
+  if (meQuery.data.mustChangePassword) {
+    return <Redirect to="/espace-client/connexion" />;
+  }
+
   return <>{children}</>;
 }
