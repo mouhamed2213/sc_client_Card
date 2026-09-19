@@ -6,6 +6,7 @@ import {
   LogOut,
   Menu,
   MessageSquare,
+  RefreshCw,
   Settings,
   SquareArrowOutUpRight,
   X,
@@ -189,14 +190,23 @@ export default function ClientLayout({
             </div>
           </div>
           {fiche?.data && (
-            <a
-              href={`/fiche/${fiche.data.slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="hidden items-center gap-1.5 rounded-lg border border-[#e6e8ec] px-3 py-2 text-sm font-medium text-[#172033] hover:bg-[#f6f8fa] sm:flex"
-            >
-              <SquareArrowOutUpRight size={15} /> Fiche publique
-            </a>
+            <div className="hidden items-center gap-2 sm:flex">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#e3c89e] bg-[#fff9ef] px-3 py-2 text-sm font-semibold text-[#8b5e20] shadow-sm hover:bg-[#fff4df]"
+                aria-label="Renouveler"
+              >
+                <RefreshCw size={15} /> Renouveler
+              </button>
+              <a
+                href={`/fiche/${fiche.data.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#e6e8ec] px-3 py-2 text-sm font-medium text-[#172033] hover:bg-[#f6f8fa]"
+              >
+                <SquareArrowOutUpRight size={15} /> Fiche publique
+              </a>
+            </div>
           )}
         </header>
         <main className="min-w-0">{children}</main>
