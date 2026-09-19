@@ -58,14 +58,29 @@ export default function ClientLogin() {
         return;
       }
 
-      // The login endpoint has already authenticated the browser and set the
-      // session cookie. Keep the transition deterministic instead of waiting
-      // for React Query to notice the new session.
+      // The login endpoint has authenticated the browser and set the session
+      // cookie. Verify that the same session is immediately readable through
+      // tRPC before navigating: the protected space must never be entered on
+      // the basis of the login response alone.
       setMustChangePassword(Boolean(payload.mustChangePassword));
-      await utils.auth.me.invalidate();
+      const authenticatedUser = await utils.auth.me.fetch();
 
-      if (payload.mustChangePassword) {
-        toast.success("Connexion réussie. Vous devez maintenant choisir un nouveau mot de passe.");
+      if (
+        !authenticatedUser ||
+        authenticatedUser.role !== "user" ||
+        authenticatedUser.loginMethod !== "local-client"
+      ) {
+        setLoginError(
+          "Connexion acceptée, mais la session client n'a pas pu être vérifiée. Réessayez."
+        );
+        return;
+      }
+
+      if (authenticatedUser.mustChangePassword) {
+        setMustChangePassword(true);
+        toast.success(
+          "Connexion réussie. Vous devez maintenant choisir un nouveau mot de passe."
+        );
         return;
       }
 
@@ -122,11 +137,26 @@ export default function ClientLogin() {
         return;
       }
 
-      setPassword(newPassword);
       setNewPassword("");
       setConfirmPassword("");
+
+      // Confirm the post-change session through the same server-side auth path
+      // used by ClientGuard before entering the protected client space.
+      const authenticatedUser = await utils.auth.me.fetch();
+      if (
+        !authenticatedUser ||
+        authenticatedUser.role !== "user" ||
+        authenticatedUser.loginMethod !== "local-client" ||
+        authenticatedUser.mustChangePassword
+      ) {
+        setMustChangePassword(false);
+        setChangeError(
+          "Mot de passe modifié, mais la session client n'a pas pu être vérifiée. Reconnectez-vous."
+        );
+        return;
+      }
+
       setMustChangePassword(false);
-      await utils.auth.me.invalidate();
       toast.success("Mot de passe modifié avec succès");
       navigate("/espace-client");
     } catch {
