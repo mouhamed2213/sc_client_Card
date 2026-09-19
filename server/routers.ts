@@ -655,7 +655,7 @@ export const appRouter = router({
           logo: fiche.logo ?? "",
           googlePlaceId: fiche.googlePlaceId ?? "",
           presentation: currentData.presentation ?? "",
-          rendezVous: currentData.rendezVous,
+          rendezVous: currentData.rendezVous ?? { label: "Prendre rendez-vous", url: "" },
           reseauxSociaux: currentData.reseauxSociaux ?? [],
           liens: currentData.liens ?? [],
           galerie: currentData.galerie ?? [],
