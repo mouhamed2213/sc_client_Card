@@ -3,6 +3,7 @@ import { formuleLabels } from "@/lib/ficheStatus";
 import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
 import type { MediaKind } from "@shared/mediaRules";
+import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
 import {
   ImagePlus,
   Loader2,
@@ -118,7 +119,7 @@ export default function ClientFicheEdit() {
 
   const save = trpc.clientSpaceRouter.updateSignature.useMutation({
     onSuccess: async () => {
-      toast.success("Fiche Signature mise à jour");
+      toast.success("Fiche mise à jour");
       setSaved(true);
       await Promise.all([
         utils.clientSpaceRouter.ficheDetail.invalidate({ ficheId: id }),
@@ -141,42 +142,14 @@ export default function ClientFicheEdit() {
     );
   }
 
-  const isSignature = fiche.data.formule === "signature";
-
-  if (!isSignature) {
-    return (
-      <ClientLayout ficheId={id}>
-        <div className="p-4 sm:p-6 lg:p-8">
-          <div
-            className="id-card mx-auto max-w-md text-center"
-            style={{ padding: "34px 28px" }}
-          >
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-              <Lock size={20} />
-            </div>
-            <p className="id-card-name" style={{ fontSize: 19, marginTop: 16 }}>
-              Passez à la carte Signature
-            </p>
-            <p className="id-card-role">
-              L’édition complète depuis l’espace client est réservée à la
-              formule Signature. Votre fiche est actuellement en{" "}
-              {formuleLabels[fiche.data.formule] ?? fiche.data.formule}.
-            </p>
-            <a
-              href={`https://wa.me/?text=${encodeURIComponent(
-                `Bonjour, je souhaite passer ma fiche ${fiche.data.entreprise} à la formule Signature.`
-              )}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#e5a86b] px-4 py-2.5 text-sm font-semibold text-[#172033]"
-            >
-              <Sparkles size={15} /> Passer à Signature
-            </a>
-          </div>
-        </div>
-      </ClientLayout>
-    );
-  }
+  const plan = fiche.data.formule;
+  const capabilities = getClientFicheCapabilities(plan);
+  const upgradeLabel = (key: keyof typeof capabilities) =>
+    capabilities[key].upgradeTo === "signature" ? "Signature" : "Pro";
+  const lockedMessage = (key: keyof typeof capabilities) =>
+    capabilities[key].editable
+      ? undefined
+      : `Disponible à partir du plan ${upgradeLabel(key)}.`;
 
   const setField = <K extends keyof Omit<FormState, "data">>(
     key: K,
@@ -226,7 +199,7 @@ export default function ClientFicheEdit() {
   function saveChanges(event: React.FormEvent) {
     event.preventDefault();
     if (!form) return;
-    if (!form.photo || !form.logo) {
+    if (fiche.data.plan.requiresProfile && (!form.photo || !form.logo)) {
       toast.error("Portrait et logo obligatoires", { description: "Ajoutez un portrait et un logo avant d’enregistrer la fiche." });
       return;
     }
@@ -252,7 +225,7 @@ export default function ClientFicheEdit() {
             </div>
             <button
               type="submit"
-              form="signature-fiche-form"
+              form="client-fiche-form"
               disabled={save.isPending || uploading !== null}
               className="flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
             >
@@ -262,7 +235,7 @@ export default function ClientFicheEdit() {
           </div>
 
           <form
-            id="signature-fiche-form"
+            id="client-fiche-form"
             onSubmit={saveChanges}
             className="space-y-6"
           >
@@ -300,7 +273,7 @@ export default function ClientFicheEdit() {
                     ] as const).map(([key, label, required]) => (
                       <label key={key} className="block">
                         <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
-                        <input required={required} type={key === "email" ? "email" : "text"} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
+                        <input required={required} disabled={key === "site" && !capabilities.site.editable || key === "googlePlaceId" && !capabilities.googleReview.editable} type={key === "email" ? "email" : "text"} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
                       </label>
                     ))}
                   </div>
@@ -459,7 +432,7 @@ export default function ClientFicheEdit() {
               <Repeater
                 items={form.data.liens}
                 onAdd={() => {
-                  if (form.data.liens.length < 10)
+                  if (form.data.liens.length < (capabilities.links.maxItems ?? 0))
                     setData("liens", [
                       ...form.data.liens,
                       { label: "", url: "" },
@@ -514,7 +487,7 @@ export default function ClientFicheEdit() {
               title={`Galerie (${form.data.galerie.length}/8)`}
               note="Maximum Signature : 8 photos."
             >
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <fieldset disabled={!capabilities.gallery.editable} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 disabled:opacity-60">
                 {form.data.galerie.map((image, index) => (
                   <div
                     key={image.url}
@@ -552,7 +525,7 @@ export default function ClientFicheEdit() {
                     </button>
                   </div>
                 ))}
-                {form.data.galerie.length < 8 && (
+                {form.data.galerie.length < (capabilities.gallery.maxItems ?? 0) && (
                   <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#cfd5dd] text-sm text-[#667085]">
                     <input
                       type="file"
