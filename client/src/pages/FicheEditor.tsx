@@ -59,7 +59,7 @@ type EditorForm = {
   photo: string;
   logo: string;
   data: {
-    premierBouton: "whatsapp" | "appel" | "contact";
+    premierBouton: "whatsapp" | "appel" | "email";
     messageWhatsapp: string;
     presentation: string;
     rendezVous: LinkItem;
@@ -375,7 +375,7 @@ export default function FicheEditor() {
                 >
                   <option value="whatsapp">WhatsApp</option>
                   <option value="appel">Appeler</option>
-                  <option value="contact">Enregistrer le contact</option>
+                  <option value="email">E-mail</option>
                 </select>
               </EditorField>
             </div>
