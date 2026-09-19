@@ -1,9 +1,6 @@
 import {
   ArrowRight,
   Check,
-  ChevronDown,
-  CreditCard,
-  Gauge,
   Globe2,
   MapPin,
   Menu,
@@ -12,7 +9,6 @@ import {
   QrCode,
   Smartphone,
   Sparkles,
-  Users,
   X,
   Zap,
 } from "lucide-react";
