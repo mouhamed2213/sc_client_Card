@@ -256,7 +256,7 @@ export default function ClientFicheEdit() {
                       ["entreprise", "Entreprise", true],
                     ] as const).map(([key, label, required]) => (
                       <label key={key} className="block">
-                        <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}{key === "site" && !capabilities.site.editable ? ` — ${lockedMessage("site")}` : ""}{key === "googlePlaceId" && !capabilities.googleReview.editable ? ` — ${lockedMessage("googleReview")}` : ""}</span>
+                        <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
                         <input required={required} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
                       </label>
                     ))}
