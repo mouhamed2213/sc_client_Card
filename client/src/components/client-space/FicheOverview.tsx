@@ -1,7 +1,6 @@
 import { useLocation } from "wouter";
 import {
   ArrowRight,
-  CreditCard,
   MessageSquare,
   ScanLine,
 } from "lucide-react";
@@ -9,7 +8,7 @@ import { trpc } from "@/lib/trpc";
 import IdCard from "./IdCard";
 import KpiTile from "./KpiTile";
 import ScanChart from "./ScanChart";
-import { cardStatusLabels, getEcheanceStatus } from "@/lib/ficheStatus";
+import { getEcheanceStatus } from "@/lib/ficheStatus";
 
 export default function FicheOverview({ ficheId }: { ficheId: number }) {
   const [, navigate] = useLocation();
@@ -75,7 +74,6 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
           label="Demandes reçues"
           value={data.requestCount}
         />
-        <KpiTile icon={CreditCard} label="Cartes membres" value={data.cardCount} />
         <button
           onClick={() => navigate(`/espace-client/fiche/${ficheId}/statistiques`)}
           className="kpi-tile text-left transition hover:border-[#c98a4e]"
@@ -142,40 +140,6 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
         </div>
       </div>
 
-      {data.recentCards.length > 0 && (
-        <div className="panel">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="panel-title">Cartes membres</p>
-              <p className="panel-sub">Dernières cartes enregistrées</p>
-            </div>
-            <button
-              onClick={() => navigate(`/espace-client/fiche/${ficheId}/cartes`)}
-              className="flex items-center gap-1 text-xs font-medium text-[#c98a4e] hover:text-[#a86f3a]"
-            >
-              Tout voir <ArrowRight size={13} />
-            </button>
-          </div>
-          <div className="mt-1">
-            {data.recentCards.map(card => (
-              <div key={card.id} className="activity-row">
-                <span className="font-mono text-sm text-[#172033]">{card.numero}</span>
-                <span
-                  className={`status-pill ${
-                    card.statut === "active"
-                      ? "status-pill-ok"
-                      : card.statut === "perdue"
-                        ? "status-pill-warn"
-                        : "status-pill-danger"
-                  }`}
-                >
-                  {cardStatusLabels[card.statut]}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
