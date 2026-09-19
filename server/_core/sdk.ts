@@ -19,9 +19,8 @@ export type SessionPayload = {
 /**
  * Signs/verifies our own session JWTs and resolves the authenticated user
  * for a request. This layer is provider-agnostic: it doesn't know or care
- * whether the `openId` it was handed came from Google OAuth
- * (`server/_core/googleAuth.ts`) or the local admin/password login
- * (`server/_core/adminRoutes.ts`) — both just call `createSessionToken`.
+ * Local client/admin authentication uses User.id directly. Legacy OAuth
+ * identity data is supported only while the migration is in progress.
  */
 class SDKServer {
   private getSessionSecret() {
@@ -77,7 +76,7 @@ class SDKServer {
 
   async verifySession(
     cookieValue: string | undefined | null
-  ): Promise<{ userId: number; name: string; legacyOpenId?: string } | null> {
+  ): Promise<{ userId: number; name: string } | null> {
     if (!cookieValue) return null;
     try {
       const secretKey = this.getSessionSecret();
@@ -88,9 +87,9 @@ class SDKServer {
       }
       // Temporary compatibility for sessions issued before the User.id migration.
       if (isNonEmptyString(openId)) {
-        const legacyUser = await db.getUserByOpenId(openId);
+        const legacyUser = await db.getUserByLegacyOpenId(openId);
         if (!legacyUser) return null;
-        return { userId: legacyUser.id, name: isNonEmptyString(name) ? name : legacyUser.name ?? "", legacyOpenId: openId };
+        return { userId: legacyUser.id, name: isNonEmptyString(name) ? name : legacyUser.name ?? "" };
       }
       return null;
     } catch (error) {
