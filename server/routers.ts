@@ -54,7 +54,12 @@ export const appRouter = router({
   auth: router({
     me: publicProcedure.query(async opts => {
       if (!opts.ctx.user) return null;
-      if (opts.ctx.user.role !== "user") return opts.ctx.user;
+      if (opts.ctx.user.role !== "user") {
+        return {
+          ...opts.ctx.user,
+          mustChangePassword: false,
+        };
+      }
       const credential = await prisma.clientCredential.findUnique({
         where: { userId: opts.ctx.user.id },
         select: { mustChangePassword: true },
