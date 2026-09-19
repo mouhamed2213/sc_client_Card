@@ -5,12 +5,14 @@ import { prisma } from "../../prisma/client";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
 import { ENV } from "./env";
-import { verifyClientPassword } from "./clientAuth";
+import { hashClientPassword, verifyClientPassword } from "./clientAuth";
 
 const loginSchema = z.object({
   username: z.string().trim().min(3).max(64),
   password: z.string().min(1).max(200),
 });
+
+const passwordChangeSchema = z.object({ currentPassword: z.string().min(1).max(200), newPassword: z.string().min(12).max(200) });
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_FAILURES = 5;
@@ -113,5 +115,49 @@ export function registerClientRoutes(app: Express): void {
       success: true,
       mustChangePassword: credential.mustChangePassword,
     });
+  });
+
+  app.post("/api/client/change-password", async (req, res) => {
+    const parsed = passwordChangeSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ message: "Mot de passe invalide." });
+    }
+
+    const session = req.cookies?.[COOKIE_NAME];
+    if (!session) {
+      return res.status(401).json({ message: "Session requise." });
+    }
+
+    const openId = await sdk.verifySession(session);
+    if (!openId) {
+      return res.status(401).json({ message: "Session invalide." });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { openId },
+      include: { clientCredential: true },
+    });
+
+    if (!user || user.role !== "user" || !user.clientCredential) {
+      return res.status(403).json({ message: "Accès refusé." });
+    }
+
+    if (!verifyClientPassword(parsed.data.currentPassword, user.clientCredential.passwordHash)) {
+      return res.status(401).json({ message: "Mot de passe actuel incorrect." });
+    }
+
+    if (verifyClientPassword(parsed.data.newPassword, user.clientCredential.passwordHash)) {
+      return res.status(400).json({ message: "Le nouveau mot de passe doit être différent." });
+    }
+
+    await prisma.clientCredential.update({
+      where: { userId: user.id },
+      data: {
+        passwordHash: hashClientPassword(parsed.data.newPassword),
+        mustChangePassword: false,
+      },
+    });
+
+    return res.json({ success: true });
   });
 }
