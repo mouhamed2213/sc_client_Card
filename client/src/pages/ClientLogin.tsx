@@ -23,7 +23,7 @@ export default function ClientLogin() {
   });
 
   useEffect(() => {
-    if (me.data?.role === "user" && !me.data.mustChangePassword) {
+    if (me.data?.role === "user" && me.data.loginMethod === "local-client" && !me.data.mustChangePassword) {
       navigate("/espace-client");
     }
   }, [me.data, navigate]);
