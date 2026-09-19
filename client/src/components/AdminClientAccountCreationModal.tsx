@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
+import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
+import {
+  getPlanFeatures,
+  planLabels,
+  type PlanName,
+} from "@shared/planFeatures";
+import { validatePlanPayload } from "@shared/planValidation";
 import {
   Check,
   Clipboard,
@@ -11,6 +18,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Link } from "wouter";
 
 const days = [
   "Lundi",
@@ -21,6 +29,31 @@ const days = [
   "Samedi",
   "Dimanche",
 ];
+
+const planOrder: PlanName[] = ["essentiel", "pro", "signature"];
+
+// Derived from the shared plan matrix so the cards can never drift from what
+// the server actually enforces.
+function planHighlights(plan: PlanName): string[] {
+  const features = getPlanFeatures(plan);
+  return [
+    features.maxLinks > 0
+      ? `${features.maxLinks} liens personnalisés`
+      : "Pas de liens personnalisés",
+    features.maxPhotos > 0
+      ? `Galerie de ${features.maxPhotos} photos`
+      : "Pas de galerie photo",
+    features.requiresProfile
+      ? "Portrait ou logo obligatoire"
+      : "Portrait optionnel",
+    features.hasGoogleReview && "Avis Google",
+    features.hasForm && "Formulaire de rappel",
+    features.hasCatalog && "Catalogue",
+    features.hasPanel && "Panneau de gestion avancé",
+  ].filter((item): item is string => Boolean(item));
+}
+
+type MediaKind = "profile" | "logo" | "gallery";
 
 type Props = {
   open: boolean;
@@ -41,6 +74,12 @@ export default function AdminClientAccountCreationModal({
   const [email, setEmail] = useState("");
   const [adresse, setAdresse] = useState("");
   const [slug, setSlug] = useState("");
+  const [plan, setPlan] = useState<PlanName>("essentiel");
+  const [googlePlaceId, setGooglePlaceId] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | undefined>();
+  const [logoFile, setLogoFile] = useState<File | undefined>();
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [isPreparing, setIsPreparing] = useState(false);
   const [hours, setHours] = useState(() =>
     days.map(jour => ({ jour, horaire: "Sur rendez-vous" }))
   );
@@ -50,10 +89,14 @@ export default function AdminClientAccountCreationModal({
     username: string;
     temporaryPassword: string;
     cardId: number | null;
+    slug: string;
+    plan: PlanName;
+    statut: "active" | "brouillon";
   } | null>(null);
 
+  const mediaMutation = trpc.media.upload.useMutation();
   const mutation = trpc.admin.createClientAccountWithFiche.useMutation({
-    onSuccess: async result => {
+    onSuccess: async (result, variables) => {
       await Promise.all([
         utils.fiches.list.invalidate(),
         utils.fiches.overview.invalidate(),
@@ -62,8 +105,13 @@ export default function AdminClientAccountCreationModal({
         username: result.username,
         temporaryPassword: result.temporaryPassword,
         cardId: result.cardId,
+        slug: variables.fiche.slug,
+        plan: variables.formule,
+        statut: variables.fiche.statut === "active" ? "active" : "brouillon",
       });
-      toast.success("Compte client et fiche Essentiel créés");
+      toast.success(
+        `Compte client et fiche ${planLabels[variables.formule]} créés`
+      );
     },
     onError: error => {
       toast.error("Création impossible", { description: error.message });
@@ -74,11 +122,39 @@ export default function AdminClientAccountCreationModal({
     const value = `${prenom} ${nom}`.trim();
     return value
       .normalize("NFD")
-      .replace(/[\\u0300-\\u036f]/g, "")
+      .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
   }, [prenom, nom]);
+
+  const features = getPlanFeatures(plan);
+
+  // Same rules as the server (shared/planValidation). No blocker → the fiche
+  // can be activated right away; otherwise it is created as a draft, exactly
+  // like the former "Nouvelle fiche" flow, and completed in the editor.
+  const activationBlockers = useMemo(
+    () =>
+      validatePlanPayload({
+        formule: plan,
+        photo: photoFile ? "pending-upload" : "",
+        logo: logoFile ? "pending-upload" : "",
+        googlePlaceId: googlePlaceId.trim(),
+        site: "",
+        data: {
+          liens: [],
+          galerie: galleryFiles.slice(0, getPlanFeatures(plan).maxPhotos),
+          horaires: hours,
+          sections: [],
+        },
+      }).map(message =>
+        message.startsWith(`${plan}: `)
+          ? message.slice(plan.length + 2)
+          : message
+      ),
+    [plan, photoFile, logoFile, googlePlaceId, galleryFiles, hours]
+  );
+  const statut = activationBlockers.length === 0 ? "active" : "brouillon";
 
   if (!open) return null;
 
@@ -98,6 +174,11 @@ export default function AdminClientAccountCreationModal({
     setEmail("");
     setAdresse("");
     setSlug("");
+    setPlan("essentiel");
+    setGooglePlaceId("");
+    setPhotoFile(undefined);
+    setLogoFile(undefined);
+    setGalleryFiles([]);
     setHours(days.map(jour => ({ jour, horaire: "Sur rendez-vous" })));
     setCreateCard(false);
     setCardNumero("");
@@ -105,7 +186,7 @@ export default function AdminClientAccountCreationModal({
   }
 
   function close() {
-    if (mutation.isPending) return;
+    if (mutation.isPending || isPreparing) return;
     reset();
     onClose();
   }
@@ -163,24 +244,71 @@ export default function AdminClientAccountCreationModal({
     toast.success("Message WhatsApp copié");
   }
 
-  function submit(event: React.FormEvent) {
+  async function uploadMedia(file: File | undefined, kind: MediaKind) {
+    if (!file) return "";
+    const prepared = await prepareImage(file, kind);
+    const contentBase64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(prepared);
+    });
+    const result = await mediaMutation.mutateAsync({
+      formula: plan,
+      kind,
+      filename: prepared.name,
+      mimeType: "image/webp",
+      contentBase64,
+    });
+    return result.url;
+  }
+
+  async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (mutation.isPending || isPreparing) return;
     const finalSlug = (slug.trim() || generatedSlug).trim();
     if (!finalSlug) {
       toast.error("Le slug est obligatoire");
       return;
     }
 
+    let photo = "";
+    let logo = "";
+    let galerie: { url: string; alt: string }[] = [];
+    setIsPreparing(true);
+    try {
+      photo = await uploadMedia(photoFile, "profile");
+      logo = await uploadMedia(logoFile, "logo");
+      if (features.maxPhotos > 0) {
+        galerie = await Promise.all(
+          galleryFiles.slice(0, features.maxPhotos).map(async file => ({
+            url: await uploadMedia(file, "gallery"),
+            alt: file.name,
+          }))
+        );
+      }
+    } catch (error) {
+      toast.error("Médias non valides", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Vérifiez les images sélectionnées.",
+      });
+      return;
+    } finally {
+      setIsPreparing(false);
+    }
+
     mutation.mutate({
       name: `${prenom.trim()} ${nom.trim()}`.trim(),
       email: email.trim(),
-      formule: "essentiel",
+      formule: plan,
       createCard,
       cardNumero: createCard ? cardNumero.trim() : undefined,
       fiche: {
         slug: finalSlug,
-        formule: "essentiel",
-        statut: "active",
+        formule: plan,
+        statut,
         nom: nom.trim(),
         prenom: prenom.trim(),
         fonction: fonction.trim(),
@@ -191,9 +319,9 @@ export default function AdminClientAccountCreationModal({
         site: "",
         adresse: adresse.trim(),
         lienItineraire: "",
-        googlePlaceId: "",
-        photo: "",
-        logo: "",
+        googlePlaceId: features.hasGoogleReview ? googlePlaceId.trim() : "",
+        photo,
+        logo,
         data: {
           premierBouton: "whatsapp",
           messageWhatsapp: "Bonjour, je souhaite échanger avec vous.",
@@ -202,9 +330,9 @@ export default function AdminClientAccountCreationModal({
           reseauxSociaux: [],
           liens: [],
           horaires: hours,
-          galerie: [],
+          galerie,
           sections: [],
-          notesInternes: "Compte Essentiel créé depuis le studio.",
+          notesInternes: `Compte ${planLabels[plan]} créé depuis le studio.`,
         },
       },
     });
@@ -226,7 +354,7 @@ export default function AdminClientAccountCreationModal({
                 id="client-account-created-title"
                 className="mt-1 text-xl font-semibold"
               >
-                Compte client Essentiel créé
+                Compte client {planLabels[credentials.plan]} créé
               </h2>
               <p className="mt-1 text-sm text-[#7d8798]">
                 Les identifiants temporaires sont affichés maintenant pour être
@@ -263,6 +391,24 @@ export default function AdminClientAccountCreationModal({
                 maintenant.
               </p>
             </div>
+
+            {credentials.statut === "brouillon" && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                <p className="font-semibold">Fiche créée en brouillon</p>
+                <p className="mt-1 text-xs leading-5">
+                  Complétez les éléments obligatoires de la formule{" "}
+                  {planLabels[credentials.plan]} dans l'éditeur, puis activez la
+                  fiche.
+                </p>
+                <Link
+                  href={`/studio/fiche/${credentials.slug}`}
+                  onClick={close}
+                  className="mt-3 inline-flex text-xs font-semibold underline"
+                >
+                  Compléter la fiche
+                </Link>
+              </div>
+            )}
 
             {credentials.cardId && (
               <div className="flex items-center gap-3 rounded-xl border border-[#e6e8ec] bg-[#f8f9fb] p-4 text-sm">
@@ -336,7 +482,7 @@ export default function AdminClientAccountCreationModal({
               id="new-client-account-title"
               className="mt-1 text-xl font-semibold"
             >
-              Compte + fiche Essentiel
+              Compte + fiche {planLabels[plan]}
             </h2>
             <p className="mt-1 text-sm text-[#7d8798]">
               Le serveur génère l'identifiant et le mot de passe temporaire. La
@@ -354,8 +500,59 @@ export default function AdminClientAccountCreationModal({
         </div>
 
         <form onSubmit={submit} className="space-y-5 overflow-y-auto px-6 py-6">
-          <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
-            Formule fixée à <strong>Essentiel</strong> pour cette phase de test.
+          <div>
+            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-[#7d8798]">
+              Formule
+            </span>
+            <div
+              role="radiogroup"
+              aria-label="Formule du compte"
+              className="grid gap-3 sm:grid-cols-3"
+            >
+              {planOrder.map(option => {
+                const selected = option === plan;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    onClick={() => setPlan(option)}
+                    className={`rounded-xl border p-3 text-left transition ${
+                      selected
+                        ? "border-[#172033] bg-[#f3f5f9] ring-2 ring-[#172033]/10"
+                        : "border-[#e6e8ec] hover:border-[#c5ccd8]"
+                    }`}
+                  >
+                    <span className="flex items-center justify-between text-sm font-semibold text-[#172033]">
+                      {planLabels[option]}
+                      {selected && <Check className="h-4 w-4" />}
+                    </span>
+                    <ul className="mt-2 space-y-1 text-[11px] leading-4 text-[#6d7789]">
+                      {planHighlights(option).map(item => (
+                        <li key={item}>• {item}</li>
+                      ))}
+                    </ul>
+                  </button>
+                );
+              })}
+            </div>
+            {activationBlockers.length === 0 ? (
+              <p className="mt-2 text-xs text-emerald-700">
+                La fiche sera activée dès la création.
+              </p>
+            ) : (
+              <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                <p className="font-semibold">
+                  La fiche sera créée en brouillon. Il manque pour l'activer :
+                </p>
+                <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                  {activationBlockers.map(message => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -428,6 +625,56 @@ export default function AdminClientAccountCreationModal({
             </Field>
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label={`Portrait ${features.requiresProfile ? "(ou logo obligatoire)" : "(optionnel)"}`}
+            >
+              <input
+                accept="image/jpeg,image/png,image/webp"
+                type="file"
+                onChange={e => setPhotoFile(e.target.files?.[0])}
+              />
+            </Field>
+            <Field label="Logo (optionnel)">
+              <input
+                accept="image/jpeg,image/png,image/webp"
+                type="file"
+                onChange={e => setLogoFile(e.target.files?.[0])}
+              />
+            </Field>
+          </div>
+
+          {features.maxPhotos > 0 && (
+            <Field label={`Galerie (${features.maxPhotos} maximum)`}>
+              <input
+                multiple
+                accept="image/jpeg,image/png,image/webp"
+                type="file"
+                onChange={e => {
+                  setGalleryFiles(
+                    Array.from(e.target.files ?? []).slice(0, features.maxPhotos)
+                  );
+                }}
+              />
+              <p className="mt-1.5 text-xs text-[#9aa3b1]">
+                {galleryFiles.length > 0
+                  ? `${galleryFiles.length} photo${galleryFiles.length > 1 ? "s" : ""} sélectionnée${galleryFiles.length > 1 ? "s" : ""}. `
+                  : ""}
+                Chaque photo est préparée automatiquement (80 ko maximum).
+              </p>
+            </Field>
+          )}
+
+          {features.hasGoogleReview && (
+            <Field label="Google Place ID (avis Google)">
+              <input
+                value={googlePlaceId}
+                onChange={e => setGooglePlaceId(e.target.value)}
+                placeholder="ChIJ…"
+              />
+            </Field>
+          )}
+
           <Field label="Slug public">
             <input
               required
@@ -476,11 +723,11 @@ export default function AdminClientAccountCreationModal({
 
           <div className="rounded-xl border border-[#e6e8ec] p-4">
             <p className="text-sm font-semibold text-[#172033]">
-              Horaires Essentiel
+              Horaires
             </p>
             <p className="mt-1 text-xs text-[#7d8798]">
-              Les 7 jours sont initialisés pour satisfaire la règle de la
-              formule.
+              Les 7 jours sont initialisés : chaque ligne doit contenir un
+              horaire ou « Fermé ».
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {hours.map((row, index) => (
@@ -504,15 +751,19 @@ export default function AdminClientAccountCreationModal({
             </Button>
             <Button
               type="submit"
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || isPreparing}
               className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]"
             >
-              {mutation.isPending ? (
+              {mutation.isPending || isPreparing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <UserPlus className="h-4 w-4" />
               )}
-              {mutation.isPending ? "Création…" : "Créer le compte + la fiche"}
+              {isPreparing
+                ? "Préparation des médias…"
+                : mutation.isPending
+                  ? "Création…"
+                  : "Créer le compte + la fiche"}
             </Button>
           </div>
         </form>
