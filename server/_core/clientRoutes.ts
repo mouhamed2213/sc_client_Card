@@ -104,7 +104,7 @@ export function registerClientRoutes(app: Express): void {
       },
     });
 
-    const sessionToken = await sdk.createSessionToken(credential.user.openId, {
+    const sessionToken = await sdk.createSessionToken(credential.user.id, {
       expiresInMs: SESSION_MAX_AGE_MS,
       name: credential.user.name || username,
     });
@@ -142,7 +142,7 @@ export function registerClientRoutes(app: Express): void {
     }
 
     const user = await prisma.user.findUnique({
-      where: { openId: session.openId },
+      where: { id: session.userId },
       include: { clientCredential: true },
     });
 
