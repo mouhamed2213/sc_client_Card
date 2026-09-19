@@ -165,7 +165,14 @@ export default function ClientFicheEdit() {
 
   async function uploadImage(file: File, kind: MediaKind) {
     try {
-      const capability = kind === "gallery" ? capabilities.gallery : capabilities.profile;\n      if (!capability.editable) {\n        toast.error("Fonction verrouillée", { description: lockedMessage(kind === "gallery" ? "gallery" : "profile") });\n        return;\n      }\n      setUploading(kind);
+      const capability = kind === "gallery" ? capabilities.gallery : capabilities.profile;
+      if (!capability.editable) {
+        toast.error("Fonction verrouillée", {
+          description: lockedMessage(kind === "gallery" ? "gallery" : "profile"),
+        });
+        return;
+      }
+      setUploading(kind);
       const prepared = await prepareImage(file, kind);
       const result = await upload.mutateAsync({
         ficheId: id,
