@@ -2,18 +2,19 @@ import ClientLayout from "@/components/ClientLayout";
 import { formuleLabels } from "@/lib/ficheStatus";
 import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
-import type { MediaKind } from "@shared/mediaRules";
 import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
+import type { MediaKind } from "@shared/mediaRules";
 import {
-  Crown,
   ImagePlus,
   Loader2,
+  Lock,
   Plus,
   Save,
+  Sparkles,
   Trash2,
   Upload,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "wouter";
 
@@ -79,7 +80,6 @@ export default function ClientFicheEdit() {
   const [form, setForm] = useState<FormState | null>(null);
   const [uploading, setUploading] = useState<MediaKind | null>(null);
 
-
   useEffect(() => {
     if (!fiche.data || form) return;
     setForm({
@@ -144,10 +144,6 @@ export default function ClientFicheEdit() {
   const capabilities = getClientFicheCapabilities(plan);
   const upgradeLabel = (key: keyof typeof capabilities) =>
     capabilities[key].upgradeTo === "signature" ? "Signature" : "Pro";
-  const lockedMessage = (key: keyof typeof capabilities) =>
-    capabilities[key].editable
-      ? undefined
-      : `Disponible à partir du plan ${upgradeLabel(key)}.`;
 
   const setField = <K extends keyof Omit<FormState, "data">>(
     key: K,
@@ -166,10 +162,11 @@ export default function ClientFicheEdit() {
 
   async function uploadImage(file: File, kind: MediaKind) {
     try {
-      const capability = kind === "gallery" ? capabilities.gallery : capabilities.profile;
+      const capability =
+        kind === "gallery" ? capabilities.gallery : capabilities.profile;
       if (!capability.editable) {
         toast.error("Fonction verrouillée", {
-          description: lockedMessage(kind === "gallery" ? "gallery" : "profile"),
+          description: `Disponible à partir du plan ${upgradeLabel(kind === "gallery" ? "gallery" : "profile")}.`,
         });
         return;
       }
@@ -204,8 +201,11 @@ export default function ClientFicheEdit() {
   function saveChanges(event: React.FormEvent) {
     event.preventDefault();
     if (!form) return;
-    if (fiche.data.plan.requiresProfile && (!form.photo || !form.logo)) {
-      toast.error("Portrait et logo obligatoires", { description: "Ajoutez un portrait et un logo avant d’enregistrer la fiche." });
+    if (fiche.data?.plan.requiresProfile && (!form.photo || !form.logo)) {
+      toast.error("Portrait et logo obligatoires", {
+        description:
+          "Ajoutez un portrait et un logo avant d’enregistrer la fiche.",
+      });
       return;
     }
     save.mutate({ ficheId: id, ...form });
@@ -215,12 +215,13 @@ export default function ClientFicheEdit() {
     <ClientLayout ficheId={id}>
       <div className="min-h-screen bg-[#f5f6f8] text-[#172033] p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-[1300px] space-y-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#e5e8ed] pb-5">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#c98a4e]">
                 Formule {formuleLabels[plan] ?? plan}
               </p>
-              <h1 className="mt-1 text-xl font-semibold text-[#172033]">
+              <h1 className="mt-1 text-2xl font-bold text-[#172033]">
                 Modifier ma fiche
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-[#7d8798]">
@@ -232,10 +233,12 @@ export default function ClientFicheEdit() {
               type="submit"
               form="client-fiche-form"
               disabled={save.isPending || uploading !== null}
-              className="flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#172033] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#25324d] disabled:opacity-60"
             >
-              <Save size={15} />
-              {save.isPending ? "Enregistrement…" : "Enregistrer"}
+              <Save size={16} />
+              {save.isPending
+                ? "Enregistrement…"
+                : "Enregistrer les modifications"}
             </button>
           </div>
 
@@ -244,106 +247,148 @@ export default function ClientFicheEdit() {
             onSubmit={saveChanges}
             className="space-y-6"
           >
-            <EditorSection title="Identité et contact">
+            {/* Section Identité & Contact */}
+            <EditorSection
+              title="Identité et contact"
+              subtitle="Gérez l'ensemble de vos coordonnés et informations d'identification."
+            >
               <div className="space-y-6">
                 <div>
-                  <p className="text-sm font-semibold text-[#172033]">Identité</p>
-                  <p className="mt-1 text-xs text-[#7d8798]">Les informations principales affichées sur votre fiche.</p>
-                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                    {([
-                      ["prenom", "Prénom", true],
-                      ["nom", "Nom", true],
-                      ["fonction", "Fonction", true],
-                      ["entreprise", "Entreprise", true],
-                    ] as const).map(([key, label, required]) => (
-                      <label key={key} className="block">
-                        <span className="text-xs font-medium text-[#52607a]">{label}{required ? " *" : ""}</span>
-                        <input required={required} value={form[key]} onChange={e => setField(key, e.target.value)} className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none" />
-                      </label>
-                    ))}
+                  <h3 className="text-sm font-semibold text-[#172033] mb-3">
+                    Informations personnelles
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Prénom" required>
+                      <input
+                        required
+                        value={form.prenom}
+                        onChange={e => setField("prenom", e.target.value)}
+                        className="editor-input"
+                      />
+                    </Field>
+                    <Field label="Nom" required>
+                      <input
+                        required
+                        value={form.nom}
+                        onChange={e => setField("nom", e.target.value)}
+                        className="editor-input"
+                      />
+                    </Field>
+                    <Field label="Fonction" required>
+                      <input
+                        required
+                        value={form.fonction}
+                        onChange={e => setField("fonction", e.target.value)}
+                        className="editor-input"
+                      />
+                    </Field>
+                    <Field label="Entreprise" required>
+                      <input
+                        required
+                        value={form.entreprise}
+                        onChange={e => setField("entreprise", e.target.value)}
+                        className="editor-input"
+                      />
+                    </Field>
                   </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#172033]">Contact</p>
-                  <p className="mt-1 text-xs text-[#7d8798]">Téléphone, messagerie et coordonnées complémentaires.</p>
-                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                    {([
-                      ["telephone", "Téléphone", true],
-                      ["whatsapp", "WhatsApp", true],
-                      ["email", "E-mail", false],
-                      ["site", "Site web", false],
-                      ["adresse", "Adresse", false],
-                      ["lienItineraire", "Lien Google Maps", false],
-                      ["googlePlaceId", "Google Place ID", false],
-                    ] as const).map(([key, label, required]) => {
-                      const upgradeKey =
-                        key === "site"
-                          ? "site"
-                          : key === "googlePlaceId"
-                            ? "googleReview"
-                            : null;
 
-                      return (
-                        <div key={key}>
-                          <label className="block">
-                            <span className="text-xs font-medium text-[#52607a]">
-                              {label}
-                              {required ? " *" : ""}
-                            </span>
-                            <input
-                              required={required}
-                              disabled={
-                                (key === "site" && !capabilities.site.editable) ||
-                                (key === "googlePlaceId" &&
-                                  !capabilities.googleReview.editable)
-                              }
-                              type={key === "email" ? "email" : "text"}
-                              value={form[key]}
-                              onChange={e => setField(key, e.target.value)}
-                              className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
-                            />
-                          </label>
-                          {upgradeKey &&
-                            !capabilities[upgradeKey].editable && (
-                              <div className="mt-2">
-                                <UpgradeNotice
-                                  message={lockedMessage(upgradeKey)!}
-                                  compact
-                                />
-                              </div>
-                            )}
-                        </div>
-                      );
-                    })}
+                <hr className="border-[#f0f2f5]" />
+
+                <div>
+                  <h3 className="text-sm font-semibold text-[#172033] mb-3">
+                    Moyens de contact & localisation
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Téléphone" required>
+                      <input
+                        required
+                        value={form.telephone}
+                        onChange={e => setField("telephone", e.target.value)}
+                        className="editor-input"
+                      />
+                    </Field>
+                    <Field label="WhatsApp" required>
+                      <input
+                        required
+                        value={form.whatsapp}
+                        onChange={e => setField("whatsapp", e.target.value)}
+                        className="editor-input"
+                      />
+                    </Field>
+                    <Field label="E-mail">
+                      <input
+                        type="email"
+                        value={form.email}
+                        onChange={e => setField("email", e.target.value)}
+                        className="editor-input"
+                      />
+                    </Field>
+                    <Field label="Adresse">
+                      <input
+                        value={form.adresse}
+                        onChange={e => setField("adresse", e.target.value)}
+                        className="editor-input"
+                      />
+                    </Field>
+                    <Field
+                      label="Site web"
+                      upgradeRequired={!capabilities.site.editable}
+                      upgradePlan={upgradeLabel("site")}
+                    >
+                      <input
+                        disabled={!capabilities.site.editable}
+                        value={form.site}
+                        onChange={e => setField("site", e.target.value)}
+                        className="editor-input disabled:bg-gray-50 disabled:cursor-not-allowed"
+                        placeholder="https://votre-site.com"
+                      />
+                    </Field>
+                    <Field label="Lien Google Maps">
+                      <input
+                        value={form.lienItineraire}
+                        onChange={e =>
+                          setField("lienItineraire", e.target.value)
+                        }
+                        className="editor-input"
+                        placeholder="https://maps.google.com/..."
+                      />
+                    </Field>
                   </div>
                 </div>
               </div>
             </EditorSection>
 
-            <EditorSection
-              title="Portrait et logo"
-              note={lockedMessage("profile") ?? "Le traitement d’image et les limites du plan restent contrôlés par le serveur."}
-            >
-              <fieldset disabled={!capabilities.profile.editable} className="grid gap-5 md:grid-cols-2 disabled:opacity-60">
-                <MediaCard
-                  title="Portrait"
-                  value={form.photo}
-                  loading={uploading === "profile"}
-                  onPick={file => uploadImage(file, "profile")}
-                  onRemove={() => setField("photo", "")}
-                />
-                <MediaCard
-                  title="Logo"
-                  value={form.logo}
-                  loading={uploading === "logo"}
-                  onPick={file => uploadImage(file, "logo")}
-                  onRemove={() => setField("logo", "")}
-                />
-              </fieldset>
+            {/* Section Portrait et Logo */}
+            <EditorSection title="Portrait et logo">
+              {!capabilities.profile.editable ? (
+                <UpgradeNotice requiredPlan={upgradeLabel("profile")} />
+              ) : (
+                <fieldset
+                  disabled={!capabilities.profile.editable}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                >
+                  <MediaCard
+                    title="Portrait"
+                    value={form.photo}
+                    loading={uploading === "profile"}
+                    onPick={file => uploadImage(file, "profile")}
+                    onRemove={() => setField("photo", "")}
+                  />
+                  <MediaCard
+                    title="Logo"
+                    value={form.logo}
+                    loading={uploading === "logo"}
+                    onPick={file => uploadImage(file, "logo")}
+                    onRemove={() => setField("logo", "")}
+                  />
+                </fieldset>
+              )}
             </EditorSection>
 
+            {/* Section Présentation & Action principale */}
             <EditorSection title="Présentation et action principale">
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <Field label="Action prioritaire">
                   <select
                     value={form.data.premierBouton}
@@ -353,6 +398,7 @@ export default function ClientFicheEdit() {
                         e.target.value as FormState["data"]["premierBouton"]
                       )
                     }
+                    className="editor-input"
                   >
                     <option value="whatsapp">WhatsApp</option>
                     <option value="appel">Appeler</option>
@@ -363,266 +409,305 @@ export default function ClientFicheEdit() {
                   <input
                     value={form.data.messageWhatsapp}
                     onChange={e => setData("messageWhatsapp", e.target.value)}
+                    className="editor-input"
+                    placeholder="Bonjour, je souhaite plus d'informations..."
                   />
                 </Field>
               </div>
-              <div>
-                <Field label="Présentation">
-                  <textarea
-                    disabled={!capabilities.presentation.editable}
-                    className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
-                    rows={6}
-                    value={form.data.presentation}
-                    onChange={e => setData("presentation", e.target.value)}
-                  />
-                </Field>
-                {lockedMessage("presentation") && (
-                  <div className="mt-2">
-                    <UpgradeNotice
-                      message={lockedMessage("presentation")!}
-                      compact
+
+              <div className="mt-4">
+                {!capabilities.presentation.editable ? (
+                  <UpgradeNotice requiredPlan={upgradeLabel("presentation")} />
+                ) : (
+                  <Field label="Présentation">
+                    <textarea
+                      disabled={!capabilities.presentation.editable}
+                      className="editor-input mt-1.5 w-full rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
+                      rows={5}
+                      value={form.data.presentation}
+                      onChange={e => setData("presentation", e.target.value)}
+                      placeholder="Présentez votre activité, vos services..."
                     />
-                  </div>
+                  </Field>
                 )}
               </div>
             </EditorSection>
 
-            <EditorSection title="Rendez-vous" upgradeMessage={lockedMessage("rendezVous")}>
-              <fieldset disabled={!capabilities.rendezVous.editable} className="grid gap-4 sm:grid-cols-2 disabled:opacity-60">
-                <Field label="Libellé du bouton">
-                  <input
-                    value={form.data.rendezVous.label}
-                    onChange={e =>
-                      setData("rendezVous", {
-                        ...form.data.rendezVous,
-                        label: e.target.value,
-                      })
-                    }
-                  />
-                </Field>
-                <Field label="URL de réservation">
-                  <input
-                    className="editor-input mt-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
-                    type="url"
-                    value={form.data.rendezVous.url}
-                    onChange={e =>
-                      setData("rendezVous", {
-                        ...form.data.rendezVous,
-                        url: e.target.value,
-                      })
-                    }
-                    placeholder="https://…"
-                  />
-                </Field>
-              </fieldset>
+            {/* Section Rendez-vous */}
+            <EditorSection title="Rendez-vous">
+              {!capabilities.rendezVous.editable ? (
+                <UpgradeNotice requiredPlan={upgradeLabel("rendezVous")} />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Field label="Libellé du bouton">
+                    <input
+                      value={form.data.rendezVous.label}
+                      onChange={e =>
+                        setData("rendezVous", {
+                          ...form.data.rendezVous,
+                          label: e.target.value,
+                        })
+                      }
+                      className="editor-input"
+                    />
+                  </Field>
+                  <Field label="URL de réservation">
+                    <input
+                      className="editor-input"
+                      type="url"
+                      value={form.data.rendezVous.url}
+                      onChange={e =>
+                        setData("rendezVous", {
+                          ...form.data.rendezVous,
+                          url: e.target.value,
+                        })
+                      }
+                      placeholder="https://calendly.com/..."
+                    />
+                  </Field>
+                </div>
+              )}
             </EditorSection>
 
+            {/* Section Réseaux sociaux */}
             <EditorSection
               title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}
-              upgradeMessage={lockedMessage("socials")}
             >
-              <fieldset disabled={!capabilities.socials.editable} className="disabled:opacity-60">
-              <Repeater
-                items={form.data.reseauxSociaux}
-                onAdd={() =>
-                  setData("reseauxSociaux", [
-                    ...form.data.reseauxSociaux,
-                    { label: "", url: "" },
-                  ])
-                }
-                onRemove={index =>
-                  setData(
-                    "reseauxSociaux",
-                    form.data.reseauxSociaux.filter((_, i) => i !== index)
-                  )
-                }
-                render={(item, index) => (
-                  <div className="grid gap-2 sm:grid-cols-[180px_1fr_auto]">
-                    <input
-                      className="editor-input rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
-                      placeholder="Instagram, LinkedIn…"
-                      value={item.label}
-                      onChange={e =>
-                        setData(
-                          "reseauxSociaux",
-                          form.data.reseauxSociaux.map((x, i) =>
-                            i === index ? { ...x, label: e.target.value } : x
+              {!capabilities.socials.editable ? (
+                <UpgradeNotice requiredPlan={upgradeLabel("socials")} />
+              ) : (
+                <Repeater
+                  items={form.data.reseauxSociaux}
+                  onAdd={() =>
+                    setData("reseauxSociaux", [
+                      ...form.data.reseauxSociaux,
+                      { label: "", url: "" },
+                    ])
+                  }
+                  onRemove={index =>
+                    setData(
+                      "reseauxSociaux",
+                      form.data.reseauxSociaux.filter((_, i) => i !== index)
+                    )
+                  }
+                  render={(item, index) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr_auto] gap-2 items-center">
+                      <input
+                        className="editor-input"
+                        placeholder="Ex: Instagram, LinkedIn…"
+                        value={item.label}
+                        onChange={e =>
+                          setData(
+                            "reseauxSociaux",
+                            form.data.reseauxSociaux.map((x, i) =>
+                              i === index ? { ...x, label: e.target.value } : x
+                            )
                           )
-                        )
-                      }
-                    />
-                    <input
-                      className="editor-input rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
-                      type="url"
-                      placeholder="https://…"
-                      value={item.url}
-                      onChange={e =>
-                        setData(
-                          "reseauxSociaux",
-                          form.data.reseauxSociaux.map((x, i) =>
-                            i === index ? { ...x, url: e.target.value } : x
+                        }
+                      />
+                      <input
+                        className="editor-input"
+                        type="url"
+                        placeholder="https://instagram.com/..."
+                        value={item.url}
+                        onChange={e =>
+                          setData(
+                            "reseauxSociaux",
+                            form.data.reseauxSociaux.map((x, i) =>
+                              i === index ? { ...x, url: e.target.value } : x
+                            )
                           )
-                        )
-                      }
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setData("reseauxSociaux", form.data.reseauxSociaux.filter((_, i) => i !== index))}
-                      className="rounded-lg border px-3"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                )}
-              />
-              </fieldset>
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setData(
+                            "reseauxSociaux",
+                            form.data.reseauxSociaux.filter(
+                              (_, i) => i !== index
+                            )
+                          )
+                        }
+                        className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition"
+                        title="Supprimer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
+                />
+              )}
             </EditorSection>
 
+            {/* Section Liens personnalisés */}
             <EditorSection
               title={`Liens personnalisés (${form.data.liens.length}/${capabilities.links.maxItems ?? fiche.data.plan.maxLinks})`}
-              note={capabilities.links.editable ? `Maximum ${capabilities.links.maxItems ?? fiche.data.plan.maxLinks} liens.` : undefined}
-              upgradeMessage={lockedMessage("links")}
+              subtitle={`Maximum ${capabilities.links.maxItems ?? fiche.data.plan.maxLinks} liens autorisés.`}
             >
-              <fieldset disabled={!capabilities.links.editable} className="disabled:opacity-60">
-              <Repeater
-                items={form.data.liens}
-                onAdd={() => {
-                  if (form.data.liens.length < (capabilities.links.maxItems ?? 0))
-                    setData("liens", [
-                      ...form.data.liens,
-                      { label: "", url: "" },
-                    ]);
-                }}
-                onRemove={index =>
-                  setData(
-                    "liens",
-                    form.data.liens.filter((_, i) => i !== index)
-                  )
-                }
-                render={(item, index) => (
-                  <div className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-                    <input
-                      placeholder="Libellé"
-                      value={item.label}
-                      onChange={e =>
-                        setData(
-                          "liens",
-                          form.data.liens.map((x, i) =>
-                            i === index ? { ...x, label: e.target.value } : x
+              {!capabilities.links.editable ? (
+                <UpgradeNotice requiredPlan={upgradeLabel("links")} />
+              ) : (
+                <Repeater
+                  items={form.data.liens}
+                  onAdd={() => {
+                    if (
+                      form.data.liens.length <
+                      (capabilities.links.maxItems ?? 0)
+                    )
+                      setData("liens", [
+                        ...form.data.liens,
+                        { label: "", url: "" },
+                      ]);
+                  }}
+                  onRemove={index =>
+                    setData(
+                      "liens",
+                      form.data.liens.filter((_, i) => i !== index)
+                    )
+                  }
+                  render={(item, index) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 items-center">
+                      <input
+                        className="editor-input"
+                        placeholder="Libellé du lien"
+                        value={item.label}
+                        onChange={e =>
+                          setData(
+                            "liens",
+                            form.data.liens.map((x, i) =>
+                              i === index ? { ...x, label: e.target.value } : x
+                            )
                           )
-                        )
-                      }
-                    />
-                    <input
-                      type="url"
-                      placeholder="https://…"
-                      value={item.url}
-                      onChange={e =>
-                        setData(
-                          "liens",
-                          form.data.liens.map((x, i) =>
-                            i === index ? { ...x, url: e.target.value } : x
+                        }
+                      />
+                      <input
+                        className="editor-input"
+                        type="url"
+                        placeholder="https://..."
+                        value={item.url}
+                        onChange={e =>
+                          setData(
+                            "liens",
+                            form.data.liens.map((x, i) =>
+                              i === index ? { ...x, url: e.target.value } : x
+                            )
                           )
-                        )
-                      }
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setData("liens", form.data.liens.filter((_, i) => i !== index))}
-                      className="rounded-lg border px-3"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                )}
-              />
-              </fieldset>
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setData(
+                            "liens",
+                            form.data.liens.filter((_, i) => i !== index)
+                          )
+                        }
+                        className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition"
+                        title="Supprimer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
+                />
+              )}
             </EditorSection>
 
+            {/* Section Galerie */}
             <EditorSection
-              title={`Galerie (${form.data.galerie.length}/${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos})`}
-              note={capabilities.gallery.editable ? `Maximum ${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos} photos.` : undefined}
-              upgradeMessage={lockedMessage("gallery")}
+              title={`Galerie de photos (${form.data.galerie.length}/${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos})`}
+              subtitle={`Maximum ${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos} photos autorisées.`}
             >
-              <fieldset disabled={!capabilities.gallery.editable} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 disabled:opacity-60">
-                {form.data.galerie.map((image, index) => (
-                  <div
-                    key={image.url}
-                    className="rounded-xl border border-[#e5e8ed] p-2"
-                  >
-                    <img
-                      src={image.url}
-                      alt={image.alt}
-                      className="h-32 w-full rounded-lg object-cover"
-                    />
-                    <input
-                      className="mt-2 w-full rounded-lg border px-2 py-1.5 text-xs"
-                      aria-label={`Texte alternatif ${index + 1}`}
-                      value={image.alt}
-                      onChange={e =>
-                        setData(
-                          "galerie",
-                          form.data.galerie.map((x, i) =>
-                            i === index ? { ...x, alt: e.target.value } : x
-                          )
-                        )
-                      }
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setData(
-                          "galerie",
-                          form.data.galerie.filter((_, i) => i !== index)
-                        )
-                      }
-                      className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg border px-2 py-1.5 text-xs"
+              {!capabilities.gallery.editable ? (
+                <UpgradeNotice requiredPlan={upgradeLabel("gallery")} />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {form.data.galerie.map((image, index) => (
+                    <div
+                      key={image.url}
+                      className="rounded-xl border border-[#e5e8ed] bg-white p-2.5 shadow-sm"
                     >
-                      <Trash2 size={14} /> Supprimer
-                    </button>
-                  </div>
-                ))}
-                {form.data.galerie.length < (capabilities.gallery.maxItems ?? 0) && (
-                  <label className="flex min-h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#cfd5dd] text-sm text-[#667085]">
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      disabled={uploading === "gallery" || !capabilities.gallery.editable}
-                      onChange={async e => {
-                        const file = e.target.files?.[0];
-                        if (file) await uploadImage(file, "gallery");
-                        e.currentTarget.value = "";
-                      }}
-                    />
-                    {uploading === "gallery" ? (
-                      <Loader2 className="animate-spin" />
-                    ) : (
-                      <ImagePlus />
-                    )}
-                    Ajouter une photo
-                  </label>
-                )}
-              </fieldset>
+                      <img
+                        src={image.url}
+                        alt={image.alt}
+                        className="h-32 w-full rounded-lg object-cover"
+                      />
+                      <input
+                        className="mt-2 w-full rounded-lg border border-[#cfd5dd] px-2.5 py-1.5 text-xs outline-none focus:border-[#c98a4e]"
+                        placeholder="Description (alt)"
+                        aria-label={`Texte alternatif ${index + 1}`}
+                        value={image.alt}
+                        onChange={e =>
+                          setData(
+                            "galerie",
+                            form.data.galerie.map((x, i) =>
+                              i === index ? { ...x, alt: e.target.value } : x
+                            )
+                          )
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setData(
+                            "galerie",
+                            form.data.galerie.filter((_, i) => i !== index)
+                          )
+                        }
+                        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+                      >
+                        <Trash2 size={14} /> Supprimer
+                      </button>
+                    </div>
+                  ))}
+                  {form.data.galerie.length <
+                    (capabilities.gallery.maxItems ?? 0) && (
+                    <label className="flex h-44 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#cfd5dd] bg-gray-50/50 p-4 text-center text-sm font-medium text-[#667085] hover:bg-gray-100/50 transition">
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        disabled={
+                          uploading === "gallery" ||
+                          !capabilities.gallery.editable
+                        }
+                        onChange={async e => {
+                          const file = e.target.files?.[0];
+                          if (file) await uploadImage(file, "gallery");
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                      {uploading === "gallery" ? (
+                        <Loader2 className="animate-spin text-[#c98a4e]" />
+                      ) : (
+                        <ImagePlus className="text-[#c98a4e]" />
+                      )}
+                      <span>Ajouter une photo</span>
+                    </label>
+                  )}
+                </div>
+              )}
             </EditorSection>
 
+            {/* Section Horaires */}
             <EditorSection
-              title="Horaires"
-              note="Les 7 jours sont conservés et validés côté serveur."
+              title="Horaires d'ouverture"
+              subtitle="Renseignez vos horaires d'ouverture pour chaque jour de la semaine."
             >
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {form.data.horaires.map((row, index) => (
                   <div
                     key={row.jour}
-                    className="grid gap-2 sm:grid-cols-[150px_1fr]"
+                    className="flex items-center gap-3 bg-gray-50/60 p-2.5 rounded-lg border border-[#e5e8ed]"
                   >
-                    <div className="flex items-center text-sm font-medium">
+                    <span className="w-24 text-sm font-semibold text-[#172033]">
                       {row.jour}
-                    </div>
+                    </span>
                     <input
-                      className="editor-input rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
+                      className="editor-input flex-1"
                       value={row.horaire}
-                      placeholder="09:00 — 18:00 ou Fermé"
+                      placeholder="Ex: 09:00 — 18:00 ou Fermé"
                       onChange={e =>
                         setData(
                           "horaires",
@@ -637,38 +722,44 @@ export default function ClientFicheEdit() {
               </div>
             </EditorSection>
 
-            <EditorSection title="Avis Google" upgradeMessage={lockedMessage("googleReview")}>
-              <fieldset disabled={!capabilities.googleReview.editable} className="disabled:opacity-60">
-              <Field label="Google Place ID">
-                <input
-                  value={form.googlePlaceId}
-                  onChange={e => setField("googlePlaceId", e.target.value)}
-                  placeholder="ChIJ…"
+            {/* Section Avis Google */}
+            <EditorSection title="Avis Google">
+              {!capabilities.googleReview.editable ? (
+                <UpgradeNotice requiredPlan={upgradeLabel("googleReview")} />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Field label="Google Place ID">
+                    <input
+                      value={form.googlePlaceId}
+                      onChange={e => setField("googlePlaceId", e.target.value)}
+                      className="editor-input"
+                      placeholder="ChIJ…"
+                    />
+                  </Field>
+                </div>
+              )}
+            </EditorSection>
+
+            {/* Section Catalogue / Menu */}
+            <EditorSection title="Catalogue / Menu / Tarifs">
+              {!capabilities.catalog.editable ? (
+                <UpgradeNotice requiredPlan={upgradeLabel("catalog")} />
+              ) : (
+                <CatalogEditor
+                  sections={form.data.sections}
+                  onChange={sections => setData("sections", sections)}
                 />
-              </Field>
-              </fieldset>
+              )}
             </EditorSection>
 
-            <EditorSection
-              title="Catalogue / menu / tarifs"
-              note={capabilities.catalog.editable ? "Vous pouvez gérer vos sections et articles." : undefined}
-              upgradeMessage={lockedMessage("catalog")}
-            >
-              <fieldset disabled={!capabilities.catalog.editable} className="disabled:opacity-60">
-              <CatalogEditor
-                sections={form.data.sections}
-                onChange={sections => setData("sections", sections)}
-              />
-              </fieldset>
-            </EditorSection>
-
-            <div className="flex justify-end">
+            {/* Submit Bottom Action */}
+            <div className="flex justify-end pt-4 border-t border-[#e5e8ed]">
               <button
                 type="submit"
                 disabled={save.isPending || uploading !== null}
-                className="flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#172033] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#25324d] disabled:opacity-60"
               >
-                <Save size={15} />
+                <Save size={16} />
                 {save.isPending
                   ? "Enregistrement…"
                   : "Enregistrer les modifications"}
@@ -681,76 +772,80 @@ export default function ClientFicheEdit() {
   );
 }
 
+{
+  /* Composant de notice d'upgrade Premium */
+}
+function UpgradeNotice({ requiredPlan }: { requiredPlan: string }) {
+  return (
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-[#e2d0b5] bg-gradient-to-r from-[#fdfbf7] to-[#f9f4ec] p-4 text-[#735028]">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#c98a4e]/15 text-[#c98a4e]">
+          <Lock size={20} />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-[#543b1d]">
+            Fonctionnalité Premium
+          </p>
+          <p className="text-xs text-[#8c6537]">
+            Cette option est disponible à partir de l’offre{" "}
+            <span className="font-bold underline">{requiredPlan}</span>.
+          </p>
+        </div>
+      </div>
+      <div className="inline-flex items-center gap-1.5 rounded-lg bg-[#c98a4e] px-3.5 py-2 text-xs font-semibold text-white shadow-sm">
+        <Sparkles size={14} /> Débloquer avec le plan {requiredPlan}
+      </div>
+    </div>
+  );
+}
+
 function EditorSection({
   title,
-  note,
-  upgradeMessage,
+  subtitle,
   children,
 }: {
   title: string;
-  note?: string;
-  upgradeMessage?: string;
+  subtitle?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="editor-card">
+    <section className="rounded-2xl border border-[#e5e8ed] bg-white p-5 sm:p-6 shadow-sm">
       <div className="mb-5">
-        <h2 className="text-base font-semibold text-[#172033]">{title}</h2>
-        {upgradeMessage ? (
-          <div className="mt-2">
-            <UpgradeNotice message={upgradeMessage} />
-          </div>
-        ) : (
-          note && <p className="mt-1 text-xs text-[#7d8798]">{note}</p>
-        )}
+        <h2 className="text-lg font-bold text-[#172033]">{title}</h2>
+        {subtitle && <p className="mt-1 text-xs text-[#7d8798]">{subtitle}</p>}
       </div>
       {children}
     </section>
   );
 }
 
-function UpgradeNotice({
-  message,
-  compact = false,
-}: {
-  message: string;
-  compact?: boolean;
-}) {
-  return (
-    <div
-      role="note"
-      className={
-        compact
-          ? "flex items-start gap-2 rounded-lg border border-[#ead8b8] bg-[#fff9ef] px-3 py-2 text-xs text-[#7a5a22]"
-          : "flex items-start gap-3 rounded-xl border border-[#ead8b8] bg-gradient-to-r from-[#fff9ef] via-[#fffdf8] to-white px-3.5 py-3 text-xs text-[#7a5a22] shadow-sm"
-      }
-    >
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#e6c993] bg-white text-[#b6792f] shadow-sm">
-        <Crown size={14} strokeWidth={1.9} />
-      </span>
-      <div className="min-w-0">
-        <p className="font-semibold text-[#6f4a18]">
-          Fonction premium
-        </p>
-        <p className={compact ? "mt-0.5 leading-4" : "mt-1 leading-4"}>
-          {message}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function Field({
   label,
+  required,
+  upgradeRequired,
+  upgradePlan,
   children,
 }: {
   label: string;
+  required?: boolean;
+  upgradeRequired?: boolean;
+  upgradePlan?: string;
   children: React.ReactNode;
 }) {
   return (
-    <label className="block">
-      <span className="text-xs font-medium text-[#52607a]">{label}</span>
-      <div className="mt-1.5">{children}</div>
+    <label className="block space-y-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-[#52607a]">
+          {label}
+          {required && <span className="ml-0.5 text-red-500">*</span>}
+        </span>
+        {upgradeRequired && (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#c98a4e]">
+            <Lock size={12} /> Plan {upgradePlan}
+          </span>
+        )}
+      </div>
+      <div>{children}</div>
     </label>
   );
 }
@@ -772,9 +867,9 @@ function Repeater<T>({
       <button
         type="button"
         onClick={onAdd}
-        className="inline-flex items-center gap-2 rounded-lg border border-[#e0e4e9] px-3 py-2 text-xs font-semibold text-[#52607a]"
+        className="inline-flex items-center gap-2 rounded-lg border border-[#cfd5dd] bg-white px-4 py-2.5 text-xs font-semibold text-[#52607a] hover:bg-gray-50 transition"
       >
-        <Plus size={14} /> Ajouter
+        <Plus size={14} /> Ajouter un élément
       </button>
     </div>
   );
@@ -794,31 +889,39 @@ function MediaCard({
   onRemove: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-[#e5e8ed] p-4">
-      <div className="flex items-center justify-between">
-        <strong className="text-sm">{title}</strong>
+    <div className="rounded-xl border border-[#e5e8ed] bg-white p-4">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <strong className="text-sm font-semibold text-[#172033]">
+          {title}
+        </strong>
         <Upload size={16} className="text-[#7d8798]" />
       </div>
-      <div className="mt-3 overflow-hidden rounded-lg bg-[#f5f6f8]">
+      <div className="mt-3 flex h-48 items-center justify-center overflow-hidden rounded-lg bg-[#f5f6f8]">
         {value ? (
-          <img src={value} alt={title} className="h-48 w-full object-contain" />
+          <img
+            src={value}
+            alt={title}
+            className="h-full w-full object-contain"
+          />
         ) : (
-          <div className="flex h-48 items-center justify-center text-sm text-[#9aa3b1]">
-            Aucune image
+          <div className="flex flex-col items-center justify-center gap-1 text-sm text-[#9aa3b1]">
+            <Upload size={24} />
+            <span>Aucune image sélectionnée</span>
           </div>
         )}
       </div>
-      <div className="mt-3 flex justify-end gap-2">
+      <div className="mt-4 flex justify-end gap-2">
         {value && (
           <button
             type="button"
             onClick={onRemove}
-            className="rounded-lg border px-3 py-2 text-xs"
+            className="flex items-center justify-center rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+            title="Supprimer"
           >
             <Trash2 size={14} />
           </button>
         )}
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[#cfd5dd] bg-white px-4 py-2 text-xs font-semibold text-[#172033] hover:bg-gray-50 transition">
           <input
             type="file"
             className="hidden"
@@ -831,7 +934,7 @@ function MediaCard({
           ) : (
             <Upload size={14} />
           )}
-          Choisir
+          Choisir un fichier
         </label>
       </div>
     </div>
@@ -850,12 +953,12 @@ function CatalogEditor({
       {sections.map((section, sectionIndex) => (
         <div
           key={sectionIndex}
-          className="rounded-xl border border-[#e5e8ed] p-4"
+          className="rounded-xl border border-[#e5e8ed] bg-gray-50/50 p-4 space-y-3"
         >
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             <input
-              className="flex-1"
-              placeholder="Nom de la section"
+              className="editor-input flex-1 font-semibold"
+              placeholder="Nom de la section (Ex: Entrées, Services...)"
               value={section.titre}
               onChange={e =>
                 onChange(
@@ -870,19 +973,20 @@ function CatalogEditor({
               onClick={() =>
                 onChange(sections.filter((_, i) => i !== sectionIndex))
               }
-              className="rounded-lg border px-3"
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition shrink-0"
+              title="Supprimer la section"
             >
               <Trash2 size={16} />
             </button>
           </div>
-          <div className="mt-3 space-y-2">
+          <div className="space-y-2 pl-2 border-l-2 border-[#c98a4e]/30">
             {section.articles.map((article, articleIndex) => (
               <div
                 key={articleIndex}
-                className="grid gap-2 md:grid-cols-[1fr_1.5fr_120px_auto]"
+                className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr_120px_auto] gap-2 items-center"
               >
                 <input
-                  className="editor-input rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
+                  className="editor-input"
                   placeholder="Article / prestation"
                   value={article.nom}
                   onChange={e =>
@@ -903,6 +1007,7 @@ function CatalogEditor({
                   }
                 />
                 <input
+                  className="editor-input"
                   placeholder="Description"
                   value={article.description}
                   onChange={e =>
@@ -923,6 +1028,7 @@ function CatalogEditor({
                   }
                 />
                 <input
+                  className="editor-input"
                   placeholder="Prix"
                   value={article.prix}
                   onChange={e =>
@@ -958,7 +1064,8 @@ function CatalogEditor({
                       )
                     )
                   }
-                  className="rounded-lg border px-3"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition shrink-0"
+                  title="Supprimer l'article"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -981,9 +1088,9 @@ function CatalogEditor({
                   )
                 )
               }
-              className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2 text-xs font-semibold text-[#52607a] hover:bg-gray-50 transition mt-2"
             >
-              <Plus size={14} /> Article
+              <Plus size={14} /> Ajouter un article
             </button>
           </div>
         </div>
@@ -996,7 +1103,7 @@ function CatalogEditor({
             { titre: "", articles: [{ nom: "", description: "", prix: "" }] },
           ])
         }
-        className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold"
+        className="inline-flex items-center gap-2 rounded-lg border border-[#cfd5dd] bg-white px-4 py-2.5 text-xs font-semibold text-[#52607a] hover:bg-gray-50 transition"
       >
         <Plus size={14} /> Ajouter une section
       </button>
