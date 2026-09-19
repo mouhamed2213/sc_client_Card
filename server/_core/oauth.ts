@@ -64,7 +64,7 @@ export function registerOAuthRoutes(app: Express) {
       // so it can never collide with an id minted by another login method.
       const openId = `google:${googleUser.sub}`;
 
-      await db.upsertUser({
+      await db.upsertLegacyOAuthUser({
         openId,
         name: googleUser.name || null,
         email: googleUser.email ?? null,
@@ -72,7 +72,7 @@ export function registerOAuthRoutes(app: Express) {
         lastSignedIn: new Date(),
       });
 
-      const user = await db.getUserByOpenId(openId);
+      const user = await db.getUserByLegacyOpenId(openId);
 
       if (!user) {
         res.status(500).json({ error: "Authenticated user could not be loaded" });
