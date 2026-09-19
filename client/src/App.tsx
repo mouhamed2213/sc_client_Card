@@ -15,6 +15,7 @@ import ClientRequests from "./pages/ClientRequests";
 import ClientStats from "./pages/ClientStats";
 import FicheClientDetail from "./pages/FicheClientDetail";
 import InviteConsume from "./pages/InviteConsume";
+const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const Home = lazy(() => import("@/pages/Home"));
 const PublicFiche = lazy(() => import("@/pages/PublicFiche"));
 const FicheEditor = lazy(() => import("@/pages/FicheEditor"));
@@ -38,8 +39,9 @@ function Router() {
       <Switch>
         <Route path="/admin/login" component={AdminLogin} />
         <Route path="/fiche/:slug" component={PublicFiche} />
+        <Route path="/" component={LandingPage} />
         <Route
-          path="/"
+          path="/studio"
           component={() => (
             <AdminRoute>
               <Home />
