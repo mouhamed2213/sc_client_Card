@@ -1,5 +1,6 @@
 import AdminClientInvitationPanel from "@/components/AdminClientInvitationPanel";
 import { Button } from "@/components/ui/button";
+import { ADMIN_HOME_PATH } from "@/const";
 import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
 import type { MediaKind } from "@shared/mediaRules";
@@ -236,7 +237,7 @@ export default function FicheEditor() {
       <header className="sticky top-0 z-20 border-b border-[#e3e6ea] bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1300px] items-center justify-between gap-4 px-5 py-4">
           <div className="flex items-center gap-3">
-            <Link href="/" className="icon-button" title="Retour">
+            <Link href={ADMIN_HOME_PATH} className="icon-button" title="Retour">
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div>

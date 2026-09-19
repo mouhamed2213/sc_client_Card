@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ADMIN_HOME_PATH } from "@/const";
 import { trpc } from "@/lib/trpc";
 
 export default function AdminLogin() {
@@ -48,7 +49,7 @@ export default function AdminLogin() {
       }
 
       toast.success("Connexion administrateur réussie.");
-      window.location.replace("/");
+      window.location.replace(ADMIN_HOME_PATH);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Connexion impossible."

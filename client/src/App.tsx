@@ -6,6 +6,7 @@ import { Route, Switch } from "wouter";
 import AdminGuard from "./components/AdminGuard";
 import ClientGuard from "./components/ClientGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { ADMIN_HOME_PATH } from "./const";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ClientCards from "./pages/ClientCards";
 import ClientDashboard from "./pages/ClientDashboard";
@@ -41,7 +42,7 @@ function Router() {
         <Route path="/fiche/:slug" component={PublicFiche} />
         <Route path="/" component={LandingPage} />
         <Route
-          path="/studio"
+          path={ADMIN_HOME_PATH}
           component={() => (
             <AdminRoute>
               <Home />
