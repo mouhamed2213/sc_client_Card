@@ -1,4 +1,5 @@
 import { Share2, SquareArrowOutUpRight } from "lucide-react";
+import { toast } from "sonner";
 import { formuleLabels } from "@/lib/ficheStatus";
 
 type IdCardFiche = {
@@ -16,16 +17,27 @@ export default function IdCard({ fiche }: { fiche: IdCardFiche }) {
   const share = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: fiche.entreprise, url: publicUrl });
+        await navigator.share({
+          title: fiche.entreprise,
+          text: `Fiche de contact de ${fiche.prenom} ${fiche.nom}`,
+          url: publicUrl,
+        });
+        toast.success("Fiche partagée");
         return;
-      } catch {
-        // user cancelled — fall through to clipboard
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
       }
     }
+
     try {
       await navigator.clipboard.writeText(publicUrl);
+      toast.success("Lien de la fiche copié");
     } catch {
-      // clipboard unavailable, nothing more we can do silently
+      toast.error("Impossible de partager la fiche", {
+        description: "Le partage natif et la copie du lien ne sont pas disponibles sur cet appareil.",
+      });
     }
   };
 
