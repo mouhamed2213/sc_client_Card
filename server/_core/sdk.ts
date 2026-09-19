@@ -44,7 +44,7 @@ class SDKServer {
   /**
    * Create a session token for the canonical database `User.id`.
    * @example
-   * const sessionToken = await sdk.createSessionToken(openId, { name });
+   * const sessionToken = await sdk.createSessionToken(userId, { name });
    */
   async createSessionToken(
     userId: number,
