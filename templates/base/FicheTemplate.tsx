@@ -94,7 +94,7 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
         className="public-action public-action-whatsapp"
       >
         <MessageCircle className="h-5 w-5" />
-        <span>WhatsApp</span>
+        <span>Message WhatsApp</span>
         {preferredAction === "whatsapp" && (
           <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
         )}
@@ -102,7 +102,7 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
     ) : (
       <div className="public-action public-action--missing" role="status">
         <MessageCircle className="h-5 w-5" />
-        <span>WhatsApp non fourni</span>
+        <span>Message WhatsApp non fourni</span>
         {preferredAction === "whatsapp" && (
           <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
         )}
@@ -165,7 +165,7 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
         </div>
       </div>
       <div className="public-actions">
-        {(["appel", "whatsapp", "email"] as const).map(key => (
+        {actions.buttonOrder.map(key => (
           <span key={key}>{buttons[key]}</span>
         ))}
       </div>
