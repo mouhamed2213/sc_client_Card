@@ -849,4 +849,5 @@ export const appRouter = router({
         await updateFiche(ficheId, fields);
         return { ok: true } as const;
       }),
-
+  }),
+});
