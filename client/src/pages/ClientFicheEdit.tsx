@@ -482,6 +482,7 @@ export default function ClientFicheEdit() {
                   </div>
                 )}
               />
+              </fieldset>
             </EditorSection>
 
             <EditorSection
@@ -548,6 +549,7 @@ export default function ClientFicheEdit() {
                   </label>
                 )}
               </div>
+              </fieldset>
             </EditorSection>
 
             <EditorSection
