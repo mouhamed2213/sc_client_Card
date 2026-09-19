@@ -98,7 +98,7 @@ export function registerAdminRoutes(app: Express): void {
     });
 
     const sessionToken = await sdk.createSessionToken(
-      credential.user.openId,
+      credential.user.id,
       {
         expiresInMs: 8 * 60 * 60 * 1000,
         name: credential.user.name || credential.username,
