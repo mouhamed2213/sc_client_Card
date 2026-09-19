@@ -36,12 +36,18 @@ export default function AdminLogin() {
         throw new Error(body.message || "Connexion impossible.");
       }
 
-      // The login endpoint has just created the session cookie. Invalidate
-      // the auth query, then force a navigation so AdminGuard reads the new
-      // session instead of leaving the login page mounted with stale state.
-      await utils.auth.me.invalidate();
-      toast.success("Connexion administrateur réussie.");
+      // The login endpoint answered 200, but that only proves the credentials
+      // are valid, not that the browser kept the session cookie. Read the
+      // session back through tRPC before leaving this page: otherwise a
+      // dropped cookie makes AdminGuard silently bounce the admin back here.
+      const me = await utils.auth.me.fetch();
+      if (!me || me.role !== "admin") {
+        throw new Error(
+          "Identifiants acceptés, mais la session n'a pas été enregistrée par le navigateur (cookie refusé). Vérifiez que le site est servi en HTTPS."
+        );
+      }
 
+      toast.success("Connexion administrateur réussie.");
       window.location.replace("/");
     } catch (error) {
       toast.error(
