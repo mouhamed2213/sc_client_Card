@@ -51,3 +51,13 @@ describe("generated client credentials", () => {
     expect(verifyClientPassword(password, hash)).toBe(true);
   });
 });
+
+
+describe("client credential generation", () => {
+  it("creates credentials that can be verified", () => {
+    const password = generateTemporaryClientPassword();
+    const encoded = hashClientPassword(password);
+    expect(verifyClientPassword(password, encoded)).toBe(true);
+    expect(verifyClientPassword("wrong-password", encoded)).toBe(false);
+  });
+});
