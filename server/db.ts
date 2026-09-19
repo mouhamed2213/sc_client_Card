@@ -419,12 +419,30 @@ export async function attachFicheToOwner(ficheId: number, ownerId: number) {
 
 // --- Scans agrégés (réutilisé par admin ET client) ---
 export async function listScansForFiche(ficheId: number, days = 30) {
-  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
-  return prisma.ficheScan.findMany({
-    where: { ficheId, scanDate: { gte: since } },
+  const end = new Date();
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+
+  const startDate = start.toISOString().slice(0, 10);
+  const endDate = end.toISOString().slice(0, 10);
+
+  const rows = await prisma.ficheScan.findMany({
+    where: {
+      ficheId,
+      scanDate: { gte: startDate, lte: endDate },
+    },
     orderBy: { scanDate: "asc" },
+  });
+
+  const byDate = new Map(rows.map(row => [row.scanDate, row.count]));
+  return Array.from({ length: days }, (_, index) => {
+    const date = new Date(start);
+    date.setUTCDate(start.getUTCDate() + index);
+    const scanDate = date.toISOString().slice(0, 10);
+    return {
+      scanDate,
+      count: byDate.get(scanDate) ?? 0,
+    };
   });
 }
 
