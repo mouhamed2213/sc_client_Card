@@ -32,7 +32,7 @@ export async function updateMembershipCardStatus(
 }
 
 export async function listClientDashboard(ficheId: number) {
-  const [fiche, scans, requests, cards, requestCount, cardCount] =
+  const [fiche, scans, requests, requestCount] =
     await Promise.all([
       prisma.fiche.findUnique({ where: { id: ficheId } }),
       prisma.ficheScan.findMany({
@@ -51,20 +51,12 @@ export async function listClientDashboard(ficheId: number) {
         orderBy: { createdAt: "desc" },
         take: 5,
       }),
-      prisma.membershipCard.findMany({
-        where: { ficheId },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }),
       prisma.contactRequest.count({ where: { ficheId } }),
-      prisma.membershipCard.count({ where: { ficheId } }),
     ]);
   return {
     fiche,
     scans,
     recentRequests: requests,
-    recentCards: cards,
     requestCount,
-    cardCount,
   };
 }
