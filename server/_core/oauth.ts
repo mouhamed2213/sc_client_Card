@@ -74,8 +74,13 @@ export function registerOAuthRoutes(app: Express) {
 
       const user = await db.getUserByOpenId(openId);
 
+      if (!user) {
+        res.status(500).json({ error: "Authenticated user could not be loaded" });
+        return;
+      }
+
       let redirectTo = "/";
-      if (invitationToken && user) {
+      if (invitationToken) {
         try {
           await db.consumeInvitation(invitationToken, user.id);
           redirectTo = "/espace-client";
@@ -85,7 +90,7 @@ export function registerOAuthRoutes(app: Express) {
         }
       }
 
-      const sessionToken = await sdk.createSessionToken(user!.id, {
+      const sessionToken = await sdk.createSessionToken(user.id, {
         name: googleUser.name || "",
         expiresInMs: ONE_YEAR_MS,
       });
