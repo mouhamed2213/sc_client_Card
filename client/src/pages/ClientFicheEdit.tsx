@@ -39,7 +39,7 @@ type FormState = {
   photo: string;
   logo: string;
   data: {
-    premierBouton: "whatsapp" | "appel" | "contact";
+    premierBouton: "whatsapp" | "appel" | "email";
     messageWhatsapp: string;
     presentation: string;
     rendezVous: LinkItem;
@@ -356,7 +356,7 @@ export default function ClientFicheEdit() {
                   >
                     <option value="whatsapp">WhatsApp</option>
                     <option value="appel">Appeler</option>
-                    <option value="contact">Formulaire de contact</option>
+                    <option value="email">E-mail</option>
                   </select>
                 </Field>
                 <Field label="Message WhatsApp prérempli">
