@@ -701,6 +701,13 @@ export const appRouter = router({
           notesInternes: currentData.notesInternes ?? "",
         };
 
+        const validationData = {
+          ...nextData,
+          liens: capabilities.links.editable ? nextData.liens : [],
+          galerie: capabilities.gallery.editable ? nextData.galerie : [],
+          sections: capabilities.catalog.editable ? nextData.sections : [],
+        };
+
         const errors = validatePlanPayload({
           formule: fiche.formule,
           photo: capabilities.profile.editable ? input.photo : fiche.photo,
@@ -708,15 +715,8 @@ export const appRouter = router({
           googlePlaceId: capabilities.googleReview.editable
             ? input.googlePlaceId
             : fiche.googlePlaceId,
-          data: nextData,
+          data: validationData,
         });
-
-        const maxLinks = capabilities.links.maxItems ?? getPlanFeatures(plan).maxLinks;
-        const maxPhotos = capabilities.gallery.maxItems ?? getPlanFeatures(plan).maxPhotos;
-        if ((nextData.liens?.length ?? 0) > maxLinks)
-          errors.push(`Votre formule autorise au maximum ${maxLinks} liens.`);
-        if ((nextData.galerie?.length ?? 0) > maxPhotos)
-          errors.push(`Votre formule autorise au maximum ${maxPhotos} photos dans la galerie.`);
 
         if (errors.length)
           throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
