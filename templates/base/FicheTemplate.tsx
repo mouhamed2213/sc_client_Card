@@ -70,63 +70,68 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
   const preferredAction = actions.buttonOrder[0];
   const hasAction = (key: "appel" | "whatsapp" | "email") =>
     actions.buttonOrder.includes(key);
+  const preferredBadge = (
+    <span className="mt-1 rounded-full border border-white/15 bg-black/45 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/85 shadow-sm backdrop-blur-sm">
+      Action préférée
+    </span>
+  );
   const buttons = {
     appel: hasAction("appel") ? (
-      <a href={actions.phoneHref} className="public-action public-action-call">
-        <Phone className="h-5 w-5" />
-        <span>Appeler</span>
-        {preferredAction === "appel" && (
-          <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
-        )}
-      </a>
+      <div className="flex flex-col items-center gap-0.5">
+        <a href={actions.phoneHref} className="public-action public-action-call">
+          <Phone className="h-5 w-5" />
+          <span>Appeler</span>
+        </a>
+        {preferredAction === "appel" && preferredBadge}
+      </div>
     ) : (
-      <div className="public-action public-action--missing" role="status">
-        <Phone className="h-5 w-5" />
-        <span>Numéro non fourni</span>
-        {preferredAction === "appel" && (
-          <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
-        )}
+      <div className="flex flex-col items-center gap-0.5">
+        <div className="public-action public-action--missing" role="status">
+          <Phone className="h-5 w-5" />
+          <span>Numéro non fourni</span>
+        </div>
+        {preferredAction === "appel" && preferredBadge}
       </div>
     ),
     whatsapp: hasAction("whatsapp") ? (
-      <a
-        href={actions.whatsappHref}
-        className="public-action public-action-whatsapp"
-      >
-        <MessageCircle className="h-5 w-5" />
-        <span>Message WhatsApp</span>
-        {preferredAction === "whatsapp" && (
-          <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
-        )}
-      </a>
+      <div className="flex flex-col items-center gap-0.5">
+        <a
+          href={actions.whatsappHref}
+          className="public-action public-action-whatsapp"
+        >
+          <MessageCircle className="h-5 w-5" />
+          <span>Message WhatsApp</span>
+        </a>
+        {preferredAction === "whatsapp" && preferredBadge}
+      </div>
     ) : (
-      <div className="public-action public-action--missing" role="status">
-        <MessageCircle className="h-5 w-5" />
-        <span>Message WhatsApp non fourni</span>
-        {preferredAction === "whatsapp" && (
-          <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
-        )}
+      <div className="flex flex-col items-center gap-0.5">
+        <div className="public-action public-action--missing" role="status">
+          <MessageCircle className="h-5 w-5" />
+          <span>Message WhatsApp non fourni</span>
+        </div>
+        {preferredAction === "whatsapp" && preferredBadge}
       </div>
     ),
     email:
       hasAction("email") && actions.emailHref ? (
-        <a
-          href={actions.emailHref}
-          className="public-action public-action-email"
-        >
-          <Mail className="h-5 w-5" />
-          <span>E-mail</span>
-          {preferredAction === "email" && (
-            <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
-          )}
-        </a>
+        <div className="flex flex-col items-center gap-0.5">
+          <a
+            href={actions.emailHref}
+            className="public-action public-action-email"
+          >
+            <Mail className="h-5 w-5" />
+            <span>E-mail</span>
+          </a>
+          {preferredAction === "email" && preferredBadge}
+        </div>
       ) : (
-        <div className="public-action public-action--missing" role="status">
-          <Mail className="h-5 w-5" />
-          <span>E-mail non fourni</span>
-          {preferredAction === "email" && (
-            <span className="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide">Action préférée</span>
-          )}
+        <div className="flex flex-col items-center gap-0.5">
+          <div className="public-action public-action--missing" role="status">
+            <Mail className="h-5 w-5" />
+            <span>E-mail non fourni</span>
+          </div>
+          {preferredAction === "email" && preferredBadge}
         </div>
       ),
   } as const;
@@ -166,7 +171,9 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
       </div>
       <div className="public-actions">
         {actions.buttonOrder.map(key => (
-          <span key={key}>{buttons[key]}</span>
+          <div key={key} className="flex flex-col items-center gap-0.5">
+          {buttons[key]}
+        </div>
         ))}
       </div>
     </section>
