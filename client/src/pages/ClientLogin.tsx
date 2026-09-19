@@ -108,7 +108,7 @@ export default function ClientLogin() {
     }
   }
 
-  const mustChange = me.data?.role === "user" && me.data.mustChangePassword;
+  const mustChange = me.data?.role === "user" && me.data.loginMethod === "local-client" && me.data.mustChangePassword;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f4f5f7] p-6">
