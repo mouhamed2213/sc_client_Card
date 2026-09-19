@@ -27,7 +27,7 @@ enum Statut {
 
 model User {
   id             Int              @id @default(autoincrement())
-  openId         String           @unique @db.VarChar(64)
+  openId         String?          @unique @db.VarChar(64)
   name           String?          @db.Text
   email          String?          @db.VarChar(320)
   loginMethod    String?          @db.VarChar(64)
