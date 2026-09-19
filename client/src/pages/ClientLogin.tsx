@@ -11,6 +11,7 @@ export default function ClientLogin() {
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [mustChangePassword, setMustChangePassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,11 @@ export default function ClientLogin() {
   });
 
   useEffect(() => {
-    if (me.data?.role === "user" && me.data.loginMethod === "local-client" && !me.data.mustChangePassword) {
+    if (me.data?.role !== "user" || me.data.loginMethod !== "local-client") return;
+
+    setMustChangePassword(Boolean(me.data.mustChangePassword));
+
+    if (!me.data.mustChangePassword) {
       navigate("/espace-client");
     }
   }, [me.data, navigate]);
@@ -53,11 +58,18 @@ export default function ClientLogin() {
         return;
       }
 
+      // The login endpoint has already authenticated the browser and set the
+      // session cookie. Keep the transition deterministic instead of waiting
+      // for React Query to notice the new session.
+      setMustChangePassword(Boolean(payload.mustChangePassword));
       await utils.auth.me.invalidate();
+
       if (payload.mustChangePassword) {
-        toast.success("Connexion réussie");
+        toast.success("Connexion réussie. Vous devez maintenant choisir un nouveau mot de passe.");
         return;
       }
+
+      toast.success("Connexion réussie");
       navigate("/espace-client");
     } catch {
       setLoginError("Impossible de contacter le serveur. Réessayez.");
@@ -98,6 +110,7 @@ export default function ClientLogin() {
       setPassword(newPassword);
       setNewPassword("");
       setConfirmPassword("");
+      setMustChangePassword(false);
       await utils.auth.me.invalidate();
       toast.success("Mot de passe modifié avec succès");
       navigate("/espace-client");
@@ -108,7 +121,7 @@ export default function ClientLogin() {
     }
   }
 
-  const mustChange = me.data?.role === "user" && me.data.loginMethod === "local-client" && me.data.mustChangePassword;
+  const mustChange = mustChangePassword || (me.data?.role === "user" && me.data.loginMethod === "local-client" && me.data.mustChangePassword);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f4f5f7] p-6">
