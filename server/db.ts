@@ -38,7 +38,7 @@ export async function upsertLegacyOAuthUser(
         : {}),
       ...(user.role !== undefined
         ? { role: user.role }
-        : user.openId === ENV.ownerOpenId
+        : user.openId === ENV.legacyOwnerOpenId
           ? { role: "admin" as const }
           : {}),
       lastSignedIn: user.lastSignedIn ?? new Date(),
