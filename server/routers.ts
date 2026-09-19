@@ -1,6 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { mediaRules } from "@shared/mediaRules";
-import { getPlanFeatures } from "@shared/planFeatures";
+import { getPlanFeatures, type PlanName } from "@shared/planFeatures";
+import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
 import { fichePayload } from "@shared/types/schemas";
 import { TRPCError } from "@trpc/server";
 import { Fiche } from "generated/prisma/client";
@@ -637,51 +638,108 @@ export const appRouter = router({
           googlePlaceId: z.string().optional().default(""),
           photo: z.string().optional().default(""),
           logo: z.string().optional().default(""),
-          data: fichePayload.shape.data,
+          data: fichePayload.shape.data.omit({ notesInternes: true }),
         })
       )
       .mutation(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Fiche introuvable.",
-          });
-        if (fiche.formule !== "signature")
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message:
-              "La modification complète est réservée à la formule Signature.",
-          });
+          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
 
-        const links = input.data.liens ?? [];
-        const photos = input.data.galerie ?? [];
-        const errors: string[] = [];
-        if (!input.photo?.trim() || !input.logo?.trim())
-          errors.push(
-            "Un portrait et un logo sont obligatoires pour une fiche Signature."
-          );
-        if (links.length > 10)
-          errors.push("La formule Signature autorise au maximum 10 liens.");
-        if (photos.length > 8)
-          errors.push(
-            "La formule Signature autorise au maximum 8 photos dans la galerie."
-          );
+        const plan = fiche.formule as PlanName;
+        const capabilities = getClientFicheCapabilities(plan);
+        const currentData = JSON.parse(fiche.dataJson || "{}") as Record<string, any>;
+        const current = {
+          site: fiche.site ?? "",
+          photo: fiche.photo ?? "",
+          logo: fiche.logo ?? "",
+          googlePlaceId: fiche.googlePlaceId ?? "",
+          presentation: currentData.presentation ?? "",
+          rendezVous: currentData.rendezVous,
+          reseauxSociaux: currentData.reseauxSociaux ?? [],
+          liens: currentData.liens ?? [],
+          galerie: currentData.galerie ?? [],
+          sections: currentData.sections ?? [],
+        };
+
+        const locked: Array<{
+          key: keyof typeof capabilities;
+          field: string;
+          next: unknown;
+          previous: unknown;
+        }> = [
+          { key: "site", field: "site", next: input.site ?? "", previous: current.site },
+          { key: "profile", field: "photo", next: input.photo ?? "", previous: current.photo },
+          { key: "profile", field: "logo", next: input.logo ?? "", previous: current.logo },
+          { key: "googleReview", field: "googlePlaceId", next: input.googlePlaceId ?? "", previous: current.googlePlaceId },
+          { key: "presentation", field: "presentation", next: input.data.presentation ?? "", previous: current.presentation },
+          { key: "rendezVous", field: "rendezVous", next: input.data.rendezVous, previous: current.rendezVous },
+          { key: "socials", field: "reseauxSociaux", next: input.data.reseauxSociaux ?? [], previous: current.reseauxSociaux },
+          { key: "links", field: "liens", next: input.data.liens ?? [], previous: current.liens },
+          { key: "gallery", field: "galerie", next: input.data.galerie ?? [], previous: current.galerie },
+          { key: "catalog", field: "sections", next: input.data.sections ?? [], previous: current.sections },
+        ];
+
+        for (const item of locked) {
+          if (
+            !capabilities[item.key].editable &&
+            JSON.stringify(item.next) !== JSON.stringify(item.previous)
+          ) {
+            const upgrade = capabilities[item.key].upgradeTo;
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: upgrade
+                ? `Passez au plan ${upgrade === "signature" ? "Signature" : "Pro"} pour modifier « ${item.field} ».`
+                : `La modification de « ${item.field} » n'est pas autorisée avec votre formule.`,
+            });
+          }
+        }
+
+        const nextData = {
+          ...currentData,
+          ...input.data,
+          notesInternes: currentData.notesInternes ?? "",
+        };
+
+        const errors = validatePlanPayload({
+          formule: fiche.formule,
+          photo: capabilities.profile.editable ? input.photo : fiche.photo,
+          logo: capabilities.profile.editable ? input.logo : fiche.logo,
+          googlePlaceId: capabilities.googleReview.editable
+            ? input.googlePlaceId
+            : fiche.googlePlaceId,
+          data: nextData,
+        });
+
+        const maxLinks = capabilities.links.maxItems ?? getPlanFeatures(plan).maxLinks;
+        const maxPhotos = capabilities.gallery.maxItems ?? getPlanFeatures(plan).maxPhotos;
+        if ((nextData.liens?.length ?? 0) > maxLinks)
+          errors.push(`Votre formule autorise au maximum ${maxLinks} liens.`);
+        if ((nextData.galerie?.length ?? 0) > maxPhotos)
+          errors.push(`Votre formule autorise au maximum ${maxPhotos} photos dans la galerie.`);
+
         if (errors.length)
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: errors.join(" "),
-          });
+          throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
 
-        const { ficheId, data, ...fields } = input;
+        const { ficheId, data: _data, ...fields } = input;
         await updateFiche(ficheId, {
-          ...fields,
-          dataJson: JSON.stringify({
-            ...JSON.parse(fiche.dataJson || "{}"),
-            ...data,
-            notesInternes:
-              JSON.parse(fiche.dataJson || "{}").notesInternes ?? "",
-          }),
+          prenom: fields.prenom,
+          nom: fields.nom,
+          fonction: fields.fonction,
+          entreprise: fields.entreprise,
+          telephone: fields.telephone,
+          whatsapp: fields.whatsapp,
+          email: fields.email,
+          adresse: fields.adresse,
+          lienItineraire: fields.lienItineraire,
+          ...(capabilities.site.editable ? { site: fields.site } : {}),
+          ...(capabilities.profile.editable
+            ? { photo: fields.photo, logo: fields.logo }
+            : {}),
+          ...(capabilities.googleReview.editable
+            ? { googlePlaceId: fields.googlePlaceId }
+            : {}),
+          dataJson: JSON.stringify(nextData),
         });
         return { ok: true } as const;
       }),
@@ -699,31 +757,30 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Fiche introuvable.",
-          });
-        if (fiche.formule !== "signature")
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message:
-              "L’envoi de médias depuis l’espace client est réservé à la formule Signature.",
-          });
+          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
 
-        const currentData = JSON.parse(fiche.dataJson || "{}") as {
-          galerie?: unknown[];
-        };
-        const maxPhotos = getPlanFeatures("signature").maxPhotos;
-        if (
-          input.kind === "gallery" &&
-          (currentData.galerie?.length ?? 0) >= maxPhotos
-        )
+        const plan = fiche.formule as PlanName;
+        const capabilities = getClientFicheCapabilities(plan);
+        const key = input.kind === "gallery" ? "gallery" : "profile";
+        const capability = capabilities[key];
+
+        if (!capability.editable) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `Passez au plan ${capability.upgradeTo === "signature" ? "Signature" : "Pro"} pour modifier cette section.`,
+          });
+        }
+
+        const currentData = JSON.parse(fiche.dataJson || "{}") as { galerie?: unknown[] };
+        const maxPhotos = capabilities.gallery.maxItems ?? getPlanFeatures(plan).maxPhotos;
+        if (input.kind === "gallery" && (currentData.galerie?.length ?? 0) >= maxPhotos) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: `La galerie Signature est limitée à ${maxPhotos} photos.`,
+            message: `La galerie est limitée à ${maxPhotos} photos.`,
           });
+        }
 
-        const raw = input.contentBase64.replace(/^data:[^;]+;base64,/, "");
+        const raw = input.contentBase64.replace(/^data:[^;]+;base64, "");
         const bytes = Buffer.from(raw, "base64");
         const maxBytes = mediaRules[input.kind].maxBytes;
         if (bytes.byteLength > maxBytes)
@@ -736,16 +793,11 @@ export const appRouter = router({
         try {
           dimensions = imageSize(bytes);
         } catch {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Le fichier ne contient pas une image valide.",
-          });
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Le fichier ne contient pas une image valide." });
         }
 
         const expectedType =
-          input.mimeType === "image/jpeg"
-            ? "jpg"
-            : input.mimeType.split("/")[1];
+          input.mimeType === "image/jpeg" ? "jpg" : input.mimeType.split("/")[1];
         if (dimensions.type !== expectedType)
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -753,21 +805,13 @@ export const appRouter = router({
           });
 
         const rule = mediaRules[input.kind];
-        if (
-          !dimensions.width ||
-          !dimensions.height ||
-          dimensions.width > rule.maxWidth ||
-          dimensions.height > rule.maxHeight
-        )
+        if (!dimensions.width || !dimensions.height || dimensions.width > rule.maxWidth || dimensions.height > rule.maxHeight)
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: `Dimensions invalides : maximum ${rule.maxWidth} × ${rule.maxHeight} px.`,
           });
 
-        if (
-          input.kind === "profile" &&
-          (dimensions.width !== 400 || dimensions.height !== 400)
-        )
+        if (input.kind === "profile" && (dimensions.width !== 400 || dimensions.height !== 400))
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "Le portrait doit mesurer exactement 400 × 400 px.",
@@ -801,21 +845,9 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Fiche introuvable.",
-          });
-        if (fiche.formule !== "signature")
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message:
-              "La modification de la fiche est réservée à la formule Signature.",
-          });
+          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
         const { ficheId, ...fields } = input;
         await updateFiche(ficheId, fields);
         return { ok: true } as const;
       }),
-  }),
-});
 
-export type AppRouter = typeof appRouter;
