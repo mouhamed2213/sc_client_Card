@@ -14,7 +14,7 @@ export type GoogleTokenResponse = {
 };
 
 export type GoogleUserInfo = {
-  sub: string; // stable Google user id -> stored as our `openId`
+  sub: string; // stable Google user id used only for legacy OAuth identity
   email?: string;
   email_verified?: boolean;
   name?: string;
