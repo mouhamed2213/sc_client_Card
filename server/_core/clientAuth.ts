@@ -86,10 +86,10 @@ export function verifyClientPassword(
 export function generateClientUsername(name: string): string {
   const base = name
     .normalize("NFD")
-    .replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ".")
-    .replace(/^\\.|\\.$/g, "")
+    .replace(/^\.|\.$/g, "")
     .slice(0, 42);
 
   const suffix = randomBytes(3).toString("hex");
