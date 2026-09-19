@@ -8,7 +8,6 @@ import ClientGuard from "./components/ClientGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ADMIN_HOME_PATH } from "./const";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import ClientCards from "./pages/ClientCards";
 import ClientDashboard from "./pages/ClientDashboard";
 import ClientFicheEdit from "./pages/ClientFicheEdit";
 import ClientLogin from "./pages/ClientLogin";
@@ -80,14 +79,6 @@ function Router() {
           component={() => (
             <ClientRoute>
               <ClientRequests />
-            </ClientRoute>
-          )}
-        />
-        <Route
-          path="/espace-client/fiche/:ficheId/cartes"
-          component={() => (
-            <ClientRoute>
-              <ClientCards />
             </ClientRoute>
           )}
         />

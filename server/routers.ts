@@ -610,17 +610,6 @@ export const appRouter = router({
           });
         return listContactRequests(input.ficheId);
       }),
-    membershipCards: clientProcedure
-      .input(z.object({ ficheId: z.number().int().positive() }))
-      .query(async ({ ctx, input }) => {
-        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
-        if (!fiche)
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Fiche introuvable.",
-          });
-        return listMembershipCards(input.ficheId);
-      }),
     updateSignature: clientProcedure
       .input(
         z.object({
