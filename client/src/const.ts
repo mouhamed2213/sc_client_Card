@@ -31,3 +31,7 @@ export const startLogin = (options?: { invitationToken?: string }) => {
   url.searchParams.set("prompt", "select_account");
   window.location.href = url.toString();
 };
+
+// Numéro WhatsApp temporaire pour les demandes de renouvellement.
+// À remplacer avant la mise en production.
+export const RENEWAL_WHATSAPP_NUMBER = "221771234567";
