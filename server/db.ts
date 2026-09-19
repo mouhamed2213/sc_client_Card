@@ -16,7 +16,7 @@ export type InsertFiche = Prisma.FicheUncheckedCreateInput;
 export type InsertUser = Prisma.UserUncheckedCreateInput;
 export type InsertMembershipCard = Prisma.MembershipCardUncheckedCreateInput;
 
-export async function upsertUser(
+export async function upsertLegacyOAuthUser(
   user: Partial<InsertUser> & { openId: string }
 ): Promise<void> {
   if (!user.openId) throw new Error("User openId is required for upsert");
@@ -46,7 +46,7 @@ export async function upsertUser(
   });
 }
 
-export async function getUserByOpenId(openId: string) {
+export async function getUserByLegacyOpenId(openId: string) {
   return prisma.user.findUnique({ where: { openId } });
 }
 
