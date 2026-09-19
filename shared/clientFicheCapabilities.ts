@@ -29,7 +29,7 @@ export const clientFicheCapabilities: Record<
     identity: { editable: true },
     contact: { editable: true },
     site: { editable: false, upgradeTo: "pro" },
-    profile: { editable: false, upgradeTo: "pro" },
+    profile: { editable: true },
     presentation: { editable: false, upgradeTo: "pro" },
     rendezVous: { editable: false, upgradeTo: "pro" },
     socials: { editable: false, upgradeTo: "pro" },
