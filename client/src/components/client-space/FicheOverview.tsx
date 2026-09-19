@@ -1,7 +1,10 @@
 import { useLocation } from "wouter";
 import {
   ArrowRight,
+  BarChart3,
+  CheckCircle2,
   MessageSquare,
+  Pencil,
   ScanLine,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -86,6 +89,75 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
         </button>
       </div>
 
+      <div className="grid gap-5 lg:grid-cols-[1.1fr,0.9fr]">
+        <div className="panel">
+          <div>
+            <p className="panel-title">Actions rapides</p>
+            <p className="panel-sub">
+              Gérez votre fiche et consultez ses performances.
+            </p>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <QuickAction
+              icon={Pencil}
+              label="Modifier ma fiche"
+              onClick={() =>
+                navigate(`/espace-client/fiche/${ficheId}/modifier`)
+              }
+            />
+            <QuickAction
+              icon={BarChart3}
+              label="Voir les statistiques"
+              onClick={() =>
+                navigate(`/espace-client/fiche/${ficheId}/statistiques`)
+              }
+            />
+            <QuickAction
+              icon={MessageSquare}
+              label="Voir les demandes"
+              onClick={() =>
+                navigate(`/espace-client/fiche/${ficheId}/demandes`)
+              }
+            />
+          </div>
+        </div>
+
+        <div className="panel">
+          <div>
+            <p className="panel-title">Fonctionnalités de votre formule</p>
+            <p className="panel-sub">
+              Les capacités disponibles sur cette fiche.
+            </p>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <CapabilityItem
+              label="Liens personnalisés"
+              value={`${fiche.plan.maxLinks}`}
+            />
+            <CapabilityItem
+              label="Galerie"
+              value={`${fiche.plan.maxPhotos} photos`}
+            />
+            <CapabilityItem
+              label="Site web"
+              enabled={fiche.plan.maxLinks > 0}
+            />
+            <CapabilityItem
+              label="Avis Google"
+              enabled={fiche.plan.hasGoogleReview}
+            />
+            <CapabilityItem
+              label="Catalogue"
+              enabled={fiche.plan.hasCatalog}
+            />
+            <CapabilityItem
+              label="Formulaire de rappel"
+              enabled={fiche.plan.hasForm}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="grid gap-5 lg:grid-cols-[1.3fr,1fr]">
         <div className="panel">
           <div className="flex items-center justify-between">
@@ -149,6 +221,62 @@ function MiniStat({ label, value }: { label: string; value: string | number }) {
     <div className="rounded-lg border border-[#e6e8ec] bg-white px-3 py-2.5 text-center">
       <p className="text-base font-semibold text-[#172033]">{value}</p>
       <p className="mt-0.5 text-[10.5px] text-[#7d8798]">{label}</p>
+    </div>
+  );
+}
+
+
+function QuickAction({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: typeof Pencil;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex items-center gap-2.5 rounded-xl border border-[#e6e8ec] bg-white px-3.5 py-3 text-left transition hover:border-[#c98a4e] hover:bg-[#fffaf4]"
+    >
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#f4f5f7] text-[#667085] transition group-hover:bg-[#fff1df] group-hover:text-[#9a6a2a]">
+        <Icon size={15} />
+      </span>
+      <span className="min-w-0 text-xs font-semibold text-[#344054]">
+        {label}
+      </span>
+      <ArrowRight
+        size={14}
+        className="ml-auto shrink-0 text-[#c1c8d3] transition group-hover:translate-x-0.5 group-hover:text-[#c98a4e]"
+      />
+    </button>
+  );
+}
+
+function CapabilityItem({
+  label,
+  enabled,
+  value,
+}: {
+  label: string;
+  enabled?: boolean;
+  value?: string;
+}) {
+  const isActive = value !== undefined || enabled === true;
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-[#edf0f2] bg-[#fafbfc] px-3 py-2.5">
+      <span className="text-xs font-medium text-[#52607a]">{label}</span>
+      {value ? (
+        <span className="text-xs font-semibold text-[#172033]">{value}</span>
+      ) : (
+        <CheckCircle2
+          size={15}
+          className={isActive ? "text-emerald-600" : "text-[#c1c8d3]"}
+          aria-label={isActive ? "Inclus" : "Non inclus"}
+        />
+      )}
     </div>
   );
 }
