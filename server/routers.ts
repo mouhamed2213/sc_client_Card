@@ -52,7 +52,18 @@ function parseFiche<T extends { dataJson: string }>(fiche: T) {
 export const appRouter = router({
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query(async opts => {
+      if (!opts.ctx.user) return null;
+      if (opts.ctx.user.role !== "user") return opts.ctx.user;
+      const credential = await prisma.clientCredential.findUnique({
+        where: { userId: opts.ctx.user.id },
+        select: { mustChangePassword: true },
+      });
+      return {
+        ...opts.ctx.user,
+        mustChangePassword: credential?.mustChangePassword ?? false,
+      };
+    }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
