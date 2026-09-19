@@ -13,7 +13,7 @@ export default function ClientGuard({ children }: { children: ReactNode }) {
     return <ClientSplash label="Vérification de la session…" />;
   }
 
-  if (!meQuery.data || meQuery.data.role !== "user") {
+  if (!meQuery.data || meQuery.data.role !== "user" || meQuery.data.loginMethod !== "local-client") {
     return <Redirect to="/espace-client/connexion" />;
   }
 
