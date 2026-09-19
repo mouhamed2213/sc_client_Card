@@ -85,7 +85,7 @@ export function registerOAuthRoutes(app: Express) {
         }
       }
 
-      const sessionToken = await sdk.createSessionToken(openId, {
+      const sessionToken = await sdk.createSessionToken(user!.id, {
         name: googleUser.name || "",
         expiresInMs: ONE_YEAR_MS,
       });
