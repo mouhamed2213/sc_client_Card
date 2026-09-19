@@ -332,7 +332,6 @@ export const appRouter = router({
         try {
           const result = await createClientAccountWithFiche({
             user: {
-              openId: `local-client:${username}`,
               name: input.name,
               email: input.email || null,
               formule: input.formule,
