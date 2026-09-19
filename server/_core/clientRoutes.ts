@@ -14,14 +14,14 @@ const loginSchema = z.object({
 });
 
 const passwordChangeSchema = z.object({
-  currentPassword: z.string().min(1).max(200),
   newPassword: z
     .string()
-    .min(12)
+    .min(8, "Le nouveau mot de passe doit contenir au moins 8 caractères.")
     .max(200)
     .regex(/[A-Z]/, "Le nouveau mot de passe doit contenir une majuscule.")
     .regex(/[a-z]/, "Le nouveau mot de passe doit contenir une minuscule.")
-    .regex(/[0-9]/, "Le nouveau mot de passe doit contenir un chiffre."),
+    .regex(/[0-9]/, "Le nouveau mot de passe doit contenir un chiffre.")
+    .regex(/[^A-Za-z0-9]/, "Le nouveau mot de passe doit contenir un caractère spécial."),
 });
 
 const WINDOW_MS = 15 * 60 * 1000;
@@ -125,22 +125,24 @@ export function registerClientRoutes(app: Express): void {
   app.post("/api/client/change-password", async (req, res) => {
     const parsed = passwordChangeSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ message: "Mot de passe invalide." });
+      return res.status(400).json({
+        message: parsed.error.issues[0]?.message ?? "Mot de passe invalide.",
+      });
     }
 
     const cookies = parseCookieHeader(req.headers.cookie || "");
-    const session = cookies[COOKIE_NAME];
-    if (!session) {
+    const sessionToken = cookies[COOKIE_NAME];
+    if (!sessionToken) {
       return res.status(401).json({ message: "Session requise." });
     }
 
-    const openId = await sdk.verifySession(session);
-    if (!openId) {
+    const session = await sdk.verifySession(sessionToken);
+    if (!session) {
       return res.status(401).json({ message: "Session invalide." });
     }
 
     const user = await prisma.user.findUnique({
-      where: { openId },
+      where: { openId: session.openId },
       include: { clientCredential: true },
     });
 
@@ -148,18 +150,17 @@ export function registerClientRoutes(app: Express): void {
       return res.status(403).json({ message: "Accès refusé." });
     }
 
+    if (!user.clientCredential.mustChangePassword) {
+      return res.status(400).json({
+        message: "Aucun changement de mot de passe obligatoire n'est en attente.",
+      });
+    }
+
     const key = getClientKey(req, user.clientCredential.username);
     if (isRateLimited(key)) {
-      return res.status(429).json({ message: "Trop de tentatives. Réessayez plus tard." });
-    }
-
-    if (!verifyClientPassword(parsed.data.currentPassword, user.clientCredential.passwordHash)) {
-      recordFailure(key);
-      return res.status(401).json({ message: "Mot de passe actuel incorrect." });
-    }
-
-    if (verifyClientPassword(parsed.data.newPassword, user.clientCredential.passwordHash)) {
-      return res.status(400).json({ message: "Le nouveau mot de passe doit être différent." });
+      return res.status(429).json({
+        message: "Trop de tentatives. Réessayez plus tard.",
+      });
     }
 
     await prisma.clientCredential.update({
