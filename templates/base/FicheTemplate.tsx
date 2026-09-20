@@ -48,6 +48,7 @@ export type FicheTemplateActions = {
   ) => void;
   onContactSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
+
 export type FicheTemplateProps = {
   fiche: FicheTemplateModel;
   actions: FicheTemplateActions;
@@ -68,73 +69,92 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
 function Hero({ fiche, actions }: FicheTemplateProps) {
   const identityImage = fiche.logo;
   const preferredAction = actions.buttonOrder[0];
+
   const hasAction = (key: "appel" | "whatsapp" | "email") =>
     actions.buttonOrder.includes(key);
+
   const preferredBadge = (
     <span className="mt-1 inline-block rounded-full border border-white/15 bg-black/45 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/85 shadow-sm backdrop-blur-sm">
       Action préférée
     </span>
   );
-  const buttons = {
-    appel: hasAction("appel") ? (
-      <>
-        <a href={actions.phoneHref} className="public-action public-action-call">
-          <Phone className="h-5 w-5" />
-          <span>Appeler</span>
-        </a>
-        {preferredAction === "appel" && preferredBadge}
-      </>
-    ) : (
-      <>
-        <div className="public-action public-action--missing" role="status">
-          <Phone className="h-5 w-5" />
-          <span>Numéro non fourni</span>
-        </div>
-        {preferredAction === "appel" && preferredBadge}
-      </>
-    ),
-    whatsapp: hasAction("whatsapp") ? (
-      <>
-        <a
-          href={actions.whatsappHref}
-          className="public-action public-action-whatsapp"
-        >
-          <MessageCircle className="h-5 w-5" />
-          <span>Message WhatsApp</span>
-        </a>
-        {preferredAction === "whatsapp" && preferredBadge}
-      </>
-    ) : (
-      <>
-        <div className="public-action public-action--missing" role="status">
-          <MessageCircle className="h-5 w-5" />
-          <span>Message WhatsApp non fourni</span>
-        </div>
-        {preferredAction === "whatsapp" && preferredBadge}
-      </>
-    ),
-    email:
-      hasAction("email") && actions.emailHref ? (
-        <>
-          <a
-            href={actions.emailHref}
-            className="public-action public-action-email"
-          >
-            <Mail className="h-5 w-5" />
-            <span>E-mail</span>
-          </a>
-          {preferredAction === "email" && preferredBadge}
-        </>
-      ) : (
-        <>
-          <div className="public-action public-action--missing" role="status">
-            <Mail className="h-5 w-5" />
-            <span>E-mail non fourni</span>
+
+  const renderActionButton = (key: "appel" | "whatsapp" | "email") => {
+    switch (key) {
+      case "appel":
+        return (
+          <div className="flex flex-col items-center gap-0.5">
+            {hasAction("appel") ? (
+              <a
+                href={actions.phoneHref}
+                className="public-action public-action-call"
+              >
+                <Phone className="h-5 w-5" />
+                <span>Appeler</span>
+              </a>
+            ) : (
+              <div
+                className="public-action public-action--missing"
+                role="status"
+              >
+                <Phone className="h-5 w-5" />
+                <span>Numéro non fourni</span>
+              </div>
+            )}
+            {preferredAction === "appel" && preferredBadge}
           </div>
-          {preferredAction === "email" && preferredBadge}
-        </>
-      ),
-  } as const;
+        );
+
+      case "whatsapp":
+        return (
+          <div className="flex flex-col items-center gap-0.5">
+            {hasAction("whatsapp") ? (
+              <a
+                href={actions.whatsappHref}
+                className="public-action public-action-whatsapp"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>Message WhatsApp</span>
+              </a>
+            ) : (
+              <div
+                className="public-action public-action--missing"
+                role="status"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>Message WhatsApp non fourni</span>
+              </div>
+            )}
+            {preferredAction === "whatsapp" && preferredBadge}
+          </div>
+        );
+
+      case "email":
+        return (
+          <div className="flex flex-col items-center gap-0.5">
+            {hasAction("email") && actions.emailHref ? (
+              <a
+                href={actions.emailHref}
+                className="public-action public-action-email"
+              >
+                <Mail className="h-5 w-5" />
+                <span>E-mail</span>
+              </a>
+            ) : (
+              <div
+                className="public-action public-action--missing"
+                role="status"
+              >
+                <Mail className="h-5 w-5" />
+                <span>E-mail non fourni</span>
+              </div>
+            )}
+            {preferredAction === "email" && preferredBadge}
+          </div>
+        );
+    }
+  };
+
   return (
     <section className="public-hero">
       {fiche.photo && (
@@ -171,9 +191,7 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
       </div>
       <div className="public-actions">
         {actions.buttonOrder.map(key => (
-          <div key={key} className="flex flex-col items-center gap-0.5">
-          {buttons[key]}
-        </div>
+          <div key={key}>{renderActionButton(key)}</div>
         ))}
       </div>
     </section>
@@ -185,51 +203,31 @@ function GalleryCarousel({
 }: {
   images: FicheTemplateModel["data"]["galerie"];
 }) {
+  const gallery = images ?? [];
   const [current, setCurrent] = useState(0);
-  if (!images?.length) return null;
-  const previous = () => setCurrent(index => (index - 1 + images.length) % images.length);
-  const next = () => setCurrent(index => (index + 1) % images.length);
-  const item = images[current];
-  const isVideo = item.type === "video";
+  if (!gallery.length) return null;
+
+  const previous = () =>
+    setCurrent(index => (index - 1 + gallery.length) % gallery.length);
+  const next = () => setCurrent(index => (index + 1) % gallery.length);
+  const image = gallery[current];
+
   return (
     <div className="pro-gallery w-full">
-      <div className="pro-gallery-stage relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-black">
-        {isVideo ? (
-          item.source === "direct" ? (
-            <video
-              className="block h-full w-full object-contain"
-              src={item.url}
-              controls
-              playsInline
-              preload="metadata"
-              aria-label={item.alt || "Vidéo"}
-            />
-          ) : (
-            <iframe
-              className="block h-full w-full"
-              src={item.embedUrl}
-              title={item.alt || "Vidéo"}
-              loading="lazy"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          )
-        ) : (
-          <img
-            className="block h-full w-full object-cover"
-            src={item.url}
-            alt={item.alt}
-            loading="lazy"
-          />
-        )}
-        {images.length > 1 && (
+      <div className="pro-gallery-stage relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
+        <img
+          className="block h-full w-full object-cover"
+          src={image.url}
+          alt={image.alt}
+          loading="lazy"
+        />
+        {gallery.length > 1 && (
           <>
             <button
               type="button"
               className="pro-gallery-control absolute top-1/2 left-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
               onClick={previous}
-              aria-label={`Élément précédent`}
+              aria-label="Photo précédente"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -237,7 +235,7 @@ function GalleryCarousel({
               type="button"
               className="pro-gallery-control absolute top-1/2 right-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
               onClick={next}
-              aria-label={`Élément suivant`}
+              aria-label="Photo suivante"
             >
               <ArrowRight className="h-4 w-4" />
             </button>
@@ -245,16 +243,18 @@ function GalleryCarousel({
         )}
       </div>
       <div className="pro-gallery-meta mt-2.5 flex items-center justify-between gap-3 text-[10px] font-bold text-theme-muted">
-        <span>{isVideo ? "Vidéo" : "Photo"} {current + 1} / {images.length}</span>
-        {images.length > 1 && (
+        <span>
+          Photo {current + 1} / {gallery.length}
+        </span>
+        {gallery.length > 1 && (
           <div className="pro-gallery-dots flex items-center gap-[5px]">
-            {images.map((galleryItem, index) => (
+            {gallery.map((item, index) => (
               <button
-                key={galleryItem.id ?? galleryItem.url}
+                key={item.id ?? `${item.url}-${index}`}
                 type="button"
                 className={`pro-gallery-dot ${index === current ? "is-active" : ""}`}
                 onClick={() => setCurrent(index)}
-                aria-label={`Aller à l'élément ${index + 1}`}
+                aria-label={`Aller à la photo ${index + 1}`}
               />
             ))}
           </div>
@@ -272,6 +272,7 @@ function socialKey(label: string, url: string) {
   if (value.includes("youtube")) return "youtube";
   return "other";
 }
+
 function SocialIcon({ label, url }: { label: string; url: string }) {
   const key = socialKey(label, url);
   if (key === "instagram") return <Instagram className="h-5 w-5" />;
@@ -364,11 +365,8 @@ export function FicheTemplate({
   const config = getTemplateConfig(fiche.formule);
   const { features } = config;
   const links = (fiche.data.liens ?? []).slice(0, features.maxLinks);
-  const rawGallery = fiche.data.galerie ?? [];
-  const gallery = [
-    ...rawGallery.filter(item => item.type === "video").slice(0, features.maxVideos),
-    ...rawGallery.filter(item => item.type !== "video").slice(0, features.maxPhotos),
-  ];
+  const gallery = (fiche.data.galerie ?? []).slice(0, features.maxPhotos);
+
   return (
     <div
       className={`public-page fiche-template fiche-template--${config.theme} min-h-screen px-3 pt-6 pb-10 text-theme-text`}

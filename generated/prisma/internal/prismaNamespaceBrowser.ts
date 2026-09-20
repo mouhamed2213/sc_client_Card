@@ -57,7 +57,6 @@ export const ModelName = {
   Fiche: 'Fiche',
   FicheScan: 'FicheScan',
   ContactRequest: 'ContactRequest',
-  InvitationClient: 'InvitationClient',
   MembershipCard: 'MembershipCard'
 } as const
 
@@ -171,19 +170,6 @@ export const ContactRequestScalarFieldEnum = {
 } as const
 
 export type ContactRequestScalarFieldEnum = (typeof ContactRequestScalarFieldEnum)[keyof typeof ContactRequestScalarFieldEnum]
-
-
-export const InvitationClientScalarFieldEnum = {
-  id: 'id',
-  ficheId: 'ficheId',
-  token: 'token',
-  utilisee: 'utilisee',
-  expireLe: 'expireLe',
-  revokedAt: 'revokedAt',
-  createdAt: 'createdAt'
-} as const
-
-export type InvitationClientScalarFieldEnum = (typeof InvitationClientScalarFieldEnum)[keyof typeof InvitationClientScalarFieldEnum]
 
 
 export const MembershipCardScalarFieldEnum = {
