@@ -19,6 +19,7 @@ type Capability = {
   editable: boolean;
   upgradeTo?: PlanName;
   maxItems?: number;
+  maxVideos?: number;
 };
 
 export const clientFicheCapabilities: Record<
@@ -38,6 +39,7 @@ export const clientFicheCapabilities: Record<
       editable: false,
       upgradeTo: "pro",
       maxItems: getPlanFeatures("essentiel").maxPhotos,
+      maxVideos: getPlanFeatures("essentiel").maxVideos,
     },
     googleReview: { editable: false, upgradeTo: "pro" },
     hours: { editable: true },
@@ -56,6 +58,7 @@ export const clientFicheCapabilities: Record<
     gallery: {
       editable: true,
       maxItems: getPlanFeatures("pro").maxPhotos,
+      maxVideos: getPlanFeatures("pro").maxVideos,
     },
     googleReview: { editable: true },
     hours: { editable: true },
@@ -74,6 +77,7 @@ export const clientFicheCapabilities: Record<
     gallery: {
       editable: true,
       maxItems: getPlanFeatures("signature").maxPhotos,
+      maxVideos: getPlanFeatures("signature").maxVideos,
     },
     googleReview: { editable: true },
     hours: { editable: true },
