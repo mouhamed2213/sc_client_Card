@@ -221,6 +221,7 @@ export async function listFichesPaginated(input: {
   search?: string;
   statut?: "active" | "suspendue" | "supprimee" | "brouillon";
   aRenouveler?: boolean;
+  expiree?: boolean;
 }) {
   await ensureDemoFiches();
   const search = input.search?.trim();
@@ -236,6 +237,12 @@ export async function listFichesPaginated(input: {
       ? {
           statut: "active" as const,
           dateEcheance: { gte: startOfToday, lte: renewalLimit },
+        }
+      : {}),
+    ...(input.expiree
+      ? {
+          statut: "active" as const,
+          dateEcheance: { lt: startOfToday },
         }
       : {}),
     ...(search
