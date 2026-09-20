@@ -235,7 +235,7 @@ export async function listFichesPaginated(input: {
     ...(input.aRenouveler
       ? {
           statut: "active" as const,
-          dateEcheance: { gte: now, lte: renewalLimit },
+          dateEcheance: { gte: startOfToday, lte: renewalLimit },
         }
       : {}),
     ...(search
