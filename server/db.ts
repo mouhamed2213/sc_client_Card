@@ -225,7 +225,11 @@ export async function listFichesPaginated(input: {
   await ensureDemoFiches();
   const search = input.search?.trim();
   const now = new Date();
-  const renewalLimit = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const startOfToday = new Date(now);
+  startOfToday.setUTCHours(0, 0, 0, 0);
+  const renewalLimit = new Date(startOfToday);
+  renewalLimit.setUTCDate(renewalLimit.getUTCDate() + 30);
+  renewalLimit.setUTCHours(23, 59, 59, 999);
   const where = {
     ...(input.statut ? { statut: input.statut } : {}),
     ...(input.aRenouveler
@@ -370,9 +374,11 @@ export async function listContactRequests(ficheId: number) {
 export async function getOverview() {
   await ensureDemoFiches();
   const now = new Date();
-  const renewalLimit = new Date(
-    now.getTime() + 30 * 24 * 60 * 60 * 1000
-  );
+  const startOfToday = new Date(now);
+  startOfToday.setUTCHours(0, 0, 0, 0);
+  const renewalLimit = new Date(startOfToday);
+  renewalLimit.setUTCDate(renewalLimit.getUTCDate() + 30);
+  renewalLimit.setUTCHours(23, 59, 59, 999);
   const [total, active, scans, expiring] = await Promise.all([
     prisma.fiche.count(),
     prisma.fiche.count({ where: { statut: "active" } }),
