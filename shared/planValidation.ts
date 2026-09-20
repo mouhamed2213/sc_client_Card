@@ -1,9 +1,10 @@
 import { getClientFicheCapabilities } from "./clientFicheCapabilities";
 import { getPlanFeatures, type PlanName } from "./planFeatures";
+import { parseVideoUrl } from "./videoUrls";
 
 type PlanData = {
   liens?: unknown[];
-  galerie?: unknown[];
+  galerie?: Array<{ type?: "image" | "video"; url?: string; alt?: string; source?: string; embedUrl?: string }>;
   horaires?: { jour?: string; horaire?: string }[];
   sections?: unknown[];
   presentation?: string;
@@ -23,7 +24,9 @@ export function validatePlanPayload(input: {
   const capabilities = getClientFicheCapabilities(input.formule);
   const errors: string[] = [];
   const links = input.data.liens ?? [];
-  const photos = input.data.galerie ?? [];
+  const gallery = input.data.galerie ?? [];
+  const photos = gallery.filter(item => item.type !== "video");
+  const videos = gallery.filter(item => item.type === "video");
   const sections = input.data.sections ?? [];
   const appointment = input.data.rendezVous;
   const socials = input.data.reseauxSociaux ?? [];
@@ -38,6 +41,15 @@ export function validatePlanPayload(input: {
       ? "Cette formule ne permet pas de galerie photo."
       : `${input.formule}: maximum ${features.maxPhotos} photos.`);
   }
+  if (videos.length > features.maxVideos) {
+    errors.push(features.maxVideos === 0
+      ? "Cette formule ne permet pas de vidéos."
+      : `${input.formule}: maximum ${features.maxVideos} vidéos.`);
+  }
+  for (const video of videos) {
+    if (!video.url || !parseVideoUrl(video.url)) errors.push("Une ou plusieurs vidéos utilisent une URL non supportée.");
+  }
+
   if (!capabilities.site.editable && input.site?.trim()) errors.push("Cette formule ne permet pas de site internet.");
   if (!capabilities.rendezVous.editable && appointment?.url?.trim()) errors.push("Cette formule ne permet pas de prise de rendez-vous.");
   if (!capabilities.socials.editable && socials.some(item => item.url?.trim())) errors.push("Cette formule ne permet pas de réseaux sociaux.");
