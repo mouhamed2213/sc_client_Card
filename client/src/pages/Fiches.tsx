@@ -434,8 +434,8 @@ function FicheCard({
     <div className="rounded-xl border border-[#edf0f2] p-4">
       <div className="flex items-start justify-between gap-3">
         <FicheIdentity fiche={fiche} />
-        <span className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statut]}`}>
-          {statusLabels[fiche.statut]}
+        <span className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statutMetier]}`}>
+          {statusLabels[fiche.statutMetier]}
         </span>
       </div>
 
