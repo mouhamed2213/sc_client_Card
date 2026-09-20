@@ -16,4 +16,12 @@ describe("media rules", () => {
   it("limits logo height to 200 px while preserving its ratio", () => {
     expect(getOutputDimensions("logo", 800, 400)).toEqual({ width: 400, height: 200 });
   });
+  it("defines the gallery video optimization rules", () => {
+    expect(mediaRules.video.maxInputBytes).toBe(50 * 1024 * 1024);
+    expect(mediaRules.video.maxWidth).toBe(1920);
+    expect(mediaRules.video.maxHeight).toBe(1080);
+    expect(mediaRules.video.maxFps).toBe(30);
+    expect(mediaRules.video.outputVideoBitrate).toBe("4M");
+    expect(mediaRules.video.audioBitrate).toBe("128k");
+  });
 });
