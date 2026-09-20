@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { toast } from "sonner";
 
@@ -67,10 +67,25 @@ function formatDate(date: Date | string) {
 export default function Fiches() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<StatusFilter>("all");
+  const [page, setPage] = useState(1);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
+  const pageSize = 10;
 
-  // Même procédure que le dashboard : on réutilise la liste canonique des fiches.
-  const listQuery = trpc.fiches.list.useQuery();
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
+  const listQuery = trpc.fiches.listPaginated.useQuery({
+    page,
+    pageSize,
+    search: debouncedSearch,
+    ...(filter === "all" ? {} : { statut: filter }),
+  });
 
   const utils = trpc.useUtils();
   const statusMutation = trpc.fiches.updateStatus.useMutation({
@@ -85,33 +100,26 @@ export default function Fiches() {
       toast.error("Action impossible", { description: error.message }),
   });
 
-  const fiches = (listQuery.data ?? []) as Fiche[];
-
-  const rows = useMemo(
-    () =>
-      fiches.filter(fiche => {
-        const haystack =
-          `${fiche.prenom} ${fiche.nom} ${fiche.entreprise} ${fiche.slug}`.toLowerCase();
-
-        return (
-          haystack.includes(search.trim().toLowerCase()) &&
-          (filter === "all" || fiche.statut === filter)
-        );
-      }),
-    [fiches, filter, search]
-  );
-
-  const total = fiches.length;
+  const rows = (listQuery.data?.rows ?? []) as Fiche[];
+  const total = listQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const startItem = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const endItem = Math.min(page * pageSize, total);
   const counts = {
     all: total,
   };
 
   function changeFilter(next: StatusFilter) {
     setFilter(next);
+    setPage(1);
   }
 
   function changeSearch(value: string) {
     setSearch(value);
+  }
+
+  function changePage(nextPage: number) {
+    setPage(Math.min(Math.max(nextPage, 1), totalPages));
   }
 
   function toggleStatus(fiche: Fiche) {
@@ -258,7 +266,7 @@ export default function Fiches() {
               ))}
             </div>
 
-            {!listQuery.isLoading && !rows.length && (
+            {!listQuery.isLoading && !listQuery.isFetching && !rows.length && (
               <div className="px-7 py-14 text-center text-sm text-[#7d8798]">
                 Aucune fiche ne correspond à cette recherche.
               </div>
@@ -270,8 +278,31 @@ export default function Fiches() {
               </div>
             )}
 
-            <div className="border-t border-[#edf0f2] px-5 py-4 text-xs text-[#8b94a3] lg:px-7">
-              {rows.length} fiche{rows.length > 1 ? "s" : ""} affichée{rows.length > 1 ? "s" : ""}
+            <div className="flex flex-col gap-3 border-t border-[#edf0f2] px-5 py-4 text-xs text-[#8b94a3] sm:flex-row sm:items-center sm:justify-between lg:px-7">
+              <span>
+                {startItem}–{endItem} sur {total} fiche{total > 1 ? "s" : ""}
+              </span>
+              <div className="flex items-center gap-1" aria-label="Pagination">
+                <button
+                  type="button"
+                  onClick={() => changePage(page - 1)}
+                  disabled={page === 1 || listQuery.isFetching}
+                  className="rounded-lg border border-[#e6e8ec] px-3 py-2 font-medium text-[#526078] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Précédent
+                </button>
+                <span className="min-w-20 text-center">
+                  Page {page} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => changePage(page + 1)}
+                  disabled={page >= totalPages || listQuery.isFetching}
+                  className="rounded-lg border border-[#e6e8ec] px-3 py-2 font-medium text-[#526078] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Suivante
+                </button>
+              </div>
             </div>
           </section>
         </div>
