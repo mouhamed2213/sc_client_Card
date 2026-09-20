@@ -35,7 +35,7 @@ export type FicheTemplateData = {
   reseauxSociaux?: TemplateLink[];
   liens?: TemplateLink[];
   horaires?: TemplateHour[];
-  galerie?: TemplateImage[];
+  galerie?: TemplateGalleryItem[];
   sections?: TemplateSection[];
 };
 
