@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getClientFicheCapabilities } from "./clientFicheCapabilities";
+import { getPlanFeatures } from "./planFeatures";
 
 describe("client fiche capabilities", () => {
   it("allows Essential to edit basic public content while locking Pro and Signature features", () => {
@@ -26,11 +27,20 @@ describe("client fiche capabilities", () => {
     expect(c.rendezVous.editable).toBe(true);
     expect(c.socials.editable).toBe(true);
     expect(c.links.maxItems).toBe(10);
-    expect(c.gallery.maxItems).toBe(8);
+    expect(c.gallery.maxItems).toBe(4);
     expect(c.googleReview.editable).toBe(true);
     expect(c.catalog.editable).toBe(false);
     expect(c.catalog.upgradeTo).toBe("signature");
     expect(c.callbackForm.upgradeTo).toBe("signature");
+  });
+
+  it("derives quantitative limits from plan features", () => {
+    for (const plan of ["essentiel", "pro", "signature"] as const) {
+      const capabilities = getClientFicheCapabilities(plan);
+      const features = getPlanFeatures(plan);
+      expect(capabilities.links.maxItems).toBe(features.maxLinks);
+      expect(capabilities.gallery.maxItems).toBe(features.maxPhotos);
+    }
   });
 
   it("allows Signature to edit the complete public content", () => {
