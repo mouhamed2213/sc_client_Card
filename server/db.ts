@@ -216,6 +216,34 @@ export async function getFicheById(id: number) {
 export async function createFiche(value: InsertFiche) {
   return (await prisma.fiche.create({ data: value })).id;
 }
+
+// --- Fiche autonome : créée sans compte ou rattachée à un compte existant ---
+export async function createStandaloneFiche(input: {
+  fiche: Omit<InsertFiche, "ownerId">;
+  ownerId?: number | null;
+}) {
+  return prisma.$transaction(async tx => {
+    let ownerId: number | null = null;
+    if (input.ownerId != null) {
+      const owner = await tx.user.findUnique({
+        where: { id: input.ownerId },
+        include: { clientCredential: true },
+      });
+      if (
+        !owner ||
+        owner.role !== "user" ||
+        owner.loginMethod !== "local-client" ||
+        !owner.clientCredential
+      ) {
+        throw new Error("OWNER_NOT_FOUND");
+      }
+      ownerId = owner.id;
+    }
+    return tx.fiche.create({
+      data: { ...input.fiche, ownerId },
+    });
+  });
+}
 export async function updateFiche(
   id: number,
   value: Prisma.FicheUncheckedUpdateInput
