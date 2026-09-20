@@ -274,7 +274,6 @@ export async function createClientAccountWithFiche(input: {
   user: {
     name?: string | null;
     email?: string | null;
-    formule: "essentiel" | "pro" | "signature";
   };
   credential: {
     username: string;
@@ -295,7 +294,9 @@ export async function createClientAccountWithFiche(input: {
         email: input.user.email ?? null,
         loginMethod: "local-client",
         role: "user",
-        formule: input.user.formule,
+        // Fiche.formule is the source of truth for client-space capabilities.
+        // User.formule is kept only as account-level compatibility metadata.
+        formule: input.fiche.formule,
       },
     });
 
