@@ -12,8 +12,11 @@ export type TemplateHour = {
 
 export type TemplateGalleryItem = {
   id?: any;
+  type?: "image" | "video";
   url: string;
   alt: string;
+  source?: "youtube" | "instagram" | "facebook" | "tiktok" | "vimeo" | "direct";
+  embedUrl?: string;
 };
 
 export type TemplateArticle = {
