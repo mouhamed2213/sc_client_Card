@@ -1,3 +1,4 @@
+import { slugBaseFromFiche } from "@shared/slug";
 import { Button } from "@/components/ui/button";
 import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
@@ -73,7 +74,6 @@ export default function AdminClientAccountCreationModal({
   const [whatsapp, setWhatsapp] = useState("+221");
   const [email, setEmail] = useState("");
   const [adresse, setAdresse] = useState("");
-  const [slug, setSlug] = useState("");
   const [plan, setPlan] = useState<PlanName>("essentiel");
   const [googlePlaceId, setGooglePlaceId] = useState("");
   const [photoFile, setPhotoFile] = useState<File | undefined>();
@@ -105,7 +105,7 @@ export default function AdminClientAccountCreationModal({
         username: result.username,
         temporaryPassword: result.temporaryPassword,
         cardId: result.cardId,
-        slug: variables.fiche.slug,
+        slug: result.slug,
         plan: variables.formule,
         statut: variables.fiche.statut === "active" ? "active" : "brouillon",
       });
@@ -118,15 +118,13 @@ export default function AdminClientAccountCreationModal({
     },
   });
 
-  const generatedSlug = useMemo(() => {
-    const value = `${prenom} ${nom}`.trim();
-    return value
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
-  }, [prenom, nom]);
+  const previewSlug = useMemo(
+    () =>
+      prenom.trim() || nom.trim()
+        ? slugBaseFromFiche({ prenom, nom, entreprise })
+        : "",
+    [prenom, nom, entreprise]
+  );
 
   const features = getPlanFeatures(plan);
 
@@ -143,7 +141,13 @@ export default function AdminClientAccountCreationModal({
         site: "",
         data: {
           liens: [],
-          galerie: galleryFiles.slice(0, getPlanFeatures(plan).maxPhotos),
+          galerie: galleryFiles
+            .slice(0, getPlanFeatures(plan).maxPhotos)
+            .map(file => ({
+              type: "image" as const,
+              url: "pending-upload",
+              alt: file.name,
+            })),
           horaires: hours,
           sections: [],
         },
@@ -173,7 +177,6 @@ export default function AdminClientAccountCreationModal({
     setWhatsapp("+221");
     setEmail("");
     setAdresse("");
-    setSlug("");
     setPlan("essentiel");
     setGooglePlaceId("");
     setPhotoFile(undefined);
@@ -266,11 +269,6 @@ export default function AdminClientAccountCreationModal({
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (mutation.isPending || isPreparing) return;
-    const finalSlug = (slug.trim() || generatedSlug).trim();
-    if (!finalSlug) {
-      toast.error("Le slug est obligatoire");
-      return;
-    }
 
     let photo = "";
     let logo = "";
@@ -306,7 +304,6 @@ export default function AdminClientAccountCreationModal({
       createCard,
       cardNumero: createCard ? cardNumero.trim() : undefined,
       fiche: {
-        slug: finalSlug,
         formule: plan,
         statut,
         nom: nom.trim(),
@@ -675,17 +672,13 @@ export default function AdminClientAccountCreationModal({
             </Field>
           )}
 
-          <Field label="Slug public">
-            <input
-              required
-              value={slug}
-              onChange={e => setSlug(e.target.value)}
-              placeholder={generatedSlug || "prenom-nom"}
-              pattern="[a-zA-Z0-9-]{3,160}"
-            />
+          <Field label="Adresse publique">
+            <p className="text-sm text-[#172033]">
+              /fiche/{previewSlug || "prenom-nom"}
+            </p>
             <p className="mt-1.5 text-xs text-[#9aa3b1]">
-              La fiche sera accessible sur /fiche/
-              {slug || generatedSlug || "votre-slug"}.
+              Générée automatiquement à la création, puis figée (elle est
+              imprimée sur la carte). Un numéro est ajouté si elle existe déjà.
             </p>
           </Field>
 

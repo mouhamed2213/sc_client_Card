@@ -8,20 +8,23 @@ import {
   ExternalLink,
   Facebook,
   Globe2,
+  Images,
   Instagram,
   Linkedin,
   Mail,
   MapPin,
   MessageCircle,
   Phone,
+  Play,
   Star,
   UserRound,
   Youtube,
 } from "lucide-react";
-import type { FormEvent, ReactNode } from "react";
+import type { FormEvent, ReactNode, TouchEvent } from "react";
 import { useState } from "react";
+import { parseVideoUrl } from "../../shared/videoUrls";
 import { getTemplateConfig } from "../config";
-import type { FicheTemplateModel } from "../model";
+import type { FicheTemplateModel, TemplateGalleryItem } from "../model";
 import "../socials.css";
 import "../theme-tokens.css";
 import "../themes.css";
@@ -66,94 +69,44 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   );
 }
 
+type ActionKey = "appel" | "whatsapp" | "email";
+
+const ACTION_CONFIG: Record<
+  ActionKey,
+  {
+    label: string;
+    className: string;
+    Icon: typeof Phone;
+    href: (actions: FicheTemplateProps["actions"]) => string | undefined;
+  }
+> = {
+  appel: {
+    label: "Appeler",
+    className: "public-action-call",
+    Icon: Phone,
+    href: actions => actions.phoneHref,
+  },
+  whatsapp: {
+    label: "WhatsApp",
+    className: "public-action-whatsapp",
+    Icon: MessageCircle,
+    href: actions => actions.whatsappHref,
+  },
+  email: {
+    label: "E-mail",
+    className: "public-action-email",
+    Icon: Mail,
+    href: actions => actions.emailHref,
+  },
+};
+
 function Hero({ fiche, actions }: FicheTemplateProps) {
   const identityImage = fiche.logo;
-  const preferredAction = actions.buttonOrder[0];
-
-  const hasAction = (key: "appel" | "whatsapp" | "email") =>
-    actions.buttonOrder.includes(key);
-
-  const preferredBadge = (
-    <span className="mt-1 inline-block rounded-full border border-white/15 bg-black/45 px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white/85 shadow-sm backdrop-blur-sm">
-      Action préférée
-    </span>
+  // The preferred action is the first one in the configured order that can
+  // actually be used (e.g. no e-mail address → it cannot be "preferred").
+  const preferredKey = actions.buttonOrder.find(key =>
+    Boolean(ACTION_CONFIG[key].href(actions))
   );
-
-  const renderActionButton = (key: "appel" | "whatsapp" | "email") => {
-    switch (key) {
-      case "appel":
-        return (
-          <div className="flex flex-col items-center gap-0.5">
-            {hasAction("appel") ? (
-              <a
-                href={actions.phoneHref}
-                className="public-action public-action-call"
-              >
-                <Phone className="h-5 w-5" />
-                <span>Appeler</span>
-              </a>
-            ) : (
-              <div
-                className="public-action public-action--missing"
-                role="status"
-              >
-                <Phone className="h-5 w-5" />
-                <span>Numéro non fourni</span>
-              </div>
-            )}
-            {preferredAction === "appel" && preferredBadge}
-          </div>
-        );
-
-      case "whatsapp":
-        return (
-          <div className="flex flex-col items-center gap-0.5">
-            {hasAction("whatsapp") ? (
-              <a
-                href={actions.whatsappHref}
-                className="public-action public-action-whatsapp"
-              >
-                <MessageCircle className="h-5 w-5" />
-                <span>Message WhatsApp</span>
-              </a>
-            ) : (
-              <div
-                className="public-action public-action--missing"
-                role="status"
-              >
-                <MessageCircle className="h-5 w-5" />
-                <span>Message WhatsApp non fourni</span>
-              </div>
-            )}
-            {preferredAction === "whatsapp" && preferredBadge}
-          </div>
-        );
-
-      case "email":
-        return (
-          <div className="flex flex-col items-center gap-0.5">
-            {hasAction("email") && actions.emailHref ? (
-              <a
-                href={actions.emailHref}
-                className="public-action public-action-email"
-              >
-                <Mail className="h-5 w-5" />
-                <span>E-mail</span>
-              </a>
-            ) : (
-              <div
-                className="public-action public-action--missing"
-                role="status"
-              >
-                <Mail className="h-5 w-5" />
-                <span>E-mail non fourni</span>
-              </div>
-            )}
-            {preferredAction === "email" && preferredBadge}
-          </div>
-        );
-    }
-  };
 
   return (
     <section className="public-hero">
@@ -190,52 +143,173 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
         </div>
       </div>
       <div className="public-actions">
-        {actions.buttonOrder.map(key => (
-          <div key={key}>{renderActionButton(key)}</div>
-        ))}
+        {actions.buttonOrder.map(key => {
+          const { label, className, Icon, href } = ACTION_CONFIG[key];
+          const target = href(actions);
+          const preferred = key === preferredKey;
+          return (
+            <div key={key} className="public-action-cell">
+              {preferred && (
+                <span className="public-action-badge">Préféré</span>
+              )}
+              {target ? (
+                <a
+                  href={target}
+                  className={`public-action ${className}${preferred ? " is-preferred" : ""}`}
+                >
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                  <span>{label}</span>
+                </a>
+              ) : (
+                <div className="public-action public-action--missing" role="status">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                  <span>{label}</span>
+                  <small>Non fourni</small>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );
 }
 
-function GalleryCarousel({
-  images,
-}: {
-  images: FicheTemplateModel["data"]["galerie"];
-}) {
-  const gallery = images ?? [];
-  const [current, setCurrent] = useState(0);
-  if (!gallery.length) return null;
+/**
+ * Applies the plan limits to photos and videos independently, keeping the
+ * order chosen by the client (a video must not eat a photo slot).
+ */
+function galleryForPlan(
+  items: TemplateGalleryItem[] | undefined,
+  maxPhotos: number,
+  maxVideos: number
+) {
+  let photos = 0;
+  let videos = 0;
+  const result: TemplateGalleryItem[] = [];
+  for (const item of items ?? []) {
+    if (item.type === "video") {
+      if (videos < maxVideos) {
+        videos += 1;
+        result.push(item);
+      }
+    } else if (photos < maxPhotos) {
+      photos += 1;
+      result.push(item);
+    }
+  }
+  return result;
+}
 
-  const previous = () =>
-    setCurrent(index => (index - 1 + gallery.length) % gallery.length);
-  const next = () => setCurrent(index => (index + 1) % gallery.length);
-  const image = gallery[current];
+function GalleryVideo({ item }: { item: TemplateGalleryItem }) {
+  // The embed URL is re-derived from the source URL: a stored `embedUrl`
+  // is never trusted as-is.
+  const parsed = parseVideoUrl(item.url);
+  if (!parsed) {
+    return (
+      <div className="gallery-fallback">
+        <Play className="h-6 w-6" aria-hidden="true" />
+        <span>Vidéo indisponible</span>
+      </div>
+    );
+  }
+  if (parsed.source === "direct") {
+    return (
+      <video
+        className="gallery-media gallery-video"
+        src={parsed.url}
+        controls
+        playsInline
+        preload="metadata"
+        aria-label={item.alt || "Vidéo"}
+      />
+    );
+  }
+  const portrait = parsed.source === "instagram" || parsed.source === "tiktok";
+  return (
+    <iframe
+      className={`gallery-embed${portrait ? " gallery-embed--portrait" : ""}`}
+      src={parsed.embedUrl}
+      title={item.alt || "Vidéo"}
+      loading="lazy"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+      allowFullScreen
+      referrerPolicy="strict-origin-when-cross-origin"
+      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+    />
+  );
+}
+
+function GalleryCarousel({ items }: { items: TemplateGalleryItem[] }) {
+  const [requested, setRequested] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  if (!items.length) return null;
+
+  const current = Math.min(requested, items.length - 1);
+  const item = items[current];
+  const isVideo = item.type === "video";
+  const go = (index: number) =>
+    setRequested((index + items.length) % items.length);
+
+  const onTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    if (touchStartX === null) return;
+    const delta = event.changedTouches[0].clientX - touchStartX;
+    setTouchStartX(null);
+    if (Math.abs(delta) > 40) go(current + (delta < 0 ? 1 : -1));
+  };
 
   return (
-    <div className="pro-gallery w-full">
-      <div className="pro-gallery-stage relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-        <img
-          className="block h-full w-full object-cover"
-          src={image.url}
-          alt={image.alt}
-          loading="lazy"
-        />
-        {gallery.length > 1 && (
+    <div
+      className="pro-gallery w-full"
+      role="region"
+      aria-roledescription="carrousel"
+      aria-label="Galerie"
+    >
+      {/* Fixed-ratio stage: its size never depends on the media shown. */}
+      <div
+        className="pro-gallery-stage gallery-stage"
+        tabIndex={0}
+        onKeyDown={event => {
+          if (event.key === "ArrowLeft") go(current - 1);
+          if (event.key === "ArrowRight") go(current + 1);
+        }}
+        onTouchStart={event => setTouchStartX(event.touches[0].clientX)}
+        onTouchEnd={onTouchEnd}
+      >
+        {isVideo ? (
+          <GalleryVideo key={`${current}-${item.url}`} item={item} />
+        ) : (
+          <>
+            <img
+              className="gallery-backdrop"
+              src={item.url}
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              className="gallery-media"
+              src={item.url}
+              alt={item.alt}
+              loading="lazy"
+              draggable={false}
+            />
+          </>
+        )}
+        {items.length > 1 && (
           <>
             <button
               type="button"
-              className="pro-gallery-control absolute top-1/2 left-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
-              onClick={previous}
-              aria-label="Photo précédente"
+              className="pro-gallery-control gallery-control gallery-control--prev"
+              onClick={() => go(current - 1)}
+              aria-label="Précédent"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
             <button
               type="button"
-              className="pro-gallery-control absolute top-1/2 right-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
-              onClick={next}
-              aria-label="Photo suivante"
+              className="pro-gallery-control gallery-control gallery-control--next"
+              onClick={() => go(current + 1)}
+              aria-label="Suivant"
             >
               <ArrowRight className="h-4 w-4" />
             </button>
@@ -243,18 +317,19 @@ function GalleryCarousel({
         )}
       </div>
       <div className="pro-gallery-meta mt-2.5 flex items-center justify-between gap-3 text-[10px] font-bold text-theme-muted">
-        <span>
-          Photo {current + 1} / {gallery.length}
+        <span aria-live="polite">
+          {isVideo ? "Vidéo" : "Photo"} {current + 1} / {items.length}
         </span>
-        {gallery.length > 1 && (
+        {items.length > 1 && (
           <div className="pro-gallery-dots flex items-center gap-[5px]">
-            {gallery.map((item, index) => (
+            {items.map((entry, index) => (
               <button
-                key={item.id ?? `${item.url}-${index}`}
+                key={entry.id ?? `${entry.url}-${index}`}
                 type="button"
                 className={`pro-gallery-dot ${index === current ? "is-active" : ""}`}
-                onClick={() => setCurrent(index)}
-                aria-label={`Aller à la photo ${index + 1}`}
+                onClick={() => go(index)}
+                aria-label={`Aller à l’élément ${index + 1}`}
+                aria-current={index === current}
               />
             ))}
           </div>
@@ -365,7 +440,11 @@ export function FicheTemplate({
   const config = getTemplateConfig(fiche.formule);
   const { features } = config;
   const links = (fiche.data.liens ?? []).slice(0, features.maxLinks);
-  const gallery = (fiche.data.galerie ?? []).slice(0, features.maxPhotos);
+  const gallery = galleryForPlan(
+    fiche.data.galerie,
+    features.maxPhotos,
+    features.maxVideos
+  );
 
   return (
     <div
@@ -597,10 +676,10 @@ export function FicheTemplate({
           {gallery.length ? (
             <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
-                icon={<UserRound className="h-4 w-4" />}
+                icon={<Images className="h-4 w-4" />}
                 title="Galerie"
               />
-              <GalleryCarousel images={gallery} />
+              <GalleryCarousel items={gallery} />
             </section>
           ) : null}
           {children}

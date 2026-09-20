@@ -9,7 +9,7 @@ const galleryItem = z.object({
   embedUrl: z.string().url().optional(),
 });
 
-export const fichePayload = z.object({
+const ficheFields = z.object({
   slug: z.string().min(3).max(160),
   formule: z.enum(["essentiel", "pro", "signature"]),
   statut: z.enum(["active", "suspendue", "supprimee", "brouillon"]),
@@ -58,3 +58,13 @@ export const fichePayload = z.object({
     notesInternes: z.string().default(""),
   }),
 });
+
+/**
+ * Fiche content without the slug. The slug is generated once at creation
+ * (printed on NFC/QR cards) and is immutable afterwards, so neither the
+ * creation nor the update procedures accept it from the client.
+ */
+export const ficheContentPayload = ficheFields.omit({ slug: true });
+
+/** Full payload including the slug (type only; procedures use ficheContentPayload). */
+export const fichePayload = ficheFields;

@@ -352,15 +352,12 @@ export default function FicheEditor() {
                   onChange={e => setField("entreprise", e.target.value)}
                 />
               </EditorField>
-              <EditorField label="Slug">
+              <EditorField label="Adresse publique (non modifiable)">
                 <input
-                  value={form.slug}
-                  onChange={e =>
-                    setField(
-                      "slug",
-                      e.target.value.toLowerCase().replace(/[^a-z-]/g, "-")
-                    )
-                  }
+                  value={`/fiche/${form.slug}`}
+                  readOnly
+                  aria-readonly="true"
+                  className="cursor-not-allowed bg-[#f5f6f8] text-[#657084]"
                 />
               </EditorField>
               <EditorField label="Action prioritaire">

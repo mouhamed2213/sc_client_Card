@@ -1,3 +1,4 @@
+import { slugBaseFromFiche } from "@shared/slug";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { planLabels, type PlanName } from "@shared/planFeatures";
@@ -22,7 +23,6 @@ export default function AdminStandaloneFicheCreationModal({ open, onClose }: Pro
   const [telephone, setTelephone] = useState("+221");
   const [whatsapp, setWhatsapp] = useState("+221");
   const [email, setEmail] = useState("");
-  const [slug, setSlug] = useState("");
   const [ownerId, setOwnerId] = useState<number | null>(null);
   const [ownerSearch, setOwnerSearch] = useState("");
   const [ownerPickerOpen, setOwnerPickerOpen] = useState(false);
@@ -44,15 +44,17 @@ export default function AdminStandaloneFicheCreationModal({ open, onClose }: Pro
     onError: error => toast.error("Création impossible", { description: error.message }),
   });
 
-  const generatedSlug = useMemo(
-    () => `${prenom} ${nom}`.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
-    [prenom, nom]
+  const previewSlug = useMemo(
+    () =>
+      prenom.trim() || nom.trim()
+        ? slugBaseFromFiche({ prenom, nom, entreprise })
+        : "",
+    [prenom, nom, entreprise]
   );
 
   function reset() {
     setPlan("essentiel"); setPrenom(""); setNom(""); setFonction(""); setEntreprise("");
-    setTelephone("+221"); setWhatsapp("+221"); setEmail(""); setSlug("");
+    setTelephone("+221"); setWhatsapp("+221"); setEmail("");
     setOwnerId(null); setOwnerSearch(""); setOwnerPickerOpen(false);
   }
 
@@ -63,12 +65,9 @@ export default function AdminStandaloneFicheCreationModal({ open, onClose }: Pro
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
-    const finalSlug = (slug.trim() || generatedSlug).trim();
-    if (!finalSlug) return toast.error("Le slug est obligatoire");
     mutation.mutate({
       ownerId,
       fiche: {
-        slug: finalSlug,
         formule: plan,
         statut: "brouillon",
         nom: nom.trim(),
@@ -139,7 +138,7 @@ export default function AdminStandaloneFicheCreationModal({ open, onClose }: Pro
             <Field label="Téléphone"><input required value={telephone} onChange={e => setTelephone(e.target.value)} /></Field>
             <Field label="WhatsApp"><input required value={whatsapp} onChange={e => setWhatsapp(e.target.value)} /></Field>
             <Field label="E-mail"><input type="email" value={email} onChange={e => setEmail(e.target.value)} /></Field>
-            <Field label="Slug"><input required value={slug} onChange={e => setSlug(e.target.value)} placeholder={generatedSlug || "prenom-nom"} /></Field>
+            <Field label="Adresse publique"><p className="text-sm">/fiche/{previewSlug || "prenom-nom"}</p><p className="mt-1.5 text-xs text-[#9aa3b1]">Générée automatiquement puis figée. Un numéro est ajouté si elle existe déjà.</p></Field>
           </div>
 
           <div className="rounded-xl border border-[#e6e8ec] p-4">

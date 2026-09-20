@@ -112,3 +112,66 @@
   .fiche-template .pro-gallery-stage { aspect-ratio:4/3; border-radius:13px; }
   .fiche-template .pro-gallery-control { width:34px; height:34px; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Hero action buttons: three equal cells, whatever the label/state.   */
+/* ------------------------------------------------------------------ */
+.fiche-template .public-actions { align-items: stretch; margin-top: 30px; }
+.fiche-template .public-action-cell { position: relative; display: flex; min-width: 0; }
+.fiche-template .public-action-cell > .public-action {
+  flex: 1 1 auto; width: 100%; min-width: 0; min-height: 60px; box-sizing: border-box;
+  flex-direction: column; gap: 5px; padding: 8px 4px; text-align: center; line-height: 1.15;
+}
+.fiche-template .public-action-cell > .public-action > span { white-space: nowrap; font-size: 11px; }
+.fiche-template .public-action--missing small { font-size: 9px; font-weight: 600; opacity: .8; }
+.fiche-template .public-action-badge {
+  position: absolute; top: -9px; left: 50%; z-index: 2; transform: translateX(-50%);
+  padding: 2px 8px; border-radius: 999px; background: var(--theme-accent); color: #fff;
+  font-size: 8px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.28);
+}
+.fiche-template--signature .public-action-badge { color: #17130d; }
+.fiche-template .public-action-cell .public-action.is-preferred {
+  border-color: rgba(255,255,255,.7); background: rgba(255,255,255,.2);
+}
+.fiche-template--signature .public-action-cell .public-action.is-preferred {
+  border-color: #e4c18c; background: rgba(201,164,106,.24);
+}
+
+/* ------------------------------------------------------------------ */
+/* Gallery: fixed-ratio stage, media is contained (never resizes it).  */
+/* ------------------------------------------------------------------ */
+.fiche-template .gallery-stage {
+  position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden;
+  border-radius: 16px; background: #0c0c0c; outline-offset: 3px;
+}
+.fiche-template .gallery-backdrop {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  filter: blur(22px) brightness(.55); transform: scale(1.15); pointer-events: none;
+}
+.fiche-template .gallery-media {
+  position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%;
+  object-fit: contain; object-position: center; user-select: none; -webkit-user-drag: none;
+}
+.fiche-template .gallery-video { background: #000; }
+.fiche-template .gallery-embed {
+  position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; border: 0; background: #000;
+}
+.fiche-template .gallery-embed--portrait {
+  left: 50%; right: auto; width: auto; max-width: 100%; aspect-ratio: 9 / 16; transform: translateX(-50%);
+}
+.fiche-template .gallery-fallback {
+  position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px; color: rgba(255,255,255,.7); font-size: 12px;
+}
+.fiche-template .gallery-control { position: absolute; top: 50%; z-index: 3; display: flex; width: 38px; height: 38px;
+  align-items: center; justify-content: center; transform: translateY(-50%); }
+.fiche-template .gallery-control--prev { left: 10px; }
+.fiche-template .gallery-control--next { right: 10px; }
+.fiche-template .pro-gallery-stage.gallery-stage { background: #0c0c0c; }
+.fiche-template--signature .gallery-stage { border-color: #332d26; }
+@media (max-width: 420px) {
+  .fiche-template .public-action-cell > .public-action > span { font-size: 10px; }
+  .fiche-template .gallery-stage { border-radius: 13px; }
+  .fiche-template .gallery-control { width: 34px; height: 34px; }
+}

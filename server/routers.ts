@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { mediaRules } from "@shared/mediaRules";
 import { getPlanFeatures, type PlanName } from "@shared/planFeatures";
 import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
-import { fichePayload } from "@shared/types/schemas";
+import { ficheContentPayload } from "@shared/types/schemas";
 import { TRPCError } from "@trpc/server";
 import { Fiche } from "generated/prisma/client";
 import { imageSize } from "image-size";
@@ -110,7 +110,7 @@ export const appRouter = router({
         return { ok: true };
       }),
     update: adminProcedure
-      .input(fichePayload.extend({ id: z.number().int().positive() }))
+      .input(ficheContentPayload.extend({ id: z.number().int().positive() }))
       .mutation(async ({ input }) => {
         const current = await getFicheById(input.id);
         if (!current)
@@ -118,12 +118,7 @@ export const appRouter = router({
             code: "NOT_FOUND",
             message: "Fiche introuvable",
           });
-        const duplicate = await getFicheBySlug(input.slug);
-        if (duplicate && duplicate.id !== input.id)
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Ce slug existe déjà.",
-          });
+        // The slug is immutable: it is printed on NFC/QR cards.
         if (input.statut === "active") {
           const errors = validatePlanPayload({ ...input, data: input.data });
           if (errors.length)
@@ -134,7 +129,7 @@ export const appRouter = router({
         }
         const { id, data, ...fields } = input;
         await updateFiche(id, { ...fields, dataJson: JSON.stringify(data) });
-        return { ok: true, slug: input.slug } as const;
+        return { ok: true, slug: current.slug } as const;
       }),
     updateStatus: adminProcedure
       .input(
@@ -282,7 +277,7 @@ export const appRouter = router({
   }),
   admin: router({
     createStandaloneFiche: adminProcedure
-      .input(z.object({ fiche: fichePayload, ownerId: z.number().int().positive().nullable().optional() }))
+      .input(z.object({ fiche: ficheContentPayload, ownerId: z.number().int().positive().nullable().optional() }))
       .mutation(async ({ input }) => {
         const { data, ...fields } = input.fiche;
         const createdAt = new Date();
@@ -323,7 +318,7 @@ export const appRouter = router({
             .optional()
             .or(z.literal("")),
           formule: z.enum(["essentiel", "pro", "signature"]),
-          fiche: fichePayload,
+          fiche: ficheContentPayload,
           createCard: z.boolean().default(false),
           cardNumero: z.string().trim().max(80).optional(),
         })
@@ -383,6 +378,7 @@ export const appRouter = router({
             temporaryPassword,
             mustChangePassword: result.credential.mustChangePassword,
             cardId: result.card?.id ?? null,
+            slug: result.fiche.slug,
           };
         } catch (error) {
           if (
@@ -632,7 +628,7 @@ export const appRouter = router({
           googlePlaceId: z.string().optional().default(""),
           photo: z.string().optional().default(""),
           logo: z.string().optional().default(""),
-          data: fichePayload.shape.data.omit({ notesInternes: true }),
+          data: ficheContentPayload.shape.data.omit({ notesInternes: true }),
         })
       )
       .mutation(async ({ ctx, input }) => {

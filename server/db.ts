@@ -6,6 +6,7 @@ import type {
   PrismaClient as PrismaClientType,
 } from "generated/prisma/client";
 import { randomBytes } from "node:crypto";
+import { pickAvailableSlug, slugBaseFromFiche } from "@shared/slug";
 import { prisma } from "../prisma/client";
 import { ENV } from "./_core/env";
 
@@ -213,16 +214,51 @@ export async function getFicheBySlug(slug: string) {
 export async function getFicheById(id: number) {
   return prisma.fiche.findUnique({ where: { id } });
 }
+
+type Tx = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+const MAX_SLUG_ATTEMPTS = 5;
+
+/** Generates a unique slug (`prenom-nom`, `prenom-nom-2`, …) inside a transaction. */
+async function generateUniqueSlug(
+  tx: Tx,
+  fiche: { prenom?: string | null; nom?: string | null; entreprise?: string | null }
+) {
+  const base = slugBaseFromFiche(fiche);
+  const rows = await tx.fiche.findMany({
+    where: { slug: { startsWith: base } },
+    select: { slug: true },
+  });
+  return pickAvailableSlug(base, rows.map(row => row.slug));
+}
+
+function isSlugConflict(error: unknown) {
+  const e = error as { code?: string; meta?: { target?: unknown } };
+  if (e?.code !== "P2002") return false;
+  const target = e.meta?.target;
+  return Array.isArray(target) ? target.includes("slug") : String(target ?? "").includes("slug");
+}
+
+/** Runs `work` again when two concurrent creations pick the same slug. */
+async function withSlugRetry<T>(work: () => Promise<T>): Promise<T> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await work();
+    } catch (error) {
+      if (!isSlugConflict(error) || attempt >= MAX_SLUG_ATTEMPTS) throw error;
+    }
+  }
+}
+
 export async function createFiche(value: InsertFiche) {
   return (await prisma.fiche.create({ data: value })).id;
 }
 
 // --- Fiche autonome : créée sans compte ou rattachée à un compte existant ---
 export async function createStandaloneFiche(input: {
-  fiche: Omit<InsertFiche, "ownerId">;
+  fiche: Omit<InsertFiche, "ownerId" | "slug">;
   ownerId?: number | null;
 }) {
-  return prisma.$transaction(async tx => {
+  return withSlugRetry(() => prisma.$transaction(async tx => {
     let ownerId: number | null = null;
     if (input.ownerId != null) {
       const owner = await tx.user.findUnique({
@@ -239,10 +275,11 @@ export async function createStandaloneFiche(input: {
       }
       ownerId = owner.id;
     }
+    const slug = await generateUniqueSlug(tx, input.fiche);
     return tx.fiche.create({
-      data: { ...input.fiche, ownerId },
+      data: { ...input.fiche, slug, ownerId },
     });
-  });
+  }));
 }
 export async function updateFiche(
   id: number,
@@ -307,10 +344,10 @@ export async function createClientAccountWithFiche(input: {
     username: string;
     passwordHash: string;
   };
-  fiche: Omit<InsertFiche, "ownerId">;
+  fiche: Omit<InsertFiche, "ownerId" | "slug">;
   cardNumero?: string;
 }) {
-  return prisma.$transaction(async tx => {
+  return withSlugRetry(() => prisma.$transaction(async tx => {
     const existingUsername = await tx.clientCredential.findUnique({
       where: { username: input.credential.username },
     });
@@ -328,9 +365,11 @@ export async function createClientAccountWithFiche(input: {
       },
     });
 
+    const slug = await generateUniqueSlug(tx, input.fiche);
     const fiche = await tx.fiche.create({
       data: {
         ...input.fiche,
+        slug,
         ownerId: user.id,
       },
     });
@@ -358,7 +397,7 @@ export async function createClientAccountWithFiche(input: {
     }
 
     return { user, fiche, credential, card };
-  });
+  }));
 }
 
 // --- Fiches côté client ---
