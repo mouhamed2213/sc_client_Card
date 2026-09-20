@@ -741,16 +741,12 @@ export const appRouter = router({
       .input(
         z.object({
           ficheId: z.number().int().positive(),
-          kind: z.enum(["profile", "logo", "gallery", "video"]),
+          kind: z.enum(["profile", "logo", "gallery"]),
           filename: z.string().min(1).max(160),
           mimeType: z.enum([
             "image/jpeg",
             "image/png",
             "image/webp",
-            "video/mp4",
-            "video/webm",
-            "video/quicktime",
-            "video/ogg",
           ]),
           contentBase64: z.string().min(20).max(70_000_000),
         })
@@ -771,76 +767,7 @@ export const appRouter = router({
           });
         }
 
-        const currentData = JSON.parse(fiche.dataJson || "{}") as {
-          galerie?: Array<{ type?: "image" | "video" }>;
-        };
-        const gallery = currentData.galerie ?? [];
-        const maxPhotos = capabilities.gallery.maxItems ?? getPlanFeatures(plan).maxPhotos;
-        const maxVideos = capabilities.gallery.maxVideos ?? getPlanFeatures(plan).maxVideos;
-        const photoCount = gallery.filter(item => item.type !== "video").length;
-        const videoCount = gallery.filter(item => item.type === "video").length;
-
-        if (input.kind === "gallery" && photoCount >= maxPhotos) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: `La galerie est limitée à ${maxPhotos} photos.`,
-          });
-        }
-        if (input.kind === "video" && videoCount >= maxVideos) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: `La galerie est limitée à ${maxVideos} vidéos pour votre formule.`,
-          });
-        }
-        if (input.kind === "video" && maxVideos === 0) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Votre formule ne permet pas l’ajout de vidéos.",
-          });
-        }
-
-        const raw = input.contentBase64.replace(/^data:[^;]+;base64,/, "");
-        if (!/^[A-Za-z0-9+/]+={0,2}$/.test(raw)) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Le contenu média est invalide." });
-        }
-        const bytes = Buffer.from(raw, "base64");
-
-        if (input.kind === "video") {
-          if (bytes.byteLength > mediaRules.video.maxInputBytes)
-            throw new TRPCError({
-              code: "BAD_REQUEST",
-              message: `Vidéo trop lourde : maximum ${Math.round(mediaRules.video.maxInputBytes / (1024 * 1024))} Mo avant optimisation.`,
-            });
-
-          let optimized: Awaited<ReturnType<typeof optimizeGalleryVideo>>;
-          try {
-            optimized = await optimizeGalleryVideo({
-              bytes,
-              filename: input.filename,
-              mimeType: input.mimeType,
-            });
-          } catch (error) {
-            const message = error instanceof Error ? error.message : "Traitement vidéo impossible.";
-            const code = message === "VIDEO_TROP_LOURDE" || message === "FORMAT_VIDEO_NON_SUPPORTÉ"
-              ? "BAD_REQUEST"
-              : "INTERNAL_SERVER_ERROR";
-            throw new TRPCError({ code, message });
-          }
-
-          const safeName = input.filename.replace(/[^a-z0-9._-]/gi, "-");
-          const [videoResult, posterResult] = await Promise.all([
-            storagePut(`fiches/media/video/${safeName}.mp4`, optimized.video, optimized.mimeType),
-            storagePut(`fiches/media/video/posters/${safeName}.jpg`, optimized.poster, optimized.posterMimeType),
-          ]);
-
-          return {
-            ...videoResult,
-            poster: posterResult.url,
-            type: "video" as const,
-            bytes: optimized.video.byteLength,
-          };
-        }
-
+        const currentData = JSON.parse(fiche.dataJson || "{}") as { galerie?: unknown[] };\n        const gallery = currentData.galerie ?? [];\n\n        if (input.kind === "gallery" && gallery.length >= capabilities.gallery.maxItems!) {\n          throw new TRPCError({ code: "BAD_REQUEST", message: `La galerie est limitée à ${capabilities.gallery.maxItems} photos.` });\n        }\n\n        const raw = input.contentBase64.replace(/^data:[^;]+;base64,/, "");\n        if (!/^[A-Za-z0-9+/]+={0,2}$/.test(raw)) {\n          throw new TRPCError({ code: "BAD_REQUEST", message: "Le contenu média est invalide." });\n        }\n        const bytes = Buffer.from(raw, "base64");\n
         const maxBytes = mediaRules[input.kind].maxBytes;
         if (bytes.byteLength > maxBytes)
           throw new TRPCError({
