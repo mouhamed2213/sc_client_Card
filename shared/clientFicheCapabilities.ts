@@ -19,6 +19,7 @@ type Capability = {
   editable: boolean;
   upgradeTo?: PlanName;
   maxItems?: number;
+  maxVideos?: number;
 };
 
 export const clientFicheCapabilities: Record<
@@ -34,7 +35,12 @@ export const clientFicheCapabilities: Record<
     rendezVous: { editable: false, upgradeTo: "pro" },
     socials: { editable: false, upgradeTo: "pro" },
     links: { editable: false, upgradeTo: "pro", maxItems: getPlanFeatures("essentiel").maxLinks },
-    gallery: { editable: false, upgradeTo: "pro", maxItems: getPlanFeatures("essentiel").maxPhotos },
+    gallery: {
+      editable: false,
+      upgradeTo: "pro",
+      maxItems: getPlanFeatures("essentiel").maxPhotos,
+      maxVideos: getPlanFeatures("essentiel").maxVideos,
+    },
     googleReview: { editable: false, upgradeTo: "pro" },
     hours: { editable: true },
     catalog: { editable: false, upgradeTo: "signature" },
@@ -49,7 +55,11 @@ export const clientFicheCapabilities: Record<
     rendezVous: { editable: true },
     socials: { editable: true },
     links: { editable: true, maxItems: getPlanFeatures("pro").maxLinks },
-    gallery: { editable: true, maxItems: getPlanFeatures("pro").maxPhotos },
+    gallery: {
+      editable: true,
+      maxItems: getPlanFeatures("pro").maxPhotos,
+      maxVideos: getPlanFeatures("pro").maxVideos,
+    },
     googleReview: { editable: true },
     hours: { editable: true },
     catalog: { editable: false, upgradeTo: "signature" },
@@ -64,7 +74,11 @@ export const clientFicheCapabilities: Record<
     rendezVous: { editable: true },
     socials: { editable: true },
     links: { editable: true, maxItems: getPlanFeatures("signature").maxLinks },
-    gallery: { editable: true, maxItems: getPlanFeatures("signature").maxPhotos },
+    gallery: {
+      editable: true,
+      maxItems: getPlanFeatures("signature").maxPhotos,
+      maxVideos: getPlanFeatures("signature").maxVideos,
+    },
     googleReview: { editable: true },
     hours: { editable: true },
     catalog: { editable: true },
