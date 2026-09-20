@@ -10,10 +10,12 @@ export type TemplateHour = {
   horaire: string;
 };
 
-export type TemplateImage = {
+export type TemplateGalleryItem = {
   id?: any;
+  type?: "image" | "video";
   url: string;
   alt: string;
+  poster?: string;
 };
 
 export type TemplateArticle = {
