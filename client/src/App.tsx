@@ -16,7 +16,7 @@ import ClientRequests from "./pages/ClientRequests";
 import ClientStats from "./pages/ClientStats";
 import FicheClientDetail from "./pages/FicheClientDetail";
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
-const Home = lazy(() => import("@/pages/Home"));
+const Home = lazy(() => import("@/pages/Home"));\nconst Fiches = lazy(() => import("@/pages/Fiches"));
 const PublicFiche = lazy(() => import("@/pages/PublicFiche"));
 const FicheEditor = lazy(() => import("@/pages/FicheEditor"));
 const AdminLogin = lazy(() => import("@/pages/AdminLogin"));
@@ -45,6 +45,14 @@ function Router() {
           component={() => (
             <AdminRoute>
               <Home />
+            </AdminRoute>
+          )}
+        />
+        <Route
+          path="/studio/fiches"
+          component={() => (
+            <AdminRoute>
+              <Fiches />
             </AdminRoute>
           )}
         />
