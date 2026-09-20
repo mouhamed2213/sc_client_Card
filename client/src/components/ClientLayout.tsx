@@ -152,8 +152,7 @@ export default function ClientLayout({
             location === item.href ||
             (item.href === "/espace-client/fiches" &&
               location.startsWith("/espace-client/fiches"));
-          return (
-            {item.premium ? (
+          return item.premium ? (
               <button
                 key={item.href}
                 type="button"
@@ -178,8 +177,7 @@ export default function ClientLayout({
                 <Icon size={17} />
                 {item.label}
               </Link>
-            )}
-          );
+            );
         })}
       </nav>
 
