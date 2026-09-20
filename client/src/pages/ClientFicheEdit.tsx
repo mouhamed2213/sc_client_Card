@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import FicheStatusAlert from "@/components/client-space/FicheStatusAlert";
 import { useParams } from "wouter";
 
 type LinkItem = { label: string; url: string };
@@ -142,6 +143,33 @@ export default function ClientFicheEdit() {
       <ClientLayout ficheId={id}>
         <div className="panel m-4 sm:m-6 lg:m-8 py-16 text-center text-sm text-[#7d8798]">
           Chargement…
+        </div>
+      </ClientLayout>
+    );
+  }
+
+  const lifecycleBlocked =
+    fiche.data.statutMetier === "suspendue" || fiche.data.statutMetier === "expiree";
+
+  if (lifecycleBlocked) {
+    return (
+      <ClientLayout ficheId={id}>
+        <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#c98a4e]">
+              Modifier ma fiche
+            </p>
+            <h1 className="mt-1 text-2xl font-bold text-[#172033]">
+              Modification indisponible
+            </h1>
+            <p className="mt-1 max-w-2xl text-sm text-[#7d8798]">
+              Cette fiche ne peut pas être modifiée tant que son état n'est pas rétabli.
+            </p>
+          </div>
+          <FicheStatusAlert
+            status={fiche.data.statutMetier}
+            dateEcheance={fiche.data.dateEcheance}
+          />
         </div>
       </ClientLayout>
     );
