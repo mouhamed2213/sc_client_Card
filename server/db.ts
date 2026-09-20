@@ -369,14 +369,18 @@ export async function listContactRequests(ficheId: number) {
 }
 export async function getOverview() {
   await ensureDemoFiches();
+  const now = new Date();
+  const renewalLimit = new Date(
+    now.getTime() + 30 * 24 * 60 * 60 * 1000
+  );
   const [total, active, scans, expiring] = await Promise.all([
     prisma.fiche.count(),
     prisma.fiche.count({ where: { statut: "active" } }),
     prisma.fiche.aggregate({ _sum: { scansTotal: true } }),
     prisma.fiche.count({
       where: {
-        dateEcheance: { lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
-        statut: { not: "supprimee" },
+        statut: "active",
+        dateEcheance: { gte: now, lte: renewalLimit },
       },
     }),
   ]);
