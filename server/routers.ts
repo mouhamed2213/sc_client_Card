@@ -287,10 +287,8 @@ export const appRouter = router({
         const createdAt = new Date();
         const dateEcheance = new Date(createdAt);
         dateEcheance.setFullYear(dateEcheance.getFullYear() + 1);
-        const errors = validatePlanPayload({ ...fields, data });
-        if (errors.length) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
-        }
+        // A standalone fiche starts as a draft; plan validation is performed
+        // when the studio activates it, not when the draft is created.
         try {
           const fiche = await createStandaloneFiche({
             ownerId: input.ownerId ?? null,
