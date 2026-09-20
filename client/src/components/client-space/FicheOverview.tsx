@@ -72,11 +72,13 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
 
       <div className="client-kpis">
         <KpiTile icon={ScanLine} label="Scans · 30 jours" value={scans} />
-        <KpiTile
-          icon={MessageSquare}
-          label="Demandes reçues"
-          value={data.requestCount}
-        />
+        {fiche.plan.hasForm && (
+          <KpiTile
+            icon={MessageSquare}
+            label="Demandes reçues"
+            value={data.requestCount}
+          />
+        )}
         <button
           onClick={() => navigate(`/espace-client/fiche/${ficheId}/statistiques`)}
           className="kpi-tile text-left transition hover:border-[#c98a4e]"
