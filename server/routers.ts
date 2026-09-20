@@ -329,7 +329,6 @@ export const appRouter = router({
             user: {
               name: input.name,
               email: input.email || null,
-              formule: input.formule,
             },
             credential: {
               username,
