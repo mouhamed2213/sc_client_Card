@@ -1,28 +1,4 @@
-import { randomBytes } from "node:crypto";
 import { prisma } from "../prisma/client";
-
-export async function listInvitationsForFiche(ficheId: number) {
-  return prisma.invitationClient.findMany({
-    where: { ficheId },
-    orderBy: { createdAt: "desc" },
-  });
-}
-
-export async function revokeInvitation(id: number) {
-  const invitation = await prisma.invitationClient.findUnique({
-    where: { id },
-  });
-  if (!invitation) throw new Error("INVITATION_NOT_FOUND");
-  if (invitation.utilisee) throw new Error("INVITATION_ALREADY_USED");
-  if (invitation.revokedAt) return invitation;
-  return prisma.invitationClient.update({
-    where: { id },
-    data: {
-      revokedAt: new Date(),
-      token: `revoked_${randomBytes(24).toString("base64url")}`,
-    },
-  });
-}
 
 export async function updateMembershipCardStatus(
   id: number,
