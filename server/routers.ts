@@ -58,10 +58,14 @@ const RENEWAL_WINDOW_DAYS = 30;
 function isFicheToRenew(fiche: { statut: string; dateEcheance: Date }) {
   if (fiche.statut !== "active") return false;
   const now = new Date();
-  const renewalLimit = new Date(
-    now.getTime() + RENEWAL_WINDOW_DAYS * 24 * 60 * 60 * 1000
+  const startOfToday = new Date(now);
+  startOfToday.setUTCHours(0, 0, 0, 0);
+  const renewalLimit = new Date(startOfToday);
+  renewalLimit.setUTCDate(
+    renewalLimit.getUTCDate() + RENEWAL_WINDOW_DAYS
   );
-  return fiche.dateEcheance >= now && fiche.dateEcheance <= renewalLimit;
+  renewalLimit.setUTCHours(23, 59, 59, 999);
+  return fiche.dateEcheance >= startOfToday && fiche.dateEcheance <= renewalLimit;
 }
 
 function parseFiche<T extends { dataJson: string }>(fiche: T) {
