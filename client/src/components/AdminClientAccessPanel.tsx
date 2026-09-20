@@ -146,7 +146,7 @@ export default function AdminClientAccessPanel() {
                       type="button"
                       variant="outline"
                       disabled={busy}
-                      onClick={() => setAttachQuery("")}
+                      onClick={() => setAttachQuery(" ")}
                     >
                       Changer de compte
                     </Button>
