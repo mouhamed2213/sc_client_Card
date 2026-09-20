@@ -23,15 +23,12 @@ import {
 } from "./_core/trpc";
 import {
   listClientDashboard,
-  listInvitationsForFiche,
-  revokeInvitation,
   updateMembershipCardStatus,
 } from "./clientSpace";
 import {
   attachFicheToOwner,
   createClientAccountWithFiche,
   createContactRequest,
-  createInvitation,
   createMembershipCard,
   getFicheById,
   getFicheBySlug,
@@ -376,23 +373,6 @@ export const appRouter = router({
           throw error;
         }
       }),
-    inviteOwner: adminProcedure
-      .input(z.object({ ficheId: z.number().int().positive() }))
-      .mutation(async ({ input }) => {
-        const fiche = await getFicheById(input.ficheId);
-        if (!fiche)
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Fiche introuvable.",
-          });
-        if (fiche.ownerId)
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "Cette fiche a déjà un propriétaire.",
-          });
-        const token = await createInvitation(input.ficheId);
-        return { token, url: `/espace-client/invite/${token}` };
-      }),
     searchClientUsers: adminProcedure
       .input(z.object({ query: z.string().max(160).optional().default("") }))
       .query(({ input }) => searchClientUsers(input.query)),
@@ -427,42 +407,6 @@ export const appRouter = router({
           });
         }
         return { ok: true } as const;
-      }),
-    listInvitations: adminProcedure
-      .input(z.object({ ficheId: z.number().int().positive() }))
-      .query(async ({ input }) => {
-        const fiche = await getFicheById(input.ficheId);
-        if (!fiche)
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Fiche introuvable.",
-          });
-        return listInvitationsForFiche(input.ficheId);
-      }),
-    revokeInvitation: adminProcedure
-      .input(z.object({ invitationId: z.number().int().positive() }))
-      .mutation(async ({ input }) => {
-        try {
-          return await revokeInvitation(input.invitationId);
-        } catch (error) {
-          if (
-            error instanceof Error &&
-            error.message === "INVITATION_NOT_FOUND"
-          )
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Invitation introuvable.",
-            });
-          if (
-            error instanceof Error &&
-            error.message === "INVITATION_ALREADY_USED"
-          )
-            throw new TRPCError({
-              code: "CONFLICT",
-              message: "Cette invitation a déjà été utilisée.",
-            });
-          throw error;
-        }
       }),
     listMembershipCards: adminProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
