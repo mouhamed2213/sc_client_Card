@@ -350,6 +350,8 @@ export async function searchClientUsers(query: string) {
   return prisma.user.findMany({
     where: {
       role: "user",
+      loginMethod: "local-client",
+      clientCredential: { isNot: null },
       ...(q
         ? {
             OR: [
@@ -370,8 +372,18 @@ export async function attachFicheToOwner(ficheId: number, ownerId: number) {
     const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
     if (!fiche) throw new Error("FICHE_NOT_FOUND");
     if (fiche.ownerId) throw new Error("FICHE_ALREADY_OWNED");
-    const owner = await tx.user.findUnique({ where: { id: ownerId } });
-    if (!owner || owner.role !== "user") throw new Error("OWNER_NOT_FOUND");
+    const owner = await tx.user.findUnique({
+      where: { id: ownerId },
+      include: { clientCredential: true },
+    });
+    if (
+      !owner ||
+      owner.role !== "user" ||
+      owner.loginMethod !== "local-client" ||
+      !owner.clientCredential
+    ) {
+      throw new Error("OWNER_NOT_FOUND");
+    }
     return tx.fiche.update({ where: { id: ficheId }, data: { ownerId } });
   });
 }
