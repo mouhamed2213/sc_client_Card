@@ -189,23 +189,47 @@ function GalleryCarousel({
   if (!images?.length) return null;
   const previous = () => setCurrent(index => (index - 1 + images.length) % images.length);
   const next = () => setCurrent(index => (index + 1) % images.length);
-  const image = images[current];
+  const item = images[current];
+  const isVideo = item.type === "video";
   return (
     <div className="pro-gallery w-full">
-      <div className="pro-gallery-stage relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-        <img
-          className="block h-full w-full object-cover"
-          src={image.url}
-          alt={image.alt}
-          loading="lazy"
-        />
+      <div className="pro-gallery-stage relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-black">
+        {isVideo ? (
+          item.source === "direct" ? (
+            <video
+              className="block h-full w-full object-contain"
+              src={item.url}
+              controls
+              playsInline
+              preload="metadata"
+              aria-label={item.alt || "Vidéo"}
+            />
+          ) : (
+            <iframe
+              className="block h-full w-full"
+              src={item.embedUrl}
+              title={item.alt || "Vidéo"}
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          )
+        ) : (
+          <img
+            className="block h-full w-full object-cover"
+            src={item.url}
+            alt={item.alt}
+            loading="lazy"
+          />
+        )}
         {images.length > 1 && (
           <>
             <button
               type="button"
               className="pro-gallery-control absolute top-1/2 left-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
               onClick={previous}
-              aria-label="Image précédente"
+              aria-label={`Élément précédent`}
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -213,7 +237,7 @@ function GalleryCarousel({
               type="button"
               className="pro-gallery-control absolute top-1/2 right-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
               onClick={next}
-              aria-label="Image suivante"
+              aria-label={`Élément suivant`}
             >
               <ArrowRight className="h-4 w-4" />
             </button>
@@ -221,16 +245,16 @@ function GalleryCarousel({
         )}
       </div>
       <div className="pro-gallery-meta mt-2.5 flex items-center justify-between gap-3 text-[10px] font-bold text-theme-muted">
-        <span>Photo {current + 1} / {images.length}</span>
+        <span>{isVideo ? "Vidéo" : "Photo"} {current + 1} / {images.length}</span>
         {images.length > 1 && (
           <div className="pro-gallery-dots flex items-center gap-[5px]">
-            {images.map((galleryImage, index) => (
+            {images.map((galleryItem, index) => (
               <button
-                key={galleryImage.id ?? galleryImage.url}
+                key={galleryItem.id ?? galleryItem.url}
                 type="button"
                 className={`pro-gallery-dot ${index === current ? "is-active" : ""}`}
                 onClick={() => setCurrent(index)}
-                aria-label={`Aller à la photo ${index + 1}`}
+                aria-label={`Aller à l'élément ${index + 1}`}
               />
             ))}
           </div>
@@ -340,7 +364,11 @@ export function FicheTemplate({
   const config = getTemplateConfig(fiche.formule);
   const { features } = config;
   const links = (fiche.data.liens ?? []).slice(0, features.maxLinks);
-  const gallery = (fiche.data.galerie ?? []).slice(0, features.maxPhotos);
+  const rawGallery = fiche.data.galerie ?? [];
+  const gallery = [
+    ...rawGallery.filter(item => item.type === "video").slice(0, features.maxVideos),
+    ...rawGallery.filter(item => item.type !== "video").slice(0, features.maxPhotos),
+  ];
   return (
     <div
       className={`public-page fiche-template fiche-template--${config.theme} min-h-screen px-3 pt-6 pb-10 text-theme-text`}
