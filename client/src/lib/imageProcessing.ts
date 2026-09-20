@@ -1,6 +1,6 @@
 import { getOutputDimensions, mediaRules, type MediaKind } from "@shared/mediaRules";
 
-export async function prepareImage(file: File, kind: MediaKind): Promise<File> {
+export async function prepareImage(file: File, kind: Exclude<MediaKind, "video">): Promise<File> {
   if (!file.type.startsWith("image/")) throw new Error("Le fichier sélectionné n’est pas une image.");
   const bitmap = await createImageBitmap(file);
   const output = getOutputDimensions(kind, bitmap.width, bitmap.height);
