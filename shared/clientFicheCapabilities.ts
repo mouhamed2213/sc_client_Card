@@ -49,7 +49,7 @@ export const clientFicheCapabilities: Record<
     rendezVous: { editable: true },
     socials: { editable: true },
     links: { editable: true, maxItems: 10 },
-    gallery: { editable: true, maxItems: 8 },
+    gallery: { editable: true, maxItems: 4 },
     googleReview: { editable: true },
     hours: { editable: true },
     catalog: { editable: false, upgradeTo: "signature" },
