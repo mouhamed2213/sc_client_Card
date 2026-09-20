@@ -1,0 +1,207 @@
+/*
+ * Fiche hero — one structure, three plan identities.
+ *
+ *   .fh-bg        decorative backdrop (blurred portrait + pattern + shade)
+ *   .fh-top       logo plate (or "Fiche de contact") + NFC tag
+ *   .fh-body      portrait, name, role, company
+ *   .fh-actions   3 equal action buttons, the preferred one is filled
+ *
+ * The portrait is 400×400: it is only ever shown small and crisp, and the
+ * large backdrop is the same picture blurred, so a low-resolution source
+ * never looks pixelated. All plan differences live in the variables below.
+ */
+
+.fiche-template .fh {
+  --fh-portrait: 128px;
+  --fh-portrait-radius: 50%;
+  --fh-ring-pad: 0px;
+  --fh-photo-opacity: 0.5;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 18px 22px;
+  color: var(--fh-text, #fff);
+  background: var(--fh-bg);
+}
+
+/* ---- backdrop ---------------------------------------------------- */
+.fiche-template .fh-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.fiche-template .fh-bg-img {
+  position: absolute; inset: -14%; width: 128%; height: 128%; max-width: none;
+  object-fit: cover; filter: blur(28px) saturate(1.2);
+  opacity: var(--fh-photo-opacity); transform: translateZ(0);
+}
+.fiche-template .fh-bg-pattern {
+  position: absolute; inset: 0;
+  background:
+    repeating-radial-gradient(circle at 100% 0, transparent 0 38px, var(--fh-pattern) 39px 40px),
+    repeating-radial-gradient(circle at 0 100%, transparent 0 38px, var(--fh-pattern) 39px 40px);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 70%);
+  mask-image: linear-gradient(180deg, #000 0%, transparent 70%);
+}
+.fiche-template .fh-bg-shade { position: absolute; inset: 0; background: var(--fh-shade); }
+
+/* ---- top row ----------------------------------------------------- */
+.fiche-template .fh-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px;
+}
+.fiche-template .fh-logo {
+  display: flex; align-items: center; justify-content: center;
+  height: 40px; max-width: 62%; padding: 6px 12px; border-radius: 12px;
+  background: var(--fh-logo-plate); border: 1px solid var(--fh-logo-line);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+.fiche-template .fh-logo img {
+  display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain;
+}
+.fiche-template .fh-tag {
+  padding: 6px 11px; border: 1px solid var(--fh-line); border-radius: 999px;
+  background: var(--fh-glass); color: var(--fh-tag-text, var(--fh-text, #fff));
+  font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.fiche-template .fh-tag--nfc { opacity: 0.85; }
+
+/* ---- identity ---------------------------------------------------- */
+.fiche-template .fh-body {
+  display: flex; flex-direction: column; align-items: center; text-align: center; padding: 22px 6px 4px;
+}
+.fiche-template .fh-portrait {
+  width: var(--fh-portrait); height: var(--fh-portrait); margin-bottom: 18px; padding: var(--fh-ring-pad);
+  border-radius: var(--fh-portrait-radius); background: var(--fh-ring-bg, transparent); box-shadow: var(--fh-ring-shadow);
+}
+.fiche-template .fh-portrait-frame {
+  display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; overflow: hidden;
+  border-radius: inherit; background: var(--fh-portrait-bg, #f4f1ec); color: #1f2937;
+  font-size: 30px; font-weight: 800; letter-spacing: 0.04em;
+  border: var(--fh-frame-border, 0);
+}
+.fiche-template .fh-portrait-frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fiche-template .fh-portrait--logo img { object-fit: contain; padding: 16%; }
+.fiche-template .fh-name {
+  margin: 0; max-width: 100%; font-size: 26px; font-weight: 800; line-height: 1.1;
+  letter-spacing: -0.03em; overflow-wrap: anywhere; text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+}
+.fiche-template .fh-ornament { display: none; }
+.fiche-template .fh-role { margin: 9px 0 0; color: var(--fh-muted); font-size: 13px; font-weight: 500; line-height: 1.4; }
+.fiche-template .fh-company {
+  margin: 12px 0 0; padding: 5px 13px; border: 1px solid var(--fh-line); border-radius: 999px; background: var(--fh-glass);
+  color: var(--fh-company-text, var(--fh-text, #fff)); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; max-width: 100%; overflow-wrap: anywhere;
+}
+
+/* ---- actions ----------------------------------------------------- */
+.fiche-template .fh-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 24px; }
+.fiche-template .fh-action-cell { display: flex; min-width: 0; }
+.fiche-template .fh-action {
+  flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  min-width: 0; min-height: 60px; padding: 9px 4px; box-sizing: border-box; text-align: center; line-height: 1.1;
+  border: 1px solid var(--fh-btn-line); border-radius: var(--fh-btn-radius, 14px);
+  background: var(--fh-btn-bg); color: var(--fh-btn-text, #fff); font-size: 11px; font-weight: 750;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.16s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+.fiche-template .fh-action > span { white-space: nowrap; }
+.fiche-template .fh-action:hover { background: var(--fh-btn-bg-hover); transform: translateY(-1px); }
+.fiche-template .fh-action:active { transform: translateY(0) scale(0.98); }
+.fiche-template .fh-action:focus-visible { outline: 2px solid var(--fh-focus, #fff); outline-offset: 2px; }
+.fiche-template .fh-action.is-preferred {
+  border-color: transparent; background: var(--fh-cta-bg); color: var(--fh-cta-text);
+  box-shadow: 0 10px 24px var(--fh-cta-shadow);
+}
+.fiche-template .fh-action.is-preferred:hover { background: var(--fh-cta-bg); filter: brightness(1.05); }
+.fiche-template .fh-action--missing { border-style: dashed; opacity: 0.55; cursor: default; }
+.fiche-template .fh-action--missing:hover { background: var(--fh-btn-bg); transform: none; }
+.fiche-template .fh-action small { font-size: 9px; font-weight: 600; opacity: 0.85; }
+
+/* =================================================================== */
+/* ESSENTIEL — clean, light-blue, friendly                              */
+/* =================================================================== */
+.fiche-template--essentiel .fh {
+  --fh-bg: linear-gradient(165deg, #21446b 0%, #16324f 55%, #0f2339 100%);
+  --fh-shade: linear-gradient(180deg, rgba(10, 26, 46, 0.25) 0%, rgba(10, 26, 46, 0.78) 100%);
+  --fh-pattern: rgba(255, 255, 255, 0.07);
+  --fh-photo-opacity: 0.42;
+  --fh-glass: rgba(255, 255, 255, 0.1); --fh-line: rgba(255, 255, 255, 0.2); --fh-muted: rgba(255, 255, 255, 0.78);
+  --fh-logo-plate: rgba(255, 255, 255, 0.96); --fh-logo-line: rgba(255, 255, 255, 0.6);
+  --fh-portrait: 116px;
+  --fh-ring-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 0 10px rgba(255, 255, 255, 0.14), 0 18px 40px rgba(5, 18, 34, 0.5);
+  --fh-btn-bg: rgba(255, 255, 255, 0.1); --fh-btn-bg-hover: rgba(255, 255, 255, 0.18); --fh-btn-line: rgba(255, 255, 255, 0.22);
+  --fh-cta-bg: #ffffff; --fh-cta-text: #17324f; --fh-cta-shadow: rgba(4, 14, 28, 0.35);
+}
+.fiche-template--essentiel .fh-name { font-size: 24px; }
+
+/* =================================================================== */
+/* PRO — warm, refined, copper accents                                  */
+/* =================================================================== */
+.fiche-template--pro .fh {
+  --fh-bg:
+    radial-gradient(120% 70% at 88% 0%, rgba(205, 148, 96, 0.38), transparent 58%),
+    linear-gradient(170deg, #3b3026 0%, #261e17 62%, #1a1510 100%);
+  --fh-shade: linear-gradient(180deg, rgba(24, 18, 12, 0.2) 0%, rgba(24, 18, 12, 0.82) 100%);
+  --fh-pattern: rgba(233, 190, 148, 0.09);
+  --fh-photo-opacity: 0.5;
+  --fh-glass: rgba(255, 244, 232, 0.08); --fh-line: rgba(233, 190, 148, 0.32); --fh-muted: rgba(255, 240, 224, 0.74);
+  --fh-tag-text: #f3dcc3; --fh-company-text: #f3dcc3;
+  --fh-logo-plate: rgba(255, 252, 247, 0.96); --fh-logo-line: rgba(233, 190, 148, 0.7);
+  --fh-portrait: 128px; --fh-portrait-radius: 34%;
+  --fh-ring-shadow: 0 0 0 3px #d29a68, 0 0 0 9px rgba(210, 154, 104, 0.2), 0 20px 44px rgba(10, 6, 2, 0.55);
+  --fh-btn-bg: rgba(255, 244, 232, 0.08); --fh-btn-bg-hover: rgba(255, 244, 232, 0.15); --fh-btn-line: rgba(233, 190, 148, 0.32);
+  --fh-btn-radius: 15px;
+  --fh-cta-bg: linear-gradient(135deg, #e3b283, #c98f5f); --fh-cta-text: #24170d; --fh-cta-shadow: rgba(201, 143, 95, 0.35);
+  --fh-focus: #e3b283;
+}
+.fiche-template--pro .fh-name { font-size: 27px; letter-spacing: -0.035em; }
+
+/* =================================================================== */
+/* SIGNATURE — dark editorial luxury, gold ring, serif name             */
+/* =================================================================== */
+.fiche-template--signature .fh {
+  --fh-bg:
+    radial-gradient(85% 55% at 50% 0%, rgba(201, 164, 106, 0.3), transparent 62%),
+    linear-gradient(180deg, #16130f 0%, #0c0b0a 100%);
+  --fh-shade: linear-gradient(180deg, rgba(8, 7, 6, 0.3) 0%, rgba(8, 7, 6, 0.86) 100%);
+  --fh-pattern: rgba(228, 193, 140, 0.1);
+  --fh-photo-opacity: 0.38;
+  --fh-text: #fbf6ec; --fh-glass: rgba(201, 164, 106, 0.08); --fh-line: rgba(201, 164, 106, 0.4); --fh-muted: #c9bdae;
+  --fh-tag-text: #e4c18c; --fh-company-text: #e4c18c;
+  --fh-logo-plate: rgba(252, 248, 240, 0.97); --fh-logo-line: rgba(201, 164, 106, 0.8);
+  --fh-portrait: 144px; --fh-ring-pad: 4px;
+  --fh-ring-bg: conic-gradient(from 200deg, #6d5430, #f2dcae, #b8955a, #6d5430, #e6c48f, #6d5430);
+  --fh-ring-shadow: 0 0 0 9px rgba(201, 164, 106, 0.12), 0 22px 54px rgba(0, 0, 0, 0.6), 0 0 60px rgba(201, 164, 106, 0.18);
+  --fh-frame-border: 4px solid #0c0b0a;
+  --fh-portrait-bg: #1a1713;
+  --fh-btn-bg: rgba(201, 164, 106, 0.07); --fh-btn-bg-hover: rgba(201, 164, 106, 0.16); --fh-btn-line: rgba(201, 164, 106, 0.42);
+  --fh-btn-radius: 16px;
+  --fh-cta-bg: linear-gradient(135deg, #f0d9a8, #c9a46a); --fh-cta-text: #17130d; --fh-cta-shadow: rgba(201, 164, 106, 0.32);
+  --fh-focus: #e4c18c;
+  padding: 20px 22px 26px;
+}
+.fiche-template--signature .fh-portrait--logo img { padding: 14%; }
+.fiche-template--signature .fh-portrait-frame { color: #e4c18c; }
+.fiche-template--signature .fh-name {
+  font-family: Georgia, "Times New Roman", serif; font-size: clamp(27px, 6.4vw, 34px); font-weight: 600; letter-spacing: -0.02em;
+  color: #fffaf2;
+}
+.fiche-template--signature .fh-ornament {
+  display: block; width: 84px; height: 1px; margin: 12px auto 0;
+  background: linear-gradient(90deg, transparent, #c9a46a, transparent);
+}
+.fiche-template--signature .fh-role { margin-top: 10px; letter-spacing: 0.03em; }
+.fiche-template--signature .fh-company { border-color: rgba(201, 164, 106, 0.5); }
+
+/* ---- small screens ---------------------------------------------- */
+@media (max-width: 420px) {
+  .fiche-template .fh { padding: 16px 16px 20px; }
+  .fiche-template--signature .fh { padding: 18px 16px 22px; }
+  .fiche-template .fh-action { min-height: 56px; }
+  .fiche-template .fh-action > span { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fiche-template .fh-action { transition: none; }
+}
+
+/* A logo used as portrait always sits on a light plate, so dark logos stay readable. */
+.fiche-template .fh-portrait--logo .fh-portrait-frame { background: #f6f1e8; }

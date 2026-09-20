@@ -31,6 +31,8 @@ import "../themes.css";
 import "../themes/essentiel.css";
 import "../themes/pro.css";
 import "../themes/signature.css";
+import "../hero.css";
+import "../sections.css";
 
 export type FicheTemplateActions = {
   phoneHref: string;
@@ -60,13 +62,33 @@ export type FicheTemplateProps = {
 
 function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   return (
-    <div className="mb-4 flex items-center gap-2 text-theme-muted">
-      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-theme-accent-soft">
+    <div className="fh-section-title mb-4 flex items-center gap-2 text-theme-muted">
+      <span className="fh-section-icon flex h-7 w-7 items-center justify-center rounded-lg bg-theme-accent-soft">
         {icon}
       </span>
       <h2 className="text-xs font-bold uppercase tracking-[0.16em]">{title}</h2>
     </div>
   );
+}
+
+const WEEK_DAYS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+
+function normalizeDay(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+/** True when a row label ("Lundi", "Lundi — Samedi"…) covers today. */
+function coversToday(label: string, today = new Date().getDay()) {
+  const text = normalizeDay(label);
+  const found = WEEK_DAYS.map((day, index) => ({ index, at: text.indexOf(day) }))
+    .filter(entry => entry.at >= 0)
+    .sort((a, b) => a.at - b.at)
+    .map(entry => entry.index);
+  if (found.length === 0) return false;
+  if (found.length === 1) return found[0] === today;
+  // Range such as "Lundi — Samedi" (weeks start on Monday, wrap on Sunday).
+  const offset = (day: number) => (day + 6) % 7;
+  return offset(today) >= offset(found[0]) && offset(today) <= offset(found[found.length - 1]);
 }
 
 type ActionKey = "appel" | "whatsapp" | "email";
@@ -82,26 +104,31 @@ const ACTION_CONFIG: Record<
 > = {
   appel: {
     label: "Appeler",
-    className: "public-action-call",
+    className: "fh-action--call",
     Icon: Phone,
     href: actions => actions.phoneHref,
   },
   whatsapp: {
     label: "WhatsApp",
-    className: "public-action-whatsapp",
+    className: "fh-action--whatsapp",
     Icon: MessageCircle,
     href: actions => actions.whatsappHref,
   },
   email: {
     label: "E-mail",
-    className: "public-action-email",
+    className: "fh-action--email",
     Icon: Mail,
     href: actions => actions.emailHref,
   },
 };
 
 function Hero({ fiche, actions }: FicheTemplateProps) {
-  const identityImage = fiche.logo;
+  const photo = fiche.photo?.trim() || "";
+  const logo = fiche.logo?.trim() || "";
+  const fullName = `${fiche.prenom} ${fiche.nom}`.trim();
+  // The portrait is the person's photo. Without it (Essentiel: optional) the
+  // logo takes its place, and the initials are the last fallback.
+  const portraitKind = photo ? "photo" : logo ? "logo" : "initials";
   // The preferred action is the first one in the configured order that can
   // actually be used (e.g. no e-mail address → it cannot be "preferred").
   const preferredKey = actions.buttonOrder.find(key =>
@@ -109,59 +136,65 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
   );
 
   return (
-    <section className="public-hero">
-      {fiche.photo && (
-        <div className="public-cover">
-          <img src={fiche.photo} alt="" />
-        </div>
-      )}
-      <div className="public-hero-overlay" />
-      <div className="public-topline">
-        <span className="public-chip">Fiche de contact</span>
-        <span className="public-nfc">NFC · QR</span>
+    <header className="fh" data-portrait={portraitKind}>
+      <div className="fh-bg" aria-hidden="true">
+        {photo && <img className="fh-bg-img" src={photo} alt="" />}
+        <span className="fh-bg-pattern" />
+        <span className="fh-bg-shade" />
       </div>
-      <div className="public-identity">
-        <div className="public-avatar">
-          {identityImage ? (
-            <img src={identityImage} alt={`${fiche.prenom} ${fiche.nom}`} />
-          ) : (
-            <span>
-              {fiche.prenom.slice(0, 1)}
-              {fiche.nom.slice(0, 1)}
-            </span>
-          )}
-        </div>
-        <div className="public-identity-copy">
-          <p className="public-name">
-            {fiche.prenom} {fiche.nom}
-          </p>
-          <p className="public-role">
-            {fiche.fonction}
-            <span className="mx-2 text-white/30">·</span>
-            {fiche.entreprise}
-          </p>
-        </div>
+
+      <div className="fh-top">
+        {logo && photo ? (
+          <div className="fh-logo">
+            <img src={logo} alt={`Logo ${fiche.entreprise}`} />
+          </div>
+        ) : (
+          <span className="fh-tag">Fiche de contact</span>
+        )}
+        <span className="fh-tag fh-tag--nfc">NFC · QR</span>
       </div>
-      <div className="public-actions">
+
+      <div className="fh-body">
+        <div className={`fh-portrait fh-portrait--${portraitKind}`}>
+          <div className="fh-portrait-frame">
+            {portraitKind === "photo" && (
+              <img src={photo} alt={fullName} />
+            )}
+            {portraitKind === "logo" && (
+              <img src={logo} alt={`Logo ${fiche.entreprise}`} />
+            )}
+            {portraitKind === "initials" && (
+              <span aria-hidden="true">
+                {fiche.prenom.slice(0, 1)}
+                {fiche.nom.slice(0, 1)}
+              </span>
+            )}
+          </div>
+        </div>
+        <h1 className="fh-name">{fullName}</h1>
+        <span className="fh-ornament" aria-hidden="true" />
+        <p className="fh-role">{fiche.fonction}</p>
+        <p className="fh-company">{fiche.entreprise}</p>
+      </div>
+
+      <div className="fh-actions">
         {actions.buttonOrder.map(key => {
           const { label, className, Icon, href } = ACTION_CONFIG[key];
           const target = href(actions);
           const preferred = key === preferredKey;
           return (
-            <div key={key} className="public-action-cell">
-              {preferred && (
-                <span className="public-action-badge">Préféré</span>
-              )}
+            <div key={key} className="fh-action-cell">
               {target ? (
                 <a
                   href={target}
-                  className={`public-action ${className}${preferred ? " is-preferred" : ""}`}
+                  className={`fh-action ${className}${preferred ? " is-preferred" : ""}`}
+                  aria-label={preferred ? `${label} (action préférée)` : label}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />
                   <span>{label}</span>
                 </a>
               ) : (
-                <div className="public-action public-action--missing" role="status">
+                <div className="fh-action fh-action--missing" role="status">
                   <Icon className="h-5 w-5" aria-hidden="true" />
                   <span>{label}</span>
                   <small>Non fourni</small>
@@ -171,7 +204,7 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
           );
         })}
       </div>
-    </section>
+    </header>
   );
 }
 
@@ -549,9 +582,15 @@ export function FicheTemplate({
                 {fiche.data.horaires.map(row => (
                   <div
                     key={row.jour}
-                    className="hours-row flex items-center justify-between gap-3"
+                    className={`hours-row flex items-center justify-between gap-3${coversToday(row.jour) ? " is-today" : ""}`}
+                    aria-current={coversToday(row.jour) ? "date" : undefined}
                   >
-                    <span>{row.jour}</span>
+                    <span>
+                      {row.jour}
+                      {coversToday(row.jour) && (
+                        <em className="hours-today">Aujourd’hui</em>
+                      )}
+                    </span>
                     <strong
                       className={
                         row.horaire.toLowerCase().includes("fermé")

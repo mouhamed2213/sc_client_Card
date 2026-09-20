@@ -1,26 +1,11 @@
 .fiche-template { background: var(--theme-bg); }
 .fiche-template__card { box-shadow: 0 24px 70px rgba(23, 32, 51, 0.1); }
-.fiche-template .public-hero { position: relative; overflow: hidden; min-height: 560px; padding: 22px 20px 24px; background: var(--theme-hero); color: var(--theme-hero-text); }
-.fiche-template .public-hero::after { content: ""; position: absolute; width: 190px; height: 190px; right: -90px; top: -100px; border: 1px solid rgba(255,255,255,.14); border-radius: 50%; pointer-events: none; }
-.fiche-template .public-topline,.fiche-template .public-identity,.fiche-template .public-actions { position: relative; z-index: 1; }
-.fiche-template .public-topline { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:24px; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
-.fiche-template .public-chip { border:1px solid rgba(255,255,255,.16); border-radius:999px; padding:6px 9px; background:rgba(255,255,255,.08); }
-.fiche-template .public-nfc { opacity:1.68; }
-.fiche-template .public-identity { text-align:center; }
-.fiche-template .public-avatar { width:132px; height:132px; margin:0 auto 18px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:4px solid #c9a46a; border-radius:50%; background:#f7f5f0; color:#171717; font-size:20px; font-weight:800; letter-spacing:.04em; box-shadow:0 0 0 7px rgba(12,12,12,.68),0 14px 38px rgba(0,0,0,.42); }
-.fiche-template .public-avatar img { display:block; width:100%; height:100%; max-width:100%; object-fit:contain; object-position:center; }
-.fiche-template .public-name { margin:0; font-size:25px; font-weight:800; letter-spacing:-.03em; }
-.fiche-template .public-role { margin:6px 0 0; color:rgba(255,255,255,.66); font-size:12px; }
-.fiche-template .public-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:22px; }
-.fiche-template .public-action { display:flex; min-height:42px; align-items:center; justify-content:center; gap:7px; border:1px solid rgba(255,255,255,.13); border-radius:11px; background:rgba(255,255,255,.08); color:white; font-size:11px; font-weight:750; transition:transform .18s ease,background .18s ease; }
-.fiche-template .public-action:hover { background:rgba(255,255,255,.14); transform:translateY(-1px); }
-.fiche-template .public-action--missing { border-style:dashed; border-color:rgba(255,255,255,.32); background:rgba(0,0,0,.48); color:rgba(255,255,255,.68); cursor:default; }
-.fiche-template .public-action--missing:hover { background:rgba(0,0,0,.48); transform:none; }
+
 .fiche-template .intro-note { display:flex; align-items:flex-start; gap:10px; padding-top:18px; }
 .fiche-template .intro-note p { margin:0; color:var(--theme-muted); font-size:12px; line-height:1.65; }
 .fiche-template .accent-line { width:3px; min-height:30px; flex:0 0 3px; border-radius:99px; background:var(--theme-accent); }
 .fiche-template .public-content .mb-4 { color:var(--theme-muted)!important; }
-.fiche-template .public-content .bg-\\[\\#eef3f8\\] { background:var(--theme-accent-soft)!important; }
+.fiche-template .public-content .bg-\[\#eef3f8\] { background:var(--theme-accent-soft)!important; }
 .fiche-template .public-link { background:#fff; transition:border-color .18s ease,transform .18s ease; }
 .fiche-template .public-link:hover { border-color:var(--theme-accent); transform:translateX(2px); }
 .fiche-template .public-address { color:var(--theme-muted); font-size:12px; line-height:1.7; }
@@ -49,26 +34,15 @@
 .fiche-template .public-footer { color:#9aa3b1; }
 .fiche-template .public-brand { color:var(--theme-accent); font-weight:800; }
 .fiche-template--essentiel { --theme-bg:#f4f7fa; --theme-card:#fff; --theme-text:#203047; --theme-muted:#748196; --theme-accent:#315f91; --theme-accent-soft:#edf4fb; --theme-line:#e3e9ef; --theme-hero:#18304b; --theme-radius:18px; }
-.fiche-template--essentiel .public-hero::before { content:""; position:absolute; left:-70px; bottom:-95px; width:190px; height:190px; border:1px solid rgba(255,255,255,.1); border-radius:50%; }
-.fiche-template--essentiel .public-name { font-size:23px; }
-.fiche-template--essentiel .public-action { background:rgba(255,255,255,.1); }
+
 .fiche-template--pro { --theme-bg:#f7f4ef; --theme-card:#fffdf9; --theme-text:#2d2b28; --theme-muted:#7b746b; --theme-accent:#9a6841; --theme-accent-soft:#f7eee6; --theme-line:#e8ded4; --theme-hero:#29251f; --theme-radius:22px; }
-.fiche-template--pro .public-hero { background:radial-gradient(circle at 82% 10%,rgba(180,126,80,.28),transparent 34%),var(--theme-hero); }
-.fiche-template--pro .public-name { font-size:27px; }
-.fiche-template--pro .public-role { color:rgba(255,255,255,.7); }
-.fiche-template--pro .public-action { background:rgba(255,255,255,.07); }
+
 .fiche-template--pro .public-link { border-radius:14px; }
 .fiche-template--pro .review-panel { box-shadow:0 8px 24px rgba(83,55,35,.06); }
 .fiche-template--pro .pro-gallery-stage { box-shadow:0 12px 30px rgba(83,55,35,.1); }
 .fiche-template--signature { --theme-bg:#111; --theme-card:#171717; --theme-text:#f4eee4; --theme-muted:#aaa094; --theme-accent:#c9a46a; --theme-accent-soft:#28231c; --theme-line:#302d29; --theme-hero:#0b0b0b; --theme-radius:26px; }
 .fiche-template--signature .fiche-template__card { border-color:#2d2924; box-shadow:0 30px 90px rgba(0,0,0,.38); }
-.fiche-template--signature .public-hero { padding:28px 22px 26px; background:radial-gradient(circle at 50% -20%,rgba(201,164,106,.2),transparent 42%),var(--theme-hero); }
-.fiche-template--signature .public-hero::after { width:280px; height:280px; right:-120px; top:-170px; border-color:rgba(201,164,106,.24); }
-.fiche-template--signature .public-chip { border-color:rgba(201,164,106,.35); color:#f9f6f0; background:rgba(201,164,106,.08); }
-.fiche-template--signature .public-name { font-family:Georgia,"Times New Roman",serif; font-size:31px; font-weight:600; letter-spacing:-.02em; }
-.fiche-template--signature .public-role { color:#b9aea1; }
-.fiche-template--signature .public-action { border-color:rgba(201,164,106,.2); background:rgba(201,164,106,.07); }
-.fiche-template--signature .public-action:hover { background:rgba(201,164,106,.14); }
+
 .fiche-template--signature .public-link { border-color:#302d29; background:#1c1c1b; color:#eee7dc; }
 .fiche-template--signature .public-link:hover { border-color:#9e8054; }
 .fiche-template--signature .review-panel { border-color:#3b3228; background:#211c17; }
@@ -88,54 +62,13 @@
 .fiche-template--signature .public-footer { color:#746d64; }
 .fiche-template--signature .public-brand { color:#c9a46a; }
 
-/* Shared fixed hero frame. The photo fills the same frame across all formulas. */
-.fiche-template .public-cover { position:absolute; inset:0; z-index:0; width:100%; height:100%; overflow:hidden; background:var(--theme-hero); }
-.fiche-template .public-cover img { display:block; width:100%; height:100%; max-width:100%; object-fit:cover; object-position:center; }
-.fiche-template .public-hero-overlay { position:absolute; inset:0; z-index:1; width:100%; height:100%; pointer-events:none; }
-.fiche-template .public-topline { z-index:4; }
-.fiche-template .public-identity { z-index:3; }
-.fiche-template .public-actions { z-index:3; }
-
-/* Readable identity panel over the cover photo. */
-.fiche-template .public-identity-copy { width:fit-content; max-width:min(92%,390px); margin:0 auto; padding:10px 16px 11px; border:1px solid rgba(255,255,255,.16); border-radius:15px; background:rgba(12,12,12,.56); box-shadow:0 10px 30px rgba(0,0,0,.18); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
-.fiche-template .public-identity-copy .public-name,
-.fiche-template .public-identity-copy .public-role { text-shadow:0 1px 10px rgba(0,0,0,.32); }
-
 @media (max-width:420px) {
   .fiche-template { padding:0 0 24px; }
   .fiche-template__card { border-radius:0; border-left:0; border-right:0; }
-  .fiche-template .public-hero { min-height:540px; }
-  .fiche-template .public-actions { grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; }
-  .fiche-template .public-action { min-height:44px; gap:4px; padding:0 3px; font-size:9px; }
-  .fiche-template .public-cover { min-height:540px; }
-  .fiche-template .public-identity-copy { max-width:94%; padding:9px 13px 10px; border-radius:13px; }
+  
+  
   .fiche-template .pro-gallery-stage { aspect-ratio:4/3; border-radius:13px; }
   .fiche-template .pro-gallery-control { width:34px; height:34px; }
-}
-
-/* ------------------------------------------------------------------ */
-/* Hero action buttons: three equal cells, whatever the label/state.   */
-/* ------------------------------------------------------------------ */
-.fiche-template .public-actions { align-items: stretch; margin-top: 30px; }
-.fiche-template .public-action-cell { position: relative; display: flex; min-width: 0; }
-.fiche-template .public-action-cell > .public-action {
-  flex: 1 1 auto; width: 100%; min-width: 0; min-height: 60px; box-sizing: border-box;
-  flex-direction: column; gap: 5px; padding: 8px 4px; text-align: center; line-height: 1.15;
-}
-.fiche-template .public-action-cell > .public-action > span { white-space: nowrap; font-size: 11px; }
-.fiche-template .public-action--missing small { font-size: 9px; font-weight: 600; opacity: .8; }
-.fiche-template .public-action-badge {
-  position: absolute; top: -9px; left: 50%; z-index: 2; transform: translateX(-50%);
-  padding: 2px 8px; border-radius: 999px; background: var(--theme-accent); color: #fff;
-  font-size: 8px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,.28);
-}
-.fiche-template--signature .public-action-badge { color: #17130d; }
-.fiche-template .public-action-cell .public-action.is-preferred {
-  border-color: rgba(255,255,255,.7); background: rgba(255,255,255,.2);
-}
-.fiche-template--signature .public-action-cell .public-action.is-preferred {
-  border-color: #e4c18c; background: rgba(201,164,106,.24);
 }
 
 /* ------------------------------------------------------------------ */
@@ -171,7 +104,6 @@
 .fiche-template .pro-gallery-stage.gallery-stage { background: #0c0c0c; }
 .fiche-template--signature .gallery-stage { border-color: #332d26; }
 @media (max-width: 420px) {
-  .fiche-template .public-action-cell > .public-action > span { font-size: 10px; }
   .fiche-template .gallery-stage { border-radius: 13px; }
   .fiche-template .gallery-control { width: 34px; height: 34px; }
 }

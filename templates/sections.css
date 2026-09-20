@@ -1,0 +1,78 @@
+/*
+ * Fiche content sections — polish shared by the three plans.
+ * Colours come from the theme tokens (theme-tokens.css), so every rule here
+ * adapts to Essentiel / Pro / Signature without per-plan duplication.
+ */
+
+/* The "save contact" button overlaps the hero to tie the two areas together. */
+.fiche-template .fh { padding-bottom: 46px; }
+.fiche-template .essential-save-row { position: relative; z-index: 2; margin-top: -30px; padding: 0 0 6px; }
+.fiche-template .public-save-contact { box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16); }
+.fiche-template--signature .public-save-contact { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); }
+
+/* Sections */
+.fiche-template .public-section { padding: 24px 0; border-bottom-color: var(--theme-line); }
+.fiche-template .fh-section-icon { color: var(--theme-accent); }
+.fiche-template .fh-section-title h2 { color: var(--theme-text); opacity: 0.78; }
+.fiche-template .pro-presentation-text { margin: 0; color: var(--theme-text); font-size: 14px; line-height: 1.8; opacity: 0.88; }
+
+/* Links */
+.fiche-template .public-link {
+  min-height: 54px; padding-inline: 14px; border-radius: 14px; font-size: 13px;
+  box-shadow: 0 6px 16px rgba(20, 30, 50, 0.05);
+}
+.fiche-template .public-link svg {
+  box-sizing: border-box; width: 28px; height: 28px; padding: 6px; border-radius: 50%;
+  background: var(--theme-accent-soft); color: var(--theme-accent); flex-shrink: 0;
+}
+.fiche-template--signature .public-link { box-shadow: none; }
+
+/* Address */
+.fiche-template .public-address { font-size: 13px; line-height: 1.7; }
+.fiche-template .public-primary-link {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--theme-accent) 30%, transparent);
+}
+.fiche-template .contact-form .public-primary-link,
+.fiche-template .contact-form .public-secondary-link { margin-top: 0; }
+
+/* Google review */
+.fiche-template .review-panel {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 22px; padding: 16px;
+  border-radius: 16px; background: linear-gradient(135deg, var(--theme-accent-soft), var(--theme-card));
+}
+.fiche-template .review-button { display: inline-flex; align-items: center; gap: 6px; padding: 10px 13px; border-radius: 10px; color: #fff; }
+.fiche-template--signature .review-button { color: #17130d; }
+
+/* Hours */
+.fiche-template .hours-list { gap: 0; border-radius: 14px; background: var(--theme-card); }
+.fiche-template .hours-row { padding: 11px 14px; font-size: 12px; }
+.fiche-template .hours-row:nth-child(even) { background: color-mix(in srgb, var(--theme-accent-soft) 45%, transparent); }
+.fiche-template .hours-row.is-today { background: var(--theme-accent-soft); }
+.fiche-template .hours-row.is-today span { color: var(--theme-text); font-weight: 700; }
+.fiche-template .hours-today {
+  margin-left: 8px; padding: 2px 7px; border-radius: 999px; background: var(--theme-accent); color: #fff;
+  font-size: 9px; font-style: normal; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.fiche-template--signature .hours-today { color: #17130d; }
+
+/* Catalogue */
+.fiche-template .catalog-section h3 {
+  display: inline-block; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 2px solid var(--theme-accent);
+  color: var(--theme-text); font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.fiche-template .catalog-row > span { padding: 3px 9px; border-radius: 999px; background: var(--theme-accent-soft); }
+
+/* Callback form */
+.fiche-template .contact-form { display: grid; gap: 9px; }
+.fiche-template .contact-form input,
+.fiche-template .contact-form textarea {
+  width: 100%; box-sizing: border-box; padding: 12px 13px; border: 1px solid var(--theme-line); border-radius: 12px;
+  background: var(--theme-card); color: var(--theme-text); font-size: 14px;
+}
+.fiche-template .contact-form textarea { min-height: 96px; resize: vertical; }
+.fiche-template .contact-form input:focus,
+.fiche-template .contact-form textarea:focus { outline: 2px solid var(--theme-accent); outline-offset: 1px; }
+
+/* Footer */
+.fiche-template .public-footer { margin-top: 4px; }
