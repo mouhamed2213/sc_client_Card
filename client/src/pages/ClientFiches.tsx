@@ -42,9 +42,8 @@ export default function ClientFiches() {
             Aucune fiche associée
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-[#7d8798]">
-            Votre compte n'est pas encore relié à une fiche. Si vous venez de
-            recevoir une invitation, ouvrez-la depuis l'e-mail ou le lien
-            transmis par notre équipe.
+            Votre compte n'est pas encore relié à une fiche. Contactez notre
+            équipe pour rattacher une fiche à votre compte.
           </p>
         </div>
       </ClientLayout>
