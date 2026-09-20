@@ -27,6 +27,9 @@ import {
 } from "./clientSpace";
 import {
   attachFicheToOwner,
+  changeFicheOwner,
+  detachFicheOwner,
+  getFicheOwner,
   createClientAccountWithFiche,
   createContactRequest,
   createMembershipCard,
@@ -371,6 +374,44 @@ export const appRouter = router({
             });
           }
           throw error;
+        }
+      }),
+    getFicheOwner: adminProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .query(async ({ input }) => {
+        const fiche = await getFicheOwner(input.ficheId);
+        if (!fiche) throw new TRPCError({ code: "NOT_FOUND", message: "Fiche introuvable." });
+        return fiche;
+      }),
+    changeFicheOwner: adminProcedure
+      .input(z.object({
+        ficheId: z.number().int().positive(),
+        ownerId: z.number().int().positive(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          await changeFicheOwner(input.ficheId, input.ownerId);
+          return { ok: true } as const;
+        } catch (err) {
+          if (err instanceof Error && err.message === "FICHE_NOT_FOUND")
+            throw new TRPCError({ code: "NOT_FOUND", message: "Fiche introuvable." });
+          if (err instanceof Error && err.message === "OWNER_NOT_FOUND")
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Compte client introuvable." });
+          throw err;
+        }
+      }),
+    detachFicheOwner: adminProcedure
+      .input(z.object({ ficheId: z.number().int().positive() }))
+      .mutation(async ({ input }) => {
+        try {
+          await detachFicheOwner(input.ficheId);
+          return { ok: true } as const;
+        } catch (err) {
+          if (err instanceof Error && err.message === "FICHE_NOT_FOUND")
+            throw new TRPCError({ code: "NOT_FOUND", message: "Fiche introuvable." });
+          if (err instanceof Error && err.message === "FICHE_NOT_OWNED")
+            throw new TRPCError({ code: "CONFLICT", message: "Cette fiche n'est rattachée à aucun compte." });
+          throw err;
         }
       }),
     searchClientUsers: adminProcedure
