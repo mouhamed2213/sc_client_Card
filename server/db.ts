@@ -220,11 +220,20 @@ export async function listFichesPaginated(input: {
   pageSize: number;
   search?: string;
   statut?: "active" | "suspendue" | "supprimee" | "brouillon";
+  aRenouveler?: boolean;
 }) {
   await ensureDemoFiches();
   const search = input.search?.trim();
+  const now = new Date();
+  const renewalLimit = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
   const where = {
     ...(input.statut ? { statut: input.statut } : {}),
+    ...(input.aRenouveler
+      ? {
+          statut: "active" as const,
+          dateEcheance: { gte: now, lte: renewalLimit },
+        }
+      : {}),
     ...(search
       ? {
           OR: [
