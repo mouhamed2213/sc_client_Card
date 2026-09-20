@@ -10,11 +10,25 @@ import type { FicheTemplateModel } from "../../../templates/model";
 import { readCachedFiche, saveCachedFiche } from "../offline/ficheCache";
 
 type PublicData = FicheTemplateModel["data"];
-type PublicFicheData = FicheTemplateModel & { statut?: string };
+type PublicFicheData = FicheTemplateModel & {
+  statut?: string;
+  statutMetier?: string;
+  dateEcheance?: string | Date;
+};
 
 function parseError(error: unknown) {
   return error instanceof Error ? error.message : "Cette fiche n'existe pas.";
 }
+
+function isCachedFicheUsable(fiche: PublicFicheData | null) {
+  if (!fiche) return false;
+  if (fiche.statut === "suspendue" || fiche.statut === "supprimee") return false;
+  if (!fiche.dateEcheance) return true;
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  return new Date(fiche.dateEcheance) >= startOfToday;
+}
+
 
 export default function PublicFiche() {
   const { slug = "" } = useParams<{ slug: string }>();
@@ -29,11 +43,12 @@ export default function PublicFiche() {
     phone: "",
     message: "",
   });
-  const fiche = (ficheQuery.data ?? cachedFiche) as
+  const usableCachedFiche = isCachedFicheUsable(cachedFiche as PublicFicheData | null);
+  const fiche = (ficheQuery.data ?? (!ficheQuery.error && usableCachedFiche ? cachedFiche : null)) as
     | PublicFicheData
     | null
     | undefined;
-  const isOfflineVersion = !ficheQuery.data && Boolean(cachedFiche);
+  const isOfflineVersion = !ficheQuery.data && !ficheQuery.error && usableCachedFiche;
 
   useEffect(() => {
     if (!ficheQuery.data) return;
@@ -47,10 +62,10 @@ export default function PublicFiche() {
   }, [ficheQuery.data, slug]);
 
   useEffect(() => {
-    if (ficheQuery.data?.statut === "active") scanMutation.mutate({ slug });
+    if (ficheQuery.data && (ficheQuery.data.statutMetier === "active" || ficheQuery.data.statutMetier === "a_renouveler")) scanMutation.mutate({ slug });
   }, [ficheQuery.data?.statut, slug]);
 
-  if (ficheQuery.isLoading && !cachedFiche) {
+  if (ficheQuery.isLoading && !usableCachedFiche) {
     return (
       <div className="public-page public-loading">
         <div className="loading-pulse" />
