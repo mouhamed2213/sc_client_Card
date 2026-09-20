@@ -261,26 +261,30 @@ function SocialIcon({ label, url }: { label: string; url: string }) {
   return <Globe2 className="h-5 w-5" />;
 }
 
-function ProContent({ fiche }: { fiche: FicheTemplateModel }) {
+function PresentationContent({ fiche }: { fiche: FicheTemplateModel }) {
   const presentation = fiche.data.presentation?.trim();
+  if (!presentation) return null;
+  return (
+    <section className="public-section pro-presentation">
+      <SectionTitle
+        icon={<UserRound className="h-4 w-4" />}
+        title="Présentation"
+      />
+      <p className="pro-presentation-text">{presentation}</p>
+    </section>
+  );
+}
+
+function ProContent({ fiche }: { fiche: FicheTemplateModel }) {
   const appointment = fiche.data.rendezVous?.url?.trim()
     ? fiche.data.rendezVous
     : null;
   const socials = (fiche.data.reseauxSociaux ?? []).filter(social =>
     social.url?.trim()
   );
-  if (!presentation && !appointment && !socials.length) return null;
+  if (!appointment && !socials.length) return null;
   return (
     <>
-      {presentation && (
-        <section className="public-section pro-presentation">
-          <SectionTitle
-            icon={<UserRound className="h-4 w-4" />}
-            title="Présentation"
-          />
-          <p className="pro-presentation-text">{presentation}</p>
-        </section>
-      )}
       {appointment && (
         <section className="public-section pro-appointment">
           <div>
@@ -360,6 +364,7 @@ export function FicheTemplate({
               </a>
             </div>
           )}
+          <PresentationContent fiche={fiche} />
           {fiche.formule !== "essentiel" && <ProContent fiche={fiche} />}
           {fiche.formule !== "essentiel" && (links.length || fiche.site) ? (
             <section className="public-section py-[22px] border-b border-theme-line">
