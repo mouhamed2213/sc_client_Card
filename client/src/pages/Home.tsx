@@ -10,6 +10,7 @@ import {
   ClipboardCheck,
   Copy,
   Eye,
+  LayoutDashboard,
   LayoutGrid,
   Link2,
   Menu,
@@ -152,7 +153,10 @@ export default function Home() {
           Espace studio
         </div>
         <nav className="mt-3 space-y-1">
-          <Link className="sidebar-link sidebar-link-active" href="/studio/fiches">
+          <Link className="sidebar-link sidebar-link-active" href="/studio">
+            <LayoutDashboard className="h-4 w-4" /> Tableau de bord
+          </Link>
+          <Link className="sidebar-link" href="/studio/fiches">
             <LayoutGrid className="h-4 w-4" /> Fiches clients{" "}
             <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px]">
               {overview.total}
