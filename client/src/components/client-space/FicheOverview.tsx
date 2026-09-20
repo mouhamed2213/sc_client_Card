@@ -99,7 +99,7 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
               Gérez votre fiche et consultez ses performances.
             </p>
           </div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          <div className={`mt-4 grid gap-2 sm:grid-cols-${fiche.plan.hasForm ? "3" : "2"}`}>
             <QuickAction
               icon={Pencil}
               label="Modifier ma fiche"
@@ -114,13 +114,15 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
                 navigate(`/espace-client/fiche/${ficheId}/statistiques`)
               }
             />
-            <QuickAction
-              icon={MessageSquare}
-              label="Voir les demandes"
-              onClick={() =>
-                navigate(`/espace-client/fiche/${ficheId}/demandes`)
-              }
-            />
+            {fiche.plan.hasForm && (
+              <QuickAction
+                icon={MessageSquare}
+                label="Voir les demandes"
+                onClick={() =>
+                  navigate(`/espace-client/fiche/${ficheId}/demandes`)
+                }
+              />
+            )}
           </div>
         </div>
 
