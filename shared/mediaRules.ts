@@ -1,4 +1,4 @@
-export type MediaKind = "profile" | "logo" | "gallery";
+export type MediaKind = "profile" | "logo" | "gallery" | "video";
 
 export const mediaRules = {
   profile: { maxBytes: 30 * 1024, maxWidth: 400, maxHeight: 400, square: true },
@@ -9,10 +9,18 @@ export const mediaRules = {
     maxHeight: 1200,
     square: false,
   },
+  video: {
+    maxInputBytes: 50 * 1024 * 1024,
+    maxWidth: 1920,
+    maxHeight: 1080,
+    outputVideoBitrate: "4M",
+    audioBitrate: "128k",
+    maxFps: 30,
+  },
 } as const;
 
 export function getOutputDimensions(
-  kind: MediaKind,
+  kind: Exclude<MediaKind, "video">,
   width: number,
   height: number
 ) {
