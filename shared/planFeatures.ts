@@ -2,7 +2,6 @@ export const planFeatures = {
   essentiel: {
     maxLinks: 0,
     maxPhotos: 0,
-    maxVideos: 0,
     hasForm: false,
     hasGoogleReview: false,
     requiresProfile: false,
@@ -13,7 +12,6 @@ export const planFeatures = {
   pro: {
     maxLinks: 10,
     maxPhotos: 4,
-    maxVideos: 1,
     hasForm: false,
     hasGoogleReview: true,
     requiresProfile: true,
@@ -24,7 +22,6 @@ export const planFeatures = {
   signature: {
     maxLinks: 10,
     maxPhotos: 8,
-    maxVideos: 3,
     hasForm: true,
     hasGoogleReview: true,
     requiresProfile: true,
