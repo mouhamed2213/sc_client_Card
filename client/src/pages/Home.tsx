@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import AdminClientAccountCreationModal from "@/components/AdminClientAccountCreationModal";
+import AdminStandaloneFicheCreationModal from "@/components/AdminStandaloneFicheCreationModal";
 import {
   ArrowUpRight,
   Bell,
@@ -117,6 +118,7 @@ export default function Home() {
     "all"
   );
   const [isClientAccountOpen, setIsClientAccountOpen] = useState(false);
+  const [isStandaloneFicheOpen, setIsStandaloneFicheOpen] = useState(false);
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
 
   const filteredFiches = useMemo(
@@ -208,12 +210,20 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-2">
             <Button
-              onClick={() => setIsClientAccountOpen(true)}
+              onClick={() => setIsStandaloneFicheOpen(true)}
               variant="outline"
               className="flex gap-2 border-[#d9dde4]"
             >
               <UserPlus className="h-4 w-4" />
-              <span>Nouveau compte client</span>
+              <span>Nouvelle fiche</span>
+            </Button>
+            <Button
+              onClick={() => setIsClientAccountOpen(true)}
+              variant="outline"
+              className="hidden gap-2 border-[#d9dde4] sm:flex"
+            >
+              <UserPlus className="h-4 w-4" />
+              Nouveau compte client
             </Button>
             <button
               className="icon-button hidden sm:flex"
@@ -455,6 +465,10 @@ export default function Home() {
       <AdminClientAccountCreationModal
         open={isClientAccountOpen}
         onClose={() => setIsClientAccountOpen(false)}
+      />
+      <AdminStandaloneFicheCreationModal
+        open={isStandaloneFicheOpen}
+        onClose={() => setIsStandaloneFicheOpen(false)}
       />
     </div>
   );
