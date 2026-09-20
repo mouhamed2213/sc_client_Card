@@ -127,19 +127,6 @@ model ContactRequest {
   @@map("contact_requests")
 }
 
-model InvitationClient {
-  id         Int      @id @default(autoincrement())
-  ficheId    Int
-  token      String   @unique
-  utilisee   Boolean  @default(false)
-  expireLe   DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime @default(now())
-  fiche      Fiche    @relation(fields: [ficheId], references: [id], onDelete: Cascade)
-
-  @@index([ficheId])
-}
-
 model MembershipCard {
   id             Int         @id @default(autoincrement())
   ficheId        Int
