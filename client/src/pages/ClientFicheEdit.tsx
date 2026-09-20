@@ -611,12 +611,35 @@ export default function ClientFicheEdit() {
                   {form.data.galerie.map((item, index) => (
                     <div key={item.url} className="rounded-xl border border-[#e5e8ed] bg-white p-2.5 shadow-sm">
                       <div className="relative h-32 w-full overflow-hidden rounded-lg bg-[#f5f6f8]">
-                        <img src={item.url} alt={item.alt} className="h-full w-full object-cover" />
+                        {item.type === "video" ? (
+                          item.source === "direct" ? (
+                            <video
+                              src={item.url}
+                              controls
+                              playsInline
+                              preload="metadata"
+                              className="h-full w-full object-contain bg-black"
+                              aria-label={item.alt || "Vidéo"}
+                            />
+                          ) : (
+                            <iframe
+                              src={item.embedUrl}
+                              title={item.alt || "Vidéo"}
+                              className="h-full w-full"
+                              loading="lazy"
+                              referrerPolicy="strict-origin-when-cross-origin"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                            />
+                          )
+                        ) : (
+                          <img src={item.url} alt={item.alt} className="h-full w-full object-cover" />
+                        )}
                       </div>
                       <input
                         className="mt-2 w-full rounded-lg border border-[#cfd5dd] px-2.5 py-1.5 text-xs outline-none focus:border-[#c98a4e]"
-                        placeholder="Description (alt)"
-                        aria-label={`Texte alternatif ${index + 1}`}
+                        placeholder={item.type === "video" ? "Description de la vidéo" : "Description (alt)"}
+                        aria-label={"Description " + (index + 1)}
                         value={item.alt}
                         onChange={e => setData("galerie", form.data.galerie.map((x, i) => i === index ? { ...x, alt: e.target.value } : x))}
                       />
