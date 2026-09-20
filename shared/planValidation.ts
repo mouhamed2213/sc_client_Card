@@ -47,7 +47,7 @@ export function validatePlanPayload(input: {
   if (!capabilities.site.editable && input.site?.trim())
     errors.push("Cette formule ne permet pas de site internet.");
 
-  if (!capabilities.rendezVous.editable && (appointment?.url?.trim() || appointment?.label?.trim()))
+  if (!capabilities.rendezVous.editable && appointment?.url?.trim())
     errors.push("Cette formule ne permet pas de prise de rendez-vous.");
 
   if (!capabilities.socials.editable && socials.some(item => item.url?.trim()))
