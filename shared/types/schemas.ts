@@ -5,6 +5,8 @@ const galleryItem = z.object({
   url: z.string().min(1),
   alt: z.string().default(""),
   poster: z.string().optional(),
+  source: z.enum(["youtube", "instagram", "facebook", "tiktok", "vimeo", "direct"]).optional(),
+  embedUrl: z.string().url().optional(),
 });
 
 export const fichePayload = z.object({
