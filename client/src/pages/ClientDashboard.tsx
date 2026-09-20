@@ -30,9 +30,8 @@ export default function ClientDashboard() {
             Aucune fiche associée
           </h1>
           <p className="mt-2 text-sm text-[#7d8798]">
-            Votre compte n'est pas encore relié à une fiche. Si vous venez de
-            recevoir une invitation, ouvrez-la depuis l'e-mail ou le lien
-            fourni par notre équipe pour l'activer.
+            Votre compte n'est pas encore relié à une fiche. Contactez notre
+            équipe pour rattacher une fiche à votre compte.
           </p>
         </div>
       </ClientLayout>
