@@ -15,7 +15,7 @@ import KpiTile from "./KpiTile";
 import ScanChart from "./ScanChart";
 import { getEcheanceStatus } from "@/lib/ficheStatus";
 import { PremiumBadge, PremiumUpgradeModal } from "@/components/PremiumFeature";
-import type { PlanName } from "@shared/planFeatures";
+import { getPlanFeatures, type PlanName } from "@shared/planFeatures";
 
 export default function FicheOverview({ ficheId }: { ficheId: number }) {
   const [, navigate] = useLocation();
@@ -45,6 +45,7 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
     );
   }
 
+  const plan = fiche.plan ?? getPlanFeatures(fiche.formule);
   const scans = data.scans.reduce((sum, item) => sum + item.count, 0);
   const echeance = getEcheanceStatus(fiche.dateEcheance);
 
@@ -64,13 +65,13 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
                 month: "long",
                 year: "numeric",
               })}
-              . {fiche.plan.hasPanel ? "Votre formule inclut le panneau de gestion avancé." : ""}
+              . {plan.hasPanel ? "Votre formule inclut le panneau de gestion avancé." : ""}
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:max-w-sm">
-            <MiniStat label="Liens max" value={fiche.plan.maxLinks} />
-            <MiniStat label="Photos max" value={fiche.plan.maxPhotos} />
-            <MiniStat label="Catalogue" value={fiche.plan.hasCatalog ? "Oui" : "Non"} />
+            <MiniStat label="Liens max" value={plan.maxLinks} />
+            <MiniStat label="Photos max" value={plan.maxPhotos} />
+            <MiniStat label="Catalogue" value={plan.hasCatalog ? "Oui" : "Non"} />
           </div>
         </div>
       </div>
@@ -80,7 +81,7 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
         <button
           type="button"
           onClick={() =>
-            fiche.plan.hasForm
+            plan.hasForm
               ? navigate(`/espace-client/fiche/${ficheId}/demandes`)
               : setPremiumFeature({ name: "Demandes reçues", plan: "signature" })
           }
@@ -88,13 +89,13 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
         >
           <div className="flex items-center justify-between gap-2">
             <MessageSquare size={17} className="text-[#7d8798]" />
-            {!fiche.plan.hasForm && <Sparkles size={14} className="text-[#c98a4e]" aria-hidden="true" />}
+            {!plan.hasForm && <Sparkles size={14} className="text-[#c98a4e]" aria-hidden="true" />}
           </div>
           <p className="kpi-tile-value" style={{ fontSize: 15 }}>
-            {fiche.plan.hasForm ? data.requestCount : "Premium"}
+            {plan.hasForm ? data.requestCount : "Premium"}
           </p>
           <p className="kpi-tile-label">
-            {fiche.plan.hasForm ? "Demandes reçues" : "Disponible avec Signature"}
+            {plan.hasForm ? "Demandes reçues" : "Disponible avec Signature"}
           </p>
         </button>
         <button
@@ -117,7 +118,7 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
               Gérez votre fiche et consultez ses performances.
             </p>
           </div>
-          <div className={`mt-4 grid gap-2 sm:grid-cols-${fiche.plan.hasForm ? "3" : "2"}`}>
+          <div className={`mt-4 grid gap-2 sm:grid-cols-${plan.hasForm ? "3" : "2"}`}>
             <QuickAction
               icon={Pencil}
               label="Modifier ma fiche"
@@ -135,9 +136,9 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
             <QuickAction
               icon={MessageSquare}
               label="Voir les demandes"
-              premium={!fiche.plan.hasForm}
+              premium={!plan.hasForm}
               onClick={() =>
-                fiche.plan.hasForm
+                plan.hasForm
                   ? navigate(`/espace-client/fiche/${ficheId}/demandes`)
                   : setPremiumFeature({ name: "Demandes reçues", plan: "signature" })
               }
@@ -155,45 +156,45 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <CapabilityItem
               label="Liens personnalisés"
-              value={fiche.plan.maxLinks > 0 ? `${fiche.plan.maxLinks}` : undefined}
-              upgradePlan={fiche.plan.maxLinks === 0 ? "pro" : undefined}
+              value={plan.maxLinks > 0 ? `${plan.maxLinks}` : undefined}
+              upgradePlan={plan.maxLinks === 0 ? "pro" : undefined}
               onUpgrade={() => setPremiumFeature({ name: "Liens personnalisés", plan: "pro" })}
             />
             <CapabilityItem
               label="Galerie"
-              value={fiche.plan.maxPhotos > 0 ? `${fiche.plan.maxPhotos} photos` : undefined}
-              upgradePlan={fiche.plan.maxPhotos === 0 ? "pro" : undefined}
+              value={plan.maxPhotos > 0 ? `${plan.maxPhotos} photos` : undefined}
+              upgradePlan={plan.maxPhotos === 0 ? "pro" : undefined}
               onUpgrade={() => setPremiumFeature({ name: "Galerie", plan: "pro" })}
             />
             <CapabilityItem
               label="Site web"
-              enabled={fiche.plan.maxLinks > 0}
-              upgradePlan={fiche.plan.maxLinks === 0 ? "pro" : undefined}
+              enabled={plan.maxLinks > 0}
+              upgradePlan={plan.maxLinks === 0 ? "pro" : undefined}
               onUpgrade={() => setPremiumFeature({ name: "Site web", plan: "pro" })}
             />
             <CapabilityItem
               label="Avis Google"
-              enabled={fiche.plan.hasGoogleReview}
-              upgradePlan={!fiche.plan.hasGoogleReview ? "pro" : undefined}
+              enabled={plan.hasGoogleReview}
+              upgradePlan={!plan.hasGoogleReview ? "pro" : undefined}
               onUpgrade={() => setPremiumFeature({ name: "Avis Google", plan: "pro" })}
             />
             <CapabilityItem
               label="Catalogue"
-              enabled={fiche.plan.hasCatalog}
-              upgradePlan={!fiche.plan.hasCatalog ? "signature" : undefined}
+              enabled={plan.hasCatalog}
+              upgradePlan={!plan.hasCatalog ? "signature" : undefined}
               onUpgrade={() => setPremiumFeature({ name: "Catalogue", plan: "signature" })}
             />
             <CapabilityItem
               label="Formulaire de rappel"
-              enabled={fiche.plan.hasForm}
-              upgradePlan={!fiche.plan.hasForm ? "signature" : undefined}
+              enabled={plan.hasForm}
+              upgradePlan={!plan.hasForm ? "signature" : undefined}
               onUpgrade={() => setPremiumFeature({ name: "Formulaire de rappel", plan: "signature" })}
             />
           </div>
         </div>
       </div>
 
-      <div className={`grid gap-5 ${fiche.plan.hasForm ? "lg:grid-cols-[1.3fr,1fr]" : ""}`}>
+      <div className={`grid gap-5 ${plan.hasForm ? "lg:grid-cols-[1.3fr,1fr]" : ""}`}>
         <div className="panel">
           <div className="flex items-center justify-between">
             <div>
@@ -206,7 +207,7 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
           </div>
         </div>
 
-        {fiche.plan.hasForm && (
+        {plan.hasForm && (
           <div className="panel">
             <div className="flex items-center justify-between">
               <div>
