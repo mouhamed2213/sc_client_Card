@@ -1,12 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { trpc } from "@/lib/trpc";
 import AdminClientAccountCreationModal from "@/components/AdminClientAccountCreationModal";
 import AdminStandaloneFicheCreationModal from "@/components/AdminStandaloneFicheCreationModal";
+import { Button } from "@/components/ui/button";
+import { trpc } from "@/lib/trpc";
 import {
   ArrowUpRight,
   Bell,
   ChevronDown,
-  Copy,
   Eye,
   LayoutDashboard,
   LayoutGrid,
@@ -18,8 +17,8 @@ import {
   Search,
   SlidersHorizontal,
   Sparkles,
-  Users,
   UserPlus,
+  Users,
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -249,7 +248,7 @@ export default function Home() {
                   être partagées sur une carte NFC.
                 </p>
                 <a
-                  href="#fiches"
+                  href="studio/fiches"
                   className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-white transition-colors hover:text-[#e5a86b]"
                 >
                   Voir les fiches <ArrowUpRight className="h-4 w-4" />
@@ -402,7 +401,6 @@ export default function Home() {
               </span>
             </div>
           </section>
-
         </div>
       </main>
 
