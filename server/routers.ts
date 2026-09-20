@@ -597,9 +597,10 @@ export const appRouter = router({
       }),
   }),
   clientSpaceRouter: router({
-    myFiches: clientProcedure.query(({ ctx }) =>
-      listFichesByOwner(ctx.user.id)
-    ),
+    myFiches: clientProcedure.query(async ({ ctx }) => {
+      const fiches = await listFichesByOwner(ctx.user.id);
+      return fiches.map(fiche => parseFiche(fiche));
+    }),
     dashboard: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
