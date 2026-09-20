@@ -5,9 +5,7 @@ import AdminStandaloneFicheCreationModal from "@/components/AdminStandaloneFiche
 import {
   ArrowUpRight,
   Bell,
-  Check,
   ChevronDown,
-  ClipboardCheck,
   Copy,
   Eye,
   LayoutDashboard,
@@ -94,7 +92,7 @@ function formatDate(date: Date | string) {
 }
 
 export default function Home() {
-  const fichesQuery = trpc.fiches.list.useQuery();
+  const fichesQuery = trpc.fiches.recent.useQuery();
   const overviewQuery = trpc.fiches.overview.useQuery();
   const utils = trpc.useUtils();
   const statusMutation = trpc.fiches.updateStatus.useMutation({
@@ -162,9 +160,6 @@ export default function Home() {
               {overview.total}
             </span>
           </Link>
-          <a className="sidebar-link" href="#suivi">
-            <ClipboardCheck className="h-4 w-4" /> Contrôle qualité
-          </a>
           <a className="sidebar-link" href="#liens">
             <Link2 className="h-4 w-4" /> Liens & QR
           </a>
@@ -408,60 +403,6 @@ export default function Home() {
             </div>
           </section>
 
-          <section
-            id="suivi"
-            className="mt-7 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]"
-          >
-            <div className="rounded-2xl border border-[#e6e8ec] bg-white p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="eyebrow">Contrôle qualité</p>
-                  <h2 className="mt-2 text-lg font-semibold tracking-[-0.025em]">
-                    La recette avant mise en ligne
-                  </h2>
-                </div>
-                <div className="rounded-xl bg-[#eef5ff] p-3 text-[#2c6dcc]">
-                  <ClipboardCheck className="h-5 w-5" />
-                </div>
-              </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                <QualityItem label="12 points" note="à vérifier" />
-                <QualityItem label="< 150 ko" note="poids maximum" />
-                <QualityItem label="< 2 sec" note="sur réseau 3G" />
-              </div>
-              <div className="mt-6 flex items-center justify-between border-t border-[#edf0f2] pt-5">
-                <p className="max-w-sm text-sm leading-5 text-[#7d8798]">
-                  Une fiche n'est livrable que si le slug, les trois boutons et
-                  les mentions sont validés.
-                </p>
-                <button className="text-sm font-semibold text-[#2c6dcc] hover:underline">
-                  Ouvrir la checklist{" "}
-                  <ArrowUpRight className="ml-1 inline h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-[#e6e8ec] bg-[#fffaf4] p-6">
-              <p className="eyebrow text-[#b27945]">Raccourci utile</p>
-              <h2 className="mt-2 text-lg font-semibold tracking-[-0.025em]">
-                Message de collecte
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-[#7d6552]">
-                Les huit éléments à demander au client, prêts à copier-coller
-                sur WhatsApp.
-              </p>
-              <button
-                onClick={() => {
-                  navigator.clipboard?.writeText(
-                    "Bonjour, merci pour votre confiance. Pour préparer votre fiche, j'ai besoin de votre nom exact, fonction, établissement, photo ou logo, numéros, adresse, liens et horaires."
-                  );
-                  toast.success("Message copié");
-                }}
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-3 text-sm font-semibold text-white hover:bg-[#27334a]"
-              >
-                <Copy className="h-4 w-4" /> Copier le message
-              </button>
-            </div>
-          </section>
         </div>
       </main>
 
@@ -529,17 +470,6 @@ function FilterTab({
       {label}
       <span className={active ? "tab-count-active" : "tab-count"}>{count}</span>
     </button>
-  );
-}
-function QualityItem({ label, note }: { label: string; note: string }) {
-  return (
-    <div className="rounded-xl bg-[#f7f8fa] px-4 py-3">
-      <div className="flex items-center gap-2 text-sm font-semibold">
-        <Check className="h-4 w-4 text-emerald-500" />
-        {label}
-      </div>
-      <p className="mt-1 pl-6 text-xs text-[#8b94a3]">{note}</p>
-    </div>
   );
 }
 function FicheIdentity({ fiche }: { fiche: Fiche }) {
