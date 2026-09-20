@@ -35,12 +35,14 @@ const formulaLabels = {
 } as const;
 const statusLabels = {
   active: "Active",
+  a_renouveler: "À renouveler",
   suspendue: "Suspendue",
   supprimee: "Supprimée",
   brouillon: "Brouillon",
 } as const;
 const statusStyles = {
   active: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  a_renouveler: "bg-orange-50 text-orange-700 border-orange-100",
   suspendue: "bg-amber-50 text-amber-700 border-amber-100",
   supprimee: "bg-red-50 text-red-700 border-red-100",
   brouillon: "bg-slate-100 text-slate-600 border-slate-200",
@@ -50,7 +52,8 @@ type Fiche = {
   id: number;
   slug: string;
   formule: keyof typeof formulaLabels;
-  statut: keyof typeof statusLabels;
+  statut: Exclude<keyof typeof statusLabels, "a_renouveler">;
+  statutMetier: keyof typeof statusLabels;
   nom: string;
   prenom: string;
   fonction: string;
@@ -127,7 +130,7 @@ export default function Home() {
           `${fiche.prenom} ${fiche.nom} ${fiche.entreprise} ${fiche.slug}`.toLowerCase();
         return (
           haystack.includes(search.toLowerCase()) &&
-          (filter === "all" || fiche.statut === filter)
+          (filter === "all" || fiche.statutMetier === filter)
         );
       }),
     [fiches, filter, search]
@@ -321,7 +324,13 @@ export default function Home() {
                 label="Actives"
                 active={filter === "active"}
                 onClick={() => setFilter("active")}
-                count={fiches.filter(f => f.statut === "active").length}
+                count={fiches.filter(f => f.statutMetier === "active").length}
+              />
+              <FilterTab
+                label="À renouveler"
+                active={filter === "a_renouveler"}
+                onClick={() => setFilter("a_renouveler")}
+                count={fiches.filter(f => f.statutMetier === "a_renouveler").length}
               />
               <FilterTab
                 label="À revoir"
@@ -536,10 +545,10 @@ function FicheRow({
       </td>
       <td className="px-4 py-4">
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[fiche.statut]}`}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[fiche.statutMetier]}`}
         >
           <span className="h-1.5 w-1.5 rounded-full bg-current" />
-          {statusLabels[fiche.statut]}
+          {statusLabels[fiche.statutMetier]}
         </span>
       </td>
       <td className="px-4 py-4 text-sm font-medium text-[#42506a]">
@@ -597,9 +606,9 @@ function FicheCard({
       <div className="flex items-start justify-between">
         <FicheIdentity fiche={fiche} />
         <span
-          className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statut]}`}
+          className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statutMetier]}`}
         >
-          {statusLabels[fiche.statut]}
+          {statusLabels[fiche.statutMetier]}
         </span>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-3 text-xs">

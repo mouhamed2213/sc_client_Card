@@ -53,9 +53,28 @@ import { validatePlanPayload } from "./planValidation";
 import { parseVideoUrl } from "@shared/videoUrls";
 import { storagePut } from "./storage";
 
+const RENEWAL_WINDOW_DAYS = 30;
+
+function isFicheToRenew(fiche: { statut: string; dateEcheance: Date }) {
+  if (fiche.statut !== "active") return false;
+  const now = new Date();
+  const startOfToday = new Date(now);
+  startOfToday.setUTCHours(0, 0, 0, 0);
+  const renewalLimit = new Date(startOfToday);
+  renewalLimit.setUTCDate(
+    renewalLimit.getUTCDate() + RENEWAL_WINDOW_DAYS
+  );
+  renewalLimit.setUTCHours(23, 59, 59, 999);
+  return fiche.dateEcheance >= startOfToday && fiche.dateEcheance <= renewalLimit;
+}
+
 function parseFiche<T extends { dataJson: string }>(fiche: T) {
   const { dataJson, ...rest } = fiche;
-  return { ...rest, data: JSON.parse(dataJson || "{}") };
+  return {
+    ...rest,
+    data: JSON.parse(dataJson || "{}"),
+    statutMetier: isFicheToRenew(fiche) ? "a_renouveler" : fiche.statut,
+  };
 }
 
 export const appRouter = router({
@@ -106,12 +125,24 @@ export const appRouter = router({
           pageSize: z.number().int().min(5).max(50).default(10),
           search: z.string().trim().max(160).optional().default(""),
           statut: z
-            .enum(["active", "suspendue", "supprimee", "brouillon"])
+            .enum([
+              "active",
+              "suspendue",
+              "supprimee",
+              "brouillon",
+              "a_renouveler",
+            ])
             .optional(),
         })
       )
       .query(async ({ input }) => {
-        const result = await listFichesPaginated(input);
+        const { statut, ...pagination } = input;
+        const result = await listFichesPaginated({
+          ...pagination,
+          ...(statut === "a_renouveler"
+            ? { aRenouveler: true }
+            : { statut }),
+        });
         return {
           ...result,
           rows: result.rows.map((row: Fiche) => ({

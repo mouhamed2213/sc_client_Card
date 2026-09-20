@@ -220,11 +220,24 @@ export async function listFichesPaginated(input: {
   pageSize: number;
   search?: string;
   statut?: "active" | "suspendue" | "supprimee" | "brouillon";
+  aRenouveler?: boolean;
 }) {
   await ensureDemoFiches();
   const search = input.search?.trim();
+  const now = new Date();
+  const startOfToday = new Date(now);
+  startOfToday.setUTCHours(0, 0, 0, 0);
+  const renewalLimit = new Date(startOfToday);
+  renewalLimit.setUTCDate(renewalLimit.getUTCDate() + 30);
+  renewalLimit.setUTCHours(23, 59, 59, 999);
   const where = {
     ...(input.statut ? { statut: input.statut } : {}),
+    ...(input.aRenouveler
+      ? {
+          statut: "active" as const,
+          dateEcheance: { gte: startOfToday, lte: renewalLimit },
+        }
+      : {}),
     ...(search
       ? {
           OR: [
@@ -360,14 +373,20 @@ export async function listContactRequests(ficheId: number) {
 }
 export async function getOverview() {
   await ensureDemoFiches();
+  const now = new Date();
+  const startOfToday = new Date(now);
+  startOfToday.setUTCHours(0, 0, 0, 0);
+  const renewalLimit = new Date(startOfToday);
+  renewalLimit.setUTCDate(renewalLimit.getUTCDate() + 30);
+  renewalLimit.setUTCHours(23, 59, 59, 999);
   const [total, active, scans, expiring] = await Promise.all([
     prisma.fiche.count(),
     prisma.fiche.count({ where: { statut: "active" } }),
     prisma.fiche.aggregate({ _sum: { scansTotal: true } }),
     prisma.fiche.count({
       where: {
-        dateEcheance: { lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
-        statut: { not: "supprimee" },
+        statut: "active",
+        dateEcheance: { gte: now, lte: renewalLimit },
       },
     }),
   ]);
