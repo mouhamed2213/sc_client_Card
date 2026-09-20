@@ -1,4 +1,3 @@
-import { useLocation } from "wouter";
 import React from "react";
 import { useLocation } from "wouter";
 import {
@@ -260,6 +259,7 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
       )}
     </div>
   );
+}
 
 function MiniStat({ label, value }: { label: string; value: string | number }) {
   return (
