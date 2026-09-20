@@ -97,7 +97,7 @@ export default function Home() {
   const utils = trpc.useUtils();
   const statusMutation = trpc.fiches.updateStatus.useMutation({
     onSuccess: () => {
-      utils.fiches.list.invalidate();
+      utils.fiches.recent.invalidate();
       utils.fiches.overview.invalidate();
       toast.success("Statut mis à jour");
     },
@@ -289,10 +289,10 @@ export default function Home() {
             <div className="flex flex-col gap-5 border-b border-[#edf0f2] px-5 py-5 sm:flex-row sm:items-center sm:justify-between lg:px-7">
               <div>
                 <h2 className="font-semibold tracking-[-0.02em]">
-                  Toutes les fiches
+                  Les 10 dernières fiches
                 </h2>
                 <p className="mt-1 text-sm text-[#7d8798]">
-                  Un gabarit, plusieurs métiers, aucune variante de code.
+                  Les 10 fiches ou comptes ajoutés le plus récemment.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
