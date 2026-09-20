@@ -403,6 +403,30 @@ export default function Home() {
             </div>
           </section>
 
+          <section
+            className="mt-7 rounded-2xl border border-[#e6e8ec] bg-[#fffaf4] p-6"
+          >
+            <p className="eyebrow text-[#b27945]">Raccourci utile</p>
+            <h2 className="mt-2 text-lg font-semibold tracking-[-0.025em]">
+              Message de collecte
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-[#7d6552]">
+              Les huit éléments à demander au client, prêts à copier-coller
+              sur WhatsApp.
+            </p>
+            <button
+              onClick={() => {
+                navigator.clipboard?.writeText(
+                  "Bonjour, merci pour votre confiance. Pour préparer votre fiche, j'ai besoin de votre nom exact, fonction, établissement, photo ou logo, numéros, adresse, liens et horaires."
+                );
+                toast.success("Message copié");
+              }}
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-3 text-sm font-semibold text-white hover:bg-[#27334a]"
+            >
+              <Copy className="h-4 w-4" /> Copier le message
+            </button>
+          </section>
+
         </div>
       </main>
 
