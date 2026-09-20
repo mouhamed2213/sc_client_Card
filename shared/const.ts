@@ -15,7 +15,6 @@ export const OAUTH_STATE_COOKIE = "__Host-oauth_state";
 export type OAuthState = {
   redirectUri: string;
   nonce?: string;
-  invitationToken?: string;
 };
 export const encodeOAuthState = (state: OAuthState): string =>
   btoa(JSON.stringify(state));
