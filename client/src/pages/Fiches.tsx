@@ -3,8 +3,6 @@ import { trpc } from "@/lib/trpc";
 import { ADMIN_HOME_PATH } from "@/const";
 import {
   Bell,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   LayoutDashboard,
   Menu,
@@ -69,22 +67,15 @@ function formatDate(date: Date | string) {
 export default function Fiches() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<StatusFilter>("all");
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
 
-  const listQuery = trpc.fiches.listPaginated.useQuery({
-    page,
-    pageSize,
-    search,
-    statut: filter === "all" ? undefined : filter,
-  });
+  // Même procédure que le dashboard : on réutilise la liste canonique des fiches.
+  const listQuery = trpc.fiches.list.useQuery();
 
   const utils = trpc.useUtils();
   const statusMutation = trpc.fiches.updateStatus.useMutation({
     onSuccess: async () => {
       await Promise.all([
-        utils.fiches.listPaginated.invalidate(),
         utils.fiches.list.invalidate(),
         utils.fiches.overview.invalidate(),
       ]);
@@ -94,27 +85,33 @@ export default function Fiches() {
       toast.error("Action impossible", { description: error.message }),
   });
 
-  const rows = (listQuery.data?.rows ?? []) as Fiche[];
-  const total = listQuery.data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const fiches = (listQuery.data ?? []) as Fiche[];
 
-  const counts = useMemo(() => {
-    return {
-      all: total,
-      active: undefined,
-      brouillon: undefined,
-      suspendue: undefined,
-    };
-  }, [total]);
+  const rows = useMemo(
+    () =>
+      fiches.filter(fiche => {
+        const haystack =
+          `${fiche.prenom} ${fiche.nom} ${fiche.entreprise} ${fiche.slug}`.toLowerCase();
+
+        return (
+          haystack.includes(search.trim().toLowerCase()) &&
+          (filter === "all" || fiche.statut === filter)
+        );
+      }),
+    [fiches, filter, search]
+  );
+
+  const total = fiches.length;
+  const counts = {
+    all: total,
+  };
 
   function changeFilter(next: StatusFilter) {
     setFilter(next);
-    setPage(1);
   }
 
   function changeSearch(value: string) {
     setSearch(value);
-    setPage(1);
   }
 
   function toggleStatus(fiche: Fiche) {
@@ -273,34 +270,8 @@ export default function Fiches() {
               </div>
             )}
 
-            <div className="flex flex-col gap-3 border-t border-[#edf0f2] px-5 py-4 text-xs text-[#8b94a3] sm:flex-row sm:items-center sm:justify-between lg:px-7">
-              <span>
-                Page {Math.min(page, totalPages)} sur {totalPages}
-              </span>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={page <= 1 || listQuery.isFetching}
-                  onClick={() => setPage(current => Math.max(1, current - 1))}
-                  aria-label="Page précédente"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Précédente
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={page >= totalPages || listQuery.isFetching}
-                  onClick={() => setPage(current => Math.min(totalPages, current + 1))}
-                  aria-label="Page suivante"
-                >
-                  Suivante
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+            <div className="border-t border-[#edf0f2] px-5 py-4 text-xs text-[#8b94a3] lg:px-7">
+              {rows.length} fiche{rows.length > 1 ? "s" : ""} affichée{rows.length > 1 ? "s" : ""}
             </div>
           </section>
         </div>
