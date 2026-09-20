@@ -591,6 +591,11 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "Fiche introuvable.",
           });
+        if (fiche.formule !== "signature")
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Les statistiques sont disponibles uniquement avec la formule Signature.",
+          });
         return listScansForFiche(input.ficheId, input.days ?? 30);
       }),
     contactRequests: clientProcedure
