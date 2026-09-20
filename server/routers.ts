@@ -695,6 +695,27 @@ export const appRouter = router({
           notesInternes: currentData.notesInternes ?? "",
         };
 
+        const normalizedGallery = (nextData.galerie ?? []).map(item => {
+          if (item.type !== "video") {
+            return { type: "image" as const, url: item.url, alt: item.alt ?? "" };
+          }
+          const parsed = parseVideoUrl(item.url);
+          if (!parsed) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Une ou plusieurs vidéos utilisent une URL non supportée.",
+            });
+          }
+          return {
+            type: "video" as const,
+            url: parsed.url,
+            alt: item.alt ?? "",
+            source: parsed.source,
+            embedUrl: parsed.embedUrl,
+          };
+        });
+        nextData.galerie = normalizedGallery;
+
         const validationData = {
           ...nextData,
           liens: capabilities.links.editable ? nextData.liens : [],
