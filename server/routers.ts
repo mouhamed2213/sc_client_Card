@@ -768,7 +768,19 @@ export const appRouter = router({
           });
         }
 
-        const currentData = JSON.parse(fiche.dataJson || "{}") as { galerie?: unknown[] };\n        const gallery = currentData.galerie ?? [];\n\n        if (input.kind === "gallery" && gallery.length >= capabilities.gallery.maxItems!) {\n          throw new TRPCError({ code: "BAD_REQUEST", message: `La galerie est limitée à ${capabilities.gallery.maxItems} photos.` });\n        }\n\n        const raw = input.contentBase64.replace(/^data:[^;]+;base64,/, "");\n        if (!/^[A-Za-z0-9+/]+={0,2}$/.test(raw)) {\n          throw new TRPCError({ code: "BAD_REQUEST", message: "Le contenu média est invalide." });\n        }\n        const bytes = Buffer.from(raw, "base64");\n
+        const currentData = JSON.parse(fiche.dataJson || "{}") as { galerie?: unknown[] };
+        const gallery = currentData.galerie ?? [];
+
+        if (input.kind === "gallery" && gallery.length >= capabilities.gallery.maxItems!) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: `La galerie est limitée à ${capabilities.gallery.maxItems} photos.` });
+        }
+
+        const raw = input.contentBase64.replace(/^data:[^;]+;base64,/, "");
+        if (!/^[A-Za-z0-9+/]+={0,2}$/.test(raw)) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Le contenu média est invalide." });
+        }
+        const bytes = Buffer.from(raw, "base64");
+
         const maxBytes = mediaRules[input.kind].maxBytes;
         if (bytes.byteLength > maxBytes)
           throw new TRPCError({
