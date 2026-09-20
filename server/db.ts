@@ -388,6 +388,61 @@ export async function attachFicheToOwner(ficheId: number, ownerId: number) {
   });
 }
 
+export async function getFicheOwner(ficheId: number) {
+  return prisma.fiche.findUnique({
+    where: { id: ficheId },
+    select: {
+      ownerId: true,
+      owner: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          loginMethod: true,
+          role: true,
+          _count: { select: { fiche: true } },
+        },
+      },
+    },
+  });
+}
+
+export async function changeFicheOwner(ficheId: number, ownerId: number) {
+  return prisma.$transaction(async tx => {
+    const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
+    if (!fiche) throw new Error("FICHE_NOT_FOUND");
+
+    const owner = await tx.user.findUnique({
+      where: { id: ownerId },
+      include: { clientCredential: true },
+    });
+    if (
+      !owner ||
+      owner.role !== "user" ||
+      owner.loginMethod !== "local-client" ||
+      !owner.clientCredential
+    ) {
+      throw new Error("OWNER_NOT_FOUND");
+    }
+
+    return tx.fiche.update({
+      where: { id: ficheId },
+      data: { ownerId },
+    });
+  });
+}
+
+export async function detachFicheOwner(ficheId: number) {
+  const fiche = await prisma.fiche.findUnique({ where: { id: ficheId } });
+  if (!fiche) throw new Error("FICHE_NOT_FOUND");
+  if (!fiche.ownerId) throw new Error("FICHE_NOT_OWNED");
+
+  return prisma.fiche.update({
+    where: { id: ficheId },
+    data: { ownerId: null },
+  });
+}
+
 // --- Scans agrégés (réutilisé par admin ET client) ---
 export async function listScansForFiche(ficheId: number, days = 30) {
   const end = new Date();
