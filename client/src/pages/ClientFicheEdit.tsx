@@ -2,8 +2,10 @@ import ClientLayout from "@/components/ClientLayout";
 import { formuleLabels } from "@/lib/ficheStatus";
 import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
+import { PremiumUpgradeModal } from "@/components/PremiumFeature";
 import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
 import type { MediaKind } from "@shared/mediaRules";
+import type { PlanName } from "@shared/planFeatures";
 import {
   ImagePlus,
   Loader2,
@@ -142,8 +144,8 @@ export default function ClientFicheEdit() {
 
   const plan = fiche.data.formule;
   const capabilities = getClientFicheCapabilities(plan);
-  const upgradeLabel = (key: keyof typeof capabilities) =>
-    capabilities[key].upgradeTo === "signature" ? "Signature" : "Pro";
+  const upgradeLabel = (key: keyof typeof capabilities): PlanName =>
+    capabilities[key].upgradeTo ?? "pro";
 
   const setField = <K extends keyof Omit<FormState, "data">>(
     key: K,
@@ -775,27 +777,42 @@ export default function ClientFicheEdit() {
 {
   /* Composant de notice d'upgrade Premium */
 }
-function UpgradeNotice({ requiredPlan }: { requiredPlan: string }) {
+function UpgradeNotice({ requiredPlan }: { requiredPlan: PlanName }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-[#e2d0b5] bg-gradient-to-r from-[#fdfbf7] to-[#f9f4ec] p-4 text-[#735028]">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#c98a4e]/15 text-[#c98a4e]">
-          <Lock size={20} />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-[#543b1d]">
-            Fonctionnalité Premium
-          </p>
-          <p className="text-xs text-[#8c6537]">
-            Cette option est disponible à partir de l’offre{" "}
-            <span className="font-bold underline">{requiredPlan}</span>.
-          </p>
-        </div>
-      </div>
-      <div className="inline-flex items-center gap-1.5 rounded-lg bg-[#c98a4e] px-3.5 py-2 text-xs font-semibold text-white shadow-sm">
-        <Sparkles size={14} /> Débloquer avec le plan {requiredPlan}
-      </div>
-    </div>
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex w-full flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-[#e2d0b5] bg-gradient-to-r from-[#fdfbf7] to-[#f9f4ec] p-4 text-left text-[#735028] transition hover:border-[#c98a4e]"
+        aria-label={`Fonctionnalité Premium, disponible avec le plan ${requiredPlan}`}
+      >
+        <span className="flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#c98a4e]/15 text-[#c98a4e]">
+            <Lock size={20} aria-hidden="true" />
+          </span>
+          <span>
+            <span className="block text-sm font-semibold text-[#543b1d]">
+              Fonctionnalité Premium
+            </span>
+            <span className="block text-xs text-[#8c6537]">
+              Cette option est disponible avec le plan{" "}
+              <span className="font-bold underline">{requiredPlan}</span>.
+            </span>
+          </span>
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#c98a4e] px-3.5 py-2 text-xs font-semibold text-white shadow-sm">
+          <Sparkles size={14} aria-hidden="true" /> Voir le plan
+        </span>
+      </button>
+      <PremiumUpgradeModal
+        feature="Cette fonctionnalité"
+        requiredPlan={requiredPlan}
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
   );
 }
 
