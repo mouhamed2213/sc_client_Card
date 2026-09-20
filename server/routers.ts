@@ -31,6 +31,7 @@ import {
   detachFicheOwner,
   getFicheOwner,
   createClientAccountWithFiche,
+  createStandaloneFiche,
   createContactRequest,
   createMembershipCard,
   getFicheById,
@@ -279,6 +280,38 @@ export const appRouter = router({
       }),
   }),
   admin: router({
+    createStandaloneFiche: adminProcedure
+      .input(z.object({ fiche: fichePayload, ownerId: z.number().int().positive().nullable().optional() }))
+      .mutation(async ({ input }) => {
+        const { data, ...fields } = input.fiche;
+        const createdAt = new Date();
+        const dateEcheance = new Date(createdAt);
+        dateEcheance.setFullYear(dateEcheance.getFullYear() + 1);
+        const errors = validatePlanPayload({ ...fields, data });
+        if (errors.length) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
+        }
+        try {
+          const fiche = await createStandaloneFiche({
+            ownerId: input.ownerId ?? null,
+            fiche: {
+              ...fields,
+              dataJson: JSON.stringify(data),
+              dateCreation: createdAt,
+              dateEcheance,
+            },
+          });
+          return { ok: true as const, ficheId: fiche.id, slug: fiche.slug };
+        } catch (error) {
+          if (error instanceof Error && error.message === "OWNER_NOT_FOUND") {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Compte client introuvable." });
+          }
+          if ((error as { code?: string })?.code === "P2002") {
+            throw new TRPCError({ code: "CONFLICT", message: "Ce slug existe déjà." });
+          }
+          throw error;
+        }
+      }),
     createClientAccountWithFiche: adminProcedure
       .input(
         z.object({
