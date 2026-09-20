@@ -2,12 +2,14 @@ import { useParams } from "wouter";
 import { MessageSquare, Phone } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import ClientLayout from "@/components/ClientLayout";
+import FicheStatusAlert from "@/components/client-space/FicheStatusAlert";
 
 export default function ClientRequests() {
   const { ficheId } = useParams<{ ficheId: string }>();
   const id = Number(ficheId);
   const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
-  const canViewRequests = fiche.data?.formule === "signature";
+  const lifecycleBlocked = fiche.data?.statutMetier === "suspendue" || fiche.data?.statutMetier === "expiree";
+  const canViewRequests = fiche.data?.formule === "signature" && !lifecycleBlocked;
   const requests = trpc.clientSpaceRouter.contactRequests.useQuery(
     { ficheId: id },
     { enabled: canViewRequests }
@@ -27,6 +29,11 @@ export default function ClientRequests() {
           <div className="panel py-16 text-center text-sm text-[#7d8798]">
             Chargement…
           </div>
+        ) : lifecycleBlocked ? (
+          <FicheStatusAlert
+            status={fiche.data?.statutMetier}
+            dateEcheance={fiche.data?.dateEcheance}
+          />
         ) : !canViewRequests ? (
           <div className="panel flex flex-col items-center py-16 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#fff4df]">

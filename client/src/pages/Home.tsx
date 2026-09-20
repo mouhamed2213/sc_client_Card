@@ -36,6 +36,7 @@ const formulaLabels = {
 const statusLabels = {
   active: "Active",
   a_renouveler: "À renouveler",
+  expiree: "Expirée",
   suspendue: "Suspendue",
   supprimee: "Supprimée",
   brouillon: "Brouillon",
@@ -43,6 +44,7 @@ const statusLabels = {
 const statusStyles = {
   active: "bg-emerald-50 text-emerald-700 border-emerald-100",
   a_renouveler: "bg-orange-50 text-orange-700 border-orange-100",
+  expiree: "bg-red-50 text-red-700 border-red-100",
   suspendue: "bg-amber-50 text-amber-700 border-amber-100",
   supprimee: "bg-red-50 text-red-700 border-red-100",
   brouillon: "bg-slate-100 text-slate-600 border-slate-200",
@@ -331,6 +333,12 @@ export default function Home() {
                 active={filter === "a_renouveler"}
                 onClick={() => setFilter("a_renouveler")}
                 count={fiches.filter(f => f.statutMetier === "a_renouveler").length}
+              />
+              <FilterTab
+                label="Expirées"
+                active={filter === "expiree"}
+                onClick={() => setFilter("expiree")}
+                count={fiches.filter(f => f.statutMetier === "expiree").length}
               />
               <FilterTab
                 label="À revoir"
