@@ -36,7 +36,7 @@ export function registerOAuthRoutes(app: Express) {
     // CSRF guard: the nonce in `state` must match the one-time cookie that
     // startLogin set in the browser that began this login. An attacker can
     // forge `state`, but cannot plant this cookie in the victim's browser.
-    const { nonce, invitationToken } = decodeOAuthState(state);
+    const { nonce } = decodeOAuthState(state);
 
     const expectedNonce = parseCookieHeader(req.headers.cookie ?? "")[
       OAUTH_STATE_COOKIE
@@ -79,16 +79,7 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      let redirectTo = "/";
-      if (invitationToken) {
-        try {
-          await db.consumeInvitation(invitationToken, user.id);
-          redirectTo = "/espace-client";
-        } catch (err) {
-          console.error("[OAuth] Invitation consumption failed", err);
-          redirectTo = "/espace-client/invite/erreur";
-        }
-      }
+      const redirectTo = "/";
 
       const sessionToken = await sdk.createSessionToken(user.id, {
         name: googleUser.name || "",
