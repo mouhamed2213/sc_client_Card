@@ -60,7 +60,7 @@ export default function ClientLayout({
             href: `/espace-client/fiche/${ficheId}/demandes`,
             label: "Demandes reçues",
             icon: MessageSquare,
-            premium: currentPlan !== "signature",
+            premium: currentPlan !== undefined && currentPlan !== "signature",
             requiredPlan: "signature" as const,
           },
           {
@@ -155,6 +155,7 @@ export default function ClientLayout({
           return (
             {item.premium ? (
               <button
+                key={item.href}
                 type="button"
                 onClick={() => {
                   setPremiumOpen(true);
