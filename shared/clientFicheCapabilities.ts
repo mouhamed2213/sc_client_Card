@@ -1,4 +1,4 @@
-import type { PlanName } from "./planFeatures";
+import { getPlanFeatures, type PlanName } from "./planFeatures";
 
 export type ClientEditableKey =
   | "identity"
@@ -33,8 +33,8 @@ export const clientFicheCapabilities: Record<
     presentation: { editable: true },
     rendezVous: { editable: false, upgradeTo: "pro" },
     socials: { editable: false, upgradeTo: "pro" },
-    links: { editable: false, upgradeTo: "pro", maxItems: 0 },
-    gallery: { editable: false, upgradeTo: "pro", maxItems: 0 },
+    links: { editable: false, upgradeTo: "pro", maxItems: getPlanFeatures("essentiel").maxLinks },
+    gallery: { editable: false, upgradeTo: "pro", maxItems: getPlanFeatures("essentiel").maxPhotos },
     googleReview: { editable: false, upgradeTo: "pro" },
     hours: { editable: true },
     catalog: { editable: false, upgradeTo: "signature" },
@@ -48,8 +48,8 @@ export const clientFicheCapabilities: Record<
     presentation: { editable: true },
     rendezVous: { editable: true },
     socials: { editable: true },
-    links: { editable: true, maxItems: 10 },
-    gallery: { editable: true, maxItems: 4 },
+    links: { editable: true, maxItems: getPlanFeatures("pro").maxLinks },
+    gallery: { editable: true, maxItems: getPlanFeatures("pro").maxPhotos },
     googleReview: { editable: true },
     hours: { editable: true },
     catalog: { editable: false, upgradeTo: "signature" },
@@ -63,8 +63,8 @@ export const clientFicheCapabilities: Record<
     presentation: { editable: true },
     rendezVous: { editable: true },
     socials: { editable: true },
-    links: { editable: true, maxItems: 10 },
-    gallery: { editable: true, maxItems: 8 },
+    links: { editable: true, maxItems: getPlanFeatures("signature").maxLinks },
+    gallery: { editable: true, maxItems: getPlanFeatures("signature").maxPhotos },
     googleReview: { editable: true },
     hours: { editable: true },
     catalog: { editable: true },
