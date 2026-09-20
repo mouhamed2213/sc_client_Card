@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 import React from "react";
+import { useLocation } from "wouter";
 import {
   ArrowRight,
   BarChart3,
