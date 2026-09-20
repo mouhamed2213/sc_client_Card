@@ -63,7 +63,7 @@ export default function PublicFiche() {
 
   useEffect(() => {
     if (ficheQuery.data && (ficheQuery.data.statutMetier === "active" || ficheQuery.data.statutMetier === "a_renouveler")) scanMutation.mutate({ slug });
-  }, [ficheQuery.data?.statut, slug]);
+  }, [ficheQuery.data?.statutMetier, slug]);
 
   if (ficheQuery.isLoading && !usableCachedFiche) {
     return (
