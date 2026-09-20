@@ -952,6 +952,15 @@ export const appRouter = router({
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
 
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
+
         const plan = fiche.formule as PlanName;
         const capabilities = getClientFicheCapabilities(plan);
         if (!capabilities.gallery.editable) {
