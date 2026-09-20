@@ -380,8 +380,7 @@ export async function listContactRequests(ficheId: number) {
 }
 export async function getOverview() {
   await ensureDemoFiches();
-  const now = new Date();
-  const startOfToday = new Date(now);
+  const startOfToday = new Date();
   startOfToday.setUTCHours(0, 0, 0, 0);
   const renewalLimit = new Date(startOfToday);
   renewalLimit.setUTCDate(renewalLimit.getUTCDate() + 30);
