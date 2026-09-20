@@ -15,6 +15,7 @@ import KpiTile from "./KpiTile";
 import ScanChart from "./ScanChart";
 import { getEcheanceStatus } from "@/lib/ficheStatus";
 import { PremiumBadge, PremiumUpgradeModal } from "@/components/PremiumFeature";
+import FicheStatusAlert from "@/components/client-space/FicheStatusAlert";
 import { getPlanFeatures, type PlanName } from "@shared/planFeatures";
 
 export default function FicheOverview({ ficheId }: { ficheId: number }) {
@@ -48,9 +49,11 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
   const plan = fiche.plan ?? getPlanFeatures(fiche.formule);
   const scans = data.scans.reduce((sum, item) => sum + item.count, 0);
   const echeance = getEcheanceStatus(fiche.dateEcheance);
+  const lifecycleBlocked = fiche.statutMetier === "suspendue" || fiche.statutMetier === "expiree";
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+      <FicheStatusAlert status={fiche.statutMetier} dateEcheance={fiche.dateEcheance} />
       <div className="grid gap-5 lg:grid-cols-[1.1fr,0.9fr]">
         <IdCard fiche={fiche} />
         <div className="flex flex-col justify-center gap-3">
