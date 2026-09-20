@@ -31,7 +31,6 @@ import {
   attachFicheToOwner,
   createClientAccountWithFiche,
   createContactRequest,
-  createFiche,
   createInvitation,
   createMembershipCard,
   getFicheById,
@@ -108,31 +107,6 @@ export const appRouter = router({
         if (fiche && fiche.statut === "active") await recordScan(fiche);
         return { ok: true };
       }),
-    create: adminProcedure.input(fichePayload).mutation(async ({ input }) => {
-      const existing = await getFicheBySlug(input.slug);
-      if (existing)
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Ce slug existe déjà.",
-        });
-      const createdAt = new Date();
-      const dateEcheance = new Date(createdAt);
-      dateEcheance.setFullYear(dateEcheance.getFullYear() + 1);
-      const errors =
-        input.statut === "active"
-          ? validatePlanPayload({ ...input, data: input.data })
-          : [];
-      if (errors.length)
-        throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
-      const { data, ...fields } = input;
-      const id = await createFiche({
-        ...fields,
-        dataJson: JSON.stringify(data),
-        dateCreation: createdAt,
-        dateEcheance,
-      });
-      return { id, slug: input.slug };
-    }),
     update: adminProcedure
       .input(fichePayload.extend({ id: z.number().int().positive() }))
       .mutation(async ({ input }) => {
