@@ -25,6 +25,7 @@ const formulaLabels = {
 
 const statusLabels = {
   active: "Active",
+  a_renouveler: "À renouveler",
   suspendue: "Suspendue",
   supprimee: "Supprimée",
   brouillon: "Brouillon",
@@ -32,6 +33,7 @@ const statusLabels = {
 
 const statusStyles = {
   active: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  a_renouveler: "bg-orange-50 text-orange-700 border-orange-100",
   suspendue: "bg-amber-50 text-amber-700 border-amber-100",
   supprimee: "bg-red-50 text-red-700 border-red-100",
   brouillon: "bg-slate-100 text-slate-600 border-slate-200",
@@ -41,7 +43,8 @@ type Fiche = {
   id: number;
   slug: string;
   formule: keyof typeof formulaLabels;
-  statut: keyof typeof statusLabels;
+  statut: Exclude<keyof typeof statusLabels, "a_renouveler">;
+  statutMetier: keyof typeof statusLabels;
   nom: string;
   prenom: string;
   fonction: string;
@@ -228,6 +231,7 @@ export default function Fiches() {
               <div className="flex gap-1 overflow-x-auto" role="tablist" aria-label="Filtrer les fiches">
                 <FilterTab label="Toutes" active={filter === "all"} onClick={() => changeFilter("all")} />
                 <FilterTab label="Actives" active={filter === "active"} onClick={() => changeFilter("active")} />
+                <FilterTab label="À renouveler" active={filter === "a_renouveler"} onClick={() => changeFilter("a_renouveler")} />
                 <FilterTab label="À revoir" active={filter === "brouillon"} onClick={() => changeFilter("brouillon")} />
                 <FilterTab label="Suspendues" active={filter === "suspendue"} onClick={() => changeFilter("suspendue")} />
                 <FilterTab label="Supprimées" active={filter === "supprimee"} onClick={() => changeFilter("supprimee")} />
@@ -379,9 +383,9 @@ function FicheRow({
       </td>
       <td className="px-4 py-4 text-sm text-[#657084]">{formulaLabels[fiche.formule]}</td>
       <td className="px-4 py-4">
-        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[fiche.statut]}`}>
+        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[fiche.statutMetier]}`}>
           <span className="h-1.5 w-1.5 rounded-full bg-current" />
-          {statusLabels[fiche.statut]}
+          {statusLabels[fiche.statutMetier]}
         </span>
       </td>
       <td className="px-4 py-4 text-sm font-medium text-[#42506a]">{fiche.scansTotal}</td>
