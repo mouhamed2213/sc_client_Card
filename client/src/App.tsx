@@ -15,7 +15,6 @@ import ClientLogin from "./pages/ClientLogin";
 import ClientRequests from "./pages/ClientRequests";
 import ClientStats from "./pages/ClientStats";
 import FicheClientDetail from "./pages/FicheClientDetail";
-import InviteConsume from "./pages/InviteConsume";
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const Home = lazy(() => import("@/pages/Home"));
 const PublicFiche = lazy(() => import("@/pages/PublicFiche"));
@@ -58,7 +57,6 @@ function Router() {
           )}
         />
         <Route path="/espace-client/connexion" component={ClientLogin} />
-        <Route path="/espace-client/invite/:token" component={InviteConsume} />
         <Route
           path="/espace-client/fiches"
           component={() => (
