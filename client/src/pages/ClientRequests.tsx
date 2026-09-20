@@ -6,7 +6,12 @@ import ClientLayout from "@/components/ClientLayout";
 export default function ClientRequests() {
   const { ficheId } = useParams<{ ficheId: string }>();
   const id = Number(ficheId);
-  const requests = trpc.clientSpaceRouter.contactRequests.useQuery({ ficheId: id });
+  const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
+  const canViewRequests = fiche.data?.formule === "signature";
+  const requests = trpc.clientSpaceRouter.contactRequests.useQuery(
+    { ficheId: id },
+    { enabled: canViewRequests }
+  );
 
   return (
     <ClientLayout ficheId={id}>
@@ -18,7 +23,23 @@ export default function ClientRequests() {
           </p>
         </div>
 
-        {requests.isLoading ? (
+        {fiche.isLoading ? (
+          <div className="panel py-16 text-center text-sm text-[#7d8798]">
+            Chargement…
+          </div>
+        ) : !canViewRequests ? (
+          <div className="panel flex flex-col items-center py-16 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#fff4df]">
+              <MessageSquare size={20} className="text-[#9a6a2a]" />
+            </div>
+            <p className="mt-4 font-medium text-[#172033]">
+              Fonctionnalité réservée à la formule Signature
+            </p>
+            <p className="mt-1 max-w-md text-sm text-[#7d8798]">
+              Les demandes reçues correspondent au formulaire de rappel de votre fiche publique.
+            </p>
+          </div>
+        ) : requests.isLoading ? (
           <div className="panel py-16 text-center text-sm text-[#7d8798]">
             Chargement…
           </div>
