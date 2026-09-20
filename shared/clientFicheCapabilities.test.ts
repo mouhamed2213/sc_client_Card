@@ -27,7 +27,7 @@ describe("client fiche capabilities", () => {
     expect(c.rendezVous.editable).toBe(true);
     expect(c.socials.editable).toBe(true);
     expect(c.links.maxItems).toBe(10);
-    expect(c.gallery.maxItems).toBe(4);
+    expect(c.gallery.maxItems).toBe(4);\n    expect(c.gallery.maxVideos).toBe(1);
     expect(c.googleReview.editable).toBe(true);
     expect(c.catalog.editable).toBe(false);
     expect(c.catalog.upgradeTo).toBe("signature");
@@ -39,7 +39,7 @@ describe("client fiche capabilities", () => {
       const capabilities = getClientFicheCapabilities(plan);
       const features = getPlanFeatures(plan);
       expect(capabilities.links.maxItems).toBe(features.maxLinks);
-      expect(capabilities.gallery.maxItems).toBe(features.maxPhotos);
+      expect(capabilities.gallery.maxItems).toBe(features.maxPhotos);\n      expect(capabilities.gallery.maxVideos).toBe(features.maxVideos);
     }
   });
 
