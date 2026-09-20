@@ -30,7 +30,7 @@ export const clientFicheCapabilities: Record<
     contact: { editable: true },
     site: { editable: false, upgradeTo: "pro" },
     profile: { editable: true },
-    presentation: { editable: false, upgradeTo: "pro" },
+    presentation: { editable: true },
     rendezVous: { editable: false, upgradeTo: "pro" },
     socials: { editable: false, upgradeTo: "pro" },
     links: { editable: false, upgradeTo: "pro", maxItems: 0 },
