@@ -40,6 +40,7 @@ import {
   getOverview,
   listContactRequests,
   listFiches,
+  listFichesPaginated,
   listFichesByOwner,
   listMembershipCards,
   listScansForFiche,
@@ -90,6 +91,27 @@ export const appRouter = router({
         plan: getPlanFeatures(row.formule),
       }));
     }),
+    listPaginated: adminProcedure
+      .input(
+        z.object({
+          page: z.number().int().positive().default(1),
+          pageSize: z.number().int().min(5).max(50).default(10),
+          search: z.string().trim().max(160).optional().default(""),
+          statut: z
+            .enum(["active", "suspendue", "supprimee", "brouillon"])
+            .optional(),
+        })
+      )
+      .query(async ({ input }) => {
+        const result = await listFichesPaginated(input);
+        return {
+          ...result,
+          rows: result.rows.map((row: Fiche) => ({
+            ...parseFiche(row),
+            plan: getPlanFeatures(row.formule),
+          })),
+        };
+      }),
     overview: adminProcedure.query(async () => getOverview()),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
