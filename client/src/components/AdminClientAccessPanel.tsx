@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation, useParams } from "wouter";
 
-export default function AdminClientInvitationPanel() {
+export default function AdminClientAccessPanel() {
   const [location] = useLocation();
   const { slug = "" } = useParams<{ slug: string }>();
   const [open, setOpen] = useState(false);
@@ -17,20 +17,52 @@ export default function AdminClientInvitationPanel() {
     { enabled: location.startsWith("/studio/fiche/") && !!slug }
   );
   const ficheId = ficheQuery.data?.id;
+  const ownerQuery = trpc.admin.getFicheOwner.useQuery(
+    { ficheId: ficheId! },
+    { enabled: open && !!ficheId }
+  );
   const clientUsersQuery = trpc.admin.searchClientUsers.useQuery(
     { query: attachQuery },
     { enabled: open && !!ficheId }
   );
+
+  const refreshAccess = async () => {
+    await Promise.all([
+      ownerQuery.refetch(),
+      utils.fiches.getBySlug.invalidate({ slug }),
+    ]);
+  };
+
   const attachMutation = trpc.admin.attachFicheToOwner.useMutation({
     onSuccess: async () => {
-      toast.success("Fiche rattachée au compte", {
-        description: "Ce client verra maintenant plusieurs fiches dans son espace.",
-      });
-      await utils.fiches.getBySlug.invalidate({ slug });
-      setOpen(false);
+      toast.success("Fiche rattachée au compte");
+      await refreshAccess();
     },
     onError: error =>
       toast.error("Impossible de rattacher la fiche", {
+        description: error.message,
+      }),
+  });
+
+  const changeOwnerMutation = trpc.admin.changeFicheOwner.useMutation({
+    onSuccess: async () => {
+      toast.success("Propriétaire de la fiche modifié");
+      setAttachQuery("");
+      await refreshAccess();
+    },
+    onError: error =>
+      toast.error("Impossible de changer le propriétaire", {
+        description: error.message,
+      }),
+  });
+
+  const detachMutation = trpc.admin.detachFicheOwner.useMutation({
+    onSuccess: async () => {
+      toast.success("Fiche détachée du compte client");
+      await refreshAccess();
+    },
+    onError: error =>
+      toast.error("Impossible de détacher la fiche", {
         description: error.message,
       }),
   });
@@ -44,7 +76,12 @@ export default function AdminClientInvitationPanel() {
     return null;
   }
 
-  const hasOwner = Boolean(ficheQuery.data.ownerId);
+  const owner = ownerQuery.data?.owner;
+  const hasOwner = Boolean(owner?.id);
+  const busy =
+    attachMutation.isPending ||
+    changeOwnerMutation.isPending ||
+    detachMutation.isPending;
 
   return (
     <>
@@ -71,7 +108,7 @@ export default function AdminClientInvitationPanel() {
                   Accès à {ficheQuery.data.prenom} {ficheQuery.data.nom}
                 </h2>
                 <p className="mt-1 text-sm text-[#667085]">
-                  Associez cette fiche à un compte client déjà créé.
+                  Gérez le compte client associé à cette fiche.
                 </p>
               </div>
               <button
@@ -85,18 +122,67 @@ export default function AdminClientInvitationPanel() {
             </div>
 
             <div className="space-y-5 px-6 py-6">
-              {hasOwner ? (
-                <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-800">
-                  Cette fiche est déjà rattachée à un compte client. Elle est
-                  disponible dans l’espace « Mes fiches » de ce compte.
-                </div>
-              ) : (
+              {ownerQuery.isFetching ? (
+                <p className="py-6 text-center text-sm text-[#98a2b3]">
+                  Chargement du compte…
+                </p>
+              ) : hasOwner ? (
+                <>
+                  <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">
+                      Compte propriétaire
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-emerald-950">
+                      {owner?.name || "Sans nom"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-emerald-800/80">
+                      {owner?.email || "Sans e-mail"} · {owner?._count.fiche ?? 0} fiche
+                      {(owner?._count.fiche ?? 0) > 1 ? "s" : ""}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => setAttachQuery("")}
+                    >
+                      Changer de compte
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Détacher cette fiche du compte client ? Elle restera disponible dans le studio, mais ne sera plus visible dans « Mes fiches »."
+                          )
+                        ) {
+                          detachMutation.mutate({ ficheId: ficheId! });
+                        }
+                      }}
+                      className="border-red-200 text-red-700 hover:bg-red-50"
+                    >
+                      Détacher
+                    </Button>
+                  </div>
+                </>
+              ) : null}
+
+              {(!hasOwner || attachQuery !== "") && (
                 <div className="space-y-3">
-                  <p className="text-sm text-[#667085]">
-                    Sélectionnez un compte client existant pour rattacher cette
-                    fiche. Pour créer un nouveau compte, utilisez « Nouveau
-                    compte clients ».
-                  </p>
+                  <div>
+                    <p className="text-sm font-medium text-[#172033]">
+                      {hasOwner ? "Nouveau compte propriétaire" : "Compte existant"}
+                    </p>
+                    <p className="mt-1 text-sm text-[#667085]">
+                      Sélectionnez un compte client existant. Pour créer un nouveau
+                      compte, utilisez « Nouveau compte clients ».
+                    </p>
+                  </div>
+
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#98a2b3]" />
                     <input
@@ -106,6 +192,7 @@ export default function AdminClientInvitationPanel() {
                       className="w-full rounded-lg border border-[#e0e4e9] py-2.5 pl-9 pr-3 text-sm outline-none focus:border-[#172033]"
                     />
                   </div>
+
                   <div className="max-h-72 space-y-2 overflow-y-auto">
                     {clientUsersQuery.isFetching ? (
                       <p className="py-6 text-center text-sm text-[#98a2b3]">
@@ -138,22 +225,39 @@ export default function AdminClientInvitationPanel() {
                           <Button
                             type="button"
                             size="sm"
-                            disabled={attachMutation.isPending}
+                            disabled={busy || user.id === owner?.id}
                             onClick={() =>
-                              attachMutation.mutate({
-                                ficheId: ficheId!,
-                                ownerId: user.id,
-                              })
+                              hasOwner
+                                ? changeOwnerMutation.mutate({
+                                    ficheId: ficheId!,
+                                    ownerId: user.id,
+                                  })
+                                : attachMutation.mutate({
+                                    ficheId: ficheId!,
+                                    ownerId: user.id,
+                                  })
                             }
                             className="shrink-0 bg-[#172033] text-white hover:bg-[#27334a]"
                           >
-                            Attacher
+                            {hasOwner ? "Changer" : "Attacher"}
                           </Button>
                         </div>
                       ))
                     )}
                   </div>
                 </div>
+              )}
+
+              {hasOwner && attachQuery === "" && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => setAttachQuery(" ")}
+                  className="text-[#52607a]"
+                >
+                  Changer le propriétaire
+                </Button>
               )}
             </div>
           </div>
