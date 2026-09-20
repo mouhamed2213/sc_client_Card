@@ -180,70 +180,7 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
   );
 }
 
-function GalleryCarousel({
-  images,
-}: {
-  images: FicheTemplateModel["data"]["galerie"];
-}) {
-  const gallery = images ?? [];
-  const [current, setCurrent] = useState(0);
-  if (!gallery.length) return null;
-  const previous = () =>
-    setCurrent(index => (index - 1 + gallery.length) % gallery.length);
-  const next = () => setCurrent(index => (index + 1) % gallery.length);
-  const image = gallery[current];
-  return (
-    <div className="pro-gallery w-full">
-      <div className="pro-gallery-stage relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
-        <img
-          className="block h-full w-full object-cover"
-          src={image.url}
-          alt={image.alt}
-          loading="lazy"
-        />
-        {gallery.length > 1 && (
-          <>
-            <button
-              type="button"
-              className="pro-gallery-control absolute top-1/2 left-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
-              onClick={previous}
-              aria-label="Photo précédente"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              className="pro-gallery-control absolute top-1/2 right-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center"
-              onClick={next}
-              aria-label="Photo suivante"
-            >
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </>
-        )}
-      </div>
-      <div className="pro-gallery-meta mt-2.5 flex items-center justify-between gap-3 text-[10px] font-bold text-theme-muted">
-        <span>
-          Photo {current + 1} / {gallery.length}
-        </span>
-        {gallery.length > 1 && (
-          <div className="pro-gallery-dots flex items-center gap-[5px]">
-            {gallery.map((item, index) => (
-              <button
-                key={item.id ?? `${item.url}-${index}`}
-                type="button"
-                className={`pro-gallery-dot ${index === current ? "is-active" : ""}`}
-                onClick={() => setCurrent(index)}
-                aria-label={`Aller à la photo ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
+function GalleryCarousel({\n  images,\n}: {\n  images: FicheTemplateModel["data"]["galerie"];\n}) {\n  const gallery = [...(images ?? [])].sort((a, b) => {\n    const aVideo = a.type === "video" ? 0 : 1;\n    const bVideo = b.type === "video" ? 0 : 1;\n    return aVideo - bVideo;\n  });\n  const [current, setCurrent] = useState(0);\n  if (!gallery.length) return null;\n  const previous = () => setCurrent(index => (index - 1 + gallery.length) % gallery.length);\n  const next = () => setCurrent(index => (index + 1) % gallery.length);\n  const item = gallery[current];\n  const isVideo = item.type === "video";\n  return (\n    <div className="pro-gallery w-full">\n      <div className="pro-gallery-stage relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-black">\n        {isVideo ? (\n          <video className="block h-full w-full object-contain" src={item.url} poster={item.poster} controls playsInline preload="metadata" aria-label={item.alt || `Vidéo ${current + 1}`} />\n        ) : (\n          <img className="block h-full w-full object-cover" src={item.url} alt={item.alt} loading="lazy" />\n        )}\n        {gallery.length > 1 && (\n          <>\n            <button type="button" className="pro-gallery-control absolute top-1/2 left-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center" onClick={previous} aria-label="Élément précédent">\n              <ArrowLeft className="h-4 w-4" />\n            </button>\n            <button type="button" className="pro-gallery-control absolute top-1/2 right-3 flex h-[38px] w-[38px] -translate-y-1/2 items-center justify-center" onClick={next} aria-label="Élément suivant">\n              <ArrowRight className="h-4 w-4" />\n            </button>\n          </>\n        )}\n      </div>\n      <div className="pro-gallery-meta mt-2.5 flex items-center justify-between gap-3 text-[10px] font-bold text-theme-muted">\n        <span>{isVideo ? "Vidéo" : "Photo"} {current + 1} / {gallery.length}</span>\n        {gallery.length > 1 && (\n          <div className="pro-gallery-dots flex items-center gap-[5px]">\n            {gallery.map((galleryItem, index) => (\n              <button key={galleryItem.id ?? `${galleryItem.type ?? "image"}-${galleryItem.url}-${index}`} type="button" className={`pro-gallery-dot ${index === current ? "is-active" : ""}`} onClick={() => setCurrent(index)} aria-label={`Aller à ${galleryItem.type === "video" ? "la vidéo" : "la photo"} ${index + 1}`} />\n            ))}\n          </div>\n        )}\n      </div>\n    </div>\n  );\n}\n
 function socialKey(label: string, url: string) {
   const value = `${label} ${url}`.toLowerCase();
   if (value.includes("instagram")) return "instagram";
@@ -344,7 +281,7 @@ export function FicheTemplate({
   const config = getTemplateConfig(fiche.formule);
   const { features } = config;
   const links = (fiche.data.liens ?? []).slice(0, features.maxLinks);
-  const gallery = (fiche.data.galerie ?? []).slice(0, features.maxPhotos);
+  const gallery = (fiche.data.galerie ?? []).slice(0, features.maxPhotos + features.maxVideos);
   return (
     <div
       className={`public-page fiche-template fiche-template--${config.theme} min-h-screen px-3 pt-6 pb-10 text-theme-text`}
