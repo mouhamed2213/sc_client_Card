@@ -606,9 +606,9 @@ function FicheCard({
       <div className="flex items-start justify-between">
         <FicheIdentity fiche={fiche} />
         <span
-          className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statut]}`}
+          className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statutMetier]}`}
         >
-          {statusLabels[fiche.statut]}
+          {statusLabels[fiche.statutMetier]}
         </span>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-3 text-xs">
