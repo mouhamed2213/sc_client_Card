@@ -9,6 +9,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ADMIN_HOME_PATH } from "./const";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ClientDashboard from "./pages/ClientDashboard";
+import ClientFiches from "./pages/ClientFiches";
 import ClientFicheEdit from "./pages/ClientFicheEdit";
 import ClientLogin from "./pages/ClientLogin";
 import ClientRequests from "./pages/ClientRequests";
@@ -58,6 +59,14 @@ function Router() {
         />
         <Route path="/espace-client/connexion" component={ClientLogin} />
         <Route path="/espace-client/invite/:token" component={InviteConsume} />
+        <Route
+          path="/espace-client/fiches"
+          component={() => (
+            <ClientRoute>
+              <ClientFiches />
+            </ClientRoute>
+          )}
+        />
         <Route
           path="/espace-client"
           component={() => (
