@@ -13,8 +13,10 @@ import {
   Settings,
   SquareArrowOutUpRight,
   X,
+  Sparkles,
 } from "lucide-react";
 import { ReactNode, useState } from "react";
+import { PremiumUpgradeModal } from "@/components/PremiumFeature";
 import { Link, useLocation } from "wouter";
 
 export default function ClientLayout({
@@ -26,12 +28,15 @@ export default function ClientLayout({
 }) {
   const [location, navigate] = useLocation();
   const [open, setOpen] = useState(false);
+  const [premiumOpen, setPremiumOpen] = useState(false);
   const { user, logout } = useAuth();
   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
   const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery(
     { ficheId: ficheId ?? 0 },
     { enabled: ficheId !== undefined }
   );
+
+  const currentPlan = fiche.data?.formule;
 
   const nav = [
     {
@@ -51,15 +56,13 @@ export default function ClientLayout({
             label: "Statistiques",
             icon: BarChart3,
           },
-          ...(fiche.data?.formule === "signature"
-            ? [
-                {
-                  href: `/espace-client/fiche/${ficheId}/demandes`,
-                  label: "Demandes reçues",
-                  icon: MessageSquare,
-                },
-              ]
-            : []),
+          {
+            href: `/espace-client/fiche/${ficheId}/demandes`,
+            label: "Demandes reçues",
+            icon: MessageSquare,
+            premium: currentPlan !== "signature",
+            requiredPlan: "signature" as const,
+          },
           {
             href: `/espace-client/fiche/${ficheId}/modifier`,
             label: "Modifier ma fiche",
@@ -150,15 +153,31 @@ export default function ClientLayout({
             (item.href === "/espace-client/fiches" &&
               location.startsWith("/espace-client/fiches"));
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className={`sidebar-link ${active ? "sidebar-link-active" : ""}`}
-            >
-              <Icon size={17} />
-              {item.label}
-            </Link>
+            {item.premium ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setPremiumOpen(true);
+                  setOpen(false);
+                }}
+                className={`sidebar-link w-full ${active ? "sidebar-link-active" : ""}`}
+                aria-label={`${item.label}, disponible avec le plan ${item.requiredPlan}`}
+              >
+                <Icon size={17} />
+                <span>{item.label}</span>
+                <span className="ml-auto"><PremiumIcon /></span>
+              </button>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className={`sidebar-link ${active ? "sidebar-link-active" : ""}`}
+              >
+                <Icon size={17} />
+                {item.label}
+              </Link>
+            )}
           );
         })}
       </nav>
@@ -189,6 +208,14 @@ export default function ClientLayout({
 
   return (
     <div className="client-shell">
+      {currentPlan && (
+        <PremiumUpgradeModal
+          feature="Demandes reçues"
+          requiredPlan="signature"
+          open={premiumOpen}
+          onClose={() => setPremiumOpen(false)}
+        />
+      )}
       <aside className="client-sidebar hidden lg:flex">{sidebarContent}</aside>
 
       {open && (
@@ -263,4 +290,8 @@ export default function ClientLayout({
       </div>
     </div>
   );
+}
+
+function PremiumIcon() {
+  return <Sparkles size={13} className="text-[#c98a4e]" aria-hidden="true" />;
 }
