@@ -1,4 +1,5 @@
 import { useLocation } from "wouter";
+import React from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -6,15 +7,19 @@ import {
   MessageSquare,
   Pencil,
   ScanLine,
+  Sparkles,
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import IdCard from "./IdCard";
 import KpiTile from "./KpiTile";
 import ScanChart from "./ScanChart";
 import { getEcheanceStatus } from "@/lib/ficheStatus";
+import { PremiumBadge, PremiumUpgradeModal } from "@/components/PremiumFeature";
+import type { PlanName } from "@shared/planFeatures";
 
 export default function FicheOverview({ ficheId }: { ficheId: number }) {
   const [, navigate] = useLocation();
+  const [premiumFeature, setPremiumFeature] = React.useState<{ name: string; plan: PlanName } | null>(null);
   const dashboard = trpc.clientSpaceRouter.dashboard.useQuery({ ficheId });
 
   if (dashboard.isLoading) {
@@ -72,13 +77,26 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
 
       <div className="client-kpis">
         <KpiTile icon={ScanLine} label="Scans · 30 jours" value={scans} />
-        {fiche.plan.hasForm && (
-          <KpiTile
-            icon={MessageSquare}
-            label="Demandes reçues"
-            value={data.requestCount}
-          />
-        )}
+        <button
+          type="button"
+          onClick={() =>
+            fiche.plan.hasForm
+              ? navigate(`/espace-client/fiche/${ficheId}/demandes`)
+              : setPremiumFeature({ name: "Demandes reçues", plan: "signature" })
+          }
+          className="kpi-tile text-left transition hover:border-[#c98a4e]"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <MessageSquare size={17} className="text-[#7d8798]" />
+            {!fiche.plan.hasForm && <Sparkles size={14} className="text-[#c98a4e]" aria-hidden="true" />}
+          </div>
+          <p className="kpi-tile-value" style={{ fontSize: 15 }}>
+            {fiche.plan.hasForm ? data.requestCount : "Premium"}
+          </p>
+          <p className="kpi-tile-label">
+            {fiche.plan.hasForm ? "Demandes reçues" : "Disponible avec Signature"}
+          </p>
+        </button>
         <button
           onClick={() => navigate(`/espace-client/fiche/${ficheId}/statistiques`)}
           className="kpi-tile text-left transition hover:border-[#c98a4e]"
@@ -114,15 +132,16 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
                 navigate(`/espace-client/fiche/${ficheId}/statistiques`)
               }
             />
-            {fiche.plan.hasForm && (
-              <QuickAction
-                icon={MessageSquare}
-                label="Voir les demandes"
-                onClick={() =>
-                  navigate(`/espace-client/fiche/${ficheId}/demandes`)
-                }
-              />
-            )}
+            <QuickAction
+              icon={MessageSquare}
+              label="Voir les demandes"
+              premium={!fiche.plan.hasForm}
+              onClick={() =>
+                fiche.plan.hasForm
+                  ? navigate(`/espace-client/fiche/${ficheId}/demandes`)
+                  : setPremiumFeature({ name: "Demandes reçues", plan: "signature" })
+              }
+            />
           </div>
         </div>
 
@@ -136,27 +155,39 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <CapabilityItem
               label="Liens personnalisés"
-              value={`${fiche.plan.maxLinks}`}
+              value={fiche.plan.maxLinks > 0 ? `${fiche.plan.maxLinks}` : undefined}
+              upgradePlan={fiche.plan.maxLinks === 0 ? "pro" : undefined}
+              onUpgrade={() => setPremiumFeature({ name: "Liens personnalisés", plan: "pro" })}
             />
             <CapabilityItem
               label="Galerie"
-              value={`${fiche.plan.maxPhotos} photos`}
+              value={fiche.plan.maxPhotos > 0 ? `${fiche.plan.maxPhotos} photos` : undefined}
+              upgradePlan={fiche.plan.maxPhotos === 0 ? "pro" : undefined}
+              onUpgrade={() => setPremiumFeature({ name: "Galerie", plan: "pro" })}
             />
             <CapabilityItem
               label="Site web"
               enabled={fiche.plan.maxLinks > 0}
+              upgradePlan={fiche.plan.maxLinks === 0 ? "pro" : undefined}
+              onUpgrade={() => setPremiumFeature({ name: "Site web", plan: "pro" })}
             />
             <CapabilityItem
               label="Avis Google"
               enabled={fiche.plan.hasGoogleReview}
+              upgradePlan={!fiche.plan.hasGoogleReview ? "pro" : undefined}
+              onUpgrade={() => setPremiumFeature({ name: "Avis Google", plan: "pro" })}
             />
             <CapabilityItem
               label="Catalogue"
               enabled={fiche.plan.hasCatalog}
+              upgradePlan={!fiche.plan.hasCatalog ? "signature" : undefined}
+              onUpgrade={() => setPremiumFeature({ name: "Catalogue", plan: "signature" })}
             />
             <CapabilityItem
               label="Formulaire de rappel"
               enabled={fiche.plan.hasForm}
+              upgradePlan={!fiche.plan.hasForm ? "signature" : undefined}
+              onUpgrade={() => setPremiumFeature({ name: "Formulaire de rappel", plan: "signature" })}
             />
           </div>
         </div>
@@ -218,9 +249,16 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
         )}
       </div>
 
+      {premiumFeature && (
+        <PremiumUpgradeModal
+          feature={premiumFeature.name}
+          requiredPlan={premiumFeature.plan}
+          open
+          onClose={() => setPremiumFeature(null)}
+        />
+      )}
     </div>
   );
-}
 
 function MiniStat({ label, value }: { label: string; value: string | number }) {
   return (
@@ -235,10 +273,12 @@ function MiniStat({ label, value }: { label: string; value: string | number }) {
 function QuickAction({
   icon: Icon,
   label,
+  premium,
   onClick,
 }: {
   icon: typeof Pencil;
   label: string;
+  premium?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -253,6 +293,7 @@ function QuickAction({
       <span className="min-w-0 text-xs font-semibold text-[#344054]">
         {label}
       </span>
+      {premium && <Sparkles size={13} className="ml-auto shrink-0 text-[#c98a4e]" aria-hidden="true" />}
       <ArrowRight
         size={14}
         className="ml-auto shrink-0 text-[#c1c8d3] transition group-hover:translate-x-0.5 group-hover:text-[#c98a4e]"
@@ -265,16 +306,28 @@ function CapabilityItem({
   label,
   enabled,
   value,
+  upgradePlan,
+  onUpgrade,
 }: {
   label: string;
   enabled?: boolean;
   value?: string;
+  upgradePlan?: PlanName;
+  onUpgrade?: () => void;
 }) {
   const isActive = value !== undefined || enabled === true;
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-[#edf0f2] bg-[#fafbfc] px-3 py-2.5">
+    <button
+      type="button"
+      disabled={!upgradePlan}
+      onClick={onUpgrade}
+      className="flex w-full items-center justify-between gap-3 rounded-lg border border-[#edf0f2] bg-[#fafbfc] px-3 py-2.5 text-left disabled:cursor-default"
+      aria-label={upgradePlan ? `${label}, disponible avec ${upgradePlan}` : label}
+    >
       <span className="text-xs font-medium text-[#52607a]">{label}</span>
-      {value ? (
+      {upgradePlan ? (
+        <PremiumBadge plan={upgradePlan} />
+      ) : value ? (
         <span className="text-xs font-semibold text-[#172033]">{value}</span>
       ) : (
         <CheckCircle2
@@ -283,6 +336,6 @@ function CapabilityItem({
           aria-label={isActive ? "Inclus" : "Non inclus"}
         />
       )}
-    </div>
+    </button>
   );
 }
