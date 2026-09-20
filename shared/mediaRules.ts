@@ -12,7 +12,7 @@ export const mediaRules = {
 } as const;
 
 export function getOutputDimensions(
-  kind: Exclude<MediaKind, "video">,
+  kind: MediaKind,
   width: number,
   height: number
 ) {
