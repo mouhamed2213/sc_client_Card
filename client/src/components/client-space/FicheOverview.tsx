@@ -49,7 +49,6 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
   const plan = fiche.plan ?? getPlanFeatures(fiche.formule);
   const scans = data.scans.reduce((sum, item) => sum + item.count, 0);
   const echeance = getEcheanceStatus(fiche.dateEcheance);
-  const lifecycleBlocked = fiche.statutMetier === "suspendue" || fiche.statutMetier === "expiree";
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
