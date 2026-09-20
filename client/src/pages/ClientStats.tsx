@@ -41,7 +41,7 @@ export default function ClientStats() {
           onClose={() => window.history.back()}
         />
       )}
-      <div className={isSignature ? "" : "hidden"} className="space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className={"space-y-6 p-4 sm:p-6 lg:p-8 " + (isSignature ? "" : "hidden")}>
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <h1 className="text-xl font-semibold text-[#172033]">Statistiques</h1>
