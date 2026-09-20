@@ -4,6 +4,7 @@ import { BarChart3, ScanLine } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import ClientLayout from "@/components/ClientLayout";
 import ScanChart from "@/components/client-space/ScanChart";
+import { PremiumUpgradeModal } from "@/components/PremiumFeature";
 
 const RANGES = [
   { value: 7 as const, label: "7 jours" },
@@ -15,7 +16,12 @@ export default function ClientStats() {
   const { ficheId } = useParams<{ ficheId: string }>();
   const id = Number(ficheId);
   const [days, setDays] = useState<7 | 30 | 90>(30);
-  const scans = trpc.clientSpaceRouter.scans.useQuery({ ficheId: id, days });
+  const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
+  const isSignature = fiche.data?.formule === "signature";
+  const scans = trpc.clientSpaceRouter.scans.useQuery(
+    { ficheId: id, days },
+    { enabled: isSignature }
+  );
 
   const total = scans.data?.reduce((sum, item) => sum + item.count, 0) ?? 0;
   const daysCount = scans.data?.length || days;
@@ -27,7 +33,15 @@ export default function ClientStats() {
 
   return (
     <ClientLayout ficheId={id}>
-      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+      {fiche.data && !isSignature && (
+        <PremiumUpgradeModal
+          feature="Statistiques"
+          requiredPlan="signature"
+          open
+          onClose={() => window.history.back()}
+        />
+      )}
+      <div className={isSignature ? "" : "hidden"} className="space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <h1 className="text-xl font-semibold text-[#172033]">Statistiques</h1>
