@@ -332,47 +332,6 @@ export async function createClientAccountWithFiche(input: {
   });
 }
 
-// --- Invitations ---
-export async function createInvitation(ficheId: number, ttlDays = 7) {
-  const token = randomBytes(32).toString("base64url");
-  const expireLe = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
-  await prisma.invitationClient.create({ data: { ficheId, token, expireLe } });
-  return token;
-}
-
-export async function getInvitationByToken(token: string) {
-  return prisma.invitationClient.findUnique({ where: { token } });
-}
-
-// Consomme le token et rattache la fiche à l'utilisateur, dans une seule
-// transaction pour éviter une invitation utilisée deux fois en concurrence.
-export async function consumeInvitation(token: string, userId: number) {
-  return prisma.$transaction(async tx => {
-    const invitation = await tx.invitationClient.findUnique({
-      where: { token },
-    });
-    if (!invitation) throw new Error("INVITATION_NOT_FOUND");
-    if (invitation.utilisee) throw new Error("INVITATION_ALREADY_USED");
-    if (invitation.expireLe < new Date()) throw new Error("INVITATION_EXPIRED");
-
-    const fiche = await tx.fiche.findUnique({
-      where: { id: invitation.ficheId },
-    });
-    if (!fiche) throw new Error("FICHE_NOT_FOUND");
-    if (fiche.ownerId) throw new Error("FICHE_ALREADY_OWNED");
-
-    await tx.fiche.update({
-      where: { id: fiche.id },
-      data: { ownerId: userId },
-    });
-    await tx.invitationClient.update({
-      where: { id: invitation.id },
-      data: { utilisee: true },
-    });
-    return fiche;
-  });
-}
-
 // --- Fiches côté client ---
 export async function listFichesByOwner(ownerId: number) {
   return prisma.fiche.findMany({
