@@ -152,12 +152,12 @@ export default function Home() {
           Espace studio
         </div>
         <nav className="mt-3 space-y-1">
-          <a className="sidebar-link sidebar-link-active" href="#fiches">
+          <Link className="sidebar-link sidebar-link-active" href="/studio/fiches">
             <LayoutGrid className="h-4 w-4" /> Fiches clients{" "}
             <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px]">
               {overview.total}
             </span>
-          </a>
+          </Link>
           <a className="sidebar-link" href="#suivi">
             <ClipboardCheck className="h-4 w-4" /> Contrôle qualité
           </a>
