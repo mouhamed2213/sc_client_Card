@@ -335,6 +335,12 @@ export default function Home() {
                 count={fiches.filter(f => f.statutMetier === "a_renouveler").length}
               />
               <FilterTab
+                label="Expirées"
+                active={filter === "expiree"}
+                onClick={() => setFilter("expiree")}
+                count={fiches.filter(f => f.statutMetier === "expiree").length}
+              />
+              <FilterTab
                 label="À revoir"
                 active={filter === "brouillon"}
                 onClick={() => setFilter("brouillon")}
