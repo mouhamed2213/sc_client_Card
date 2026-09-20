@@ -162,7 +162,7 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
         </div>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1.3fr,1fr]">
+      <div className={`grid gap-5 ${fiche.plan.hasForm ? "lg:grid-cols-[1.3fr,1fr]" : ""}`}>
         <div className="panel">
           <div className="flex items-center justify-between">
             <div>
@@ -175,45 +175,47 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
           </div>
         </div>
 
-        <div className="panel">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="panel-title">Dernières demandes</p>
-              <p className="panel-sub">Envoyées depuis votre fiche publique</p>
+        {fiche.plan.hasForm && (
+          <div className="panel">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="panel-title">Dernières demandes</p>
+                <p className="panel-sub">Envoyées depuis votre fiche publique</p>
+              </div>
+              {data.recentRequests.length > 0 && (
+                <button
+                  onClick={() => navigate(`/espace-client/fiche/${ficheId}/demandes`)}
+                  className="flex items-center gap-1 text-xs font-medium text-[#c98a4e] hover:text-[#a86f3a]"
+                >
+                  Tout voir <ArrowRight size={13} />
+                </button>
+              )}
             </div>
-            {data.recentRequests.length > 0 && (
-              <button
-                onClick={() => navigate(`/espace-client/fiche/${ficheId}/demandes`)}
-                className="flex items-center gap-1 text-xs font-medium text-[#c98a4e] hover:text-[#a86f3a]"
-              >
-                Tout voir <ArrowRight size={13} />
-              </button>
-            )}
-          </div>
-          <div className="mt-3">
-            {!data.recentRequests.length ? (
-              <p className="py-8 text-center text-sm text-[#7d8798]">
-                Aucune demande pour le moment.
-              </p>
-            ) : (
-              data.recentRequests.map(req => (
-                <div key={req.id} className="activity-row">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-[#172033]">
-                      {req.name}
-                    </p>
-                    <p className="mt-0.5 line-clamp-1 text-xs text-[#7d8798]">
-                      {req.message}
-                    </p>
+            <div className="mt-3">
+              {!data.recentRequests.length ? (
+                <p className="py-8 text-center text-sm text-[#7d8798]">
+                  Aucune demande pour le moment.
+                </p>
+              ) : (
+                data.recentRequests.map(req => (
+                  <div key={req.id} className="activity-row">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-[#172033]">
+                        {req.name}
+                      </p>
+                      <p className="mt-0.5 line-clamp-1 text-xs text-[#7d8798]">
+                        {req.message}
+                      </p>
+                    </div>
+                    <time className="shrink-0 whitespace-nowrap text-xs text-[#9aa3b1]">
+                      {new Date(req.createdAt).toLocaleDateString("fr-FR")}
+                    </time>
                   </div>
-                  <time className="shrink-0 whitespace-nowrap text-xs text-[#9aa3b1]">
-                    {new Date(req.createdAt).toLocaleDateString("fr-FR")}
-                  </time>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
     </div>
