@@ -1,15 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
+import StudioSidebar from "@/components/StudioSidebar";
 import { ADMIN_HOME_PATH } from "@/const";
 import {
-  Bell,
   Eye,
-  LayoutDashboard,
   Menu,
-  Pencil,
   QrCode as QrCodeIcon,
   Search,
-  Sparkles,
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -143,48 +140,8 @@ export default function Fiches() {
 
   return (
     <div className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
-      <aside className="studio-sidebar hidden lg:flex">
-        <div className="flex items-center gap-3 px-2">
-          <div className="brand-mark">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] text-white/55">
-              Support
-            </p>
-            <p className="font-semibold tracking-tight text-white">Connecté</p>
-          </div>
-        </div>
-
-        <div className="mt-10 px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/35">
-          Espace studio
-        </div>
-
-        <nav className="mt-3 space-y-1" aria-label="Navigation du studio">
-          <Link className="sidebar-link" href={ADMIN_HOME_PATH}>
-            <LayoutDashboard className="h-4 w-4" /> Tableau de bord
-          </Link>
-          <Link className="sidebar-link sidebar-link-active" href="/studio/fiches">
-            <Pencil className="h-4 w-4" /> Fiches clients
-            <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px]">
-              {counts.all}
-            </span>
-          </Link>
-        </nav>
-
-        <div className="mt-auto">
-          <div className="flex items-center gap-3 border-t border-white/10 pt-4">
-            <div className="avatar avatar-small">AD</div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-white">Administrateur</p>
-              <p className="truncate text-xs text-white/45">Studio</p>
-            </div>
-            <Bell className="ml-auto h-4 w-4 text-white/45" aria-hidden="true" />
-          </div>
-        </div>
-      </aside>
-
-      <main className="studio-main">
+      <StudioSidebar />
+     <main className="studio-main">
         <header className="flex items-center justify-between border-b border-[#e7e9ed] bg-white/80 px-5 py-4 backdrop-blur lg:px-10">
           <div className="flex items-center gap-3">
             <button className="icon-button lg:hidden" aria-label="Ouvrir le menu">
