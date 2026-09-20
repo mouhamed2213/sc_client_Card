@@ -597,6 +597,11 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "Fiche introuvable.",
           });
+        if (!getPlanFeatures(fiche.formule).hasForm)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Les demandes reçues sont disponibles uniquement avec la formule Signature.",
+          });
         return listContactRequests(input.ficheId);
       }),
     updateSignature: clientProcedure
