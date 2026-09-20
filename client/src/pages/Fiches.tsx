@@ -91,6 +91,7 @@ export default function Fiches() {
   const statusMutation = trpc.fiches.updateStatus.useMutation({
     onSuccess: async () => {
       await Promise.all([
+        utils.fiches.listPaginated.invalidate(),
         utils.fiches.list.invalidate(),
         utils.fiches.overview.invalidate(),
       ]);
@@ -103,6 +104,11 @@ export default function Fiches() {
   const rows = (listQuery.data?.rows ?? []) as Fiche[];
   const total = listQuery.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
   const startItem = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const endItem = Math.min(page * pageSize, total);
   const counts = {
