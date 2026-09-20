@@ -19,7 +19,7 @@ describe("planFeatures architecture", () => {
   it("declares the exact capabilities of the three formulas", () => {
     expect(planFeatures).toEqual({
       essentiel: { maxLinks: 0, maxPhotos: 0, hasForm: false, hasGoogleReview: false, requiresProfile: false, requiresHours: true, hasCatalog: false, hasPanel: false },
-      pro: { maxLinks: 10, maxPhotos: 8, hasForm: false, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: false, hasPanel: false },
+      pro: { maxLinks: 10, maxPhotos: 4, hasForm: false, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: false, hasPanel: false },
       signature: { maxLinks: 10, maxPhotos: 8, hasForm: true, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true, hasPanel: true },
     });
   });
@@ -63,7 +63,7 @@ describe("planFeatures architecture", () => {
       data: {
         ...base.data,
         horaires: hours,
-        galerie: items(8),
+        galerie: items(4),
         liens: items(10),
         rendezVous: { label: "RDV", url: "https://cal.com/x" },
         reseauxSociaux: [{ label: "Instagram", url: "https://instagram.com/x" }],
