@@ -388,12 +388,17 @@ export async function getOverview() {
   renewalLimit.setUTCHours(23, 59, 59, 999);
   const [total, active, scans, expiring] = await Promise.all([
     prisma.fiche.count(),
-    prisma.fiche.count({ where: { statut: "active" } }),
+    prisma.fiche.count({
+      where: {
+        statut: "active",
+        dateEcheance: { gte: startOfToday },
+      },
+    }),
     prisma.fiche.aggregate({ _sum: { scansTotal: true } }),
     prisma.fiche.count({
       where: {
         statut: "active",
-        dateEcheance: { gte: now, lte: renewalLimit },
+        dateEcheance: { gte: startOfToday, lte: renewalLimit },
       },
     }),
   ]);
