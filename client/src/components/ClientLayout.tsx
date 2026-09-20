@@ -28,7 +28,7 @@ export default function ClientLayout({
 }) {
   const [location, navigate] = useLocation();
   const [open, setOpen] = useState(false);
-  const [premiumOpen, setPremiumOpen] = useState(false);
+  const [premiumFeature, setPremiumFeature] = useState<"Statistiques" | "Demandes reçues" | null>(null);
   const { user, logout } = useAuth();
   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
   const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery(
@@ -55,6 +55,8 @@ export default function ClientLayout({
             href: `/espace-client/fiche/${ficheId}/statistiques`,
             label: "Statistiques",
             icon: BarChart3,
+            premium: currentPlan !== undefined && currentPlan !== "signature",
+            requiredPlan: "signature" as const,
           },
           {
             href: `/espace-client/fiche/${ficheId}/demandes`,
@@ -157,7 +159,7 @@ export default function ClientLayout({
                 key={item.href}
                 type="button"
                 onClick={() => {
-                  setPremiumOpen(true);
+                  setPremiumFeature(item.label as "Statistiques" | "Demandes reçues");
                   setOpen(false);
                 }}
                 className={`sidebar-link w-full ${active ? "sidebar-link-active" : ""}`}
@@ -209,10 +211,10 @@ export default function ClientLayout({
     <div className="client-shell">
       {currentPlan && (
         <PremiumUpgradeModal
-          feature="Demandes reçues"
+          feature={premiumFeature ?? "Demandes reçues"}
           requiredPlan="signature"
-          open={premiumOpen}
-          onClose={() => setPremiumOpen(false)}
+          open={premiumFeature !== null}
+          onClose={() => setPremiumFeature(null)}
         />
       )}
       <aside className="client-sidebar hidden lg:flex">{sidebarContent}</aside>
