@@ -78,6 +78,8 @@ export default function AdminClientAccessPanel() {
 
   const owner = ownerQuery.data?.owner;
   const hasOwner = Boolean(owner?.id);
+  const availableClientUsers =
+    clientUsersQuery.data?.filter(user => user.id !== owner?.id) ?? [];
   const busy =
     attachMutation.isPending ||
     changeOwnerMutation.isPending ||
@@ -198,12 +200,12 @@ export default function AdminClientAccessPanel() {
                       <p className="py-6 text-center text-sm text-[#98a2b3]">
                         Recherche…
                       </p>
-                    ) : !clientUsersQuery.data?.length ? (
+                    ) : !availableClientUsers.length ? (
                       <p className="py-6 text-center text-sm text-[#98a2b3]">
-                        Aucun compte client trouvé.
+                        Aucun autre compte client trouvé.
                       </p>
                     ) : (
-                      clientUsersQuery.data.map(user => (
+                      availableClientUsers.map(user => (
                         <div
                           key={user.id}
                           className="flex items-center justify-between gap-3 rounded-xl border border-[#edf0f2] p-3"
@@ -225,7 +227,7 @@ export default function AdminClientAccessPanel() {
                           <Button
                             type="button"
                             size="sm"
-                            disabled={busy || user.id === owner?.id}
+                            disabled={busy}
                             onClick={() =>
                               hasOwner
                                 ? changeOwnerMutation.mutate({
