@@ -281,7 +281,8 @@ export function FicheTemplate({
   const config = getTemplateConfig(fiche.formule);
   const { features } = config;
   const links = (fiche.data.liens ?? []).slice(0, features.maxLinks);
-  const rawGallery = fiche.data.galerie ?? [];\n  const gallery = [\n    ...rawGallery.filter(item => item.type === "video").slice(0, features.maxVideos),\n    ...rawGallery.filter(item => item.type !== "video").slice(0, features.maxPhotos),\n  ];
+  const rawGallery = fiche.data.galerie ?? [];
+  const gallery = [\n    ...rawGallery.filter(item => item.type === "video").slice(0, features.maxVideos),\n    ...rawGallery.filter(item => item.type !== "video").slice(0, features.maxPhotos),\n  ];
   return (
     <div
       className={`public-page fiche-template fiche-template--${config.theme} min-h-screen px-3 pt-6 pb-10 text-theme-text`}
