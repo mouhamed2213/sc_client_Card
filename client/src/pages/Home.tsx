@@ -1,7 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
-import { getPlanFeatures } from "@shared/planFeatures";
 import AdminClientAccountCreationModal from "@/components/AdminClientAccountCreationModal";
 import {
   ArrowUpRight,
@@ -11,13 +9,11 @@ import {
   ClipboardCheck,
   Copy,
   Eye,
-  FilePlus2,
   LayoutGrid,
   Link2,
   Menu,
   MoreHorizontal,
   Pencil,
-  Plus,
   QrCode as QrCodeIcon,
   Search,
   SlidersHorizontal,
@@ -70,7 +66,7 @@ type Fiche = {
   scansTotal: number;
   lastScanAt?: Date | string | null;
   data: {
-    premierBouton?: "whatsapp" | "appel" | "contact";
+    premierBouton?: "whatsapp" | "appel" | "email";
     messageWhatsapp?: string;
     liens?: { label: string; url: string }[];
     horaires?: { jour: string; horaire: string }[];
@@ -81,35 +77,6 @@ type Fiche = {
     }[];
     notesInternes?: string;
   };
-};
-
-type CreateForm = {
-  prenom: string;
-  nom: string;
-  entreprise: string;
-  fonction: string;
-  formule: keyof typeof formulaLabels;
-  telephone: string;
-  whatsapp: string;
-  adresse: string;
-  slug: string;
-  premierBouton: "whatsapp" | "appel" | "contact";
-  photoFile?: File;
-  logoFile?: File;
-  galleryFiles?: File[];
-};
-
-const emptyForm: CreateForm = {
-  prenom: "",
-  nom: "",
-  entreprise: "",
-  fonction: "",
-  formule: "pro",
-  telephone: "+221",
-  whatsapp: "+221",
-  adresse: "",
-  slug: "",
-  premierBouton: "whatsapp",
 };
 
 function initials(fiche: Fiche) {
@@ -124,35 +91,10 @@ function formatDate(date: Date | string) {
   }).format(new Date(date));
 }
 
-function makeSlug(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
-
 export default function Home() {
   const fichesQuery = trpc.fiches.list.useQuery();
   const overviewQuery = trpc.fiches.overview.useQuery();
   const utils = trpc.useUtils();
-  const createMutation = trpc.fiches.create.useMutation({
-    onSuccess: async ({ slug }) => {
-      await utils.fiches.list.invalidate();
-      await utils.fiches.overview.invalidate();
-      setIsCreateOpen(false);
-      setForm(emptyForm);
-      toast.success("Fiche créée", {
-        description: `/${slug} est prête à être complétée.`,
-      });
-    },
-    onError: error =>
-      toast.error("Impossible de créer la fiche", {
-        description: error.message,
-      }),
-  });
-  const mediaMutation = trpc.media.upload.useMutation();
   const statusMutation = trpc.fiches.updateStatus.useMutation({
     onSuccess: () => {
       utils.fiches.list.invalidate();
@@ -174,10 +116,8 @@ export default function Home() {
   const [filter, setFilter] = useState<"all" | keyof typeof statusLabels>(
     "all"
   );
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isClientAccountOpen, setIsClientAccountOpen] = useState(false);
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
-  const [form, setForm] = useState<CreateForm>(emptyForm);
 
   const filteredFiches = useMemo(
     () =>
@@ -191,77 +131,6 @@ export default function Home() {
       }),
     [fiches, filter, search]
   );
-
-  function updateField<K extends keyof CreateForm>(
-    key: K,
-    value: CreateForm[K]
-  ) {
-    setForm(current => ({ ...current, [key]: value }));
-  }
-
-  async function submitCreate(event: React.FormEvent) {
-    event.preventDefault();
-    const features = getPlanFeatures(form.formule);
-    const upload = async (
-      file: File | undefined,
-      kind: "profile" | "logo" | "gallery"
-    ) => {
-      if (!file) return "";
-      const prepared = await prepareImage(file, kind);
-      const contentBase64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = reject;
-        reader.readAsDataURL(prepared);
-      });
-      const result = await mediaMutation.mutateAsync({
-        formula: form.formule,
-        kind,
-        filename: prepared.name,
-        mimeType: "image/webp",
-        contentBase64,
-      });
-      return result.url;
-    };
-    try {
-      const photo = await upload(form.photoFile, "profile");
-      const logo = await upload(form.logoFile, "logo");
-      const galerie = await Promise.all(
-        (form.galleryFiles ?? [])
-          .slice(0, features.maxPhotos)
-          .map(async file => ({
-            url: await upload(file, "gallery"),
-            alt: file.name,
-          }))
-      );
-      await createMutation.mutateAsync({
-        ...form,
-        photo,
-        logo,
-        data: {
-          premierBouton: form.premierBouton,
-          messageWhatsapp: "Bonjour, je souhaite échanger avec vous.",
-          liens: [],
-          horaires: [],
-          galerie,
-          sections: [],
-          notesInternes: "Créée depuis le studio.",
-        },
-        email: "",
-        site: "",
-        lienItineraire: "",
-        googlePlaceId: "",
-        statut: "brouillon",
-      });
-    } catch (error) {
-      toast.error("Impossible de créer la fiche", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "Vérifiez les médias et les champs.",
-      });
-    }
-  }
 
   return (
     <div className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
@@ -353,13 +222,6 @@ export default function Home() {
               <Bell className="h-4 w-4" />
               <span className="notification-dot" />
             </button>
-            <Button
-              onClick={() => setIsCreateOpen(true)}
-              className="gap-2 bg-[#172033] text-white shadow-sm hover:bg-[#27334a]"
-            >
-              <Plus className="h-4 w-4" />{" "}
-              <span className="hidden sm:inline">Nouvelle fiche</span>
-            </Button>
           </div>
         </header>
 
@@ -589,17 +451,6 @@ export default function Home() {
         </div>
       </main>
 
-      {isCreateOpen && (
-        <CreateModal
-          form={form}
-          setForm={updateField}
-          onClose={() => {
-            setIsCreateOpen(false);
-            }}
-          onSubmit={submitCreate}
-          isPending={createMutation.isPending}
-        />
-      )}
       {qrFiche && <QrModal fiche={qrFiche} onClose={() => setQrFiche(null)} />}
       <AdminClientAccountCreationModal
         open={isClientAccountOpen}
@@ -825,205 +676,6 @@ function FicheCard({
   );
 }
 
-function CreateModal({
-  form,
-  setForm,
-  onClose,
-  onSubmit,
-  isPending,
-}: {
-  form: CreateForm;
-  setForm: <K extends keyof CreateForm>(key: K, value: CreateForm[K]) => void;
-  onClose: () => void;
-  onSubmit: (event: React.FormEvent) => void;
-  isPending: boolean;
-}) {
-  const features = getPlanFeatures(form.formule);
-  return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="modal-panel">
-        <div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5">
-          <div>
-            <p className="eyebrow">Nouvelle fiche</p>
-            <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em]">
-              Créer une fiche client
-            </h2>
-            <p className="mt-1 text-sm text-[#7d8798]">
-              Les médias sont contrôlés selon la formule : portrait{" "}
-              {features.requiresProfile ? "obligatoire" : "optionnel"}, galerie{" "}
-              {features.maxPhotos} photo{features.maxPhotos > 1 ? "s" : ""} max.
-            </p>
-          </div>
-          <button onClick={onClose} className="icon-button">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <form
-          onSubmit={onSubmit}
-          className="space-y-5 overflow-y-auto px-6 py-6"
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Prénom">
-              <input
-                required
-                value={form.prenom}
-                onChange={e => setForm("prenom", e.target.value)}
-                placeholder="Marie"
-              />
-            </Field>
-            <Field label="Nom">
-              <input
-                required
-                value={form.nom}
-                onChange={e => setForm("nom", e.target.value)}
-                placeholder="Diallo"
-              />
-            </Field>
-            <Field label="Entreprise">
-              <input
-                required
-                value={form.entreprise}
-                onChange={e => setForm("entreprise", e.target.value)}
-                placeholder="Saly Immo Conseil"
-              />
-            </Field>
-            <Field label="Fonction">
-              <input
-                required
-                value={form.fonction}
-                onChange={e => setForm("fonction", e.target.value)}
-                placeholder="Conseillère immobilière"
-              />
-            </Field>
-            <Field label="Téléphone">
-              <input
-                required
-                value={form.telephone}
-                onChange={e => setForm("telephone", e.target.value)}
-              />
-            </Field>
-            <Field label="WhatsApp">
-              <input
-                required
-                value={form.whatsapp}
-                onChange={e => setForm("whatsapp", e.target.value)}
-              />
-            </Field>
-          </div>
-          <Field label="Slug public">
-            <input
-              required
-              value={form.slug}
-              onChange={e => setForm("slug", makeSlug(e.target.value))}
-              placeholder="prenom-nom ou nom-etablissement"
-            />
-            <p className="mt-1.5 text-xs text-[#9aa3b1]">
-              La puce pointera vers /fiche/{form.slug || "votre-slug"}
-            </p>
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Formule">
-              <select
-                value={form.formule}
-                onChange={e =>
-                  setForm("formule", e.target.value as CreateForm["formule"])
-                }
-              >
-                {Object.entries(formulaLabels).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Premier bouton">
-              <select
-                value={form.premierBouton}
-                onChange={e =>
-                  setForm(
-                    "premierBouton",
-                    e.target.value as CreateForm["premierBouton"]
-                  )
-                }
-              >
-                <option value="whatsapp">WhatsApp</option>
-                <option value="appel">Appeler</option>
-                <option value="contact">Enregistrer le contact</option>
-              </select>
-            </Field>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              label={`Portrait ${features.requiresProfile ? "(obligatoire)" : "(optionnel)"}`}
-            >
-              <input
-                accept="image/jpeg,image/png,image/webp"
-                type="file"
-                onChange={e => setForm("photoFile", e.target.files?.[0])}
-              />
-            </Field>
-            <Field label="Logo (optionnel)">
-              <input
-                accept="image/jpeg,image/png,image/webp"
-                type="file"
-                onChange={e => setForm("logoFile", e.target.files?.[0])}
-              />
-            </Field>
-          </div>
-          {features.maxPhotos > 0 && (
-            <Field label={`Galerie (${features.maxPhotos} maximum)`}>
-              <input
-                multiple
-                accept="image/jpeg,image/png,image/webp"
-                type="file"
-                onChange={e => {
-                  const files = Array.from(e.target.files ?? []).slice(
-                    0,
-                    features.maxPhotos
-                  );
-                  // setSelectedGalleryFiles(files);
-                  setForm("galleryFiles", files);
-                  e.currentTarget.value = "";
-                }}
-              />
-              {(form.galleryFiles?.length ?? 0) > 0 && (
-                <p className="mt-1.5 text-xs font-medium text-[#42506a]">
-                  {form.galleryFiles?.length ?? 0} photo
-                  {(form.galleryFiles?.length ?? 0) > 1 ? "s" : ""} sélectionnée
-                  {(form.galleryFiles?.length ?? 0) > 1 ? "s" : ""}.
-                </p>
-              )}
-              <p className="mt-1 text-xs text-[#9aa3b1]">
-                Sélectionnez plusieurs photos en une seule fois. Chaque photo :
-                maximum 80 ko après préparation.
-              </p>
-            </Field>
-          )}
-          <Field label="Adresse">
-            <input
-              value={form.adresse}
-              onChange={e => setForm("adresse", e.target.value)}
-              placeholder="Quartier, ville, repère"
-            />
-          </Field>
-          <div className="flex justify-end gap-2 border-t border-[#edf0f2] pt-5">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]"
-            >
-              <FilePlus2 className="h-4 w-4" />
-              {isPending ? "Création…" : "Créer la fiche"}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
 function QrModal({ fiche, onClose }: { fiche: Fiche; onClose: () => void }) {
   const publicUrl = `${window.location.origin}/fiche/${fiche.slug}`;
   function downloadQr() {
