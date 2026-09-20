@@ -45,8 +45,8 @@ function planHighlights(plan: PlanName): string[] {
       ? `Galerie de ${features.maxPhotos} photos`
       : "Pas de galerie photo",
     features.requiresProfile
-      ? "Portrait ou logo obligatoire"
-      : "Portrait optionnel",
+      ? "Couverture et logo obligatoires"
+      : "Couverture et logo optionnels",
     features.hasGoogleReview && "Avis Google",
     features.hasForm && "Formulaire de rappel",
     features.hasCatalog && "Catalogue",
@@ -624,7 +624,7 @@ export default function AdminClientAccountCreationModal({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
-              label={`Portrait ${features.requiresProfile ? "(ou logo obligatoire)" : "(optionnel)"}`}
+              label={`Couverture ${features.requiresProfile ? "(obligatoire)" : "(optionnel)"}`}
             >
               <input
                 accept="image/jpeg,image/png,image/webp"
@@ -632,7 +632,7 @@ export default function AdminClientAccountCreationModal({
                 onChange={e => setPhotoFile(e.target.files?.[0])}
               />
             </Field>
-            <Field label="Logo (optionnel)">
+            <Field label={`Logo ${features.requiresProfile ? "(obligatoire)" : "(optionnel)"}`}>
               <input
                 accept="image/jpeg,image/png,image/webp"
                 type="file"

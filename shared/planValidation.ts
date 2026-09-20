@@ -55,7 +55,7 @@ export function validatePlanPayload(input: {
   if (!capabilities.socials.editable && socials.some(item => item.url?.trim())) errors.push("Cette formule ne permet pas de réseaux sociaux.");
   if (!capabilities.googleReview.editable && input.googlePlaceId?.trim()) errors.push("Cette formule ne permet pas les avis Google.");
   if (!capabilities.catalog.editable && sections.length > 0) errors.push("Cette formule ne permet pas de catalogue.");
-  if (features.requiresProfile && (!input.photo || !input.logo)) errors.push(`${input.formule}: le portrait et le logo sont obligatoires.`);
+  if (features.requiresProfile && (!input.photo || !input.logo)) errors.push(`${input.formule}: la couverture et le logo sont obligatoires.`);
   if (features.requiresHours) {
     const hours = input.data.horaires ?? [];
     const hasAnyHour = hours.some(row => Boolean(row.jour?.trim()) || Boolean(row.horaire?.trim()));

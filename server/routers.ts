@@ -264,7 +264,7 @@ export const appRouter = router({
         )
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Le portrait doit mesurer exactement 400 × 400 px.",
+            message: "La couverture doit mesurer exactement 400 × 400 px.",
           });
         const extension = input.mimeType.split("/")[1];
         const result = await storagePut(
@@ -830,7 +830,7 @@ export const appRouter = router({
         if (input.kind === "profile" && (dimensions.width !== 400 || dimensions.height !== 400))
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Le portrait doit mesurer exactement 400 × 400 px.",
+            message: "La couverture doit mesurer exactement 400 × 400 px.",
           });
 
         const extension = input.mimeType.split("/")[1];

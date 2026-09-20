@@ -123,12 +123,12 @@ const ACTION_CONFIG: Record<
 };
 
 function Hero({ fiche, actions }: FicheTemplateProps) {
-  const photo = fiche.photo?.trim() || "";
+  // `photo` is the cover picture (shown large and sharp behind the identity),
+  // `logo` is the brand mark shown above the name. Both are optional in
+  // Essentiel; initials are the fallback when there is no logo.
+  const cover = fiche.photo?.trim() || "";
   const logo = fiche.logo?.trim() || "";
   const fullName = `${fiche.prenom} ${fiche.nom}`.trim();
-  // The portrait is the person's photo. Without it (Essentiel: optional) the
-  // logo takes its place, and the initials are the last fallback.
-  const portraitKind = photo ? "photo" : logo ? "logo" : "initials";
   // The preferred action is the first one in the configured order that can
   // actually be used (e.g. no e-mail address → it cannot be "preferred").
   const preferredKey = actions.buttonOrder.find(key =>
@@ -136,41 +136,33 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
   );
 
   return (
-    <header className="fh" data-portrait={portraitKind}>
+    <header
+      className="fh"
+      data-cover={cover ? "yes" : "no"}
+      data-logo={logo ? "yes" : "no"}
+    >
       <div className="fh-bg" aria-hidden="true">
-        {photo && <img className="fh-bg-img" src={photo} alt="" />}
+        {cover && <img className="fh-cover-img" src={cover} alt="" />}
         <span className="fh-bg-pattern" />
         <span className="fh-bg-shade" />
       </div>
 
       <div className="fh-top">
-        {logo && photo ? (
-          <div className="fh-logo">
-            <img src={logo} alt={`Logo ${fiche.entreprise}`} />
-          </div>
-        ) : (
-          <span className="fh-tag">Fiche de contact</span>
-        )}
+        <span className="fh-tag">Fiche de contact</span>
         <span className="fh-tag fh-tag--nfc">NFC · QR</span>
       </div>
 
       <div className="fh-body">
-        <div className={`fh-portrait fh-portrait--${portraitKind}`}>
-          <div className="fh-portrait-frame">
-            {portraitKind === "photo" && (
-              <img src={photo} alt={fullName} />
-            )}
-            {portraitKind === "logo" && (
-              <img src={logo} alt={`Logo ${fiche.entreprise}`} />
-            )}
-            {portraitKind === "initials" && (
-              <span aria-hidden="true">
-                {fiche.prenom.slice(0, 1)}
-                {fiche.nom.slice(0, 1)}
-              </span>
-            )}
+        {logo ? (
+          <div className="fh-logo-plate">
+            <img src={logo} alt={`Logo ${fiche.entreprise}`} />
           </div>
-        </div>
+        ) : (
+          <div className="fh-initials" aria-hidden="true">
+            {fiche.prenom.slice(0, 1)}
+            {fiche.nom.slice(0, 1)}
+          </div>
+        )}
         <h1 className="fh-name">{fullName}</h1>
         <span className="fh-ornament" aria-hidden="true" />
         <p className="fh-role">{fiche.fonction}</p>
