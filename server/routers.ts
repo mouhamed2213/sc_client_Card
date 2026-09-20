@@ -549,12 +549,17 @@ export const appRouter = router({
             message: "Fiche introuvable.",
           });
         const dashboard = await listClientDashboard(input.ficheId);
+        const plan = dashboard.fiche
+          ? getPlanFeatures(dashboard.fiche.formule)
+          : null;
         return {
           ...dashboard,
+          recentRequests: plan?.hasForm ? dashboard.recentRequests : [],
+          requestCount: plan?.hasForm ? dashboard.requestCount : 0,
           fiche: dashboard.fiche
             ? {
                 ...parseFiche(dashboard.fiche),
-                plan: getPlanFeatures(dashboard.fiche.formule),
+                plan,
               }
             : null,
         };
