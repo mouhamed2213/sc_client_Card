@@ -3,7 +3,9 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   BarChart3,
+  CreditCard,
   LayoutDashboard,
+  Layers3,
   LogOut,
   Menu,
   MessageSquare,
@@ -31,30 +33,37 @@ export default function ClientLayout({
     { enabled: ficheId !== undefined }
   );
 
-  const nav = ficheId
-    ? [
-        {
-          href: `/espace-client/fiche/${ficheId}`,
-          label: "Vue d'ensemble",
-          icon: LayoutDashboard,
-        },
-        {
-          href: `/espace-client/fiche/${ficheId}/statistiques`,
-          label: "Statistiques",
-          icon: BarChart3,
-        },
-        {
-          href: `/espace-client/fiche/${ficheId}/demandes`,
-          label: "Demandes reçues",
-          icon: MessageSquare,
-        },
-        {
-          href: `/espace-client/fiche/${ficheId}/modifier`,
-          label: "Modifier ma fiche",
-          icon: Settings,
-        },
-      ]
-    : [];
+  const nav = [
+    {
+      href: "/espace-client/fiches",
+      label: "Mes fiches",
+      icon: Layers3,
+    },
+    ...(ficheId
+      ? [
+          {
+            href: `/espace-client/fiche/${ficheId}`,
+            label: "Vue d'ensemble",
+            icon: LayoutDashboard,
+          },
+          {
+            href: `/espace-client/fiche/${ficheId}/statistiques`,
+            label: "Statistiques",
+            icon: BarChart3,
+          },
+          {
+            href: `/espace-client/fiche/${ficheId}/demandes`,
+            label: "Demandes reçues",
+            icon: MessageSquare,
+          },
+          {
+            href: `/espace-client/fiche/${ficheId}/modifier`,
+            label: "Modifier ma fiche",
+            icon: Settings,
+          },
+        ]
+      : []),
+  ];
 
   const initials = (user?.name || user?.email || "?")
     .trim()
@@ -76,34 +85,66 @@ export default function ClientLayout({
         </div>
       </div>
 
-      {fiches.data && fiches.data.length > 1 && (
-        <div className="mt-6 space-y-1 px-1">
-          <p className="eyebrow" style={{ color: "rgba(255,255,255,0.4)" }}>
-            Mes fiches
-          </p>
-          {fiches.data.map(f => (
-            <button
-              key={f.id}
-              onClick={() => {
-                navigate(`/espace-client/fiche/${f.id}`);
-                setOpen(false);
-              }}
-              className={`w-full truncate rounded-lg px-3 py-2 text-left text-[13px] transition ${
-                f.id === ficheId
-                  ? "bg-white/10 font-medium text-white"
-                  : "text-white/55 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              {f.prenom} {f.nom} · {f.entreprise}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="mt-6 px-1">
+        <p className="eyebrow mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>
+          Fiche sélectionnée
+        </p>
 
-      <nav className="mt-6 flex-1 space-y-1">
+        {ficheId && fiche.data ? (
+          <button
+            type="button"
+            onClick={() => {
+              navigate("/espace-client/fiches");
+              setOpen(false);
+            }}
+            className="group w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] text-left transition hover:border-white/20 hover:bg-white/[0.07]"
+            aria-label="Ouvrir Mes fiches"
+          >
+            <div className="relative overflow-hidden px-3.5 py-3.5">
+              <div
+                className="absolute -right-8 -top-8 h-20 w-20 rounded-full border border-[#e5a86b]/20"
+                aria-hidden="true"
+              />
+              <div className="relative flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#e5a86b] text-[11px] font-bold text-[#172033]">
+                  {(fiche.data.prenom?.[0] ?? "") + (fiche.data.nom?.[0] ?? "")}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-[12px] font-semibold text-white">
+                    {fiche.data.prenom} {fiche.data.nom}
+                  </p>
+                  <p className="mt-0.5 truncate text-[10px] text-white/45">
+                    {fiche.data.entreprise}
+                  </p>
+                </div>
+                <CreditCard size={14} className="ml-auto shrink-0 text-[#e5a86b]" />
+              </div>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <span className="rounded-full bg-white/8 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-white/55">
+                  {fiche.data.formule}
+                </span>
+                <span className="text-[9px] font-medium text-white/35">
+                  Changer
+                </span>
+              </div>
+            </div>
+          </button>
+        ) : (
+          <div className="rounded-2xl border border-white/8 bg-white/[0.035] px-3.5 py-3.5">
+            <p className="text-[11px] leading-5 text-white/45">
+              Retrouvez toutes vos fiches dans « Mes fiches ».
+            </p>
+          </div>
+        )}
+      </div>
+
+      <nav className="mt-5 flex-1 space-y-1">
         {nav.map(item => {
           const Icon = item.icon;
-          const active = location === item.href;
+          const active =
+            location === item.href ||
+            (item.href === "/espace-client/fiches" &&
+              location.startsWith("/espace-client/fiches"));
           return (
             <Link
               key={item.href}
