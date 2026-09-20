@@ -52,28 +52,21 @@ import {
 import { validatePlanPayload } from "./planValidation";
 import { parseVideoUrl } from "@shared/videoUrls";
 import { storagePut } from "./storage";
+import {
+  getFicheBusinessStatus,
+  getFicheOwnerBlockedMessage,
+  isFicheOwnerEditable,
+  isFichePubliclyAccessible,
+} from "./ficheLifecycle";
 
-const RENEWAL_WINDOW_DAYS = 30;
-
-function isFicheToRenew(fiche: { statut: string; dateEcheance: Date }) {
-  if (fiche.statut !== "active") return false;
-  const now = new Date();
-  const startOfToday = new Date(now);
-  startOfToday.setUTCHours(0, 0, 0, 0);
-  const renewalLimit = new Date(startOfToday);
-  renewalLimit.setUTCDate(
-    renewalLimit.getUTCDate() + RENEWAL_WINDOW_DAYS
-  );
-  renewalLimit.setUTCHours(23, 59, 59, 999);
-  return fiche.dateEcheance >= startOfToday && fiche.dateEcheance <= renewalLimit;
-}
-
-function parseFiche<T extends { dataJson: string }>(fiche: T) {
+function parseFiche<T extends { dataJson: string; statut: string; dateEcheance: Date }>(
+  fiche: T
+) {
   const { dataJson, ...rest } = fiche;
   return {
     ...rest,
     data: JSON.parse(dataJson || "{}"),
-    statutMetier: isFicheToRenew(fiche) ? "a_renouveler" : fiche.statut,
+    statutMetier: getFicheBusinessStatus(fiche),
   };
 }
 
@@ -161,13 +154,18 @@ export const appRouter = router({
             code: "NOT_FOUND",
             message: "Fiche introuvable",
           });
+        if (!isFichePubliclyAccessible(fiche))
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cette fiche est temporairement indisponible.",
+          });
         return { ...parseFiche(fiche), plan: getPlanFeatures(fiche.formule) };
       }),
     recordScan: publicProcedure
       .input(z.object({ slug: z.string() }))
       .mutation(async ({ input }) => {
         const fiche = await getFicheBySlug(input.slug);
-        if (fiche && fiche.statut === "active") await recordScan(fiche);
+        if (fiche && isFichePubliclyAccessible(fiche)) await recordScan(fiche);
         return { ok: true };
       }),
     update: adminProcedure
@@ -238,6 +236,11 @@ export const appRouter = router({
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Fiche introuvable",
+          });
+        if (!isFichePubliclyAccessible(fiche))
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cette fiche est temporairement indisponible.",
           });
         if (!getPlanFeatures(fiche.formule).hasForm)
           throw new TRPCError({
@@ -610,10 +613,17 @@ export const appRouter = router({
         const plan = dashboard.fiche
           ? getPlanFeatures(dashboard.fiche.formule)
           : null;
+        const businessStatus = dashboard.fiche
+          ? getFicheBusinessStatus(dashboard.fiche)
+          : null;
+        const requestsAvailable =
+          plan?.hasForm === true &&
+          businessStatus !== "suspendue" &&
+          businessStatus !== "expiree";
         return {
           ...dashboard,
-          recentRequests: plan?.hasForm ? dashboard.recentRequests : [],
-          requestCount: plan?.hasForm ? dashboard.requestCount : 0,
+          recentRequests: requestsAvailable ? dashboard.recentRequests : [],
+          requestCount: requestsAvailable ? dashboard.requestCount : 0,
           fiche: dashboard.fiche
             ? {
                 ...parseFiche(dashboard.fiche),
@@ -670,6 +680,14 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "Les demandes reçues sont disponibles uniquement avec la formule Signature.",
           });
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
         return listContactRequests(input.ficheId);
       }),
     updateSignature: clientProcedure
@@ -696,6 +714,15 @@ export const appRouter = router({
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
 
         const plan = fiche.formule as PlanName;
         const capabilities = getClientFicheCapabilities(plan);
@@ -834,6 +861,15 @@ export const appRouter = router({
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
 
         const plan = fiche.formule as PlanName;
         const capabilities = getClientFicheCapabilities(plan);
@@ -991,6 +1027,14 @@ export const appRouter = router({
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
         const { ficheId, ...fields } = input;
         await updateFiche(ficheId, fields);
         return { ok: true } as const;
