@@ -4,6 +4,7 @@ import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
 import { PremiumUpgradeModal } from "@/components/PremiumFeature";
 import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
+import { parseVideoUrl } from "@shared/videoUrls";
 import type { MediaKind } from "@shared/mediaRules";
 import type { PlanName } from "@shared/planFeatures";
 import {
@@ -15,6 +16,7 @@ import {
   Sparkles,
   Trash2,
   Upload,
+  Video,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -22,7 +24,7 @@ import { useParams } from "wouter";
 
 type LinkItem = { label: string; url: string };
 type SocialItem = { label: string; url: string };
-type GalleryItem = { url: string; alt: string };
+type GalleryItem = { type?: "image" | "video"; url: string; alt: string; source?: "youtube" | "instagram" | "facebook" | "tiktok" | "vimeo" | "direct"; embedUrl?: string };
 type HoursItem = { jour: string; horaire: string };
 type Article = { nom: string; description: string; prix: string };
 type CatalogSection = { titre: string; articles: Article[] };
@@ -81,6 +83,8 @@ export default function ClientFicheEdit() {
   const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
   const [form, setForm] = useState<FormState | null>(null);
   const [uploading, setUploading] = useState<MediaKind | null>(null);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoAlt, setVideoAlt] = useState("");
 
   useEffect(() => {
     if (!fiche.data || form) return;
@@ -131,6 +135,7 @@ export default function ClientFicheEdit() {
   });
 
   const upload = trpc.clientSpaceRouter.uploadMedia.useMutation();
+  const addVideo = trpc.clientSpaceRouter.addVideo.useMutation();
 
   if (fiche.isLoading || !fiche.data || !form) {
     return (
@@ -630,6 +635,64 @@ export default function ClientFicheEdit() {
                 </div>
               )}
             </EditorSection>
+            {/* Section Vidéos */}
+            <EditorSection
+              title={`Vidéos (${form.data.galerie.filter(item => item.type === "video").length}/${capabilities.gallery.maxVideos ?? 0})`}
+              subtitle="Ajoutez une vidéo par lien. Les vidéos sont affichées avant les photos sur la fiche publique."
+            >
+              {!capabilities.gallery.editable ? (
+                <UpgradeNotice requiredPlan={upgradeLabel("gallery")} />
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_220px_auto] gap-3">
+                    <input
+                      className="editor-input"
+                      type="url"
+                      value={videoUrl}
+                      onChange={e => setVideoUrl(e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      aria-label="URL de la vidéo"
+                    />
+                    <input
+                      className="editor-input"
+                      value={videoAlt}
+                      onChange={e => setVideoAlt(e.target.value)}
+                      placeholder="Description de la vidéo"
+                      aria-label="Description de la vidéo"
+                    />
+                    <button
+                      type="button"
+                      disabled={!videoUrl.trim() || addVideo.isPending || form.data.galerie.filter(item => item.type === "video").length >= (capabilities.gallery.maxVideos ?? 0)}
+                      onClick={async () => {
+                        const parsed = parseVideoUrl(videoUrl);
+                        if (!parsed) {
+                          toast.error("Lien vidéo non supporté", { description: "Utilisez YouTube, Instagram, Facebook, TikTok, Vimeo ou une URL vidéo directe HTTPS." });
+                          return;
+                        }
+                        try {
+                          const item = await addVideo.mutateAsync({ ficheId: id, url: parsed.url, alt: videoAlt });
+                          setData("galerie", [...form.data.galerie, item as GalleryItem]);
+                          setVideoUrl("");
+                          setVideoAlt("");
+                          await utils.clientSpaceRouter.ficheDetail.invalidate({ ficheId: id });
+                          toast.success("Vidéo ajoutée");
+                        } catch (error) {
+                          toast.error("Vidéo refusée", { description: error instanceof Error ? error.message : "Impossible d'ajouter la vidéo." });
+                        }
+                      }}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#172033] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                    >
+                      {addVideo.isPending ? <Loader2 className="animate-spin" size={16} /> : <Video size={16} />}
+                      Ajouter
+                    </button>
+                  </div>
+                  <p className="text-xs text-[#7d8798]">
+                    YouTube, Shorts, Instagram, Facebook, TikTok, Vimeo et URLs directes HTTPS (.mp4/.webm/.ogg).
+                  </p>
+                </div>
+              )}
+            </EditorSection>
+
             {/* Section Horaires */}
             <EditorSection
               title="Horaires d'ouverture"
