@@ -6,7 +6,7 @@ export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 // or link that means "back to the studio" must use this constant, not "/".
 export const ADMIN_HOME_PATH = "/studio";
 
-export const startLogin = (options?: { invitationToken?: string }) => {
+export const startLogin = () => {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
 
@@ -15,9 +15,6 @@ export const startLogin = (options?: { invitationToken?: string }) => {
   const state = encodeOAuthState({
     redirectUri,
     nonce,
-    ...(options?.invitationToken
-      ? { invitationToken: options.invitationToken }
-      : {}),
   });
 
   // `redirect_uri` here must byte-for-byte match both GOOGLE_REDIRECT_URI on
