@@ -41,6 +41,7 @@ import {
   listContactRequests,
   listFiches,
   listFichesPaginated,
+  listRecentFiches,
   listFichesByOwner,
   listMembershipCards,
   listScansForFiche,
@@ -86,6 +87,13 @@ export const appRouter = router({
   fiches: router({
     list: adminProcedure.query(async () => {
       const rows = await listFiches();
+      return rows.map((row: Fiche) => ({
+        ...parseFiche(row),
+        plan: getPlanFeatures(row.formule),
+      }));
+    }),
+    recent: adminProcedure.query(async () => {
+      const rows = await listRecentFiches(10);
       return rows.map((row: Fiche) => ({
         ...parseFiche(row),
         plan: getPlanFeatures(row.formule),
