@@ -49,7 +49,6 @@ import {
 } from "./db";
 import { validatePlanPayload } from "./planValidation";
 import { storagePut } from "./storage";
-import { optimizeGalleryVideo } from "./videoProcessing";
 
 function parseFiche<T extends { dataJson: string }>(fiche: T) {
   const { dataJson, ...rest } = fiche;
