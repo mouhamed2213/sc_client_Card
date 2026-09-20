@@ -88,10 +88,10 @@ describe("planFeatures architecture", () => {
       ...base,
       photo: "/portrait.webp",
       logo: "/logo.webp",
-      data: { ...base.data, horaires: hours, galerie: items(9), liens: items(11) },
+      data: { ...base.data, horaires: hours, galerie: items(5), liens: items(11) },
     });
     expect(proErrors).toContain("pro: maximum 10 liens.");
-    expect(proErrors).toContain("pro: maximum 8 photos.");
+    expect(proErrors).toContain("pro: maximum 4 photos.");
 
     const signatureErrors = validatePlanPayload({
       formule: "signature",
