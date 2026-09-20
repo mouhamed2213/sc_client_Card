@@ -22,7 +22,7 @@ import { useParams } from "wouter";
 
 type LinkItem = { label: string; url: string };
 type SocialItem = { label: string; url: string };
-type GalleryItem = { url: string; alt: string };
+type GalleryItem = { type?: "image" | "video"; url: string; alt: string; poster?: string };
 type HoursItem = { jour: string; horaire: string };
 type Article = { nom: string; description: string; prix: string };
 type CatalogSection = { titre: string; articles: Article[] };
@@ -162,42 +162,39 @@ export default function ClientFicheEdit() {
         : current
     );
 
-  async function uploadImage(file: File, kind: MediaKind) {
+  async function uploadImage(file: File, kind: Exclude<MediaKind, "video">) {
     try {
-      const capability =
-        kind === "gallery" ? capabilities.gallery : capabilities.profile;
-      if (!capability.editable) {
-        toast.error("Fonction verrouillée", {
-          description: `Disponible à partir du plan ${upgradeLabel(kind === "gallery" ? "gallery" : "profile")}.`,
-        });
-        return;
-      }
+      const capability = kind === "gallery" ? capabilities.gallery : capabilities.profile;
+      if (!capability.editable) { toast.error("Fonction verrouillée", { description: `Disponible à partir du plan ${upgradeLabel(kind === "gallery" ? "gallery" : "profile")}.` }); return; }
       setUploading(kind);
       const prepared = await prepareImage(file, kind);
-      const result = await upload.mutateAsync({
-        ficheId: id,
-        kind,
-        filename: prepared.name,
-        mimeType: "image/webp",
-        contentBase64: await fileToDataUrl(prepared),
-      });
+      const result = await upload.mutateAsync({ ficheId: id, kind, filename: prepared.name, mimeType: "image/webp", contentBase64: await fileToDataUrl(prepared) });
       if (kind === "profile") setField("photo", result.url);
       if (kind === "logo") setField("logo", result.url);
-      if (kind === "gallery") {
-        setData("galerie", [
-          ...(form?.data.galerie ?? []),
-          { url: result.url, alt: prepared.name },
-        ]);
-      }
+      if (kind === "gallery") setData("galerie", [...(form?.data.galerie ?? []), { type: "image", url: result.url, alt: prepared.name }]);
       toast.success("Image ajoutée");
     } catch (error) {
-      toast.error("Image refusée", {
-        description:
-          error instanceof Error ? error.message : "Le traitement a échoué.",
+      toast.error("Image refusée", { description: error instanceof Error ? error.message : "Le traitement a échoué." });
+    } finally { setUploading(null); }
+  }
+
+  async function uploadVideo(file: File) {
+    try {
+      const maxVideos = capabilities.gallery.maxVideos ?? 0;
+      const currentVideos = (form?.data.galerie ?? []).filter(item => item.type === "video").length;
+      if (currentVideos >= maxVideos) { toast.error("Limite vidéo atteinte", { description: `Votre formule autorise maximum ${maxVideos} vidéo${maxVideos > 1 ? "s" : ""}.` }); return; }
+      if (!file.type.startsWith("video/")) { toast.error("Vidéo refusée", { description: "Sélectionnez un fichier vidéo." }); return; }
+      setUploading("video");
+      const result = await upload.mutateAsync({
+        ficheId: id, kind: "video", filename: file.name,
+        mimeType: file.type as "video/mp4" | "video/webm" | "video/quicktime" | "video/ogg",
+        contentBase64: await fileToDataUrl(file),
       });
-    } finally {
-      setUploading(null);
-    }
+      setData("galerie", [...(form?.data.galerie ?? []), { type: "video", url: result.url, poster: result.poster, alt: file.name }]);
+      toast.success("Vidéo optimisée et ajoutée");
+    } catch (error) {
+      toast.error("Vidéo refusée", { description: error instanceof Error ? error.message : "Le traitement a échoué." });
+    } finally { setUploading(null); }
   }
 
   function saveChanges(event: React.FormEvent) {
@@ -618,80 +615,45 @@ export default function ClientFicheEdit() {
 
             {/* Section Galerie */}
             <EditorSection
-              title={`Galerie de photos (${form.data.galerie.length}/${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos})`}
-              subtitle={`Maximum ${capabilities.gallery.maxItems ?? fiche.data.plan.maxPhotos} photos autorisées.`}
+              title={`Galerie (${form.data.galerie.filter(item => item.type !== "video").length}/${capabilities.gallery.maxItems ?? 0} photos · ${form.data.galerie.filter(item => item.type === "video").length}/${capabilities.gallery.maxVideos ?? 0} vidéos)`}
+              subtitle={`Maximum ${capabilities.gallery.maxItems ?? 0} photos et ${capabilities.gallery.maxVideos ?? 0} vidéos. Les vidéos seront affichées en premier.`}
             >
               {!capabilities.gallery.editable ? (
                 <UpgradeNotice requiredPlan={upgradeLabel("gallery")} />
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {form.data.galerie.map((image, index) => (
-                    <div
-                      key={image.url}
-                      className="rounded-xl border border-[#e5e8ed] bg-white p-2.5 shadow-sm"
-                    >
-                      <img
-                        src={image.url}
-                        alt={image.alt}
-                        className="h-32 w-full rounded-lg object-cover"
-                      />
-                      <input
-                        className="mt-2 w-full rounded-lg border border-[#cfd5dd] px-2.5 py-1.5 text-xs outline-none focus:border-[#c98a4e]"
-                        placeholder="Description (alt)"
-                        aria-label={`Texte alternatif ${index + 1}`}
-                        value={image.alt}
-                        onChange={e =>
-                          setData(
-                            "galerie",
-                            form.data.galerie.map((x, i) =>
-                              i === index ? { ...x, alt: e.target.value } : x
-                            )
-                          )
-                        }
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setData(
-                            "galerie",
-                            form.data.galerie.filter((_, i) => i !== index)
-                          )
-                        }
-                        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
-                      >
-                        <Trash2 size={14} /> Supprimer
-                      </button>
+                  {form.data.galerie.map((item, index) => (
+                    <div key={item.url} className="rounded-xl border border-[#e5e8ed] bg-white p-2.5 shadow-sm">
+                      <div className="relative h-32 w-full overflow-hidden rounded-lg bg-black">
+                        {item.type === "video" ? (
+                          <video src={item.url} poster={item.poster} controls playsInline preload="metadata" className="h-full w-full object-contain" aria-label={item.alt || `Vidéo ${index + 1}`} />
+                        ) : (
+                          <img src={item.url} alt={item.alt} className="h-full w-full object-cover" />
+                        )}
+                        {item.type === "video" && <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/70 px-2 py-1 text-[10px] font-semibold text-white"><Video size={12} aria-hidden="true" /> Vidéo</span>}
+                      </div>
+                      {item.type !== "video" && <input className="mt-2 w-full rounded-lg border border-[#cfd5dd] px-2.5 py-1.5 text-xs outline-none focus:border-[#c98a4e]" placeholder="Description (alt)" aria-label={`Texte alternatif ${index + 1}`} value={item.alt} onChange={e => setData("galerie", form.data.galerie.map((x, i) => i === index ? { ...x, alt: e.target.value } : x))} />}
+                      <button type="button" onClick={() => setData("galerie", form.data.galerie.filter((_, i) => i !== index))} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"><Trash2 size={14} /> Supprimer</button>
                     </div>
                   ))}
-                  {form.data.galerie.length <
-                    (capabilities.gallery.maxItems ?? 0) && (
+                  {form.data.galerie.filter(item => item.type !== "video").length < (capabilities.gallery.maxItems ?? 0) && (
                     <label className="flex h-44 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#cfd5dd] bg-gray-50/50 p-4 text-center text-sm font-medium text-[#667085] hover:bg-gray-100/50 transition">
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        disabled={
-                          uploading === "gallery" ||
-                          !capabilities.gallery.editable
-                        }
-                        onChange={async e => {
-                          const file = e.target.files?.[0];
-                          if (file) await uploadImage(file, "gallery");
-                          e.currentTarget.value = "";
-                        }}
-                      />
-                      {uploading === "gallery" ? (
-                        <Loader2 className="animate-spin text-[#c98a4e]" />
-                      ) : (
-                        <ImagePlus className="text-[#c98a4e]" />
-                      )}
+                      <input type="file" className="hidden" accept="image/*" disabled={uploading !== null} onChange={async e => { const file = e.target.files?.[0]; if (file) await uploadImage(file, "gallery"); e.currentTarget.value = ""; }} />
+                      {uploading === "gallery" ? <Loader2 className="animate-spin text-[#c98a4e]" /> : <ImagePlus className="text-[#c98a4e]" />}
                       <span>Ajouter une photo</span>
+                    </label>
+                  )}
+                  {form.data.galerie.filter(item => item.type === "video").length < (capabilities.gallery.maxVideos ?? 0) && (
+                    <label className="flex h-44 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#cfd5dd] bg-gray-50/50 p-4 text-center text-sm font-medium text-[#667085] hover:bg-gray-100/50 transition">
+                      <input type="file" className="hidden" accept="video/mp4,video/webm,video/quicktime,video/ogg" disabled={uploading !== null} onChange={async e => { const file = e.target.files?.[0]; if (file) await uploadVideo(file); e.currentTarget.value = ""; }} />
+                      {uploading === "video" ? <Loader2 className="animate-spin text-[#c98a4e]" /> : <Video className="text-[#c98a4e]" />}
+                      <span>Ajouter une vidéo</span>
+                      <span className="text-[10px] text-[#8c95a5]">Optimisée en MP4 · H.264 · AAC</span>
                     </label>
                   )}
                 </div>
               )}
             </EditorSection>
-
             {/* Section Horaires */}
             <EditorSection
               title="Horaires d'ouverture"
