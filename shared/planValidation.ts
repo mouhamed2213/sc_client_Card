@@ -3,7 +3,7 @@ import { getPlanFeatures, type PlanName } from "./planFeatures";
 
 type PlanData = {
   liens?: unknown[];
-  galerie?: Array<{ type?: "image" | "video"; url?: string; alt?: string; poster?: string }>;
+  galerie?: unknown[];
   horaires?: { jour?: string; horaire?: string }[];
   sections?: unknown[];
   presentation?: string;
@@ -23,9 +23,7 @@ export function validatePlanPayload(input: {
   const capabilities = getClientFicheCapabilities(input.formule);
   const errors: string[] = [];
   const links = input.data.liens ?? [];
-  const gallery = input.data.galerie ?? [];
-  const photos = gallery.filter(item => item.type !== "video");
-  const videos = gallery.filter(item => item.type === "video");
+  const photos = input.data.galerie ?? [];
   const sections = input.data.sections ?? [];
   const appointment = input.data.rendezVous;
   const socials = input.data.reseauxSociaux ?? [];
@@ -39,11 +37,6 @@ export function validatePlanPayload(input: {
     errors.push(features.maxPhotos === 0
       ? "Cette formule ne permet pas de galerie photo."
       : `${input.formule}: maximum ${features.maxPhotos} photos.`);
-  }
-  if (videos.length > features.maxVideos) {
-    errors.push(features.maxVideos === 0
-      ? "Cette formule ne permet pas de vidéos."
-      : `${input.formule}: maximum ${features.maxVideos} vidéos.`);
   }
   if (!capabilities.site.editable && input.site?.trim()) errors.push("Cette formule ne permet pas de site internet.");
   if (!capabilities.rendezVous.editable && appointment?.url?.trim()) errors.push("Cette formule ne permet pas de prise de rendez-vous.");
