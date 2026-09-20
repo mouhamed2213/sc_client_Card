@@ -98,8 +98,6 @@ model Fiche {
   ownerId         Int?
   owner            User?             @relation(fields: [ownerId], references: [id])
   membershipCards MembershipCard[]
-  invitations     InvitationClient[]
-
   @@map("fiches")
 }
 
