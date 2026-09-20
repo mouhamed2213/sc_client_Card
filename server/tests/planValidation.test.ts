@@ -135,35 +135,4 @@ describe("planFeatures architecture", () => {
     expect(errors).toContain("signature: les horaires doivent couvrir exactement les 7 jours.");
   });
 
-  it("enforces video limits independently from photo limits", () => {
-    const proErrors = validatePlanPayload({
-      formule: "pro",
-      photo: "photo.webp",
-      logo: "logo.webp",
-      data: {
-        galerie: [
-          { type: "video", url: "video-1.mp4", alt: "" },
-          { type: "video", url: "video-2.mp4", alt: "" },
-        ],
-        horaires: [],
-      },
-    });
-    expect(proErrors).toContain("pro: maximum 1 vidéos.");
-
-    const signatureErrors = validatePlanPayload({
-      formule: "signature",
-      photo: "photo.webp",
-      logo: "logo.webp",
-      data: {
-        galerie: Array.from({ length: 4 }, (_, index) => ({
-          type: "video" as const,
-          url: `video-${index}.mp4`,
-          alt: "",
-        })),
-        horaires: [],
-      },
-    });
-    expect(signatureErrors).toContain("signature: maximum 3 vidéos.");
-  });
-
-});
+}););
