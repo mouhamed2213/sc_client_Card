@@ -26,7 +26,7 @@ function youtubeId(url: URL) {
 export function parseVideoUrl(value: string): ParsedVideoUrl | null {
   let url: URL;
   try { url = new URL(value.trim()); } catch { return null; }
-  if (url.protocol !== "https:") return null;
+  if (url.protocol !== "https:" || url.username || url.password || url.port) return null;
 
   const id = youtubeId(url);
   if (id && /^[A-Za-z0-9_-]{6,128}$/.test(id)) {
@@ -51,7 +51,7 @@ export function parseVideoUrl(value: string): ParsedVideoUrl | null {
   }
 
   if (hostMatches(url.hostname, ["facebook.com", "fb.watch"])) {
-    if (hostMatches(url.hostname, ["fb.watch"]) || parts.includes("videos") || parts[0] === "reel" || parts.includes("reel")) {
+    if (hostMatches(url.hostname, ["fb.watch"]) || parts.includes("videos") || parts[0] === "reel" || parts.includes("reel") || (url.pathname === "/watch" && url.searchParams.has("v"))) {
       return {
         source: "facebook",
         url: url.toString(),
