@@ -104,11 +104,16 @@ export default function PublicFiche() {
     .filter(Boolean)
     .join("\n");
   const contactHref = `data:text/vcard;charset=utf-8,${encodeURIComponent(vCard)}`;
-  const primaryButton = data.premierBouton || "whatsapp";
+  const primaryButton =
+    data.premierBouton === "appel" || data.premierBouton === "email"
+      ? data.premierBouton
+      : "whatsapp";
   const buttonOrder: FicheTemplateActions["buttonOrder"] =
     primaryButton === "appel"
       ? ["appel", "whatsapp", "email"]
-      : ["whatsapp", "appel", "email"];
+      : primaryButton === "email"
+        ? ["email", "appel", "whatsapp"]
+        : ["whatsapp", "appel", "email"];
 
   const templateFiche: FicheTemplateModel = {
     slug: fiche.slug,
