@@ -77,7 +77,26 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
       </div>
 
       <div className="client-kpis">
-        <KpiTile icon={ScanLine} label="Scans · 30 jours" value={scans} />
+        <button
+          type="button"
+          onClick={() =>
+            plan.hasPanel
+              ? navigate("/espace-client/fiche/" + ficheId + "/statistiques")
+              : setPremiumFeature({ name: "Statistiques", plan: "signature" })
+          }
+          className="kpi-tile text-left transition hover:border-[#c98a4e]"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <ScanLine size={17} className="text-[#7d8798]" />
+            {!plan.hasPanel && <Sparkles size={14} className="text-[#c98a4e]" aria-hidden="true" />}
+          </div>
+          <p className="kpi-tile-value" style={{ fontSize: 15 }}>
+            {plan.hasPanel ? scans : "Premium"}
+          </p>
+          <p className="kpi-tile-label">
+            {plan.hasPanel ? "Scans · 30 jours" : "Statistiques · Signature"}
+          </p>
+        </button>
         <button
           type="button"
           onClick={() =>
@@ -129,8 +148,11 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
             <QuickAction
               icon={BarChart3}
               label="Voir les statistiques"
+              premium={!plan.hasPanel}
               onClick={() =>
-                navigate(`/espace-client/fiche/${ficheId}/statistiques`)
+                plan.hasPanel
+                  ? navigate("/espace-client/fiche/" + ficheId + "/statistiques")
+                  : setPremiumFeature({ name: "Statistiques", plan: "signature" })
               }
             />
             <QuickAction
@@ -195,17 +217,30 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
       </div>
 
       <div className={`grid gap-5 ${plan.hasForm ? "lg:grid-cols-[1.3fr,1fr]" : ""}`}>
-        <div className="panel">
-          <div className="flex items-center justify-between">
+        <button
+          type="button"
+          disabled={plan.hasPanel}
+          onClick={() => !plan.hasPanel && setPremiumFeature({ name: "Évolution des scans", plan: "signature" })}
+          className="panel w-full text-left transition enabled:hover:border-[#c98a4e] disabled:cursor-default"
+          aria-label={plan.hasPanel ? "Évolution des scans" : "Évolution des scans, disponible avec Signature"}
+        >
+          <div className="flex items-center justify-between gap-3">
             <div>
               <p className="panel-title">Évolution des scans</p>
               <p className="panel-sub">30 derniers jours</p>
             </div>
+            {!plan.hasPanel && <PremiumBadge plan="signature" />}
           </div>
-          <div className="mt-4">
-            <ScanChart data={data.scans} />
-          </div>
-        </div>
+          {plan.hasPanel ? (
+            <div className="mt-4">
+              <ScanChart data={data.scans} />
+            </div>
+          ) : (
+            <div className="mt-4 flex h-[220px] items-center justify-center rounded-xl border border-dashed border-[#e6e8ec] bg-[#fafbfc] text-sm text-[#7d8798]">
+              Disponible avec la formule Signature
+            </div>
+          )}
+        </button>
 
         {plan.hasForm && (
           <div className="panel">
