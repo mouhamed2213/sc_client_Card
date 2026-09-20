@@ -207,6 +207,14 @@ export async function listFiches() {
   await ensureDemoFiches();
   return prisma.fiche.findMany({ orderBy: { updatedAt: "desc" } });
 }
+export async function listRecentFiches(limit = 10) {
+  await ensureDemoFiches();
+  return prisma.fiche.findMany({
+    orderBy: { dateCreation: "desc" },
+    take: limit,
+  });
+}
+
 export async function listFichesPaginated(input: {
   page: number;
   pageSize: number;
