@@ -51,11 +51,15 @@ export default function ClientLayout({
             label: "Statistiques",
             icon: BarChart3,
           },
-          {
-            href: `/espace-client/fiche/${ficheId}/demandes`,
-            label: "Demandes reçues",
-            icon: MessageSquare,
-          },
+          ...(fiche.data?.formule === "signature"
+            ? [
+                {
+                  href: `/espace-client/fiche/${ficheId}/demandes`,
+                  label: "Demandes reçues",
+                  icon: MessageSquare,
+                },
+              ]
+            : []),
           {
             href: `/espace-client/fiche/${ficheId}/modifier`,
             label: "Modifier ma fiche",
