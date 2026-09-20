@@ -18,9 +18,9 @@ const hours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dim
 describe("planFeatures architecture", () => {
   it("declares the exact capabilities of the three formulas", () => {
     expect(planFeatures).toEqual({
-      essentiel: { maxLinks: 0, maxPhotos: 0, hasForm: false, hasGoogleReview: false, requiresProfile: false, requiresHours: true, hasCatalog: false, hasPanel: false },
-      pro: { maxLinks: 10, maxPhotos: 4, hasForm: false, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: false, hasPanel: false },
-      signature: { maxLinks: 10, maxPhotos: 8, hasForm: true, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true, hasPanel: true },
+      essentiel: { maxLinks: 0, maxPhotos: 0, maxVideos: 0, hasForm: false, hasGoogleReview: false, requiresProfile: false, requiresHours: true, hasCatalog: false, hasPanel: false },
+      pro: { maxLinks: 10, maxPhotos: 4, maxVideos: 1, hasForm: false, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: false, hasPanel: false },
+      signature: { maxLinks: 10, maxPhotos: 8, maxVideos: 3, hasForm: true, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true, hasPanel: true },
     });
   });
 
@@ -124,6 +124,46 @@ describe("planFeatures architecture", () => {
     })).toEqual([]);
   });
 
+  it("enforces video limits independently from photo limits", () => {
+    const proErrors = validatePlanPayload({
+      formule: "pro",
+      ...base,
+      photo: "/portrait.webp",
+      logo: "/logo.webp",
+      data: {
+        ...base.data,
+        horaires: hours,
+        galerie: [
+          { type: "image", url: "/1.webp", alt: "" },
+          { type: "image", url: "/2.webp", alt: "" },
+          { type: "image", url: "/3.webp", alt: "" },
+          { type: "image", url: "/4.webp", alt: "" },
+          { type: "video", url: "https://www.youtube.com/watch?v=abcDEF_123", alt: "" },
+          { type: "video", url: "https://www.youtube.com/shorts/abcDEF_123", alt: "" },
+        ],
+      },
+    });
+    expect(proErrors).toContain("pro: maximum 1 vidéos.");
+
+    const signatureErrors = validatePlanPayload({
+      formule: "signature",
+      ...base,
+      photo: "/portrait.webp",
+      logo: "/logo.webp",
+      data: {
+        ...base.data,
+        horaires: hours,
+        galerie: [
+          { type: "video", url: "https://www.youtube.com/watch?v=abcDEF_123", alt: "" },
+          { type: "video", url: "https://vimeo.com/123456789", alt: "" },
+          { type: "video", url: "https://www.tiktok.com/@user/video/1234567890123456789", alt: "" },
+          { type: "video", url: "https://www.youtube.com/watch?v=abcDEF_123", alt: "" },
+        ],
+      },
+    });
+    expect(signatureErrors).toContain("signature: maximum 3 vidéos.");
+  });
+
   it("validates incomplete hours", () => {
     const errors = validatePlanPayload({
       formule: "signature",
@@ -135,4 +175,4 @@ describe("planFeatures architecture", () => {
     expect(errors).toContain("signature: les horaires doivent couvrir exactement les 7 jours.");
   });
 
-}););
+});
