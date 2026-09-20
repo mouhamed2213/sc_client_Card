@@ -1,5 +1,11 @@
 import z from "zod";
 
+const galleryItem = z.object({
+  type: z.enum(["image", "video"]).default("image"),
+  url: z.string().min(1),
+  alt: z.string().default(""),
+  poster: z.string().optional(),
+});
 
 export const fichePayload = z.object({
   slug: z.string().min(3).max(160),
@@ -32,9 +38,7 @@ export const fichePayload = z.object({
     horaires: z
       .array(z.object({ jour: z.string(), horaire: z.string() }))
       .default([]),
-    galerie: z
-      .array(z.object({ url: z.string(), alt: z.string() }))
-      .default([]),
+    galerie: z.array(galleryItem).default([]),
     sections: z
       .array(
         z.object({
