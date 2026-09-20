@@ -15,6 +15,7 @@ import {
   Sparkles,
   Trash2,
   Upload,
+  Video,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
