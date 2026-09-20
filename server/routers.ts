@@ -48,6 +48,7 @@ import {
   updateFiche,
 } from "./db";
 import { validatePlanPayload } from "./planValidation";
+import { parseVideoUrl } from "@shared/videoUrls";
 import { storagePut } from "./storage";
 
 function parseFiche<T extends { dataJson: string }>(fiche: T) {
@@ -810,6 +811,75 @@ export const appRouter = router({
           input.mimeType
         );
         return { ...result, type: "image" as const, bytes: bytes.byteLength };
+      }),
+
+    addVideo: clientProcedure
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          url: z.string().url().max(2048),
+          alt: z.string().trim().max(200).default(""),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        if (!fiche)
+          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+
+        const plan = fiche.formule as PlanName;
+        const capabilities = getClientFicheCapabilities(plan);
+        if (!capabilities.gallery.editable) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Votre formule ne permet pas de modifier la galerie.",
+          });
+        }
+
+        const parsed = parseVideoUrl(input.url);
+        if (!parsed)
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Cette URL vidéo n'est pas supportée. Utilisez YouTube, Instagram, Facebook, TikTok, Vimeo ou une URL vidéo directe HTTPS.",
+          });
+
+        const currentData = JSON.parse(fiche.dataJson || "{}") as {
+          galerie?: Array<{ type?: "image" | "video"; url?: string }>;
+        };
+        const gallery = currentData.galerie ?? [];
+        const videoCount = gallery.filter(item => item.type === "video").length;
+        const maxVideos = capabilities.gallery.maxVideos ?? getPlanFeatures(plan).maxVideos;
+        if (videoCount >= maxVideos) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `La galerie est limitée à ${maxVideos} vidéos pour votre formule.`,
+          });
+        }
+
+        const nextGallery = [
+          ...gallery,
+          {
+            type: "video" as const,
+            url: parsed.url,
+            alt: input.alt,
+            source: parsed.source,
+            embedUrl: parsed.embedUrl,
+          },
+        ];
+        const validationErrors = validatePlanPayload({
+          formule: plan,
+          photo: fiche.photo,
+          logo: fiche.logo,
+          googlePlaceId: fiche.googlePlaceId,
+          site: fiche.site,
+          data: { ...currentData, galerie: nextGallery },
+        });
+        if (validationErrors.length)
+          throw new TRPCError({ code: "BAD_REQUEST", message: validationErrors.join(" ") });
+
+        await updateFiche(input.ficheId, {
+          dataJson: JSON.stringify({ ...currentData, galerie: nextGallery }),
+        });
+        return nextGallery[nextGallery.length - 1];
       }),
 
     updateContact: clientProcedure
