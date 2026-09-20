@@ -124,6 +124,7 @@ export const appRouter = router({
               "supprimee",
               "brouillon",
               "a_renouveler",
+              "expiree",
             ])
             .optional(),
         })
@@ -134,7 +135,9 @@ export const appRouter = router({
           ...pagination,
           ...(statut === "a_renouveler"
             ? { aRenouveler: true }
-            : { statut }),
+            : statut === "expiree"
+              ? { expiree: true }
+              : { statut }),
         });
         return {
           ...result,
