@@ -3,7 +3,8 @@
  *
  *   .fh-bg        cover picture (sharp, full frame) + pattern + legibility shade
  *   .fh-top       "Fiche de contact" + NFC tag
- *   .fh-body      logo plate (or initials), name, role, company
+ *   .fh-body      identity band: logo (or initials) on the LEFT, name / role /
+ *                 company stacked on the RIGHT (stacks vertically below 340px)
  *   .fh-actions   3 equal action buttons, the preferred one is filled
  *
  * The cover is never blurred: the top of the hero is left free so it stays
@@ -54,30 +55,39 @@
 }
 .fiche-template .fh-tag--nfc { opacity: 0.85; }
 
-/* ---- identity ---------------------------------------------------- */
+/* ---- identity (side-by-side band) --------------------------------
+ * Logo/initials on the left, text on the right. The text column can shrink
+ * (min-width: 0) and wraps instead of being cut, so name, role and company
+ * always stay readable, whatever their length.                          */
 .fiche-template .fh-body {
-  display: flex; flex-direction: column; align-items: center; margin-top: auto; padding: 24px 6px 4px; text-align: center;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 16px; align-items: center; align-content: end;
+  margin-top: auto; padding: 24px 2px 4px; text-align: left;
 }
 .fiche-template .fh[data-cover="no"] .fh-body { margin-top: 0; padding-top: 28px; }
 .fiche-template .fh-avatar,
 .fiche-template .fh-initials {
+  grid-column: 1; grid-row: 1 / span 4; align-self: center;
   display: flex; align-items: center; justify-content: center; box-sizing: border-box; flex: none;
-  width: 112px; height: 112px; margin-bottom: 14px; overflow: hidden; border-radius: 50%;
+  width: 88px; height: 88px; margin: 0; overflow: hidden; border-radius: 50%;
   border: 3px solid var(--fh-logo-line); background: var(--fh-logo-plate); box-shadow: var(--fh-ring-shadow);
 }
 .fiche-template .fh-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 22%; }
-.fiche-template .fh-avatar[data-fit="contain"] { padding: 15px; }
+.fiche-template .fh-avatar[data-fit="contain"] { padding: 12px; }
 .fiche-template .fh-avatar[data-fit="contain"] img { object-fit: contain; object-position: center; }
-.fiche-template .fh-initials { color: var(--fh-initials-text, #1f2937); font-size: 30px; font-weight: 800; letter-spacing: 0.04em; }
+.fiche-template .fh-initials { color: var(--fh-initials-text, #1f2937); font-size: 26px; font-weight: 800; letter-spacing: 0.04em; }
+.fiche-template .fh-name,
+.fiche-template .fh-ornament,
+.fiche-template .fh-role,
+.fiche-template .fh-company { grid-column: 2; min-width: 0; }
 .fiche-template .fh-name {
-  margin: 0; max-width: 100%; font-size: 26px; font-weight: 800; line-height: 1.1;
-  letter-spacing: -0.03em; overflow-wrap: anywhere; text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  margin: 0; max-width: 100%; font-size: 24px; font-weight: 800; line-height: 1.12;
+  letter-spacing: -0.03em; overflow-wrap: anywhere; text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
 }
 .fiche-template .fh-ornament { display: none; }
-.fiche-template .fh-role { margin: 9px 0 0; color: var(--fh-muted); font-size: 13px; font-weight: 500; line-height: 1.4; }
+.fiche-template .fh-role { margin: 6px 0 0; color: var(--fh-muted); font-size: 13px; font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
 .fiche-template .fh-company {
-  margin: 12px 0 0; padding: 5px 13px; border: 1px solid var(--fh-line); border-radius: 999px; background: var(--fh-glass);
-  color: var(--fh-company-text, var(--fh-text, #fff)); font-size: 11px; font-weight: 700;
+  justify-self: start; margin: 10px 0 0; padding: 5px 12px; border: 1px solid var(--fh-line); border-radius: 12px; background: var(--fh-glass);
+  color: var(--fh-company-text, var(--fh-text, #fff)); font-size: 11px; font-weight: 700; line-height: 1.3;
   letter-spacing: 0.08em; text-transform: uppercase; max-width: 100%; overflow-wrap: anywhere;
 }
 
@@ -118,7 +128,7 @@
   --fh-btn-bg: rgba(255, 255, 255, 0.1); --fh-btn-bg-hover: rgba(255, 255, 255, 0.18); --fh-btn-line: rgba(255, 255, 255, 0.22);
   --fh-cta-bg: #ffffff; --fh-cta-text: #17324f; --fh-cta-shadow: rgba(4, 14, 28, 0.35);
 }
-.fiche-template--essentiel .fh-name { font-size: 24px; }
+.fiche-template--essentiel .fh-name { font-size: 23px; }
 
 /* =================================================================== */
 /* PRO — warm, refined, copper accents                                  */
@@ -138,7 +148,7 @@
   --fh-cta-bg: linear-gradient(135deg, #e3b283, #c98f5f); --fh-cta-text: #24170d; --fh-cta-shadow: rgba(201, 143, 95, 0.35);
   --fh-focus: #e3b283;
 }
-.fiche-template--pro .fh-name { font-size: 27px; letter-spacing: -0.035em; }
+.fiche-template--pro .fh-name { font-size: 25px; letter-spacing: -0.035em; }
 
 /* =================================================================== */
 /* SIGNATURE — dark editorial luxury, gold ring, serif name             */
@@ -161,14 +171,14 @@
 }
 .fiche-template--signature .fh-initials { color: #17130d; }
 .fiche-template--signature .fh-name {
-  font-family: Georgia, "Times New Roman", serif; font-size: clamp(27px, 6.4vw, 34px); font-weight: 600; letter-spacing: -0.02em;
+  font-family: Georgia, "Times New Roman", serif; font-size: clamp(23px, 5.6vw, 30px); font-weight: 600; letter-spacing: -0.02em;
   color: #fffaf2;
 }
 .fiche-template--signature .fh-ornament {
-  display: block; width: 84px; height: 1px; margin: 12px auto 0;
-  background: linear-gradient(90deg, transparent, #c9a46a, transparent);
+  display: block; width: 64px; height: 1px; margin: 10px 0 0;
+  background: linear-gradient(90deg, #c9a46a, transparent);
 }
-.fiche-template--signature .fh-role { margin-top: 10px; letter-spacing: 0.03em; }
+.fiche-template--signature .fh-role { margin-top: 8px; letter-spacing: 0.03em; }
 .fiche-template--signature .fh-company { border-color: rgba(201, 164, 106, 0.5); }
 
 /* ---- small screens ---------------------------------------------- */
@@ -177,8 +187,18 @@
   .fiche-template .fh[data-cover="no"] { min-height: 0; }
   .fiche-template--signature .fh { padding: 18px 16px 22px; }
   .fiche-template .fh-action { min-height: 56px; }
-  .fiche-template .fh-avatar, .fiche-template .fh-initials { width: 104px; height: 104px; }
+  .fiche-template .fh-avatar, .fiche-template .fh-initials { width: 76px; height: 76px; }
+  .fiche-template .fh-body { column-gap: 12px; }
+  .fiche-template .fh-name { font-size: 21px; }
   .fiche-template .fh-action > span { font-size: 10px; }
+}
+/* Very narrow screens: stack the identity so the text keeps its full width. */
+@media (max-width: 340px) {
+  .fiche-template .fh-body { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; row-gap: 0; }
+  .fiche-template .fh-avatar, .fiche-template .fh-initials { grid-column: 1; grid-row: auto; margin-bottom: 12px; }
+  .fiche-template .fh-name, .fiche-template .fh-ornament, .fiche-template .fh-role, .fiche-template .fh-company { grid-column: 1; }
+  .fiche-template .fh-company { justify-self: center; }
+  .fiche-template--signature .fh-ornament { margin: 10px auto 0; background: linear-gradient(90deg, transparent, #c9a46a, transparent); }
 }
 @media (prefers-reduced-motion: reduce) {
   .fiche-template .fh-action { transition: none; }
