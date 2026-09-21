@@ -1,58 +1,146 @@
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
+  ArrowDown,
   ArrowRight,
+  BarChart3,
   Check,
-  Globe2,
+  CircleCheck,
+  Clock,
+  FileText,
+  Gem,
+  Headset,
+  Infinity as InfinityIcon,
   MapPin,
   Menu,
   MessageCircle,
-  MousePointer2,
+  Package,
+  Phone,
+  Play,
   QrCode,
+  RefreshCw,
+  Send,
+  Settings,
+  Share2,
+  ShieldCheck,
+  ShoppingCart,
   Smartphone,
-  Sparkles,
+  User,
+  Users,
   X,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "wouter";
+import {
+  BlackCard,
+  BrandMark,
+  CopperCard,
+  WhiteCard,
+} from "../landing/CardMock";
+import "../landing/landing.css";
 
-const WHATSAPP_URL =
-  "https://wa.me/221778096713?text=Bonjour%20Support%20Connect%C3%A9%2C%20je%20souhaite%20demander%20une%20carte%20connect%C3%A9e.";
+const whatsapp = (message: string) =>
+  `https://wa.me/221778096713?text=${encodeURIComponent(message)}`;
+const WHATSAPP_URL = whatsapp(
+  "Bonjour Support Connecté, je souhaite demander une carte connectée."
+);
+const WHATSAPP_ENTERPRISE_URL = whatsapp(
+  "Bonjour Support Connecté, je souhaite un devis pour une offre Entreprise."
+);
 
-const plans = [
+const NAV = [
+  ["#principe", "Le principe"],
+  ["#gammes", "Les cartes"],
+  ["#parcours", "Comment ça marche"],
+] as const;
+
+const PRINCIPLES = [
+  {
+    Icon: Smartphone,
+    title: "Un geste",
+    text: "Le téléphone ouvre directement votre fiche, sans effort.",
+  },
+  {
+    Icon: Send,
+    title: "Aucune app",
+    text: "Votre client n’installe rien pour vous contacter.",
+  },
+  {
+    Icon: Users,
+    title: "Votre présence",
+    text: "WhatsApp, site, réseaux, Maps et avis au même endroit.",
+  },
+  {
+    Icon: RefreshCw,
+    title: "Toujours à jour",
+    text: "Une modification en ligne vaut mieux qu’une réimpression.",
+  },
+];
+
+const WHY = [
+  { Icon: Zap, title: "1 geste", text: "NFC + QR, sans application." },
+  {
+    Icon: User,
+    title: "1 fiche",
+    text: "Contacts, WhatsApp, réseaux, adresse.",
+  },
+  {
+    Icon: RefreshCw,
+    title: "Toujours à jour",
+    text: "Une modification, aucune réimpression.",
+  },
+  {
+    Icon: Share2,
+    title: "Plus de points de contact",
+    text: "Partageable partout.",
+  },
+];
+
+const SAME = [
+  { Icon: Smartphone, title: "Même technologie", text: "NFC + QR code" },
+  { Icon: Settings, title: "Même simplicité", text: "Aucune application" },
+  { Icon: InfinityIcon, title: "Même mise à jour", text: "En temps réel" },
+  {
+    Icon: BarChart3,
+    title: "Plus d’opportunités",
+    text: "Pour votre activité",
+  },
+];
+
+const PLANS = [
   {
     name: "Essentielle",
+    Icon: User,
     price: "12 000",
-    description: "L'essentiel pour être trouvé et contacté.",
-    audience: "Artisan · commerçant · indépendant",
+    pitch: "L’essentiel pour être trouvé et contacté.",
     features: [
       "Appel direct",
       "WhatsApp & e-mail",
       "Google Maps",
       "QR code + NFC",
-      "Jusqu'à 3 liens",
+      "Jusqu’à 3 liens",
     ],
+    cta: "Demander cette carte",
   },
   {
     name: "Pro",
     price: "15 000",
-    description: "Plus d'opportunités pour votre activité.",
-    audience: "Commercial · restaurateur · cabinet",
+    pitch: "Plus d’opportunités pour développer votre activité.",
+    popular: true,
     features: [
-      "Tout l'Essentielle",
-      "Jusqu'à 10 liens",
-      "Galerie 8 photos",
+      "Tout l’Essentiel",
+      "Jusqu’à 10 liens",
+      "Galerie photos",
       "Avis Google",
-      "Statistiques",
+      "Statistiques de vues",
     ],
-    featured: true,
+    cta: "Demander cette carte",
   },
   {
     name: "Signature",
+    Icon: Gem,
     price: "75 000",
-    suffix: "3 cartes",
-    description: "Un design exclusif, à votre image.",
-    audience: "Dirigeant · profession libérale · direction",
+    pitch: "Un design exclusif, à votre image.",
     features: [
       "Tout le Pro",
       "Design sur mesure",
@@ -60,636 +148,563 @@ const plans = [
       "Rédaction des textes",
       "Traitement prioritaire",
     ],
+    cta: "Demander cette carte",
   },
-
+  {
+    name: "Entreprise",
+    Icon: Users,
+    price: null,
+    pitch: "Pour les équipes et réseaux de grande envergure.",
+    features: [
+      "Tout le Signature",
+      "Cartes en volume",
+      "Gestion multi-profils",
+      "Tableau de bord dédié",
+      "Accompagnement personnalisé",
+    ],
+    cta: "Nous contacter",
+    enterprise: true,
+  },
 ];
 
-const steps = [
-  [
-    "01",
-    "Vous commandez",
-    "Écrivez-nous sur WhatsApp. Nous vous envoyons un devis gratuit sous 24 h.",
-  ],
-  [
-    "02",
-    "Vous validez",
-    "Vous transmettez vos informations et validez le bon à tirer avant impression.",
-  ],
-  [
-    "03",
-    "Nous fabriquons",
-    "Impression, encodage NFC et tests sur deux téléphones dans notre atelier de Saly.",
-  ],
-  [
-    "04",
-    "Vous êtes connecté",
-    "Vous tendez votre carte. Votre client ouvre votre fiche en quelques secondes.",
-  ],
+const STEPS = [
+  {
+    Icon: ShoppingCart,
+    title: "Vous choisissez",
+    text: "Choisissez votre carte et votre niveau de service.",
+  },
+  {
+    Icon: FileText,
+    title: "Vous transmettez",
+    text: "Envoyez vos informations, liens et visuels.",
+  },
+  {
+    Icon: Settings,
+    title: "Nous préparons",
+    text: "Nous fabriquons, imprimons, encodons et testons votre carte.",
+  },
+  {
+    Icon: CircleCheck,
+    title: "Vous êtes connecté",
+    text: "Vous recevez une carte prête à partager, sans application.",
+  },
 ];
+
+function Reveal({
+  children,
+  delay = 0,
+  className,
+}: {
+  children: ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const reduce = useReducedMotion();
+  if (reduce) return <div className={className}>{children}</div>;
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px 0px -60px 0px" }}
+      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function Brand({ onClick }: { onClick?: () => void }) {
+  return (
+    <a href="#top" className="lp-brand" onClick={onClick} aria-label="Support Connecté">
+      <BrandMark tone="dark" className="lp-brand-mark" />
+      <span className="lp-brand-word">
+        <b>SUPPORT</b>
+        <i>CONNECTÉ</i>
+      </span>
+    </a>
+  );
+}
+
+function Eyebrow({ children, tone = "red" }: { children: ReactNode; tone?: "red" | "copper" }) {
+  return (
+    <p className={`lp-eyebrow lp-eyebrow--${tone}`}>
+      {tone === "red" && <span className="lp-eyebrow-dash" />}
+      {children}
+      {tone === "copper" && <span className="lp-eyebrow-line" />}
+    </p>
+  );
+}
 
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { scrollYProgress } = useScroll();
-  const orbY = useTransform(scrollYProgress, [0, 1], [0, -180]);
+  const [scrolled, setScrolled] = useState(false);
 
-  const goToWhatsApp = () => {
-    window.location.href = WHATSAPP_URL;
-  };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#f5f3ef] text-[#142033] selection:bg-[#dca66b]/30">
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#111a2b]/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-[74px] max-w-7xl items-center justify-between px-5 lg:px-8">
-          <a
-            href="#top"
-            className="flex items-center gap-3"
-            onClick={() => setMenuOpen(false)}
-          >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#dfa56a] text-[#111a2b] shadow-lg shadow-black/10">
-              <Sparkles className="h-5 w-5" />
-            </span>
-            <span className="leading-none">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.28em] text-white/45">
-                Support
-              </span>
-              <span className="block text-[17px] font-semibold tracking-[-0.03em] text-white">
-                Connecté
-              </span>
-            </span>
-          </a>
-
-          <nav className="hidden items-center gap-8 md:flex">
-            <a
-              href="#principe"
-              className="text-sm text-white/65 transition hover:text-white"
-            >
-              Le principe
-            </a>
-            <a
-              href="#gammes"
-              className="text-sm text-white/65 transition hover:text-white"
-            >
-              Les cartes
-            </a>
-            <a
-              href="#parcours"
-              className="text-sm text-white/65 transition hover:text-white"
-            >
-              Comment ça marche
-            </a>
+    <div className="sc-landing">
+      {/* ------------------------------ header ------------------------------ */}
+      <header className={`lp-header${scrolled || menuOpen ? " is-solid" : ""}`}>
+        <div className="lp-header-inner">
+          <Brand onClick={closeMenu} />
+          <nav className="lp-nav" aria-label="Navigation principale">
+            {NAV.map(([href, label]) => (
+              <a key={href} href={href}>
+                {label}
+              </a>
+            ))}
           </nav>
-
-          <div className="hidden items-center gap-3 sm:flex">
-            <Link
-              href="/espace-client/connexion"
-              className="rounded-full px-4 py-2.5 text-sm font-semibold text-white/80 transition hover:bg-white/10 hover:text-white"
-            >
+          <div className="lp-header-cta">
+            <Link href="/espace-client/connexion" className="lp-link">
               Se connecter
             </Link>
-            <button
-              onClick={goToWhatsApp}
-              className="group flex items-center gap-2 rounded-full bg-[#dfa56a] px-5 py-2.5 text-sm font-bold text-[#111a2b] transition hover:-translate-y-0.5 hover:bg-[#efb97e]"
-            >
-              Demander une carte
-              <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-            </button>
+            <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper lp-btn--sm">
+              Demander une carte <ArrowRight />
+            </a>
           </div>
-
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-white md:hidden"
-            onClick={() => setMenuOpen(value => !value)}
+            className="lp-burger"
+            onClick={() => setMenuOpen(open => !open)}
             aria-label="Menu"
             aria-expanded={menuOpen}
           >
             {menuOpen ? <X /> : <Menu />}
           </button>
         </div>
-
         {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="border-t border-white/10 bg-[#111a2b] px-5 pb-5 md:hidden"
-          >
-            <nav className="grid gap-1 pt-3">
-              {[
-                ["#principe", "Le principe"],
-                ["#gammes", "Les cartes"],
-                ["#parcours", "Comment ça marche"],
-              ].map(([href, label]) => (
-                <a
-                  key={href}
-                  href={href}
-                  onClick={() => setMenuOpen(false)}
-                  className="rounded-xl px-3 py-3 text-sm text-white/75 hover:bg-white/5"
-                >
-                  {label}
-                </a>
-              ))}
-              <Link
-                href="/espace-client/connexion"
-                className="mt-2 rounded-xl border border-white/10 px-3 py-3 text-center text-sm font-semibold text-white"
-              >
-                Se connecter
-              </Link>
-              <button
-                onClick={goToWhatsApp}
-                className="rounded-xl bg-[#dfa56a] px-3 py-3 text-sm font-bold text-[#111a2b]"
-              >
-                Demander une carte
-              </button>
-            </nav>
-          </motion.div>
+          <div className="lp-mobile-menu">
+            {NAV.map(([href, label]) => (
+              <a key={href} href={href} onClick={closeMenu}>
+                {label}
+              </a>
+            ))}
+            <Link href="/espace-client/connexion" className="lp-mobile-login">
+              Se connecter
+            </Link>
+            <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper">
+              Demander une carte <ArrowRight />
+            </a>
+          </div>
         )}
       </header>
 
       <main id="top">
-        <section className="relative isolate min-h-[760px] overflow-hidden bg-[#111a2b] pt-[74px] text-white">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_25%,rgba(223,165,106,.18),transparent_28%),radial-gradient(circle_at_15%_80%,rgba(53,104,151,.16),transparent_32%)]" />
-          <motion.div
-            style={{ y: orbY }}
-            className="pointer-events-none absolute -right-32 top-28 h-[520px] w-[520px] rounded-full border border-[#dfa56a]/20"
-          >
-            <div className="absolute inset-12 rounded-full border border-white/10" />
-            <div className="absolute inset-28 rounded-full border border-[#dfa56a]/15" />
-          </motion.div>
-
-          <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-5 pb-24 pt-20 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:pb-28 lg:pt-28">
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-              >
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#e8b17a]">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#dfa56a]" />
-                  Cartes connectées · Édition 2026
-                </div>
-                <h1 className="max-w-3xl text-[clamp(3.2rem,7vw,6.4rem)] font-semibold leading-[.91] tracking-[-0.065em]">
+        {/* -------------------------------- hero ------------------------------- */}
+        <section className="lp-hero">
+          <span className="lp-hero-swoosh" aria-hidden="true" />
+          <span className="lp-hero-rings" aria-hidden="true" />
+          <div className="lp-container lp-hero-grid">
+            <div className="lp-hero-copy">
+              <Reveal>
+                <p className="lp-pill">
+                  <span className="lp-dot" /> CARTES CONNECTÉES – ÉDITION 2026
+                </p>
+                <h1 className="lp-h1">
                   Scannez.
                   <br />
-                  <span className="text-[#dfa56a]">Vous verrez.</span>
+                  <span className="lp-copper">Créez du lien.</span>
                 </h1>
-                <p className="mt-7 max-w-xl text-base leading-7 text-white/60 sm:text-lg">
-                  Une carte de visite qui ne finit pas dans un tiroir. Un geste
-                  suffit pour ouvrir votre identité, vos contacts, WhatsApp,
-                  votre adresse et tout ce qui compte pour votre activité.
+                <p className="lp-lead">
+                  Une carte de visite intelligente qui centralise vos contacts,
+                  vos réseaux, votre adresse, vos services et bien plus. Un
+                  simple geste suffit pour tout partager.
                 </p>
-
-                <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                  <button
-                    onClick={goToWhatsApp}
-                    className="group flex items-center justify-center gap-3 rounded-full bg-[#dfa56a] px-7 py-4 text-sm font-bold text-[#111a2b] shadow-[0_14px_40px_rgba(223,165,106,.2)] transition hover:-translate-y-1 hover:bg-[#efb97e]"
-                  >
-                    Demander une carte
-                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-                  </button>
-                  <Link
-                    href="/espace-client/connexion"
-                    className="flex items-center justify-center gap-3 rounded-full border border-white/15 bg-white/5 px-7 py-4 text-sm font-semibold text-white transition hover:-translate-y-1 hover:bg-white/10"
-                  >
-                    Se connecter
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                <div className="lp-actions">
+                  <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper lp-btn--lg">
+                    Demander une carte <ArrowRight />
+                  </a>
+                  <a href="#parcours" className="lp-btn lp-btn--ghost lp-btn--lg">
+                    <Play className="lp-play" /> Voir comment ça marche
+                  </a>
                 </div>
-
-                <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-white/45">
+                <ul className="lp-checks">
+                  {["NFC + QR code", "Aucune application", "Personnalisée pour vous"].map(
+                    item => (
+                      <li key={item}>
+                        <Check /> {item}
+                      </li>
+                    )
+                  )}
+                </ul>
+                <dl className="lp-stats">
                   {[
-                    "NFC + QR code",
-                    "Aucune application",
-                    "Fabriquée à Saly",
-                  ].map(item => (
-                    <span key={item} className="flex items-center gap-2">
-                      <Check className="h-3.5 w-3.5 text-[#dfa56a]" /> {item}
-                    </span>
+                    ["+10 000", "cartes en circulation"],
+                    ["98%", "de clients satisfaits"],
+                    ["0", "application à installer"],
+                  ].map(([value, label]) => (
+                    <div key={label}>
+                      <dt>{value}</dt>
+                      <dd>{label}</dd>
+                    </div>
                   ))}
-                </div>
-              </motion.div>
+                </dl>
+              </Reveal>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.92, rotate: 2 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 0.9, delay: 0.15, ease: "easeOut" }}
-              className="relative mx-auto w-full max-w-[510px]"
-            >
-              <div className="absolute -inset-8 rounded-[42px] bg-[#dfa56a]/10 blur-3xl" />
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-br from-[#24324a] via-[#18243a] to-[#0c1422] p-5 shadow-2xl shadow-black/40">
-                <div className="flex items-center justify-between text-[10px] uppercase tracking-[.2em] text-white/35">
-                  <span>Support Connecté</span>
+            <Reveal delay={0.12} className="lp-hero-visual">
+              <div className="lp-device">
+                <div className="lp-device-top">
+                  <span>SUPPORT CONNECTÉ</span>
                   <span>NFC / QR</span>
                 </div>
-                <div className="absolute inset-x-8 top-24 h-44 rounded-[28px] bg-gradient-to-br from-[#dca66b] via-[#b97842] to-[#6d4228] opacity-90">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,.35),transparent_25%)]" />
-                  <div className="absolute bottom-5 left-5 text-[#111a2b]">
-                    <div className="text-[9px] font-bold uppercase tracking-[.2em] opacity-60">
-                      Carte Pro
-                    </div>
-                    <div className="mt-1 text-xl font-semibold tracking-[-.04em]">
-                      Votre identité.
-                    </div>
-                  </div>
-                  <div className="absolute right-5 top-5 h-11 w-11 rounded-xl border border-[#111a2b]/20 bg-white/15 backdrop-blur">
-                    <div className="m-2 h-7 w-7 rounded-lg border-2 border-[#111a2b]/40" />
-                  </div>
-                </div>
-                <div className="absolute inset-x-8 bottom-8 rounded-[24px] border border-white/10 bg-white/[.06] p-5 backdrop-blur-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-                      <Smartphone className="h-5 w-5 text-[#dfa56a]" />
-                    </div>
+                <CopperCard className="lp-device-card" />
+                <div className="lp-fiche-panel">
+                  <div className="lp-fiche-head">
+                    <span className="lp-fiche-icon">
+                      <Smartphone />
+                    </span>
                     <div>
-                      <div className="text-sm font-semibold">
-                        Un geste. Une fiche.
-                      </div>
-                      <div className="mt-1 text-xs text-white/40">
-                        Votre client n'installe rien.
-                      </div>
+                      <strong>Votre client accède à votre fiche.</strong>
+                      <small>Vos informations, toujours à jour.</small>
                     </div>
                   </div>
-                  <div className="mt-5 grid grid-cols-3 gap-2">
-                    {["WhatsApp", "Appeler", "Maps"].map(label => (
-                      <div
-                        key={label}
-                        className="rounded-xl bg-white/[.06] px-2 py-2.5 text-center text-[10px] text-white/55"
-                      >
-                        {label}
-                      </div>
-                    ))}
+                  <div className="lp-fiche-buttons">
+                    <span className="is-whatsapp">
+                      <MessageCircle /> WhatsApp
+                    </span>
+                    <span>
+                      <Phone /> Appeler
+                    </span>
+                    <span>
+                      <MapPin /> Maps
+                    </span>
                   </div>
                 </div>
               </div>
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute -bottom-5 -left-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-[#1b2940]/90 px-4 py-3 shadow-2xl backdrop-blur-xl sm:-left-8"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#dfa56a] text-[#111a2b]">
-                  <QrCode className="h-4 w-4" />
-                </span>
+              <div className="lp-chip">
                 <span>
-                  <span className="block text-xs font-semibold text-white">
-                    Sans contact
-                  </span>
-                  <span className="block text-[10px] text-white/40">
-                    ou QR code
-                  </span>
+                  <QrCode />
                 </span>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
-        <section
-          id="principe"
-          className="scroll-mt-24 bg-[#f5f3ef] py-24 lg:py-32"
-        >
-          <div className="mx-auto max-w-7xl px-5 lg:px-8">
-            <div className="grid gap-14 lg:grid-cols-[.8fr_1.2fr] lg:items-end">
-              <motion.div
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-              >
-                <p className="text-[11px] font-bold uppercase tracking-[.25em] text-[#b67843]">
-                  Le principe
-                </p>
-                <h2 className="mt-4 max-w-xl text-4xl font-semibold leading-[.98] tracking-[-.05em] sm:text-6xl">
-                  Une carte se donne une fois.
-                  <br />
-                  <span className="text-[#b67843]">Celle-ci reste.</span>
-                </h2>
-              </motion.div>
-              <motion.p
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ delay: 0.1 }}
-                className="max-w-2xl text-lg leading-8 text-[#667083]"
-              >
-                Votre client approche son téléphone. En quelques secondes, il
-                retrouve votre numéro, votre WhatsApp, votre adresse et votre
-                fiche. Vous changez de numéro demain ? Vous nous écrivez : la
-                carte continue de fonctionner.
-              </motion.p>
-            </div>
-
-            <div className="mt-16 grid gap-px overflow-hidden rounded-3xl border border-[#dedbd5] bg-[#dedbd5] sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                [
-                  Smartphone,
-                  "Un geste",
-                  "Le téléphone ouvre directement votre fiche.",
-                ],
-                [
-                  MousePointer2,
-                  "Aucune app",
-                  "Votre client n'installe rien pour vous contacter.",
-                ],
-                [
-                  Globe2,
-                  "Votre présence",
-                  "WhatsApp, site, réseaux, Maps et avis au même endroit.",
-                ],
-                [
-                  Zap,
-                  "Toujours à jour",
-                  "Une modification en ligne vaut mieux qu'une réimpression.",
-                ],
-              ].map(([Icon, title, text], index) => (
-                <motion.div
-                  key={String(title)}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.08 }}
-                  className="group bg-[#f5f3ef] p-7 transition hover:bg-white"
-                >
-                  <div className="mb-12 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e8e1d8] text-[#a76d3b] transition group-hover:scale-110 group-hover:bg-[#dfa56a] group-hover:text-[#111a2b]">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-lg font-semibold tracking-[-.025em]">
-                    {String(title)}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-[#7c8492]">
-                    {String(text)}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="overflow-hidden bg-[#111a2b] py-24 text-white lg:py-32">
-          <div className="mx-auto grid max-w-7xl gap-14 px-5 lg:grid-cols-[.8fr_1.2fr] lg:px-8">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[.25em] text-[#dfa56a]">
-                Pourquoi maintenant
-              </p>
-              <h2 className="mt-4 text-4xl font-semibold leading-[1] tracking-[-.05em] sm:text-6xl">
-                Le téléphone est devenu
+                <div>
+                  <strong>Sans contact</strong>
+                  <small>ou QR code</small>
+                </div>
+              </div>
+              <p className="lp-note lp-note--one">
+                <svg viewBox="0 0 90 40" aria-hidden="true">
+                  <path d="M88 8C62 2 30 8 8 30" />
+                  <path d="M8 30l12-1M8 30l3-12" />
+                </svg>
+                Un geste.
                 <br />
-                <span className="text-[#dfa56a]">votre vitrine.</span>
-              </h2>
+                Toutes vos infos.
+              </p>
+              <p className="lp-note lp-note--two">
+                Plus simple.
+                <br />
+                Plus rapide.
+                <br />
+                Plus d’opportunités.
+                <span className="lp-note-underline" />
+              </p>
+              <p className="lp-hero-tag">
+                <span className="lp-red-line" /> DES RELATIONS
+                <br />
+                QUI DURENT.
+              </p>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ------------------------------ principe ----------------------------- */}
+        <section id="principe" className="lp-principle">
+          <div className="lp-principle-glow" aria-hidden="true" />
+          <div className="lp-container lp-principle-grid">
+            <div className="lp-scene" aria-hidden="true">
+              <span className="lp-scene-blob" />
+              <span className="lp-scene-ring" />
+              <BlackCard className="lp-scene-card" />
+              <div className="lp-scene-foot">
+                <span>SUPPORT CONNECTÉ</span>
+                <span className="lp-red-line" />
+                <span>DES RELATIONS QUI DURENT.</span>
+              </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                [
-                  "122%",
-                  "taux de pénétration mobile au Sénégal",
-                  "23,3 M de connexions actives fin 2025.",
-                ],
-                [
-                  "60,6%",
-                  "de la population connectée à internet",
-                  "11,5 M de personnes, presque toutes par mobile.",
-                ],
-                [
-                  "97%",
-                  "des consommateurs lisent les avis",
-                  "La réputation numérique compte avant le choix.",
-                ],
-                [
-                  "71%",
-                  "des lectures d'avis se font sur Google",
-                  "Votre fiche Google est un point de décision.",
-                ],
-              ].map(([number, title, note], index) => (
-                <motion.div
-                  key={number}
-                  initial={{ opacity: 0, y: 25 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.08 }}
-                  className="rounded-3xl border border-white/10 bg-white/[.045] p-7"
-                >
-                  <div className="text-5xl font-semibold tracking-[-.06em] text-[#dfa56a]">
-                    {number}
+            <div className="lp-principle-body">
+              <Reveal>
+                <div className="lp-principle-head">
+                  <div>
+                    <Eyebrow>LE PRINCIPE</Eyebrow>
+                    <h2 className="lp-h2 lp-h2--dark">
+                      Une carte se
+                      <br />
+                      donne une fois.
+                      <br />
+                      <span className="lp-red">Celle-ci reste.</span>
+                    </h2>
                   </div>
-                  <div className="mt-5 text-sm font-semibold text-white/90">
-                    {title}
-                  </div>
-                  <div className="mt-2 text-xs leading-5 text-white/40">
-                    {note}
-                  </div>
-                </motion.div>
+                  <p className="lp-principle-text">
+                    Votre client approche son téléphone. En quelques secondes,
+                    il retrouve votre numéro, votre WhatsApp, votre adresse et
+                    votre fiche. Vous changez de numéro demain ? Vous nous
+                    écrivez : la carte continue de fonctionner.
+                  </p>
+                </div>
+              </Reveal>
+              <div className="lp-principle-cards">
+                {PRINCIPLES.map(({ Icon, title, text }, index) => (
+                  <Reveal key={title} delay={index * 0.07}>
+                    <article className="lp-tile">
+                      <span className="lp-tile-icon">
+                        <Icon />
+                      </span>
+                      <h3>{title}</h3>
+                      <p>{text}</p>
+                      <span className="lp-tile-bar" />
+                    </article>
+                  </Reveal>
+                ))}
+              </div>
+              <ul className="lp-vertical" aria-hidden="true">
+                <li>NFC</li>
+                <li>QR CODE</li>
+                <li>SIMPLE</li>
+                <li>DURABLE</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------- pourquoi ---------------------------- */}
+        <section className="lp-why">
+          <span className="lp-why-rings" aria-hidden="true" />
+          <div className="lp-container lp-why-grid">
+            <Reveal>
+              <Eyebrow tone="copper">POURQUOI ÇA COMPTE</Eyebrow>
+              <h2 className="lp-h2 lp-h2--why">
+                Votre client est déjà sur son téléphone.{" "}
+                <span className="lp-copper">
+                  Donnez-lui un accès-direct à votre activité.
+                </span>
+              </h2>
+              <p className="lp-body">
+                Aujourd’hui, être joignable ne suffit plus. Votre numéro,
+                WhatsApp, adresse, réseaux et avis doivent être accessibles au
+                même endroit, en un geste.
+              </p>
+              <a href="#gammes" className="lp-scroll-cue">
+                <span>
+                  <ArrowDown />
+                </span>
+                C’est exactement ce que fait une carte Support Connecté.
+              </a>
+            </Reveal>
+            <div className="lp-why-cards">
+              {WHY.map(({ Icon, title, text }, index) => (
+                <Reveal key={title} delay={index * 0.07}>
+                  <article className="lp-glass-tile">
+                    <span className="lp-glass-icon">
+                      <Icon />
+                    </span>
+                    <h3>{title}</h3>
+                    <p>{text}</p>
+                  </article>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
 
-        <section
-          id="gammes"
-          className="scroll-mt-24 bg-[#f5f3ef] py-24 lg:py-32"
-        >
-          <div className="mx-auto max-w-7xl px-5 lg:px-8">
-            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[.25em] text-[#b67843]">
-                  La gamme
-                </p>
-                <h2 className="mt-4 text-4xl font-semibold tracking-[-.05em] sm:text-6xl">
+        {/* -------------------------------- gamme ------------------------------ */}
+        <section id="gammes" className="lp-range">
+          <span className="lp-range-swoosh" aria-hidden="true" />
+          <div className="lp-container">
+            <div className="lp-range-head">
+              <Reveal>
+                <Eyebrow>LA GAMME</Eyebrow>
+                <h2 className="lp-h2">
                   Quatre cartes.
                   <br />
-                  Une seule logique.
+                  <span className="lp-copper">Une seule logique.</span>
                 </h2>
-              </div>
-              <p className="max-w-md text-sm leading-6 text-[#7a8290]">
-                Chaque gamme contient tout ce que fait la précédente. Choisissez
-                simplement le niveau qui correspond à votre activité.
-              </p>
+                <p className="lp-body">
+                  Quel que soit votre métier, une carte Support Connecté
+                  s’adapte à vos besoins. Même simplicité, plus de possibilités.
+                </p>
+              </Reveal>
+              <ul className="lp-same">
+                {SAME.map(({ Icon, title, text }) => (
+                  <li key={title}>
+                    <span>
+                      <Icon />
+                    </span>
+                    <strong>{title}</strong>
+                    <small>{text}</small>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="mt-14 grid gap-5 lg:grid-cols-4">
-              {plans.map((plan, index) => (
-                <motion.article
-                  key={plan.name}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-70px" }}
-                  transition={{ delay: index * 0.08 }}
-                  className={`relative flex flex-col rounded-3xl border p-6 transition hover:-translate-y-2 hover:shadow-xl ${plan.featured ? "border-[#dfa56a] bg-[#111a2b] text-white shadow-[0_20px_60px_rgba(17,26,43,.16)]" : "border-[#dfddd8] bg-white"}`}
-                >
-                  {plan.featured && (
-                    <div className="absolute right-5 top-5 rounded-full bg-[#dfa56a] px-3 py-1 text-[9px] font-bold uppercase tracking-[.14em] text-[#111a2b]">
-                      Populaire
-                    </div>
-                  )}
-                  <div
-                    className={`text-[11px] font-bold uppercase tracking-[.22em] ${plan.featured ? "text-[#dfa56a]" : "text-[#b67843]"}`}
-                  >
-                    {plan.name}
-                  </div>
-                  <div className="mt-8 flex items-end gap-2">
-                    <span className="text-4xl font-semibold tracking-[-.05em]">
-                      {plan.price}
-                    </span>
-                    <span
-                      className={`pb-1 text-xs ${plan.featured ? "text-white/40" : "text-[#9299a5]"}`}
-                    >
-                      F CFA {plan.suffix ? `· ${plan.suffix}` : ""}
-                    </span>
-                  </div>
-                  <p
-                    className={`mt-4 min-h-12 text-sm leading-5 ${plan.featured ? "text-white/55" : "text-[#687181]"}`}
-                  >
-                    {plan.description}
-                  </p>
-                  <p
-                    className={`mt-4 text-[10px] font-semibold uppercase tracking-[.08em] ${plan.featured ? "text-white/35" : "text-[#a1a7b0]"}`}
-                  >
-                    {plan.audience}
-                  </p>
-                  <div
-                    className={`my-6 h-px ${plan.featured ? "bg-white/10" : "bg-[#ebe9e5]"}`}
-                  />
-                  <ul className="space-y-3">
-                    {plan.features.map(feature => (
-                      <li
-                        key={feature}
-                        className={`flex items-start gap-2 text-xs ${plan.featured ? "text-white/65" : "text-[#626c7b]"}`}
+            <div className="lp-plans">
+              {PLANS.map(
+                ({ name, Icon, price, pitch, features, cta, popular, enterprise }, index) => (
+                  <Reveal key={name} delay={index * 0.07}>
+                    <article className={`lp-plan${popular ? " is-popular" : ""}`}>
+                      {popular && <span className="lp-plan-badge">POPULAIRE</span>}
+                      <header>
+                        <span className="lp-plan-name">{name.toUpperCase()}</span>
+                        {Icon && (
+                          <span className="lp-plan-icon">
+                            <Icon />
+                          </span>
+                        )}
+                      </header>
+                      <p className="lp-plan-price">
+                        {price ? (
+                          <>
+                            <strong>{price}</strong> <small>FCFA</small>
+                          </>
+                        ) : (
+                          <strong>Sur devis</strong>
+                        )}
+                      </p>
+                      <p className="lp-plan-pitch">{pitch}</p>
+                      <ul>
+                        {features.map(feature => (
+                          <li key={feature}>
+                            <Check /> {feature}
+                          </li>
+                        ))}
+                      </ul>
+                      <a
+                        href={enterprise ? WHATSAPP_ENTERPRISE_URL : WHATSAPP_URL}
+                        className={`lp-btn ${popular ? "lp-btn--red" : "lp-btn--dim"} lp-btn--block`}
                       >
-                        <Check
-                          className={`mt-0.5 h-3.5 w-3.5 flex-shrink-0 ${plan.featured ? "text-[#dfa56a]" : "text-[#b67843]"}`}
-                        />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={goToWhatsApp}
-                    className={`mt-auto pt-8 text-left text-xs font-bold ${plan.featured ? "text-[#dfa56a]" : "text-[#142033]"}`}
-                  >
-                    Demander cette carte{" "}
-                    <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
-                  </button>
-                </motion.article>
+                        {cta} <ArrowRight />
+                      </a>
+                    </article>
+                  </Reveal>
+                )
+              )}
+            </div>
+            <aside className="lp-range-aside">
+              <p>
+                Plus qu’une carte de visite, un levier pour{" "}
+                <span className="lp-red">votre croissance.</span>
+              </p>
+              <BlackCard className="lp-range-card" />
+            </aside>
+          </div>
+        </section>
+
+        {/* ------------------------------- parcours ---------------------------- */}
+        <section id="parcours" className="lp-journey">
+          <span className="lp-journey-rings" aria-hidden="true" />
+          <div className="lp-container">
+            <div className="lp-journey-head">
+              <Reveal>
+                <Eyebrow>DE LA COMMANDE À LA CONNEXION</Eyebrow>
+                <h2 className="lp-h2">
+                  Vous commandez.
+                  <br />
+                  Nous nous occupons <span className="lp-red">du reste.</span>
+                </h2>
+              </Reveal>
+              <p className="lp-journey-text">
+                Choisissez votre carte, transmettez vos informations et
+                validez. Support Connecté fabrique, encode, teste et remet
+                votre carte prête à l’emploi.
+                <small>SIMPLE. RAPIDE. FIABLE.</small>
+              </p>
+            </div>
+
+            <ol className="lp-steps">
+              {STEPS.map(({ Icon, title, text }, index) => (
+                <li key={title}>
+                  <Reveal delay={index * 0.07}>
+                    <article className="lp-step">
+                      <span className="lp-step-no">{`0${index + 1}`}</span>
+                      <span className="lp-step-icon">
+                        <Icon />
+                      </span>
+                      <span className="lp-step-bar" />
+                      <h3>{title}</h3>
+                      <p>{text}</p>
+                    </article>
+                  </Reveal>
+                </li>
               ))}
+            </ol>
+
+            <div className="lp-guarantee">
+              <div className="lp-guarantee-main">
+                <span className="lp-guarantee-icon">
+                  <ShieldCheck />
+                </span>
+                <div>
+                  <strong>Fabriquée, imprimée, encodée et testée à Saly.</strong>
+                  <small>UN CONTRÔLE AVANT REMISE.</small>
+                </div>
+              </div>
+              <ul className="lp-guarantee-list">
+                <li>
+                  <Package /> Qualité garantie
+                </li>
+                <li>
+                  <Clock /> Délais maîtrisés
+                </li>
+                <li>
+                  <Headset /> Un vrai support
+                </li>
+              </ul>
+              <a href={WHATSAPP_URL} className="lp-btn lp-btn--red">
+                Demander ma carte <ArrowRight />
+              </a>
             </div>
           </div>
         </section>
 
-        <section id="parcours" className="scroll-mt-24 bg-white py-24 lg:py-32">
-          <div className="mx-auto max-w-7xl px-5 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-[11px] font-bold uppercase tracking-[.25em] text-[#b67843]">
-                De la commande à la pose
-              </p>
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-.05em] sm:text-6xl">
-                Simple côté client.
-                <br />
-                Précis côté atelier.
-              </h2>
-            </div>
-            <div className="mt-16 grid gap-0 border-y border-[#e8e7e4] lg:grid-cols-4">
-              {steps.map(([number, title, description], index) => (
-                <motion.div
-                  key={number}
-                  initial={{ opacity: 0, x: index === 0 ? -10 : 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.08 }}
-                  className="relative border-b border-[#e8e7e4] px-0 py-8 lg:border-b-0 lg:border-r lg:px-7 lg:py-10 first:lg:pl-0 last:lg:border-r-0"
-                >
-                  <span className="text-xs font-bold tracking-[.2em] text-[#b67843]">
-                    {number}
-                  </span>
-                  <h3 className="mt-12 text-xl font-semibold tracking-[-.03em]">
-                    {title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-6 text-[#7c8490]">
-                    {description}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-            <div className="mt-10 flex flex-col justify-between gap-6 rounded-3xl bg-[#f5f3ef] p-7 sm:flex-row sm:items-center sm:p-9">
-              <div>
-                <p className="text-sm font-semibold">
-                  Fabriqué, imprimé et encodé à Saly.
-                </p>
-                <p className="mt-1 text-xs text-[#7b8390]">
-                  Chaque carte est testée sur deux téléphones avant remise.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#566172]">
-                <MapPin className="h-4 w-4 text-[#b67843]" /> Saly Niakh
-                Niakhal, Sénégal
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="relative overflow-hidden bg-[#dca66b] py-20 lg:py-28">
-          <div className="absolute -right-20 -top-40 h-96 w-96 rounded-full border border-[#111a2b]/10" />
-          <div className="absolute -right-4 -top-24 h-64 w-64 rounded-full border border-[#111a2b]/10" />
-          <div className="relative mx-auto flex max-w-7xl flex-col items-start justify-between gap-9 px-5 lg:flex-row lg:items-end lg:px-8">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[.25em] text-[#111a2b]/55">
-                Votre prochaine rencontre
-              </p>
-              <h2 className="mt-4 max-w-3xl text-4xl font-semibold leading-[.95] tracking-[-.05em] text-[#111a2b] sm:text-6xl">
+        {/* ---------------------------------- CTA ------------------------------ */}
+        <section className="lp-final">
+          <div className="lp-container lp-final-grid">
+            <Reveal>
+              <Eyebrow tone="copper">VOTRE PROCHAINE RENCONTRE</Eyebrow>
+              <h2 className="lp-h2">
                 Ne donnez plus seulement un numéro.
                 <br />
-                Donnez un point de contact.
+                <span className="lp-copper">Donnez un point de contact.</span>
               </h2>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row lg:flex-shrink-0">
-              <button
-                onClick={goToWhatsApp}
-                className="flex items-center justify-center gap-3 rounded-full bg-[#111a2b] px-7 py-4 text-sm font-bold text-white transition hover:-translate-y-1 hover:bg-[#1c2940]"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Demander une carte
-              </button>
-              <Link
-                href="/espace-client/connexion"
-                className="flex items-center justify-center gap-3 rounded-full border border-[#111a2b]/20 px-7 py-4 text-sm font-bold text-[#111a2b] transition hover:-translate-y-1 hover:bg-white/20"
-              >
-                Se connecter
-              </Link>
-            </div>
+              <div className="lp-actions">
+                <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper lp-btn--lg">
+                  <MessageCircle /> Demander une carte
+                </a>
+                <Link href="/espace-client/connexion" className="lp-btn lp-btn--ghost lp-btn--lg">
+                  Se connecter
+                </Link>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1} className="lp-final-visual">
+              <WhiteCard className="lp-final-card" />
+            </Reveal>
           </div>
         </section>
       </main>
 
-      <footer className="bg-[#111a2b] text-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 py-12 lg:flex-row lg:items-end lg:justify-between lg:px-8">
+      {/* -------------------------------- footer ------------------------------- */}
+      <footer className="lp-footer">
+        <div className="lp-container lp-footer-inner">
           <div>
-            <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#dfa56a] text-[#111a2b]">
-                <Sparkles className="h-4 w-4" />
-              </span>
-              <span className="font-semibold tracking-[-.02em]">
-                Support Connecté
-              </span>
-            </div>
-            <p className="mt-4 max-w-sm text-xs leading-5 text-white/35">
+            <Brand />
+            <p>
               Cartes connectées conçues, imprimées et encodées dans notre
               atelier de Saly.
             </p>
           </div>
-          <div className="flex flex-wrap gap-x-7 gap-y-3 text-xs text-white/40">
-            <a href="#principe" className="hover:text-white">
-              Le principe
-            </a>
-            <a href="#gammes" className="hover:text-white">
-              Les cartes
-            </a>
-            <a href="#parcours" className="hover:text-white">
-              Le parcours
-            </a>
-            <Link href="/espace-client/connexion" className="hover:text-white">
-              Espace client
-            </Link>
-          </div>
-          <div className="text-xs text-white/30">
-            © 2026 Support Connecté · Saly, Sénégal
-          </div>
+          <nav aria-label="Pied de page">
+            <a href="#principe">Le principe</a>
+            <a href="#gammes">Les cartes</a>
+            <a href="#parcours">Le parcours</a>
+            <Link href="/espace-client/connexion">Espace client</Link>
+          </nav>
+          <small>© 2026 Support Connecté · Saly, Sénégal</small>
         </div>
       </footer>
     </div>
