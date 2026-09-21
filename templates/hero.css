@@ -71,9 +71,9 @@
   width: 116px; height: 116px; margin: 0; overflow: hidden; border-radius: 50%;
   border: 3px solid var(--fh-logo-line); background: var(--fh-logo-plate); box-shadow: var(--fh-ring-shadow);
 }
-.fiche-template .fh-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 22%; }
-.fiche-template .fh-avatar[data-fit="contain"] { padding: 15px; }
-.fiche-template .fh-avatar[data-fit="contain"] img { object-fit: contain; object-position: center; }
+.fiche-template .fh-avatar { padding: 0; }
+/* The logo always covers its whole container (no inner margin, no letterboxing). */
+.fiche-template .fh-avatar img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: center; }
 .fiche-template .fh-initials { color: var(--fh-initials-text, #1f2937); font-size: 34px; font-weight: 800; letter-spacing: 0.04em; }
 .fiche-template .fh-name,
 .fiche-template .fh-ornament,

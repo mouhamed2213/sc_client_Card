@@ -123,27 +123,13 @@ const ACTION_CONFIG: Record<
 };
 
 /**
- * Round identity picture shown above the name (same on every plan). A photo
- * fills the circle so the person is recognisable at a glance; a wide logo is
- * kept whole (contained) instead of being cropped.
+ * Round identity picture shown beside the name (same on every plan). The image
+ * always covers its whole container, whether it is a photo or a logo.
  */
 function IdentityAvatar({ src, alt }: { src: string; alt: string }) {
-  const [fit, setFit] = useState<"cover" | "contain">("cover");
-  const measure = (img: HTMLImageElement | null) => {
-    if (!img || !img.naturalWidth || !img.naturalHeight) return;
-    const next = img.naturalWidth / img.naturalHeight > 1.45 ? "contain" : "cover";
-    setFit(current => (current === next ? current : next));
-  };
   return (
-    <div className="fh-avatar" data-fit={fit}>
-      <img
-        ref={img => {
-          if (img?.complete) measure(img);
-        }}
-        src={src}
-        alt={alt}
-        onLoad={event => measure(event.currentTarget)}
-      />
+    <div className="fh-avatar">
+      <img src={src} alt={alt} />
     </div>
   );
 }
