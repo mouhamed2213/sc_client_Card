@@ -41,6 +41,8 @@ import {
   getOverview,
   listContactRequests,
   listFiches,
+  listFichesPaginated,
+  listRecentFiches,
   listFichesByOwner,
   listMembershipCards,
   listScansForFiche,
@@ -51,10 +53,22 @@ import { SCAN_SOURCES, handleScan } from "./scans";
 import { validatePlanPayload } from "./planValidation";
 import { parseVideoUrl } from "@shared/videoUrls";
 import { storagePut } from "./storage";
+import {
+  getFicheBusinessStatus,
+  getFicheOwnerBlockedMessage,
+  isFicheOwnerEditable,
+  isFichePubliclyAccessible,
+} from "./ficheLifecycle";
 
-function parseFiche<T extends { dataJson: string }>(fiche: T) {
+function parseFiche<T extends { dataJson: string; statut: string; dateEcheance: Date }>(
+  fiche: T
+) {
   const { dataJson, ...rest } = fiche;
-  return { ...rest, data: JSON.parse(dataJson || "{}") };
+  return {
+    ...rest,
+    data: JSON.parse(dataJson || "{}"),
+    statutMetier: getFicheBusinessStatus(fiche),
+  };
 }
 
 export const appRouter = router({
@@ -91,6 +105,49 @@ export const appRouter = router({
         plan: getPlanFeatures(row.formule),
       }));
     }),
+    recent: adminProcedure.query(async () => {
+      const rows = await listRecentFiches(10);
+      return rows.map((row: Fiche) => ({
+        ...parseFiche(row),
+        plan: getPlanFeatures(row.formule),
+      }));
+    }),
+    listPaginated: adminProcedure
+      .input(
+        z.object({
+          page: z.number().int().positive().default(1),
+          pageSize: z.number().int().min(5).max(50).default(10),
+          search: z.string().trim().max(160).optional().default(""),
+          statut: z
+            .enum([
+              "active",
+              "suspendue",
+              "supprimee",
+              "brouillon",
+              "a_renouveler",
+              "expiree",
+            ])
+            .optional(),
+        })
+      )
+      .query(async ({ input }) => {
+        const { statut, ...pagination } = input;
+        const result = await listFichesPaginated({
+          ...pagination,
+          ...(statut === "a_renouveler"
+            ? { aRenouveler: true }
+            : statut === "expiree"
+              ? { expiree: true }
+              : { statut }),
+        });
+        return {
+          ...result,
+          rows: result.rows.map((row: Fiche) => ({
+            ...parseFiche(row),
+            plan: getPlanFeatures(row.formule),
+          })),
+        };
+      }),
     overview: adminProcedure.query(async () => getOverview()),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
@@ -100,6 +157,11 @@ export const appRouter = router({
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Fiche introuvable",
+          });
+        if (!isFichePubliclyAccessible(fiche))
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cette fiche est temporairement indisponible.",
           });
         return { ...parseFiche(fiche), plan: getPlanFeatures(fiche.formule) };
       }),
@@ -184,6 +246,11 @@ export const appRouter = router({
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Fiche introuvable",
+          });
+        if (!isFichePubliclyAccessible(fiche))
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cette fiche est temporairement indisponible.",
           });
         if (!getPlanFeatures(fiche.formule).hasForm)
           throw new TRPCError({
@@ -540,9 +607,10 @@ export const appRouter = router({
       }),
   }),
   clientSpaceRouter: router({
-    myFiches: clientProcedure.query(async ({ ctx }) =>
-      (await listFichesByOwner(ctx.user.id)).map(toClientFiche)
-    ),
+    myFiches: clientProcedure.query(async ({ ctx }) => {
+      const fiches = await listFichesByOwner(ctx.user.id);
+      return fiches.map(fiche => parseFiche(toClientFiche(fiche)));
+    }),
     dashboard: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {
@@ -556,12 +624,19 @@ export const appRouter = router({
         const plan = dashboard.fiche
           ? getPlanFeatures(dashboard.fiche.formule)
           : null;
+        const businessStatus = dashboard.fiche
+          ? getFicheBusinessStatus(dashboard.fiche)
+          : null;
+        const requestsAvailable =
+          plan?.hasForm === true &&
+          businessStatus !== "suspendue" &&
+          businessStatus !== "expiree";
         return {
           ...dashboard,
           // Statistics are a Signature feature: never sent to other plans.
           scans: plan?.hasPanel ? dashboard.scans : [],
-          recentRequests: plan?.hasForm ? dashboard.recentRequests : [],
-          requestCount: plan?.hasForm ? dashboard.requestCount : 0,
+          recentRequests: requestsAvailable ? dashboard.recentRequests : [],
+          requestCount: requestsAvailable ? dashboard.requestCount : 0,
           fiche: dashboard.fiche
             ? {
                 ...parseFiche(toClientFiche(dashboard.fiche)),
@@ -621,6 +696,14 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "Les demandes reçues sont disponibles uniquement avec la formule Signature.",
           });
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
         return listContactRequests(input.ficheId);
       }),
     updateSignature: clientProcedure
@@ -647,6 +730,15 @@ export const appRouter = router({
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
 
         const plan = fiche.formule as PlanName;
         const capabilities = getClientFicheCapabilities(plan);
@@ -786,6 +878,15 @@ export const appRouter = router({
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
 
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
+
         const plan = fiche.formule as PlanName;
         const capabilities = getClientFicheCapabilities(plan);
         const capability = capabilities.gallery;
@@ -867,6 +968,15 @@ export const appRouter = router({
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
 
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
+
         const plan = fiche.formule as PlanName;
         const capabilities = getClientFicheCapabilities(plan);
         if (!capabilities.gallery.editable) {
@@ -942,6 +1052,14 @@ export const appRouter = router({
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
           throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche ne peut pas être modifiée.",
+          });
+        }
         const { ficheId, ...fields } = input;
         await updateFiche(ficheId, fields);
         return { ok: true } as const;

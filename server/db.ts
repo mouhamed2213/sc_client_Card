@@ -204,6 +204,67 @@ export async function listFiches() {
   await ensureDemoFiches();
   return prisma.fiche.findMany({ orderBy: { updatedAt: "desc" } });
 }
+export async function listRecentFiches(limit = 10) {
+  await ensureDemoFiches();
+  return prisma.fiche.findMany({
+    orderBy: { dateCreation: "desc" },
+    take: limit,
+  });
+}
+
+export async function listFichesPaginated(input: {
+  page: number;
+  pageSize: number;
+  search?: string;
+  statut?: "active" | "suspendue" | "supprimee" | "brouillon";
+  aRenouveler?: boolean;
+  expiree?: boolean;
+}) {
+  await ensureDemoFiches();
+  const search = input.search?.trim();
+  const now = new Date();
+  const startOfToday = new Date(now);
+  startOfToday.setUTCHours(0, 0, 0, 0);
+  const renewalLimit = new Date(startOfToday);
+  renewalLimit.setUTCDate(renewalLimit.getUTCDate() + 30);
+  renewalLimit.setUTCHours(23, 59, 59, 999);
+  const where = {
+    ...(input.statut ? { statut: input.statut } : {}),
+    ...(input.aRenouveler
+      ? {
+          statut: "active" as const,
+          dateEcheance: { gte: startOfToday, lte: renewalLimit },
+        }
+      : {}),
+    ...(input.expiree
+      ? {
+          statut: "active" as const,
+          dateEcheance: { lt: startOfToday },
+        }
+      : {}),
+    ...(search
+      ? {
+          OR: [
+            { prenom: { contains: search, mode: "insensitive" as const } },
+            { nom: { contains: search, mode: "insensitive" as const } },
+            { entreprise: { contains: search, mode: "insensitive" as const } },
+            { slug: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+  const [total, rows] = await prisma.$transaction([
+    prisma.fiche.count({ where }),
+    prisma.fiche.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      skip: (input.page - 1) * input.pageSize,
+      take: input.pageSize,
+    }),
+  ]);
+  return { rows, total };
+}
+
 export async function getFicheBySlug(slug: string) {
   await ensureDemoFiches();
   return prisma.fiche.findUnique({ where: { slug } });
@@ -346,14 +407,24 @@ export async function listContactRequests(ficheId: number) {
 }
 export async function getOverview() {
   await ensureDemoFiches();
+  const startOfToday = new Date();
+  startOfToday.setUTCHours(0, 0, 0, 0);
+  const renewalLimit = new Date(startOfToday);
+  renewalLimit.setUTCDate(renewalLimit.getUTCDate() + 30);
+  renewalLimit.setUTCHours(23, 59, 59, 999);
   const [total, active, scans, expiring] = await Promise.all([
     prisma.fiche.count(),
-    prisma.fiche.count({ where: { statut: "active" } }),
+    prisma.fiche.count({
+      where: {
+        statut: "active",
+        dateEcheance: { gte: startOfToday },
+      },
+    }),
     prisma.fiche.aggregate({ _sum: { scansTotal: true } }),
     prisma.fiche.count({
       where: {
-        dateEcheance: { lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
-        statut: { not: "supprimee" },
+        statut: "active",
+        dateEcheance: { gte: startOfToday, lte: renewalLimit },
       },
     }),
   ]);

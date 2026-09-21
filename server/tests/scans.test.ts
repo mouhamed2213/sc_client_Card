@@ -186,6 +186,16 @@ describe("passages — recorded against a real database", () => {
       await prisma.fiche.update({ where: { id: fiche.id }, data: { statut } });
       expect(await scan()).toMatchObject({ counted: false, reason: "not_active" });
     }
+    // An "active" fiche whose end date has passed is expired: not counted either.
+    await prisma.fiche.update({
+      where: { id: fiche.id },
+      data: { statut: "active", dateEcheance: new Date(Date.now() - 3 * 86_400_000) },
+    });
+    expect(await scan()).toMatchObject({ counted: false, reason: "not_active" });
+    await prisma.fiche.update({
+      where: { id: fiche.id },
+      data: { dateEcheance: new Date(Date.now() + 30 * 86_400_000) },
+    });
     expect(await handleScan({ fiche: null, user: null, req: req(), input: { slug: "x" } })).toMatchObject({
       reason: "not_active",
     });

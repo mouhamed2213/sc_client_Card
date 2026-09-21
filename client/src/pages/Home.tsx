@@ -1,26 +1,22 @@
-import { Button } from "@/components/ui/button";
-import { trpc } from "@/lib/trpc";
+import StudioSidebar from "@/components/StudioSidebar";
 import AdminClientAccountCreationModal from "@/components/AdminClientAccountCreationModal";
 import AdminStandaloneFicheCreationModal from "@/components/AdminStandaloneFicheCreationModal";
+import { Button } from "@/components/ui/button";
+import { trpc } from "@/lib/trpc";
 import {
   ArrowUpRight,
   Bell,
-  Check,
   ChevronDown,
-  ClipboardCheck,
   Copy,
   Eye,
-  LayoutGrid,
   Link2,
   Menu,
-  MoreHorizontal,
   Pencil,
   QrCode as QrCodeIcon,
   Search,
   SlidersHorizontal,
-  Sparkles,
-  Users,
   UserPlus,
+  Users,
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -36,12 +32,16 @@ const formulaLabels = {
 } as const;
 const statusLabels = {
   active: "Active",
+  a_renouveler: "À renouveler",
+  expiree: "Expirée",
   suspendue: "Suspendue",
   supprimee: "Supprimée",
   brouillon: "Brouillon",
 } as const;
 const statusStyles = {
   active: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  a_renouveler: "bg-orange-50 text-orange-700 border-orange-100",
+  expiree: "bg-red-50 text-red-700 border-red-100",
   suspendue: "bg-amber-50 text-amber-700 border-amber-100",
   supprimee: "bg-red-50 text-red-700 border-red-100",
   brouillon: "bg-slate-100 text-slate-600 border-slate-200",
@@ -51,7 +51,8 @@ type Fiche = {
   id: number;
   slug: string;
   formule: keyof typeof formulaLabels;
-  statut: keyof typeof statusLabels;
+  statut: Exclude<keyof typeof statusLabels, "a_renouveler">;
+  statutMetier: keyof typeof statusLabels;
   nom: string;
   prenom: string;
   fonction: string;
@@ -93,12 +94,12 @@ function formatDate(date: Date | string) {
 }
 
 export default function Home() {
-  const fichesQuery = trpc.fiches.list.useQuery();
+  const fichesQuery = trpc.fiches.recent.useQuery();
   const overviewQuery = trpc.fiches.overview.useQuery();
   const utils = trpc.useUtils();
   const statusMutation = trpc.fiches.updateStatus.useMutation({
     onSuccess: () => {
-      utils.fiches.list.invalidate();
+      utils.fiches.recent.invalidate();
       utils.fiches.overview.invalidate();
       toast.success("Statut mis à jour");
     },
@@ -128,7 +129,7 @@ export default function Home() {
           `${fiche.prenom} ${fiche.nom} ${fiche.entreprise} ${fiche.slug}`.toLowerCase();
         return (
           haystack.includes(search.toLowerCase()) &&
-          (filter === "all" || fiche.statut === filter)
+          (filter === "all" || fiche.statutMetier === filter)
         );
       }),
     [fiches, filter, search]
@@ -136,63 +137,8 @@ export default function Home() {
 
   return (
     <div className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
-      <aside className="studio-sidebar hidden lg:flex">
-        <div className="flex items-center gap-3 px-2">
-          <div className="brand-mark">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] text-white/55">
-              Support
-            </p>
-            <p className="font-semibold tracking-tight text-white">Connecté</p>
-          </div>
-        </div>
-        <div className="mt-10 px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/35">
-          Espace studio
-        </div>
-        <nav className="mt-3 space-y-1">
-          <a className="sidebar-link sidebar-link-active" href="#fiches">
-            <LayoutGrid className="h-4 w-4" /> Fiches clients{" "}
-            <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px]">
-              {overview.total}
-            </span>
-          </a>
-          <a className="sidebar-link" href="#suivi">
-            <ClipboardCheck className="h-4 w-4" /> Contrôle qualité
-          </a>
-          <a className="sidebar-link" href="#liens">
-            <Link2 className="h-4 w-4" /> Liens & QR
-          </a>
-        </nav>
-        <div className="mt-auto space-y-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs text-white/55">Ce mois-ci</span>
-              <span className="text-xs text-[#e5a86b]">+18%</span>
-            </div>
-            <p className="text-2xl font-semibold text-white">
-              {overview.scans}
-            </p>
-            <p className="mt-1 text-xs text-white/45">passages comptés</p>
-            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
-              <div className="h-full w-[72%] rounded-full bg-[#e5a86b]" />
-            </div>
-          </div>
-          <div className="flex items-center gap-3 border-t border-white/10 pt-4">
-            <div className="avatar avatar-small">JD</div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-white">
-                Julien Tiget
-              </p>
-              <p className="truncate text-xs text-white/45">Administrateur</p>
-            </div>
-            <MoreHorizontal className="ml-auto h-4 w-4 text-white/45" />
-          </div>
-        </div>
-      </aside>
-
-      <main className="studio-main">
+      <StudioSidebar />
+     <main className="studio-main">
         <header className="flex items-center justify-between border-b border-[#e7e9ed] bg-white/80 px-5 py-4 backdrop-blur lg:px-10">
           <div className="flex items-center gap-3">
             <button
@@ -250,7 +196,7 @@ export default function Home() {
                   être partagées sur une carte NFC.
                 </p>
                 <a
-                  href="#fiches"
+                  href="studio/fiches"
                   className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-white transition-colors hover:text-[#e5a86b]"
                 >
                   Voir les fiches <ArrowUpRight className="h-4 w-4" />
@@ -290,10 +236,10 @@ export default function Home() {
             <div className="flex flex-col gap-5 border-b border-[#edf0f2] px-5 py-5 sm:flex-row sm:items-center sm:justify-between lg:px-7">
               <div>
                 <h2 className="font-semibold tracking-[-0.02em]">
-                  Toutes les fiches
+                  Les 10 dernières fiches
                 </h2>
                 <p className="mt-1 text-sm text-[#7d8798]">
-                  Un gabarit, plusieurs métiers, aucune variante de code.
+                  Les 10 fiches ou comptes ajoutés le plus récemment.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -322,7 +268,19 @@ export default function Home() {
                 label="Actives"
                 active={filter === "active"}
                 onClick={() => setFilter("active")}
-                count={fiches.filter(f => f.statut === "active").length}
+                count={fiches.filter(f => f.statutMetier === "active").length}
+              />
+              <FilterTab
+                label="À renouveler"
+                active={filter === "a_renouveler"}
+                onClick={() => setFilter("a_renouveler")}
+                count={fiches.filter(f => f.statutMetier === "a_renouveler").length}
+              />
+              <FilterTab
+                label="Expirées"
+                active={filter === "expiree"}
+                onClick={() => setFilter("expiree")}
+                count={fiches.filter(f => f.statutMetier === "expiree").length}
               />
               <FilterTab
                 label="À revoir"
@@ -405,59 +363,29 @@ export default function Home() {
           </section>
 
           <section
-            id="suivi"
-            className="mt-7 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]"
+            className="mt-7 rounded-2xl border border-[#e6e8ec] bg-[#fffaf4] p-6"
           >
-            <div className="rounded-2xl border border-[#e6e8ec] bg-white p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="eyebrow">Contrôle qualité</p>
-                  <h2 className="mt-2 text-lg font-semibold tracking-[-0.025em]">
-                    La recette avant mise en ligne
-                  </h2>
-                </div>
-                <div className="rounded-xl bg-[#eef5ff] p-3 text-[#2c6dcc]">
-                  <ClipboardCheck className="h-5 w-5" />
-                </div>
-              </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                <QualityItem label="12 points" note="à vérifier" />
-                <QualityItem label="< 150 ko" note="poids maximum" />
-                <QualityItem label="< 2 sec" note="sur réseau 3G" />
-              </div>
-              <div className="mt-6 flex items-center justify-between border-t border-[#edf0f2] pt-5">
-                <p className="max-w-sm text-sm leading-5 text-[#7d8798]">
-                  Une fiche n'est livrable que si le slug, les trois boutons et
-                  les mentions sont validés.
-                </p>
-                <button className="text-sm font-semibold text-[#2c6dcc] hover:underline">
-                  Ouvrir la checklist{" "}
-                  <ArrowUpRight className="ml-1 inline h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-            <div className="rounded-2xl border border-[#e6e8ec] bg-[#fffaf4] p-6">
-              <p className="eyebrow text-[#b27945]">Raccourci utile</p>
-              <h2 className="mt-2 text-lg font-semibold tracking-[-0.025em]">
-                Message de collecte
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-[#7d6552]">
-                Les huit éléments à demander au client, prêts à copier-coller
-                sur WhatsApp.
-              </p>
-              <button
-                onClick={() => {
-                  navigator.clipboard?.writeText(
-                    "Bonjour, merci pour votre confiance. Pour préparer votre fiche, j'ai besoin de votre nom exact, fonction, établissement, photo ou logo, numéros, adresse, liens et horaires."
-                  );
-                  toast.success("Message copié");
-                }}
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-3 text-sm font-semibold text-white hover:bg-[#27334a]"
-              >
-                <Copy className="h-4 w-4" /> Copier le message
-              </button>
-            </div>
+            <p className="eyebrow text-[#b27945]">Raccourci utile</p>
+            <h2 className="mt-2 text-lg font-semibold tracking-[-0.025em]">
+              Message de collecte
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-[#7d6552]">
+              Les huit éléments à demander au client, prêts à copier-coller
+              sur WhatsApp.
+            </p>
+            <button
+              onClick={() => {
+                navigator.clipboard?.writeText(
+                  "Bonjour, merci pour votre confiance. Pour préparer votre fiche, j'ai besoin de votre nom exact, fonction, établissement, photo ou logo, numéros, adresse, liens et horaires."
+                );
+                toast.success("Message copié");
+              }}
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#172033] px-4 py-3 text-sm font-semibold text-white hover:bg-[#27334a]"
+            >
+              <Copy className="h-4 w-4" /> Copier le message
+            </button>
           </section>
+
         </div>
       </main>
 
@@ -527,17 +455,6 @@ function FilterTab({
     </button>
   );
 }
-function QualityItem({ label, note }: { label: string; note: string }) {
-  return (
-    <div className="rounded-xl bg-[#f7f8fa] px-4 py-3">
-      <div className="flex items-center gap-2 text-sm font-semibold">
-        <Check className="h-4 w-4 text-emerald-500" />
-        {label}
-      </div>
-      <p className="mt-1 pl-6 text-xs text-[#8b94a3]">{note}</p>
-    </div>
-  );
-}
 function FicheIdentity({ fiche }: { fiche: Fiche }) {
   return (
     <div className="flex items-center gap-3">
@@ -578,10 +495,10 @@ function FicheRow({
       </td>
       <td className="px-4 py-4">
         <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[fiche.statut]}`}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[fiche.statutMetier]}`}
         >
           <span className="h-1.5 w-1.5 rounded-full bg-current" />
-          {statusLabels[fiche.statut]}
+          {statusLabels[fiche.statutMetier]}
         </span>
       </td>
       <td className="px-4 py-4 text-sm font-medium text-[#42506a]">
@@ -639,9 +556,9 @@ function FicheCard({
       <div className="flex items-start justify-between">
         <FicheIdentity fiche={fiche} />
         <span
-          className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statut]}`}
+          className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statutMetier]}`}
         >
-          {statusLabels[fiche.statut]}
+          {statusLabels[fiche.statutMetier]}
         </span>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-3 text-xs">

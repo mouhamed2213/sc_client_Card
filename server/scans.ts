@@ -8,6 +8,7 @@ import type { CreateExpressContextOptions } from "@trpc/server/adapters/express"
 import type { Fiche, User } from "../generated/prisma/client";
 import { recordScanEvent } from "./db";
 import { ENV } from "./_core/env";
+import { isFichePubliclyAccessible } from "./ficheLifecycle";
 
 export const SCAN_SOURCES = ["qr", "nfc"] as const;
 export type ScanSource = (typeof SCAN_SOURCES)[number];
@@ -113,7 +114,8 @@ export async function handleScan(args: {
     reason,
   });
 
-  if (!fiche || fiche.statut !== "active") return skip("not_active");
+  // Suspended, deleted, draft and expired fiches are not publicly visible.
+  if (!fiche || !isFichePubliclyAccessible(fiche)) return skip("not_active");
   // Staff and the fiche's own owner looking at their page are not passages.
   if (user?.role === "admin") return skip("staff");
   if (user && fiche.ownerId === user.id) return skip("owner");
