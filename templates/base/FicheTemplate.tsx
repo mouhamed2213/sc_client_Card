@@ -3,6 +3,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
+  ChevronDown,
   Clock3,
   Download,
   ExternalLink,
@@ -24,15 +25,15 @@ import type { FormEvent, ReactNode, TouchEvent } from "react";
 import { useState } from "react";
 import { parseVideoUrl } from "../../shared/videoUrls";
 import { getTemplateConfig } from "../config";
+import "../hero.css";
 import type { FicheTemplateModel, TemplateGalleryItem } from "../model";
+import "../sections.css";
 import "../socials.css";
 import "../theme-tokens.css";
 import "../themes.css";
 import "../themes/essentiel.css";
 import "../themes/pro.css";
 import "../themes/signature.css";
-import "../hero.css";
-import "../sections.css";
 
 export type FicheTemplateActions = {
   phoneHref: string;
@@ -71,16 +72,30 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   );
 }
 
-const WEEK_DAYS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
+const WEEK_DAYS = [
+  "dimanche",
+  "lundi",
+  "mardi",
+  "mercredi",
+  "jeudi",
+  "vendredi",
+  "samedi",
+];
 
 function normalizeDay(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 }
 
 /** True when a row label ("Lundi", "Lundi — Samedi"…) covers today. */
 function coversToday(label: string, today = new Date().getDay()) {
   const text = normalizeDay(label);
-  const found = WEEK_DAYS.map((day, index) => ({ index, at: text.indexOf(day) }))
+  const found = WEEK_DAYS.map((day, index) => ({
+    index,
+    at: text.indexOf(day),
+  }))
     .filter(entry => entry.at >= 0)
     .sort((a, b) => a.at - b.at)
     .map(entry => entry.index);
@@ -88,7 +103,10 @@ function coversToday(label: string, today = new Date().getDay()) {
   if (found.length === 1) return found[0] === today;
   // Range such as "Lundi — Samedi" (weeks start on Monday, wrap on Sunday).
   const offset = (day: number) => (day + 6) % 7;
-  return offset(today) >= offset(found[0]) && offset(today) <= offset(found[found.length - 1]);
+  return (
+    offset(today) >= offset(found[0]) &&
+    offset(today) <= offset(found[found.length - 1])
+  );
 }
 
 type ActionKey = "appel" | "whatsapp" | "email";
@@ -131,7 +149,8 @@ function IdentityAvatar({ src, alt }: { src: string; alt: string }) {
   const [fit, setFit] = useState<"cover" | "contain">("cover");
   const measure = (img: HTMLImageElement | null) => {
     if (!img || !img.naturalWidth || !img.naturalHeight) return;
-    const next = img.naturalWidth / img.naturalHeight > 1.45 ? "contain" : "cover";
+    const next =
+      img.naturalWidth / img.naturalHeight > 1.45 ? "contain" : "cover";
     setFit(current => (current === next ? current : next));
   };
   return (
@@ -180,7 +199,10 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
 
       <div className="fh-body">
         {logo ? (
-          <IdentityAvatar src={logo} alt={`${fullName} — ${fiche.entreprise}`} />
+          <IdentityAvatar
+            src={logo}
+            alt={`${fullName} — ${fiche.entreprise}`}
+          />
         ) : (
           <div className="fh-initials" aria-hidden="true">
             {fiche.prenom.slice(0, 1)}
@@ -408,14 +430,44 @@ function SocialIcon({ label, url }: { label: string; url: string }) {
 
 function PresentationContent({ fiche }: { fiche: FicheTemplateModel }) {
   const presentation = fiche.data.presentation?.trim();
-  if (!presentation) return null;
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <section className="public-section pro-presentation">
-      <SectionTitle
-        icon={<UserRound className="h-4 w-4" />}
-        title="Présentation"
-      />
-      <p className="pro-presentation-text">{presentation}</p>
+    <section
+      tabIndex={0}
+      role="button"
+      aria-expanded={isOpen}
+      onClick={() => setIsOpen(!isOpen)}
+      onKeyDown={e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setIsOpen(!isOpen);
+        }
+      }}
+      className="public-section pro-presentation cursor-pointer select-none rounded-xl 
+        bg-slate-900/50 p-4 transition-all hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    >
+      <div className="flex items-center justify-between">
+        <SectionTitle
+          icon={<UserRound className="h-4 w-4 text-indigo-400" />}
+          title="Présentation"
+        />
+        {/* Indicateur visuel (flèche pivotante) */}
+        <ChevronDown
+          className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : "rotate-125"
+          }`}
+        />
+      </div>
+
+      {/* Paragraphe avec bascule Tailwind */}
+      <p
+        className={`pro-presentation-text mt-3 text-sm text-slate-300 leading-relaxed ${
+          !isOpen ? "hidden" : "block animate-fadeIn"
+        }`}
+      >
+        {presentation}
+      </p>
     </section>
   );
 }
