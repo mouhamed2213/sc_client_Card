@@ -4,6 +4,15 @@
  * adapts to Essentiel / Pro / Signature without per-plan duplication.
  */
 
+/* Typeface: Inter everywhere on the fiche (buttons and fields included). */
+.fiche-template,
+.fiche-template button,
+.fiche-template input,
+.fiche-template textarea {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-feature-settings: "cv11", "ss01";
+}
+
 /* The "save contact" button overlaps the hero to tie the two areas together. */
 .fiche-template .fh { padding-bottom: 46px; }
 .fiche-template .essential-save-row { position: relative; z-index: 2; margin-top: -30px; padding: 0 0 6px; }
@@ -12,8 +21,20 @@
 
 /* Sections */
 .fiche-template .public-section { padding: 24px 0; border-bottom-color: var(--theme-line); }
-.fiche-template .fh-section-icon { color: var(--theme-accent); }
-.fiche-template .fh-section-title h2 { color: var(--theme-text); opacity: 0.78; }
+.fiche-template .fh-section-title { gap: 10px; margin-bottom: 16px; }
+.fiche-template .fh-section-icon {
+  width: 32px; height: 32px; border-radius: 10px; color: var(--theme-accent);
+  background: var(--theme-accent-soft); border: 1px solid color-mix(in srgb, var(--theme-accent) 35%, transparent);
+}
+.fiche-template .fh-section-icon svg { width: 17px; height: 17px; }
+/* Section titles: full-contrast text, larger and bolder, with an accent rule. */
+.fiche-template .fh-section-title h2 {
+  color: var(--theme-text); opacity: 1; font-size: 14px; font-weight: 800; letter-spacing: 0.1em; line-height: 1.2;
+}
+.fiche-template .fh-section-title::after {
+  content: ""; flex: 1 1 auto; min-width: 16px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--theme-accent) 55%, transparent), transparent);
+}
 .fiche-template .pro-presentation-text { margin: 0; color: var(--theme-text); font-size: 14px; line-height: 1.8; opacity: 0.88; }
 
 /* Links */
