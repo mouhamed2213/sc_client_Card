@@ -445,7 +445,7 @@ function PresentationContent({ fiche }: { fiche: FicheTemplateModel }) {
         }
       }}
       className="public-section pro-presentation cursor-pointer select-none rounded-xl 
-        bg-slate-900/50 p-4 transition-all hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        bg-slate-900/50 p-4 transition-all hover:bg-slate-800/60"
     >
       <div className="flex items-center justify-between">
         <SectionTitle
@@ -510,7 +510,7 @@ function ProContent({ fiche }: { fiche: FicheTemplateModel }) {
             icon={<Globe2 className="h-4 w-4" />}
             title="Réseaux sociaux"
           />
-          <div className="pro-social-grid">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-[9px] gap-2">
             {socials.map(social => (
               <a
                 key={`${social.label}-${social.url}`}
@@ -541,6 +541,7 @@ export function FicheTemplate({
   const config = getTemplateConfig(fiche.formule);
   const { features } = config;
   const links = (fiche.data.liens ?? []).slice(0, features.maxLinks);
+  const [isOpenHoraire, setIsOpenHoraire] = useState(false);
   const gallery = galleryForPlan(
     fiche.data.galerie,
     features.maxPhotos,
@@ -641,22 +642,53 @@ export function FicheTemplate({
             </section>
           ) : null}
           {features.requiresHours && fiche.data.horaires?.length ? (
+            // const [isOpenHoraire , setIsOpenHoraire] = useState(false)
+
             <section className="public-section py-[22px] border-b border-theme-line">
-              <SectionTitle
-                icon={<Clock3 className="h-4 w-4" />}
-                title="Horaires"
-              />
-              <div className="hours-list grid gap-2">
+              {/* En-tête cliquable */}
+              <div
+                tabIndex={0}
+                role="button"
+                aria-expanded={isOpenHoraire}
+                onClick={() => setIsOpenHoraire(!isOpenHoraire)}
+                onKeyDown={e => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setIsOpenHoraire(!isOpenHoraire);
+                  }
+                }}
+                className="flex items-center justify-between cursor-pointer select-none group"
+              >
+                <SectionTitle
+                  icon={<Clock3 className="h-4 w-4" />}
+                  title="Horaires"
+                />
+                {/* Rotation de la flèche selon l'état */}
+                <ChevronDown
+                  className={`h-4 w-4 text-slate-400 transition-transform duration-200 group-hover:text-slate-200 ${
+                    isOpenHoraire ? "rotate-180" : ""
+                  }`}
+                />
+              </div>
+
+              {/* Liste des horaires dépliable */}
+              <div
+                className={`hours-list grid gap-2 transition-all ${
+                  isOpenHoraire ? "mt-4 block animate-fadeIn" : "hidden"
+                }`}
+              >
                 {fiche.data.horaires.map(row => (
                   <div
                     key={row.jour}
-                    className={`hours-row flex items-center justify-between gap-3${coversToday(row.jour) ? " is-today" : ""}`}
+                    className={`hours-row flex items-center justify-between gap-3${
+                      coversToday(row.jour) ? " is-today" : ""
+                    }`}
                     aria-current={coversToday(row.jour) ? "date" : undefined}
                   >
                     <span>
                       {row.jour}
                       {coversToday(row.jour) && (
-                        <em className="hours-today">Aujourd’hui</em>
+                        <em className="hours-today ml-2">Aujourd’hui</em>
                       )}
                     </span>
                     <strong
@@ -681,8 +713,7 @@ export function FicheTemplate({
               />
               {actions.contactSent ? (
                 <div className="rounded-xl bg-theme-success-bg p-4 text-sm font-medium text-theme-success-text">
-                  Votre demande a bien été transmise. L’établissement peut
-                  maintenant vous rappeler.
+                  Votre demande a bien été transmise.
                 </div>
               ) : actions.contactOpen ? (
                 <form

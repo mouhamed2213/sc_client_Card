@@ -1,11 +1,21 @@
 @import "./theme-tokens.css";
 
+/* Style par défaut pour Mobile : 1 colonne (ou 2 selon ton besoin) */
 .fiche-template .pro-social-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(
+    1,
+    minmax(2, 1fr)
+  ); /* 1 seule colonne sur mobile */
   gap: 9px;
 }
 
+/* À partir des écrans de taille tablette/desktop (>= 640px ou 768px) */
+@media (min-width: 640px) {
+  .fiche-template .pro-social-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* Retour à 3 colonnes */
+  }
+}
 .fiche-template .pro-social-button {
   display: flex;
   align-items: center;
