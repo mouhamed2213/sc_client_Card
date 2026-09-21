@@ -20,7 +20,7 @@ function isPortAvailable(port: number): Promise<boolean> {
     });
     server.on("error", () => resolve(false));
   });
-}
+}4755.
 
 async function findAvailablePort(startPort: number = 3000): Promise<number> {
   for (let port = startPort; port < startPort + 20; port++) {
