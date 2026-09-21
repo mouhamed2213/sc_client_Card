@@ -642,8 +642,6 @@ export function FicheTemplate({
             </section>
           ) : null}
           {features.requiresHours && fiche.data.horaires?.length ? (
-            // const [isOpenHoraire , setIsOpenHoraire] = useState(false)
-
             <section className="public-section py-[22px] border-b border-theme-line">
               {/* En-tête cliquable */}
               <div
