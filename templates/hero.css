@@ -69,9 +69,14 @@
   grid-column: 1; grid-row: 1 / span 4; align-self: center;
   display: flex; align-items: center; justify-content: center; box-sizing: border-box; flex: none;
   width: 116px; height: 116px; margin: 0; overflow: hidden; border-radius: 50%;
-  border: 3px solid var(--fh-logo-line); background: var(--fh-logo-plate); box-shadow: var(--fh-ring-shadow);
+  border: 3px solid var(--fh-logo-line); background: var(--fh-logo-plate); background-clip: padding-box; box-shadow: var(--fh-ring-shadow);
 }
-.fiche-template .fh-avatar { padding: 0; }
+.fiche-template .fh-avatar {
+  padding: 0;
+  /* The translucent border used to sit on top of the white plate and looked like a white margin
+     around the picture: the plate is now clipped to the padding box and is only a neutral fallback. */
+  background: var(--fh-glass); background-clip: padding-box;
+}
 /* The logo always covers its whole container (no inner margin, no letterboxing). */
 .fiche-template .fh-avatar img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: center; }
 .fiche-template .fh-initials { color: var(--fh-initials-text, #1f2937); font-size: 34px; font-weight: 800; letter-spacing: 0.04em; }
