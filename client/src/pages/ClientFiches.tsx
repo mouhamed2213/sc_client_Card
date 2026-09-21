@@ -2,7 +2,7 @@ import { LayoutGrid, Plus, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import ClientLayout from "@/components/ClientLayout";
-import FicheSelectionCard from "@/components/client-space/FicheSelectionCard";
+import FichesTable from "@/components/client-space/FichesTable";
 
 export default function ClientFiches() {
   const [, navigate] = useLocation();
@@ -17,12 +17,9 @@ export default function ClientFiches() {
             <div className="mt-3 h-8 w-64 animate-pulse rounded-lg bg-[#e1e5ea]" />
             <div className="mt-2 h-4 w-96 max-w-full animate-pulse rounded bg-[#edf0f2]" />
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-[440px] animate-pulse rounded-[24px] border border-[#e6e8ec] bg-white"
-              />
+          <div className="space-y-px overflow-hidden rounded-2xl border border-[#e6e8ec] bg-white">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-[76px] animate-pulse border-b border-[#f0f2f4] bg-white" />
             ))}
           </div>
         </div>
@@ -66,7 +63,7 @@ export default function ClientFiches() {
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-white/55">
               Retrouvez toutes vos fiches Support Connecté au même endroit.
-              Chaque carte correspond à une fiche que vous pouvez ouvrir,
+              Chaque ligne correspond à une fiche que vous pouvez ouvrir,
               consulter et gérer.
             </p>
           </div>
@@ -80,7 +77,7 @@ export default function ClientFiches() {
 
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
-            <p className="eyebrow">Vos cartes</p>
+            <p className="eyebrow">Vos fiches</p>
             <h2 className="mt-1 text-lg font-semibold text-[#172033]">
               Sélectionnez une fiche
             </h2>
@@ -95,11 +92,7 @@ export default function ClientFiches() {
           </button>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {fiches.data.map(fiche => (
-            <FicheSelectionCard key={fiche.id} fiche={fiche} />
-          ))}
-        </div>
+        <FichesTable fiches={fiches.data} />
       </div>
     </ClientLayout>
   );

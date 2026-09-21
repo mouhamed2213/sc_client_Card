@@ -40,6 +40,16 @@ export default function ClientLayout({
   const lifecycleBlocked = fiche.data?.statutMetier === "suspendue" || fiche.data?.statutMetier === "expiree";
 
   const nav = [
+    // Aggregated overview of every fiche (only meaningful with several fiches).
+    ...((fiches.data?.length ?? 0) > 1
+      ? [
+          {
+            href: "/espace-client",
+            label: "Vue d'ensemble",
+            icon: LayoutDashboard,
+          },
+        ]
+      : []),
     {
       href: "/espace-client/fiches",
       label: "Mes fiches",
@@ -49,7 +59,7 @@ export default function ClientLayout({
       ? [
           {
             href: `/espace-client/fiche/${ficheId}`,
-            label: "Vue d'ensemble",
+            label: (fiches.data?.length ?? 0) > 1 ? "Détail de la fiche" : "Vue d'ensemble",
             icon: LayoutDashboard,
           },
           {

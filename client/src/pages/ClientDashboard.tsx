@@ -1,9 +1,9 @@
 import { useLocation } from "wouter";
-import { ArrowRight, LayoutGrid } from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import ClientLayout from "@/components/ClientLayout";
 import FicheOverview from "@/components/client-space/FicheOverview";
-import { formuleLabels } from "@/lib/ficheStatus";
+import AllFichesOverview from "@/components/client-space/AllFichesOverview";
 
 export default function ClientDashboard() {
   const [, navigate] = useLocation();
@@ -49,36 +49,7 @@ export default function ClientDashboard() {
 
   return (
     <ClientLayout>
-      <div className="space-y-5 p-4 sm:p-6 lg:p-8">
-        <div>
-          <h1 className="text-xl font-semibold text-[#172033]">Vos fiches</h1>
-          <p className="mt-1 text-sm text-[#7d8798]">
-            Choisissez une fiche pour accéder à son tableau de bord.
-          </p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {fiches.data.map(fiche => (
-            <button
-              key={fiche.id}
-              onClick={() => navigate(`/espace-client/fiche/${fiche.id}`)}
-              className="group flex w-full items-center justify-between rounded-xl border border-[#e6e8ec] bg-white p-5 text-left transition hover:border-[#c98a4e] hover:shadow-[0_12px_30px_rgba(23,32,51,0.06)]"
-            >
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-[#172033]">
-                  {fiche.prenom} {fiche.nom}
-                </p>
-                <p className="truncate text-sm text-[#7d8798]">
-                  {fiche.entreprise} · {formuleLabels[fiche.formule] ?? fiche.formule}
-                </p>
-              </div>
-              <ArrowRight
-                size={18}
-                className="shrink-0 text-[#c1c8d3] transition group-hover:translate-x-0.5 group-hover:text-[#c98a4e]"
-              />
-            </button>
-          ))}
-        </div>
-      </div>
+      <AllFichesOverview fiches={fiches.data} />
     </ClientLayout>
   );
 }

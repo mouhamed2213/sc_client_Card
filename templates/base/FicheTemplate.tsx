@@ -22,7 +22,7 @@ import {
   Youtube,
 } from "lucide-react";
 import type { FormEvent, ReactNode, TouchEvent } from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { parseVideoUrl } from "../../shared/videoUrls";
 import { getTemplateConfig } from "../config";
 import "../hero.css";
@@ -72,15 +72,52 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   );
 }
 
-const WEEK_DAYS = [
-  "dimanche",
-  "lundi",
-  "mardi",
-  "mercredi",
-  "jeudi",
-  "vendredi",
-  "samedi",
-];
+/**
+ * Foldable section (Présentation, Horaires). The header is a real button
+ * (keyboard + screen-reader friendly: aria-expanded / aria-controls); the body
+ * is simply hidden, so its content stays in the page for assistive tech when open.
+ * `summary` is shown in the header while the section is folded.
+ */
+function CollapsibleSection({
+  icon,
+  title,
+  summary,
+  defaultOpen = true,
+  className = "public-section",
+  children,
+}: {
+  icon: ReactNode;
+  title: string;
+  summary?: string;
+  defaultOpen?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const bodyId = useId();
+  return (
+    <section className={`${className} fh-collapsible`} data-open={open}>
+      <button
+        type="button"
+        className="fh-collapse-toggle"
+        aria-expanded={open}
+        aria-controls={bodyId}
+        onClick={() => setOpen(value => !value)}
+      >
+        <SectionTitle icon={icon} title={title} />
+        {!open && summary ? (
+          <span className="fh-collapse-summary">{summary}</span>
+        ) : null}
+        <ChevronDown className="fh-collapse-chevron" aria-hidden="true" />
+      </button>
+      <div id={bodyId} className="fh-collapse-body" hidden={!open}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+const WEEK_DAYS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 
 function normalizeDay(value: string) {
   return value
@@ -107,6 +144,12 @@ function coversToday(label: string, today = new Date().getDay()) {
     offset(today) >= offset(found[0]) &&
     offset(today) <= offset(found[found.length - 1])
   );
+}
+
+/** "Aujourd'hui : 08:00 – 18:00", shown in the folded Horaires header. */
+function todayHoursSummary(rows: { jour: string; horaire: string }[]) {
+  const today = rows.find(row => coversToday(row.jour));
+  return today ? `Aujourd’hui : ${today.horaire}` : undefined;
 }
 
 type ActionKey = "appel" | "whatsapp" | "email";
@@ -141,9 +184,8 @@ const ACTION_CONFIG: Record<
 };
 
 /**
- * Round identity picture shown above the name (same on every plan). A photo
- * fills the circle so the person is recognisable at a glance; a wide logo is
- * kept whole (contained) instead of being cropped.
+ * Round identity picture shown beside the name (same on every plan). The image
+ * always covers its whole container, whether it is a photo or a logo.
  */
 function IdentityAvatar({ src, alt }: { src: string; alt: string }) {
   const [fit, setFit] = useState<"cover" | "contain">("cover");
@@ -154,15 +196,8 @@ function IdentityAvatar({ src, alt }: { src: string; alt: string }) {
     setFit(current => (current === next ? current : next));
   };
   return (
-    <div className="fh-avatar" data-fit={fit}>
-      <img
-        ref={img => {
-          if (img?.complete) measure(img);
-        }}
-        src={src}
-        alt={alt}
-        onLoad={event => measure(event.currentTarget)}
-      />
+    <div className="fh-avatar">
+      <img src={src} alt={alt} />
     </div>
   );
 }
@@ -433,42 +468,14 @@ function PresentationContent({ fiche }: { fiche: FicheTemplateModel }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <section
-      tabIndex={0}
-      role="button"
-      aria-expanded={isOpen}
-      onClick={() => setIsOpen(!isOpen)}
-      onKeyDown={e => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          setIsOpen(!isOpen);
-        }
-      }}
-      className="public-section pro-presentation cursor-pointer select-none rounded-xl 
-        bg-slate-900/50 p-4 transition-all hover:bg-slate-800/60"
+    <CollapsibleSection
+      className="public-section pro-presentation"
+      icon={<UserRound className="h-4 w-4" />}
+      title="Présentation"
+      defaultOpen
     >
-      <div className="flex items-center justify-between">
-        <SectionTitle
-          icon={<UserRound className="h-4 w-4 text-indigo-400" />}
-          title="Présentation"
-        />
-        {/* Indicateur visuel (flèche pivotante) */}
-        <ChevronDown
-          className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : "rotate-125"
-          }`}
-        />
-      </div>
-
-      {/* Paragraphe avec bascule Tailwind */}
-      <p
-        className={`pro-presentation-text mt-3 text-sm text-slate-300 leading-relaxed ${
-          !isOpen ? "hidden" : "block animate-fadeIn"
-        }`}
-      >
-        {presentation}
-      </p>
-    </section>
+      <p className="pro-presentation-text">{presentation}</p>
+    </CollapsibleSection>
   );
 }
 
@@ -642,39 +649,14 @@ export function FicheTemplate({
             </section>
           ) : null}
           {features.requiresHours && fiche.data.horaires?.length ? (
-            <section className="public-section py-[22px] border-b border-theme-line">
-              {/* En-tête cliquable */}
-              <div
-                tabIndex={0}
-                role="button"
-                aria-expanded={isOpenHoraire}
-                onClick={() => setIsOpenHoraire(!isOpenHoraire)}
-                onKeyDown={e => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setIsOpenHoraire(!isOpenHoraire);
-                  }
-                }}
-                className="flex items-center justify-between cursor-pointer select-none group"
-              >
-                <SectionTitle
-                  icon={<Clock3 className="h-4 w-4" />}
-                  title="Horaires"
-                />
-                {/* Rotation de la flèche selon l'état */}
-                <ChevronDown
-                  className={`h-4 w-4 text-slate-400 transition-transform duration-200 group-hover:text-slate-200 ${
-                    isOpenHoraire ? "rotate-180" : ""
-                  }`}
-                />
-              </div>
-
-              {/* Liste des horaires dépliable */}
-              <div
-                className={`hours-list grid gap-2 transition-all ${
-                  isOpenHoraire ? "mt-4 block animate-fadeIn" : "hidden"
-                }`}
-              >
+            <CollapsibleSection
+              className="public-section py-[22px] border-b border-theme-line"
+              icon={<Clock3 className="h-4 w-4" />}
+              title="Horaires"
+              summary={todayHoursSummary(fiche.data.horaires)}
+              defaultOpen={false}
+            >
+              <div className="hours-list grid gap-2">
                 {fiche.data.horaires.map(row => (
                   <div
                     key={row.jour}
@@ -701,7 +683,7 @@ export function FicheTemplate({
                   </div>
                 ))}
               </div>
-            </section>
+            </CollapsibleSection>
           ) : null}
           {features.hasForm ? (
             <section className="public-section py-[22px] border-b border-theme-line">

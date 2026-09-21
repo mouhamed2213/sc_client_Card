@@ -382,7 +382,7 @@ export default function ClientFicheEdit() {
                         disabled={!capabilities.site.editable}
                         value={form.site}
                         onChange={e => setField("site", e.target.value)}
-                        className="editor-input disabled:bg-gray-50 disabled:cursor-not-allowed"
+                        className="editor-input"
                         placeholder="https://votre-site.com"
                       />
                     </Field>
@@ -464,7 +464,7 @@ export default function ClientFicheEdit() {
                   <Field label="Présentation">
                     <textarea
                       disabled={!capabilities.presentation.editable}
-                      className="editor-input mt-1.5 w-full rounded-lg border border-[#cfd5dd] bg-white px-3 py-2.5 shadow-sm focus:border-[#c98a4e] focus:ring-2 focus:ring-[#c98a4e]/20 outline-none"
+                      className="editor-input"
                       rows={5}
                       value={form.data.presentation}
                       onChange={e => setData("presentation", e.target.value)}
@@ -976,12 +976,12 @@ function EditorSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-[#e5e8ed] bg-white p-5 sm:p-6 shadow-sm">
-      <div className="mb-5">
-        <h2 className="text-lg font-bold text-[#172033]">{title}</h2>
-        {subtitle && <p className="mt-1 text-xs text-[#7d8798]">{subtitle}</p>}
-      </div>
-      {children}
+    <section className="overflow-hidden rounded-2xl border border-[#dfe4ea] bg-white shadow-sm">
+      <header className="border-b border-[#e9edf2] bg-[#f7f9fb] px-5 py-4 sm:px-6">
+        <h2 className="text-base font-bold text-[#172033]">{title}</h2>
+        {subtitle && <p className="mt-1 text-xs text-[#6b7789]">{subtitle}</p>}
+      </header>
+      <div className="p-5 sm:p-6">{children}</div>
     </section>
   );
 }
@@ -1002,7 +1002,7 @@ function Field({
   return (
     <label className="block space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-[#52607a]">
+        <span className="text-[13px] font-semibold text-[#3a4761]">
           {label}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </span>
@@ -1120,7 +1120,7 @@ function CatalogEditor({
       {sections.map((section, sectionIndex) => (
         <div
           key={sectionIndex}
-          className="rounded-xl border border-[#e5e8ed] bg-gray-50/50 p-4 space-y-3"
+          className="rounded-xl border border-[#dfe4ea] bg-[#f7f9fb] p-4 space-y-3"
         >
           <div className="flex gap-2 items-center">
             <input
