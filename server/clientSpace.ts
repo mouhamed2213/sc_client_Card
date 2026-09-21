@@ -1,4 +1,29 @@
+import { getPlanFeatures } from "@shared/planFeatures";
+import type { Fiche } from "../generated/prisma/client";
 import { prisma } from "../prisma/client";
+
+/**
+ * What a client account may see of its own fiche row. Admin-only data never
+ * leaves the server: internal notes always, and passage statistics unless the
+ * plan includes the statistics panel (Signature).
+ */
+export function toClientFiche<T extends Fiche>(fiche: T): T {
+  const plan = getPlanFeatures(fiche.formule);
+  let dataJson = fiche.dataJson;
+  try {
+    const data = JSON.parse(dataJson || "{}");
+    delete data.notesInternes;
+    dataJson = JSON.stringify(data);
+  } catch {
+    // Keep the original payload if it is not valid JSON.
+  }
+  return {
+    ...fiche,
+    dataJson,
+    scansTotal: plan.hasPanel ? fiche.scansTotal : 0,
+    lastScanAt: plan.hasPanel ? fiche.lastScanAt : null,
+  };
+}
 
 export async function updateMembershipCardStatus(
   id: number,

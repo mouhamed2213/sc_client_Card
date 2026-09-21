@@ -24,6 +24,7 @@ import {
 import {
   listClientDashboard,
   updateMembershipCardStatus,
+  toClientFiche,
 } from "./clientSpace";
 import {
   attachFicheToOwner,
@@ -539,8 +540,8 @@ export const appRouter = router({
       }),
   }),
   clientSpaceRouter: router({
-    myFiches: clientProcedure.query(({ ctx }) =>
-      listFichesByOwner(ctx.user.id)
+    myFiches: clientProcedure.query(async ({ ctx }) =>
+      (await listFichesByOwner(ctx.user.id)).map(toClientFiche)
     ),
     dashboard: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
@@ -557,11 +558,13 @@ export const appRouter = router({
           : null;
         return {
           ...dashboard,
+          // Statistics are a Signature feature: never sent to other plans.
+          scans: plan?.hasPanel ? dashboard.scans : [],
           recentRequests: plan?.hasForm ? dashboard.recentRequests : [],
           requestCount: plan?.hasForm ? dashboard.requestCount : 0,
           fiche: dashboard.fiche
             ? {
-                ...parseFiche(dashboard.fiche),
+                ...parseFiche(toClientFiche(dashboard.fiche)),
                 plan,
               }
             : null,
@@ -576,7 +579,10 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "Fiche introuvable.",
           });
-        return { ...parseFiche(fiche), plan: getPlanFeatures(fiche.formule) };
+        return {
+          ...parseFiche(toClientFiche(fiche)),
+          plan: getPlanFeatures(fiche.formule),
+        };
       }),
     scans: clientProcedure
       .input(
