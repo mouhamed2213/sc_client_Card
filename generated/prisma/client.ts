@@ -62,6 +62,14 @@ export type ClientCredential = Prisma.ClientCredentialModel
  */
 export type Fiche = Prisma.FicheModel
 /**
+ * Model FicheScanEvent
+ * One row per counted "passage" (card tap or QR scan). Only visitor hashes are
+ * stored (never raw ids, IPs or user agents). It is the audit trail behind the
+ * `scansTotal` counter and the daily `fiche_scans` aggregates, and it is what
+ * makes de-duplication reliable across restarts and instances.
+ */
+export type FicheScanEvent = Prisma.FicheScanEventModel
+/**
  * Model FicheScan
  * 
  */

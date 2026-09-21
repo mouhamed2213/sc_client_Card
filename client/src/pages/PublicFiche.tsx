@@ -1,12 +1,13 @@
 import { trpc } from "@/lib/trpc";
 import { ArrowUpRight, Phone, XCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "wouter";
 import {
   FicheTemplate,
   type FicheTemplateActions,
 } from "../../../templates/base/FicheTemplate";
 import type { FicheTemplateModel } from "../../../templates/model";
+import { getVisitorId } from "@/lib/visitorId";
 import { readCachedFiche, saveCachedFiche } from "../offline/ficheCache";
 
 type PublicData = FicheTemplateModel["data"];
@@ -46,8 +47,35 @@ export default function PublicFiche() {
     }
   }, [ficheQuery.data, slug]);
 
+  // A "passage" = a real visitor arriving through the card (NFC) or its QR code.
+  // The server makes the final decision (staff/owner, bots, duplicates…); the
+  // client only avoids the obvious false positives: previews, offline copies,
+  // hidden/prerendered tabs and React re-runs.
+  const scanSentFor = useRef<string | null>(null);
   useEffect(() => {
-    if (ficheQuery.data?.statut === "active") scanMutation.mutate({ slug });
+    if (ficheQuery.data?.statut !== "active") return;
+    if (scanSentFor.current === slug) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("preview")) return;
+    const marker = params.get("s");
+    const source = marker === "qr" || marker === "nfc" ? marker : undefined;
+
+    const send = () => {
+      if (scanSentFor.current === slug) return;
+      scanSentFor.current = slug;
+      scanMutation.mutate({ slug, source, visitorId: getVisitorId() });
+    };
+    if (document.visibilityState === "visible") {
+      send();
+      return;
+    }
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      document.removeEventListener("visibilitychange", onVisible);
+      send();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, [ficheQuery.data?.statut, slug]);
 
   if (ficheQuery.isLoading && !cachedFiche) {

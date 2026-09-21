@@ -401,6 +401,7 @@ export const ModelName = {
   AdminCredential: 'AdminCredential',
   ClientCredential: 'ClientCredential',
   Fiche: 'Fiche',
+  FicheScanEvent: 'FicheScanEvent',
   FicheScan: 'FicheScan',
   ContactRequest: 'ContactRequest',
   MembershipCard: 'MembershipCard'
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "adminCredential" | "clientCredential" | "fiche" | "ficheScan" | "contactRequest" | "membershipCard"
+    modelProps: "user" | "adminCredential" | "clientCredential" | "fiche" | "ficheScanEvent" | "ficheScan" | "contactRequest" | "membershipCard"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -716,6 +717,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.FicheCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.FicheCountAggregateOutputType> | number
+        }
+      }
+    }
+    FicheScanEvent: {
+      payload: Prisma.$FicheScanEventPayload<ExtArgs>
+      fields: Prisma.FicheScanEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FicheScanEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FicheScanEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload>
+        }
+        findFirst: {
+          args: Prisma.FicheScanEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FicheScanEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload>
+        }
+        findMany: {
+          args: Prisma.FicheScanEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload>[]
+        }
+        create: {
+          args: Prisma.FicheScanEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload>
+        }
+        createMany: {
+          args: Prisma.FicheScanEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FicheScanEventCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload>[]
+        }
+        delete: {
+          args: Prisma.FicheScanEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload>
+        }
+        update: {
+          args: Prisma.FicheScanEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.FicheScanEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FicheScanEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FicheScanEventUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload>[]
+        }
+        upsert: {
+          args: Prisma.FicheScanEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FicheScanEventPayload>
+        }
+        aggregate: {
+          args: Prisma.FicheScanEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFicheScanEvent>
+        }
+        groupBy: {
+          args: Prisma.FicheScanEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FicheScanEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FicheScanEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FicheScanEventCountAggregateOutputType> | number
         }
       }
     }
@@ -1050,6 +1125,17 @@ export const FicheScalarFieldEnum = {
 } as const
 
 export type FicheScalarFieldEnum = (typeof FicheScalarFieldEnum)[keyof typeof FicheScalarFieldEnum]
+
+
+export const FicheScanEventScalarFieldEnum = {
+  id: 'id',
+  ficheId: 'ficheId',
+  visitorKey: 'visitorKey',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type FicheScanEventScalarFieldEnum = (typeof FicheScanEventScalarFieldEnum)[keyof typeof FicheScanEventScalarFieldEnum]
 
 
 export const FicheScanScalarFieldEnum = {
@@ -1391,6 +1477,7 @@ export type GlobalOmitConfig = {
   adminCredential?: Prisma.AdminCredentialOmit
   clientCredential?: Prisma.ClientCredentialOmit
   fiche?: Prisma.FicheOmit
+  ficheScanEvent?: Prisma.FicheScanEventOmit
   ficheScan?: Prisma.FicheScanOmit
   contactRequest?: Prisma.ContactRequestOmit
   membershipCard?: Prisma.MembershipCardOmit

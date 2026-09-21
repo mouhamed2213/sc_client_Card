@@ -7,6 +7,9 @@ export const ENV = {
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
 
+  // Passages: when "true", only visits carrying a card marker (?s=qr / ?s=nfc) are counted.
+  scanRequireSource: process.env.SCAN_REQUIRE_SOURCE === "true",
+
   // LOCAL ADMIN AUTH
   adminUsername: process.env.ADMIN_USERNAME ?? "",
   adminPasswordHash: process.env.ADMIN_PASSWORD_HASH ?? "",

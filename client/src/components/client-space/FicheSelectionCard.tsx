@@ -198,7 +198,7 @@ export default function FicheSelectionCard({
         </button>
 
         <a
-          href={`/fiche/${fiche.slug}`}
+          href={`/fiche/${fiche.slug}?preview=1`}
           target="_blank"
           rel="noreferrer"
           className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-[#667085] transition hover:bg-[#f5f7f9] hover:text-[#26344a]"

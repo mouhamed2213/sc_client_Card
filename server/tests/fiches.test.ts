@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { appRouter } from "../routers";
 import { getFicheBySlug, updateFiche } from "../db";
 import type { TrpcContext } from "../_core/context";
+import { prisma } from "../../prisma/client";
 
 function createPublicContext(): TrpcContext {
   return {
@@ -40,11 +41,27 @@ describe("fiches.public", () => {
   });
 
   it("records a real scan and keeps the previous total after verification", async () => {
-    const caller = appRouter.createCaller(createPublicContext());
+    const caller = appRouter.createCaller({
+      ...createPublicContext(),
+      req: {
+        protocol: "https",
+        headers: {
+          "user-agent": "Mozilla/5.0 (Linux; Android 14) Chrome/126.0 Mobile Safari/537.36",
+          "x-forwarded-for": "203.0.113.7",
+        },
+      } as TrpcContext["req"],
+    });
     const fiche = await getFicheBySlug("hotel-teranga");
     const before = fiche!.scansTotal;
-    await caller.fiches.recordScan({ slug: "hotel-teranga" });
+    const result = await caller.fiches.recordScan({
+      slug: "hotel-teranga",
+      source: "qr",
+      visitorId: "fiches-test-visitor-1",
+    });
+    expect(result).toMatchObject({ counted: true });
     expect((await getFicheBySlug("hotel-teranga"))?.scansTotal).toBe(before + 1);
     await updateFiche(fiche!.id, { scansTotal: before });
+    await prisma.ficheScanEvent.deleteMany({ where: { ficheId: fiche!.id } });
+    await prisma.ficheScan.deleteMany({ where: { ficheId: fiche!.id } });
   });
 });

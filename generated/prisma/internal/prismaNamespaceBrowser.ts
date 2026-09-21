@@ -55,6 +55,7 @@ export const ModelName = {
   AdminCredential: 'AdminCredential',
   ClientCredential: 'ClientCredential',
   Fiche: 'Fiche',
+  FicheScanEvent: 'FicheScanEvent',
   FicheScan: 'FicheScan',
   ContactRequest: 'ContactRequest',
   MembershipCard: 'MembershipCard'
@@ -146,6 +147,17 @@ export const FicheScalarFieldEnum = {
 } as const
 
 export type FicheScalarFieldEnum = (typeof FicheScalarFieldEnum)[keyof typeof FicheScalarFieldEnum]
+
+
+export const FicheScanEventScalarFieldEnum = {
+  id: 'id',
+  ficheId: 'ficheId',
+  visitorKey: 'visitorKey',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type FicheScanEventScalarFieldEnum = (typeof FicheScanEventScalarFieldEnum)[keyof typeof FicheScanEventScalarFieldEnum]
 
 
 export const FicheScanScalarFieldEnum = {

@@ -600,7 +600,7 @@ function FicheRow({
             <Pencil className="h-4 w-4" />
           </Link>
           <Link
-            href={`/fiche/${fiche.slug}`}
+            href={`/fiche/${fiche.slug}?preview=1`}
             className="table-action"
             title="Prévisualiser"
           >
@@ -666,7 +666,7 @@ function FicheCard({
           Modifier
         </Link>
         <Link
-          href={`/fiche/${fiche.slug}`}
+          href={`/fiche/${fiche.slug}?preview=1`}
           className="rounded-lg border border-[#e6e8ec] px-3 py-2"
           title="Prévisualiser"
         >
@@ -691,7 +691,17 @@ function FicheCard({
 }
 
 function QrModal({ fiche, onClose }: { fiche: Fiche; onClose: () => void }) {
-  const publicUrl = `${window.location.origin}/fiche/${fiche.slug}`;
+  // Cards are counted as "passages" only when opened through the card itself.
+  // The marker (?s=qr / ?s=nfc) tells the server which physical support was used.
+  const baseUrl = `${window.location.origin}/fiche/${fiche.slug}`;
+  const publicUrl = `${baseUrl}?s=qr`;
+  const nfcUrl = `${baseUrl}?s=nfc`;
+  function copyNfcUrl() {
+    navigator.clipboard
+      ?.writeText(nfcUrl)
+      .then(() => toast.success("Lien NFC copié"))
+      .catch(() => toast.error("Copie impossible"));
+  }
   function downloadQr() {
     const svg = document.getElementById(`qr-${fiche.slug}`);
     if (!svg) return;
@@ -715,7 +725,7 @@ function QrModal({ fiche, onClose }: { fiche: Fiche; onClose: () => void }) {
               {fiche.prenom} {fiche.nom}
             </h2>
             <p className="mt-1 text-sm text-[#7d8798]">
-              À imprimer sur la carte ou à partager directement.
+              À imprimer sur la carte. Programmez la puce NFC avec le lien NFC.
             </p>
           </div>
           <button onClick={onClose} className="icon-button">
@@ -737,6 +747,21 @@ function QrModal({ fiche, onClose }: { fiche: Fiche; onClose: () => void }) {
           <QrCodeIcon className="h-4 w-4 flex-shrink-0 text-[#7d8798]" />
           <span>{publicUrl}</span>
         </div>
+        <div className="qr-url mt-2">
+          <Link2 className="h-4 w-4 flex-shrink-0 text-[#7d8798]" />
+          <span className="min-w-0 flex-1 truncate">{nfcUrl}</span>
+          <button
+            type="button"
+            onClick={copyNfcUrl}
+            className="text-xs font-semibold text-[#244775]"
+          >
+            Copier
+          </button>
+        </div>
+        <p className="mt-2 text-xs leading-5 text-[#7d8798]">
+          Le QR ci-dessus et le lien NFC portent un marqueur : seuls les
+          passages venant de la carte sont comptés. Vos aperçus ne le sont jamais.
+        </p>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="outline" onClick={onClose}>
             Fermer

@@ -43,10 +43,10 @@ import {
   listFichesByOwner,
   listMembershipCards,
   listScansForFiche,
-  recordScan,
   searchClientUsers,
   updateFiche,
 } from "./db";
+import { SCAN_SOURCES, handleScan } from "./scans";
 import { validatePlanPayload } from "./planValidation";
 import { parseVideoUrl } from "@shared/videoUrls";
 import { storagePut } from "./storage";
@@ -103,11 +103,17 @@ export const appRouter = router({
         return { ...parseFiche(fiche), plan: getPlanFeatures(fiche.formule) };
       }),
     recordScan: publicProcedure
-      .input(z.object({ slug: z.string() }))
-      .mutation(async ({ input }) => {
+      .input(
+        z.object({
+          slug: z.string().min(1).max(160),
+          source: z.enum(SCAN_SOURCES).optional(),
+          visitorId: z.string().min(8).max(64).optional(),
+          preview: z.boolean().optional(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
         const fiche = await getFicheBySlug(input.slug);
-        if (fiche && fiche.statut === "active") await recordScan(fiche);
-        return { ok: true };
+        return handleScan({ fiche, user: ctx.user, req: ctx.req, input });
       }),
     update: adminProcedure
       .input(ficheContentPayload.extend({ id: z.number().int().positive() }))

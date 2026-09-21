@@ -76,7 +76,7 @@ export default function IdCard({ fiche }: { fiche: IdCardFiche }) {
             <Share2 size={15} />
           </button>
           <a
-            href={`/fiche/${fiche.slug}`}
+            href={`/fiche/${fiche.slug}?preview=1`}
             target="_blank"
             rel="noreferrer"
             className="icon-button"

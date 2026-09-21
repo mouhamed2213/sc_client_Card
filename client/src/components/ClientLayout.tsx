@@ -277,7 +277,7 @@ export default function ClientLayout({
                 <RefreshCw size={15} /> Renouveler
               </a>
               <a
-                href={`/fiche/${fiche.data.slug}`}
+                href={`/fiche/${fiche.data.slug}?preview=1`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-lg border border-[#e6e8ec] px-3 py-2 text-sm font-medium text-[#172033] hover:bg-[#f6f8fa]"

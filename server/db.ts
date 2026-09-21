@@ -83,8 +83,7 @@ const demoRows: InsertFiche[] = [
     googlePlaceId: "ChIJdemo-teranga",
     dateCreation: new Date("2026-08-11"),
     dateEcheance: new Date("2027-08-11"),
-    scansTotal: 128,
-    lastScanAt: new Date("2026-09-13T17:30:00Z"),
+    scansTotal: 0,
     dataJson: JSON.stringify({
       premierBouton: "whatsapp",
       messageWhatsapp:
@@ -142,8 +141,7 @@ const demoRows: InsertFiche[] = [
     googlePlaceId: "ChIJdemo-marie",
     dateCreation: new Date("2026-07-02"),
     dateEcheance: new Date("2027-07-02"),
-    scansTotal: 84,
-    lastScanAt: new Date("2026-09-12T10:00:00Z"),
+    scansTotal: 0,
     dataJson: JSON.stringify({
       premierBouton: "contact",
       messageWhatsapp:
@@ -182,8 +180,7 @@ const demoRows: InsertFiche[] = [
     googlePlaceId: "",
     dateCreation: new Date("2026-05-19"),
     dateEcheance: new Date("2027-05-19"),
-    scansTotal: 41,
-    lastScanAt: new Date("2026-08-20T10:00:00Z"),
+    scansTotal: 0,
     dataJson: JSON.stringify({
       premierBouton: "whatsapp",
       messageWhatsapp: "Bonjour, je souhaite découvrir vos créations.",
@@ -288,19 +285,49 @@ export async function updateFiche(
   await prisma.fiche.update({ where: { id }, data: value });
   return true;
 }
-export async function recordScan(fiche: Fiche) {
-  const today = new Date().toISOString().slice(0, 10);
-  await prisma.$transaction([
-    prisma.fiche.update({
+/**
+ * Records one passage atomically (audit event + `scansTotal` + daily
+ * aggregate). Returns false — and records nothing — when the same visitor
+ * already produced a passage on this fiche inside the window. A per-visitor
+ * advisory lock makes the check race-free (double clicks, two tabs, retries).
+ */
+export async function recordScanEvent(
+  fiche: Fiche,
+  event: { visitorKey: string; source: string; windowMs: number }
+) {
+  const now = new Date();
+  const since = new Date(now.getTime() - event.windowMs);
+  const today = now.toISOString().slice(0, 10);
+  return prisma.$transaction(async tx => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`${fiche.id}:${event.visitorKey}`}))`;
+    const recent = await tx.ficheScanEvent.findFirst({
+      where: {
+        ficheId: fiche.id,
+        visitorKey: event.visitorKey,
+        createdAt: { gte: since },
+      },
+      select: { id: true },
+    });
+    if (recent) return false;
+    await tx.ficheScanEvent.create({
+      data: {
+        ficheId: fiche.id,
+        visitorKey: event.visitorKey,
+        source: event.source,
+        createdAt: now,
+      },
+    });
+    await tx.fiche.update({
       where: { id: fiche.id },
-      data: { scansTotal: { increment: 1 }, lastScanAt: new Date() },
-    }),
-    prisma.ficheScan.upsert({
+      data: { scansTotal: { increment: 1 }, lastScanAt: now },
+    });
+    await tx.ficheScan.upsert({
       where: { ficheId_scanDate: { ficheId: fiche.id, scanDate: today } },
       create: { ficheId: fiche.id, scanDate: today, count: 1 },
       update: { count: { increment: 1 } },
-    }),
-  ]);
+    });
+    return true;
+  });
 }
 export async function createContactRequest(input: {
   ficheId: number;
