@@ -22,6 +22,7 @@ import {
   router,
 } from "./_core/trpc";
 import {
+  getClientOverview,
   listClientDashboard,
   updateMembershipCardStatus,
   toClientFiche,
@@ -611,6 +612,17 @@ export const appRouter = router({
       const fiches = await listFichesByOwner(ctx.user.id);
       return fiches.map(fiche => parseFiche(toClientFiche(fiche)));
     }),
+    overview: clientProcedure
+      .input(z.object({ ficheId: z.number().int().positive().optional() }))
+      .query(async ({ ctx, input }) => {
+        const overview = await getClientOverview(ctx.user.id, input.ficheId);
+        if (!overview)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
+        return overview;
+      }),
     dashboard: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ ctx, input }) => {

@@ -30,7 +30,7 @@ export type ClientFicheRow = {
   dateEcheance: Date | string;
 };
 
-const STATUS_LABELS: Record<string, string> = {
+export const STATUS_LABELS: Record<string, string> = {
   active: "Active",
   a_renouveler: "À renouveler",
   expiree: "Expirée",
@@ -39,7 +39,7 @@ const STATUS_LABELS: Record<string, string> = {
   brouillon: "Brouillon",
 };
 
-const STATUS_STYLES: Record<string, string> = {
+export const STATUS_STYLES: Record<string, string> = {
   active: "bg-emerald-50 text-emerald-700 border-emerald-100",
   a_renouveler: "bg-orange-50 text-orange-700 border-orange-100",
   expiree: "bg-red-50 text-red-700 border-red-100",
