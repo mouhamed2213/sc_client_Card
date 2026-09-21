@@ -1,3 +1,4 @@
+import StudioSidebar from "@/components/StudioSidebar";
 import AdminClientAccountCreationModal from "@/components/AdminClientAccountCreationModal";
 import AdminStandaloneFicheCreationModal from "@/components/AdminStandaloneFicheCreationModal";
 import { Button } from "@/components/ui/button";
@@ -8,16 +9,11 @@ import {
   ChevronDown,
   Copy,
   Eye,
-  LayoutDashboard,
-  LayoutGrid,
-  Link2,
   Menu,
-  MoreHorizontal,
   Pencil,
   QrCode as QrCodeIcon,
   Search,
   SlidersHorizontal,
-  Sparkles,
   UserPlus,
   Users,
   X,
@@ -140,63 +136,8 @@ export default function Home() {
 
   return (
     <div className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
-      <aside className="studio-sidebar hidden lg:flex">
-        <div className="flex items-center gap-3 px-2">
-          <div className="brand-mark">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] text-white/55">
-              Support
-            </p>
-            <p className="font-semibold tracking-tight text-white">Connecté</p>
-          </div>
-        </div>
-        <div className="mt-10 px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/35">
-          Espace studio
-        </div>
-        <nav className="mt-3 space-y-1">
-          <Link className="sidebar-link sidebar-link-active" href="/studio">
-            <LayoutDashboard className="h-4 w-4" /> Tableau de bord
-          </Link>
-          <Link className="sidebar-link" href="/studio/fiches">
-            <LayoutGrid className="h-4 w-4" /> Fiches clients{" "}
-            <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[10px]">
-              {overview.total}
-            </span>
-          </Link>
-          <a className="sidebar-link" href="#liens">
-            <Link2 className="h-4 w-4" /> Liens & QR
-          </a>
-        </nav>
-        <div className="mt-auto space-y-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs text-white/55">Ce mois-ci</span>
-              <span className="text-xs text-[#e5a86b]">+18%</span>
-            </div>
-            <p className="text-2xl font-semibold text-white">
-              {overview.scans}
-            </p>
-            <p className="mt-1 text-xs text-white/45">passages comptés</p>
-            <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
-              <div className="h-full w-[72%] rounded-full bg-[#e5a86b]" />
-            </div>
-          </div>
-          <div className="flex items-center gap-3 border-t border-white/10 pt-4">
-            <div className="avatar avatar-small">JD</div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-white">
-                Julien Tiget
-              </p>
-              <p className="truncate text-xs text-white/45">Administrateur</p>
-            </div>
-            <MoreHorizontal className="ml-auto h-4 w-4 text-white/45" />
-          </div>
-        </div>
-      </aside>
-
-      <main className="studio-main">
+      <StudioSidebar />
+     <main className="studio-main">
         <header className="flex items-center justify-between border-b border-[#e7e9ed] bg-white/80 px-5 py-4 backdrop-blur lg:px-10">
           <div className="flex items-center gap-3">
             <button
