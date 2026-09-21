@@ -9,14 +9,15 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ADMIN_HOME_PATH } from "./const";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import ClientDashboard from "./pages/ClientDashboard";
-import ClientFiches from "./pages/ClientFiches";
 import ClientFicheEdit from "./pages/ClientFicheEdit";
+import ClientFiches from "./pages/ClientFiches";
 import ClientLogin from "./pages/ClientLogin";
 import ClientRequests from "./pages/ClientRequests";
 import ClientStats from "./pages/ClientStats";
 import FicheClientDetail from "./pages/FicheClientDetail";
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const Home = lazy(() => import("@/pages/Home"));
+const Fiches = lazy(() => import("@/pages/Fiches"));
 const PublicFiche = lazy(() => import("@/pages/PublicFiche"));
 const FicheEditor = lazy(() => import("@/pages/FicheEditor"));
 const AdminLogin = lazy(() => import("@/pages/AdminLogin"));
@@ -45,6 +46,14 @@ function Router() {
           component={() => (
             <AdminRoute>
               <Home />
+            </AdminRoute>
+          )}
+        />
+        <Route
+          path="/studio/fiches"
+          component={() => (
+            <AdminRoute>
+              <Fiches />
             </AdminRoute>
           )}
         />

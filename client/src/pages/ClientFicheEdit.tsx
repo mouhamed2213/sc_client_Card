@@ -1,12 +1,13 @@
+import FicheStatusAlert from "@/components/client-space/FicheStatusAlert";
 import ClientLayout from "@/components/ClientLayout";
+import { PremiumUpgradeModal } from "@/components/PremiumFeature";
 import { formuleLabels } from "@/lib/ficheStatus";
 import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
-import { PremiumUpgradeModal } from "@/components/PremiumFeature";
 import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
-import { parseVideoUrl } from "@shared/videoUrls";
 import type { MediaKind } from "@shared/mediaRules";
 import type { PlanName } from "@shared/planFeatures";
+import { parseVideoUrl } from "@shared/videoUrls";
 import {
   ImagePlus,
   Loader2,
@@ -24,7 +25,13 @@ import { useParams } from "wouter";
 
 type LinkItem = { label: string; url: string };
 type SocialItem = { label: string; url: string };
-type GalleryItem = { type?: "image" | "video"; url: string; alt: string; source?: "youtube" | "instagram" | "facebook" | "tiktok" | "vimeo" | "direct"; embedUrl?: string };
+type GalleryItem = {
+  type?: "image" | "video";
+  url: string;
+  alt: string;
+  source?: "youtube" | "instagram" | "facebook" | "tiktok" | "vimeo" | "direct";
+  embedUrl?: string;
+};
 type HoursItem = { jour: string; horaire: string };
 type Article = { nom: string; description: string; prix: string };
 type CatalogSection = { titre: string; articles: Article[] };
@@ -147,6 +154,35 @@ export default function ClientFicheEdit() {
     );
   }
 
+  const lifecycleBlocked =
+    fiche.data.statutMetier === "suspendue" ||
+    fiche.data.statutMetier === "expiree";
+
+  if (lifecycleBlocked) {
+    return (
+      <ClientLayout ficheId={id}>
+        <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#c98a4e]">
+              Modifier ma fiche
+            </p>
+            <h1 className="mt-1 text-2xl font-bold text-[#172033]">
+              Modification indisponible
+            </h1>
+            <p className="mt-1 max-w-2xl text-sm text-[#7d8798]">
+              Cette fiche ne peut pas être modifiée tant que son état n'est pas
+              rétabli.
+            </p>
+          </div>
+          <FicheStatusAlert
+            status={fiche.data.statutMetier}
+            dateEcheance={fiche.data.dateEcheance}
+          />
+        </div>
+      </ClientLayout>
+    );
+  }
+
   const plan = fiche.data.formule;
   const capabilities = getClientFicheCapabilities(plan);
   const upgradeLabel = (key: keyof typeof capabilities): PlanName =>
@@ -169,18 +205,39 @@ export default function ClientFicheEdit() {
 
   async function uploadImage(file: File, kind: MediaKind) {
     try {
-      const capability = kind === "gallery" ? capabilities.gallery : capabilities.profile;
-      if (!capability.editable) { toast.error("Fonction verrouillée", { description: `Disponible à partir du plan ${upgradeLabel(kind === "gallery" ? "gallery" : "profile")}.` }); return; }
+      const capability =
+        kind === "gallery" ? capabilities.gallery : capabilities.profile;
+      if (!capability.editable) {
+        toast.error("Fonction verrouillée", {
+          description: `Disponible à partir du plan ${upgradeLabel(kind === "gallery" ? "gallery" : "profile")}.`,
+        });
+        return;
+      }
       setUploading(kind);
       const prepared = await prepareImage(file, kind);
-      const result = await upload.mutateAsync({ ficheId: id, kind, filename: prepared.name, mimeType: "image/webp", contentBase64: await fileToDataUrl(prepared) });
+      const result = await upload.mutateAsync({
+        ficheId: id,
+        kind,
+        filename: prepared.name,
+        mimeType: "image/webp",
+        contentBase64: await fileToDataUrl(prepared),
+      });
       if (kind === "profile") setField("photo", result.url);
       if (kind === "logo") setField("logo", result.url);
-      if (kind === "gallery") setData("galerie", [...(form?.data.galerie ?? []), { type: "image", url: result.url, alt: prepared.name }]);
+      if (kind === "gallery")
+        setData("galerie", [
+          ...(form?.data.galerie ?? []),
+          { type: "image", url: result.url, alt: prepared.name },
+        ]);
       toast.success("Image ajoutée");
     } catch (error) {
-      toast.error("Image refusée", { description: error instanceof Error ? error.message : "Le traitement a échoué." });
-    } finally { setUploading(null); }
+      toast.error("Image refusée", {
+        description:
+          error instanceof Error ? error.message : "Le traitement a échoué.",
+      });
+    } finally {
+      setUploading(null);
+    }
   }
 
   function saveChanges(event: React.FormEvent) {
@@ -609,7 +666,10 @@ export default function ClientFicheEdit() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {form.data.galerie.map((item, index) => (
-                    <div key={item.url} className="rounded-xl border border-[#e5e8ed] bg-white p-2.5 shadow-sm">
+                    <div
+                      key={item.url}
+                      className="rounded-xl border border-[#e5e8ed] bg-white p-2.5 shadow-sm"
+                    >
                       <div className="relative h-32 w-full overflow-hidden rounded-lg bg-[#f5f6f8]">
                         {item.type === "video" ? (
                           item.source === "direct" ? (
@@ -633,25 +693,64 @@ export default function ClientFicheEdit() {
                             />
                           )
                         ) : (
-                          <img src={item.url} alt={item.alt} className="h-full w-full object-cover" />
+                          <img
+                            src={item.url}
+                            alt={item.alt}
+                            className="h-full w-full object-cover"
+                          />
                         )}
                       </div>
                       <input
                         className="mt-2 w-full rounded-lg border border-[#cfd5dd] px-2.5 py-1.5 text-xs outline-none focus:border-[#c98a4e]"
-                        placeholder={item.type === "video" ? "Description de la vidéo" : "Description (alt)"}
+                        placeholder={
+                          item.type === "video"
+                            ? "Description de la vidéo"
+                            : "Description (alt)"
+                        }
                         aria-label={"Description " + (index + 1)}
                         value={item.alt}
-                        onChange={e => setData("galerie", form.data.galerie.map((x, i) => i === index ? { ...x, alt: e.target.value } : x))}
+                        onChange={e =>
+                          setData(
+                            "galerie",
+                            form.data.galerie.map((x, i) =>
+                              i === index ? { ...x, alt: e.target.value } : x
+                            )
+                          )
+                        }
                       />
-                      <button type="button" onClick={() => setData("galerie", form.data.galerie.filter((_, i) => i !== index))} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setData(
+                            "galerie",
+                            form.data.galerie.filter((_, i) => i !== index)
+                          )
+                        }
+                        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+                      >
                         <Trash2 size={14} /> Supprimer
                       </button>
                     </div>
                   ))}
-                  {form.data.galerie.length < (capabilities.gallery.maxItems ?? 0) && (
+                  {form.data.galerie.length <
+                    (capabilities.gallery.maxItems ?? 0) && (
                     <label className="flex h-44 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[#cfd5dd] bg-gray-50/50 p-4 text-center text-sm font-medium text-[#667085] hover:bg-gray-100/50 transition">
-                      <input type="file" className="hidden" accept="image/*" disabled={uploading !== null} onChange={async e => { const file = e.target.files?.[0]; if (file) await uploadImage(file, "gallery"); e.currentTarget.value = ""; }} />
-                      {uploading === "gallery" ? <Loader2 className="animate-spin text-[#c98a4e]" /> : <ImagePlus className="text-[#c98a4e]" />}
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        disabled={uploading !== null}
+                        onChange={async e => {
+                          const file = e.target.files?.[0];
+                          if (file) await uploadImage(file, "gallery");
+                          e.currentTarget.value = "";
+                        }}
+                      />
+                      {uploading === "gallery" ? (
+                        <Loader2 className="animate-spin text-[#c98a4e]" />
+                      ) : (
+                        <ImagePlus className="text-[#c98a4e]" />
+                      )}
                       <span>Ajouter une photo</span>
                     </label>
                   )}
@@ -685,32 +784,59 @@ export default function ClientFicheEdit() {
                     />
                     <button
                       type="button"
-                      disabled={!videoUrl.trim() || addVideo.isPending || form.data.galerie.filter(item => item.type === "video").length >= (capabilities.gallery.maxVideos ?? 0)}
+                      disabled={
+                        !videoUrl.trim() ||
+                        addVideo.isPending ||
+                        form.data.galerie.filter(item => item.type === "video")
+                          .length >= (capabilities.gallery.maxVideos ?? 0)
+                      }
                       onClick={async () => {
                         const parsed = parseVideoUrl(videoUrl);
                         if (!parsed) {
-                          toast.error("Lien vidéo non supporté", { description: "Utilisez YouTube, Instagram, Facebook, TikTok, Vimeo ou une URL vidéo directe HTTPS." });
+                          toast.error("Lien vidéo non supporté", {
+                            description:
+                              "Utilisez YouTube, Instagram, Facebook, TikTok, Vimeo ou une URL vidéo directe HTTPS.",
+                          });
                           return;
                         }
                         try {
-                          const item = await addVideo.mutateAsync({ ficheId: id, url: parsed.url, alt: videoAlt });
-                          setData("galerie", [...form.data.galerie, item as GalleryItem]);
+                          const item = await addVideo.mutateAsync({
+                            ficheId: id,
+                            url: parsed.url,
+                            alt: videoAlt,
+                          });
+                          setData("galerie", [
+                            ...form.data.galerie,
+                            item as GalleryItem,
+                          ]);
                           setVideoUrl("");
                           setVideoAlt("");
-                          await utils.clientSpaceRouter.ficheDetail.invalidate({ ficheId: id });
+                          await utils.clientSpaceRouter.ficheDetail.invalidate({
+                            ficheId: id,
+                          });
                           toast.success("Vidéo ajoutée");
                         } catch (error) {
-                          toast.error("Vidéo refusée", { description: error instanceof Error ? error.message : "Impossible d'ajouter la vidéo." });
+                          toast.error("Vidéo refusée", {
+                            description:
+                              error instanceof Error
+                                ? error.message
+                                : "Impossible d'ajouter la vidéo.",
+                          });
                         }
                       }}
                       className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#172033] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                     >
-                      {addVideo.isPending ? <Loader2 className="animate-spin" size={16} /> : <Video size={16} />}
+                      {addVideo.isPending ? (
+                        <Loader2 className="animate-spin" size={16} />
+                      ) : (
+                        <Video size={16} />
+                      )}
                       Ajouter
                     </button>
                   </div>
                   <p className="text-xs text-[#7d8798]">
-                    YouTube, Shorts, Instagram, Facebook, TikTok, Vimeo et URLs directes HTTPS (.mp4/.webm/.ogg).
+                    YouTube, Shorts, Instagram, Facebook, TikTok, Vimeo et URLs
+                    directes HTTPS (.mp4/.webm/.ogg).
                   </p>
                 </div>
               )}

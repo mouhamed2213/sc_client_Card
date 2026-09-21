@@ -37,6 +37,7 @@ export default function ClientLayout({
   );
 
   const currentPlan = fiche.data?.formule;
+  const lifecycleBlocked = fiche.data?.statutMetier === "suspendue" || fiche.data?.statutMetier === "expiree";
 
   const nav = [
     {
@@ -276,14 +277,24 @@ export default function ClientLayout({
               >
                 <RefreshCw size={15} /> Renouveler
               </a>
-              <a
-                href={`/fiche/${fiche.data.slug}?preview=1`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[#e6e8ec] px-3 py-2 text-sm font-medium text-[#172033] hover:bg-[#f6f8fa]"
-              >
-                <SquareArrowOutUpRight size={15} /> Fiche publique
-              </a>
+
+              {lifecycleBlocked ? (
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#e6e8ec] bg-[#f6f7f9] px-3 py-2 text-sm font-medium text-[#8a93a2]"
+                  aria-label="Fiche publique indisponible"
+                >
+                  Fiche publique indisponible
+                </span>
+              ) : (
+                <a
+                  href={`/fiche/${fiche.data.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#e6e8ec] px-3 py-2 text-sm font-medium text-[#172033] hover:bg-[#f6f8fa]"
+                >
+                  <SquareArrowOutUpRight size={15} /> Fiche publique
+                </a>
+              )}
             </div>
           )}
         </header>
