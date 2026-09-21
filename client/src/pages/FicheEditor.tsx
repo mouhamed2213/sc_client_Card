@@ -298,7 +298,7 @@ export default function FicheEditor() {
                 <strong>{features.maxPhotos}</strong> photos de galerie
               </p>
               <p>
-                Couverture et logo{" "}
+                Couverture et photo / logo{" "}
                 {features.requiresProfile ? "obligatoire" : "optionnel"}
               </p>
               <p>Formulaire {features.hasForm ? "inclus" : "non inclus"}</p>
@@ -378,8 +378,8 @@ export default function FicheEditor() {
             </div>
           </EditorSection>
           <EditorSection
-            title="Couverture et logo"
-            note="Couverture : grande image en haut de la fiche (recadrée à 400 × 400 sous 30 ko). Logo : affiché au-dessus du nom (sous 80 ko)."
+            title="Couverture et photo / logo"
+            note="Couverture : grande image en haut de la fiche (recadrée à 400 × 400 sous 30 ko). Photo / logo : affiché en rond au-dessus du nom, pour reconnaître la personne (sous 80 ko)."
           >
             <div className="media-pair">
               <MediaPicker
@@ -391,7 +391,7 @@ export default function FicheEditor() {
                 onRemove={() => setField("photo", "")}
               />
               <MediaPicker
-                title="Logo"
+                title="Photo / logo"
                 value={form.logo}
                 required={features.requiresProfile}
                 loading={uploading === "logo"}

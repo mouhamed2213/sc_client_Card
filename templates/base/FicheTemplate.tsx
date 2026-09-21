@@ -122,6 +122,32 @@ const ACTION_CONFIG: Record<
   },
 };
 
+/**
+ * Round identity picture shown above the name (same on every plan). A photo
+ * fills the circle so the person is recognisable at a glance; a wide logo is
+ * kept whole (contained) instead of being cropped.
+ */
+function IdentityAvatar({ src, alt }: { src: string; alt: string }) {
+  const [fit, setFit] = useState<"cover" | "contain">("cover");
+  const measure = (img: HTMLImageElement | null) => {
+    if (!img || !img.naturalWidth || !img.naturalHeight) return;
+    const next = img.naturalWidth / img.naturalHeight > 1.45 ? "contain" : "cover";
+    setFit(current => (current === next ? current : next));
+  };
+  return (
+    <div className="fh-avatar" data-fit={fit}>
+      <img
+        ref={img => {
+          if (img?.complete) measure(img);
+        }}
+        src={src}
+        alt={alt}
+        onLoad={event => measure(event.currentTarget)}
+      />
+    </div>
+  );
+}
+
 function Hero({ fiche, actions }: FicheTemplateProps) {
   // `photo` is the cover picture (shown large and sharp behind the identity),
   // `logo` is the brand mark shown above the name. Both are optional in
@@ -154,9 +180,7 @@ function Hero({ fiche, actions }: FicheTemplateProps) {
 
       <div className="fh-body">
         {logo ? (
-          <div className="fh-logo-plate">
-            <img src={logo} alt={`Logo ${fiche.entreprise}`} />
-          </div>
+          <IdentityAvatar src={logo} alt={`${fullName} — ${fiche.entreprise}`} />
         ) : (
           <div className="fh-initials" aria-hidden="true">
             {fiche.prenom.slice(0, 1)}

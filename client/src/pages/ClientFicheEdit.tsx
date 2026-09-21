@@ -244,9 +244,9 @@ export default function ClientFicheEdit() {
     event.preventDefault();
     if (!form) return;
     if (fiche.data?.plan.requiresProfile && (!form.photo || !form.logo)) {
-      toast.error("Couverture et logo obligatoires", {
+      toast.error("Couverture et photo / logo obligatoires", {
         description:
-          "Ajoutez une couverture et un logo avant d’enregistrer la fiche.",
+          "Ajoutez une couverture et une photo / un logo avant d’enregistrer la fiche.",
       });
       return;
     }
@@ -401,8 +401,8 @@ export default function ClientFicheEdit() {
               </div>
             </EditorSection>
 
-            {/* Section Couverture et Logo */}
-            <EditorSection title="Couverture et logo">
+            {/* Section Couverture et Photo / logo */}
+            <EditorSection title="Couverture et photo / logo">
               {!capabilities.profile.editable ? (
                 <UpgradeNotice requiredPlan={upgradeLabel("profile")} />
               ) : (
@@ -418,7 +418,7 @@ export default function ClientFicheEdit() {
                     onRemove={() => setField("photo", "")}
                   />
                   <MediaCard
-                    title="Logo"
+                    title="Photo / logo"
                     value={form.logo}
                     loading={uploading === "logo"}
                     onPick={file => uploadImage(file, "logo")}
