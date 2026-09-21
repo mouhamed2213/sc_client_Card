@@ -3,6 +3,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   CalendarDays,
+  ChevronDown,
   Clock3,
   Download,
   ExternalLink,
@@ -21,7 +22,7 @@ import {
   Youtube,
 } from "lucide-react";
 import type { FormEvent, ReactNode, TouchEvent } from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { parseVideoUrl } from "../../shared/videoUrls";
 import { getTemplateConfig } from "../config";
 import type { FicheTemplateModel, TemplateGalleryItem } from "../model";
@@ -71,6 +72,51 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
   );
 }
 
+/**
+ * Foldable section (Présentation, Horaires). The header is a real button
+ * (keyboard + screen-reader friendly: aria-expanded / aria-controls); the body
+ * is simply hidden, so its content stays in the page for assistive tech when open.
+ * `summary` is shown in the header while the section is folded.
+ */
+function CollapsibleSection({
+  icon,
+  title,
+  summary,
+  defaultOpen = true,
+  className = "public-section",
+  children,
+}: {
+  icon: ReactNode;
+  title: string;
+  summary?: string;
+  defaultOpen?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const bodyId = useId();
+  return (
+    <section className={`${className} fh-collapsible`} data-open={open}>
+      <button
+        type="button"
+        className="fh-collapse-toggle"
+        aria-expanded={open}
+        aria-controls={bodyId}
+        onClick={() => setOpen(value => !value)}
+      >
+        <SectionTitle icon={icon} title={title} />
+        {!open && summary ? (
+          <span className="fh-collapse-summary">{summary}</span>
+        ) : null}
+        <ChevronDown className="fh-collapse-chevron" aria-hidden="true" />
+      </button>
+      <div id={bodyId} className="fh-collapse-body" hidden={!open}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
 const WEEK_DAYS = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 
 function normalizeDay(value: string) {
@@ -89,6 +135,12 @@ function coversToday(label: string, today = new Date().getDay()) {
   // Range such as "Lundi — Samedi" (weeks start on Monday, wrap on Sunday).
   const offset = (day: number) => (day + 6) % 7;
   return offset(today) >= offset(found[0]) && offset(today) <= offset(found[found.length - 1]);
+}
+
+/** "Aujourd'hui : 08:00 – 18:00", shown in the folded Horaires header. */
+function todayHoursSummary(rows: { jour: string; horaire: string }[]) {
+  const today = rows.find(row => coversToday(row.jour));
+  return today ? `Aujourd’hui : ${today.horaire}` : undefined;
 }
 
 type ActionKey = "appel" | "whatsapp" | "email";
@@ -396,13 +448,14 @@ function PresentationContent({ fiche }: { fiche: FicheTemplateModel }) {
   const presentation = fiche.data.presentation?.trim();
   if (!presentation) return null;
   return (
-    <section className="public-section pro-presentation">
-      <SectionTitle
-        icon={<UserRound className="h-4 w-4" />}
-        title="Présentation"
-      />
+    <CollapsibleSection
+      className="public-section pro-presentation"
+      icon={<UserRound className="h-4 w-4" />}
+      title="Présentation"
+      defaultOpen
+    >
       <p className="pro-presentation-text">{presentation}</p>
-    </section>
+    </CollapsibleSection>
   );
 }
 
@@ -575,11 +628,13 @@ export function FicheTemplate({
             </section>
           ) : null}
           {features.requiresHours && fiche.data.horaires?.length ? (
-            <section className="public-section py-[22px] border-b border-theme-line">
-              <SectionTitle
-                icon={<Clock3 className="h-4 w-4" />}
-                title="Horaires"
-              />
+            <CollapsibleSection
+              className="public-section py-[22px] border-b border-theme-line"
+              icon={<Clock3 className="h-4 w-4" />}
+              title="Horaires"
+              summary={todayHoursSummary(fiche.data.horaires)}
+              defaultOpen={false}
+            >
               <div className="hours-list grid gap-2">
                 {fiche.data.horaires.map(row => (
                   <div
@@ -605,7 +660,7 @@ export function FicheTemplate({
                   </div>
                 ))}
               </div>
-            </section>
+            </CollapsibleSection>
           ) : null}
           {features.hasForm ? (
             <section className="public-section py-[22px] border-b border-theme-line">

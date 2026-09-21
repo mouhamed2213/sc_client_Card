@@ -97,3 +97,25 @@
 
 /* Footer */
 .fiche-template .public-footer { margin-top: 4px; }
+
+/* Foldable sections (Présentation, Horaires) */
+.fiche-template .fh-collapse-toggle {
+  display: flex; align-items: center; gap: 10px; width: 100%; margin: 0; padding: 0; border: 0;
+  background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.fiche-template .fh-collapse-toggle:focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 5px; border-radius: 10px; }
+.fiche-template .fh-collapse-toggle .fh-section-title { flex: 1 1 auto; min-width: 0; margin-bottom: 0; }
+.fiche-template .fh-collapse-summary {
+  flex: 0 1 auto; min-width: 0; max-width: 46%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--theme-muted); font-size: 12px; font-weight: 600;
+}
+.fiche-template .fh-collapse-chevron {
+  box-sizing: border-box; flex: none; width: 32px; height: 32px; padding: 8px; border-radius: 10px;
+  background: var(--theme-accent-soft); color: var(--theme-accent); transition: transform 0.2s ease;
+}
+.fiche-template .fh-collapsible[data-open="true"] .fh-collapse-chevron { transform: rotate(180deg); }
+.fiche-template .fh-collapse-toggle:hover .fh-collapse-chevron { background: color-mix(in srgb, var(--theme-accent) 22%, transparent); }
+.fiche-template .fh-collapse-body { margin-top: 16px; }
+@media (prefers-reduced-motion: reduce) {
+  .fiche-template .fh-collapse-chevron { transition: none; }
+}
