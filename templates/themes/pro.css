@@ -1,18 +1,16 @@
 
 
-.fiche-template--pro .essential-save-row {
-  padding: 18px 0 4px;
-}
 
 .fiche-template--pro .public-save-contact {
   display: inline-flex;
-  width: 100%;
+  width: auto;
   min-height: 48px;
   align-items: center;
   justify-content: center;
   gap: 8px;
   border: 1px solid rgba(154, 104, 65, 0.45);
-  border-radius: 13px;
+  border-radius: 999px;
+  padding: 0 24px;
   background: #fffaf4;
   color: #5e402a;
   font-size: 12px;
