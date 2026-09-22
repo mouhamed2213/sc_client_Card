@@ -283,7 +283,7 @@ export const appRouter = router({
       .input(
         z.object({
           formula: z.enum(["essentiel", "pro", "signature"]),
-          kind: z.enum(["profile", "logo", "gallery"]),
+          kind: z.enum(["profile", "logo", "gallery", "catalogArticle"]),
           filename: z.string().min(1).max(160),
           mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]),
           contentBase64: z.string().min(20),
@@ -295,6 +295,11 @@ export const appRouter = router({
           throw new TRPCError({
             code: "FORBIDDEN",
             message: "La formule Essentiel ne permet pas de galerie.",
+          });
+        if (input.kind === "catalogArticle" && !features.hasCatalog)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Cette formule ne permet pas de catalogue.",
           });
         const raw = input.contentBase64.replace(/^data:[^;]+;base64,/, "");
         const bytes = Buffer.from(raw, "base64");
@@ -875,7 +880,7 @@ export const appRouter = router({
       .input(
         z.object({
           ficheId: z.number().int().positive(),
-          kind: z.enum(["profile", "logo", "gallery"]),
+          kind: z.enum(["profile", "logo", "gallery", "catalogArticle"]),
           filename: z.string().min(1).max(160),
           mimeType: z.enum([
             "image/jpeg",
@@ -901,7 +906,8 @@ export const appRouter = router({
 
         const plan = fiche.formule as PlanName;
         const capabilities = getClientFicheCapabilities(plan);
-        const capability = capabilities.gallery;
+        const capability =
+          input.kind === "catalogArticle" ? capabilities.catalog : capabilities.gallery;
 
         if (!capability.editable) {
           throw new TRPCError({

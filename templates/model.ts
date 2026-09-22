@@ -19,10 +19,16 @@ export type TemplateGalleryItem = {
   embedUrl?: string;
 };
 
+export type ArticleBadge = "populaire" | "nouveau" | "promo";
+export type ArticleCurrency = "XOF" | "EUR";
+
 export type TemplateArticle = {
   nom: string;
   description: string;
   prix: string;
+  devise?: ArticleCurrency;
+  photo?: string;
+  badge?: ArticleBadge;
 };
 
 export type TemplateSection = {
