@@ -25,7 +25,7 @@ import type { FormEvent, ReactNode, TouchEvent } from "react";
 import { useId, useState } from "react";
 import { parseVideoUrl } from "../../shared/videoUrls";
 import { getTemplateConfig } from "../config";
-import type { FicheTemplateModel, TemplateGalleryItem } from "../model";
+import type { FicheTemplateModel, TemplateArticle, TemplateGalleryItem } from "../model";
 import "../socials.css";
 import "../theme-tokens.css";
 import "../themes.css";
@@ -141,6 +141,37 @@ function coversToday(label: string, today = new Date().getDay()) {
 function todayHoursSummary(rows: { jour: string; horaire: string }[]) {
   const today = rows.find(row => coversToday(row.jour));
   return today ? `Aujourd’hui : ${today.horaire}` : undefined;
+}
+
+const catalogBadgeLabels: Record<NonNullable<TemplateArticle["badge"]>, string> = {
+  populaire: "Populaire",
+  nouveau: "Nouveau",
+  promo: "Promo",
+};
+
+const currencySuffix: Record<NonNullable<TemplateArticle["devise"]>, string> = {
+  XOF: "FCFA",
+  EUR: "€",
+};
+
+/** Appends the currency suffix only when the price is a plain number (an
+ * article like "À partir de 5 000" keeps its own free-text price as-is). */
+function formatArticlePrice(article: TemplateArticle) {
+  const price = article.prix.trim();
+  if (!price) return "";
+  const suffix = currencySuffix[article.devise ?? "XOF"];
+  if (/^\d[\d\s.,]*$/.test(price) && !price.endsWith(suffix)) {
+    return `${price} ${suffix}`;
+  }
+  return price;
+}
+
+/** WhatsApp deep link pre-filled with the article's name and price, so a
+ * visitor can order it in one tap without leaving the fiche. */
+function catalogOrderHref(whatsapp: string, article: TemplateArticle) {
+  const price = formatArticlePrice(article);
+  const message = `Bonjour, je souhaite commander : ${article.nom}${price ? ` — ${price}` : ""}`;
+  return `https://wa.me/${whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
 }
 
 type ActionKey = "appel" | "whatsapp" | "email";
@@ -743,15 +774,48 @@ export function FicheTemplate({
                   <h3>{section.titre}</h3>
                   {section.articles.map(article => (
                     <div key={article.nom} className="catalog-row">
-                      <div>
+                      {article.photo ? (
+                        <img
+                          src={article.photo}
+                          alt=""
+                          className="catalog-row-photo"
+                          loading="lazy"
+                        />
+                      ) : null}
+                      <div className="catalog-row-body">
                         <p className="font-semibold text-theme-text">
                           {article.nom}
+                          {article.badge ? (
+                            <span
+                              className={`catalog-badge catalog-badge--${article.badge}`}
+                            >
+                              {catalogBadgeLabels[article.badge]}
+                            </span>
+                          ) : null}
                         </p>
-                        <p className="mt-1 text-xs leading-5 text-theme-muted">
-                          {article.description}
-                        </p>
+                        {article.description ? (
+                          <p className="mt-1 text-xs leading-5 text-theme-muted">
+                            {article.description}
+                          </p>
+                        ) : null}
                       </div>
-                      <span>{article.prix}</span>
+                      <div className="catalog-row-side">
+                        {article.prix ? (
+                          <span>{formatArticlePrice(article)}</span>
+                        ) : null}
+                        {fiche.whatsapp && article.nom ? (
+                          <a
+                            href={catalogOrderHref(fiche.whatsapp, article)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="catalog-order-button"
+                            aria-label={`Commander ${article.nom} sur WhatsApp`}
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            <span>Commander</span>
+                          </a>
+                        ) : null}
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -8,6 +8,8 @@ export const planFeatures = {
     requiresProfile: false,
     requiresHours: true,
     hasCatalog: false,
+    maxCatalogSections: 0,
+    maxCatalogArticlesPerSection: 0,
     hasPanel: false,
   },
   pro: {
@@ -18,7 +20,11 @@ export const planFeatures = {
     hasGoogleReview: true,
     requiresProfile: true,
     requiresHours: true,
-    hasCatalog: false,
+    hasCatalog: true,
+    // Same cap as Signature: the catalogue itself isn't a Signature-exclusive
+    // depth advantage, only its access is now shared between the two plans.
+    maxCatalogSections: 6,
+    maxCatalogArticlesPerSection: 12,
     hasPanel: false,
   },
   signature: {
@@ -30,6 +36,8 @@ export const planFeatures = {
     requiresProfile: true,
     requiresHours: true,
     hasCatalog: true,
+    maxCatalogSections: 6,
+    maxCatalogArticlesPerSection: 12,
     hasPanel: true,
   },
 } as const;

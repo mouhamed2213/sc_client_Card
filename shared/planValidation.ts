@@ -6,7 +6,7 @@ type PlanData = {
   liens?: unknown[];
   galerie?: Array<{ type?: "image" | "video"; url?: string; alt?: string; source?: string; embedUrl?: string }>;
   horaires?: { jour?: string; horaire?: string }[];
-  sections?: unknown[];
+  sections?: Array<{ titre?: string; articles?: unknown[] }>;
   presentation?: string;
   rendezVous?: { label?: string; url?: string };
   reseauxSociaux?: { label?: string; url?: string }[];
@@ -55,6 +55,14 @@ export function validatePlanPayload(input: {
   if (!capabilities.socials.editable && socials.some(item => item.url?.trim())) errors.push("Cette formule ne permet pas de réseaux sociaux.");
   if (!capabilities.googleReview.editable && input.googlePlaceId?.trim()) errors.push("Cette formule ne permet pas les avis Google.");
   if (!capabilities.catalog.editable && sections.length > 0) errors.push("Cette formule ne permet pas de catalogue.");
+  if (capabilities.catalog.editable) {
+    const maxSections = features.maxCatalogSections;
+    const maxArticles = features.maxCatalogArticlesPerSection;
+    if (sections.length > maxSections) errors.push(`${input.formule}: maximum ${maxSections} sections de catalogue.`);
+    if (sections.some(section => (section.articles ?? []).length > maxArticles)) {
+      errors.push(`${input.formule}: maximum ${maxArticles} articles par section.`);
+    }
+  }
   if (features.requiresProfile && (!input.photo || !input.logo)) errors.push(`${input.formule}: la couverture et la photo / le logo sont obligatoires.`);
   if (features.requiresHours) {
     const hours = input.data.horaires ?? [];

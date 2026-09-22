@@ -96,7 +96,35 @@
   display: inline-block; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 2px solid var(--theme-accent);
   color: var(--theme-text); font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
 }
-.fiche-template .catalog-row > span { padding: 3px 9px; border-radius: 999px; background: var(--theme-accent-soft); }
+.fiche-template .catalog-row-photo {
+  flex: none; width: 56px; height: 56px; margin-top: 2px; border-radius: 12px; border: 1px solid var(--theme-line);
+  object-fit: cover; background: var(--theme-accent-soft);
+}
+.fiche-template .catalog-row-body { flex: 1 1 auto; min-width: 0; }
+.fiche-template .catalog-row-side {
+  flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-left: auto;
+}
+.fiche-template .catalog-row-side > span {
+  padding: 3px 9px; border-radius: 999px; background: var(--theme-accent-soft);
+  font-size: 12px; font-weight: 800; white-space: nowrap;
+}
+.fiche-template .catalog-badge {
+  display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px;
+  background: var(--theme-accent); color: #fff; font-size: 9px; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase; vertical-align: middle;
+}
+.fiche-template .catalog-badge--promo { background: #d9534f; }
+.fiche-template .catalog-order-button {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; padding: 5px 11px;
+  border: 1px solid var(--theme-line); border-radius: 999px; background: transparent;
+  color: var(--theme-accent); font-size: 11px; font-weight: 700; text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.fiche-template .catalog-order-button:hover { background: var(--theme-accent-soft); transform: translateY(-1px); }
+@media (max-width: 360px) {
+  .fiche-template .catalog-row-photo { width: 46px; height: 46px; }
+  .fiche-template .catalog-order-button span { display: none; }
+}
 
 /* Callback form */
 .fiche-template .contact-form { display: grid; gap: 9px; }

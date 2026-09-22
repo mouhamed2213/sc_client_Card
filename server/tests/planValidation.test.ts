@@ -18,9 +18,9 @@ const hours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dim
 describe("planFeatures architecture", () => {
   it("declares the exact capabilities of the three formulas", () => {
     expect(planFeatures).toEqual({
-      essentiel: { maxLinks: 0, maxPhotos: 0, maxVideos: 0, hasForm: false, hasGoogleReview: false, requiresProfile: false, requiresHours: true, hasCatalog: false, hasPanel: false },
-      pro: { maxLinks: 10, maxPhotos: 4, maxVideos: 1, hasForm: false, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: false, hasPanel: false },
-      signature: { maxLinks: 10, maxPhotos: 8, maxVideos: 3, hasForm: true, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true, hasPanel: true },
+      essentiel: { maxLinks: 0, maxPhotos: 0, maxVideos: 0, hasForm: false, hasGoogleReview: false, requiresProfile: false, requiresHours: true, hasCatalog: false, maxCatalogSections: 0, maxCatalogArticlesPerSection: 0, hasPanel: false },
+      pro: { maxLinks: 10, maxPhotos: 4, maxVideos: 1, hasForm: false, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true, maxCatalogSections: 6, maxCatalogArticlesPerSection: 12, hasPanel: false },
+      signature: { maxLinks: 10, maxPhotos: 8, maxVideos: 3, hasForm: true, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true, maxCatalogSections: 6, maxCatalogArticlesPerSection: 12, hasPanel: true },
     });
   });
 
@@ -52,7 +52,7 @@ describe("planFeatures architecture", () => {
     expect(getPlanFeatures("essentiel").hasForm).toBe(false);
   });
 
-  it("allows Pro features and rejects Signature-only catalog", () => {
+  it("allows Pro features, including a catalogue within the shared limits", () => {
     const validPro = validatePlanPayload({
       formule: "pro",
       ...base,
@@ -67,19 +67,52 @@ describe("planFeatures architecture", () => {
         liens: items(10),
         rendezVous: { label: "RDV", url: "https://cal.com/x" },
         reseauxSociaux: [{ label: "Instagram", url: "https://instagram.com/x" }],
+        sections: [{ titre: "Menu", articles: items(12) }],
       },
     });
     expect(validPro).toEqual([]);
     expect(getPlanFeatures("pro").hasForm).toBe(false);
+  });
 
-    const proWithCatalog = validatePlanPayload({
+  it("caps the catalogue at 6 sections / 12 articles per section, for both Pro and Signature", () => {
+    const tooManySections = validatePlanPayload({
       formule: "pro",
       ...base,
       photo: "/portrait.webp",
       logo: "/logo.webp",
-      data: { ...base.data, horaires: hours, sections: [{ titre: "Menu" }] },
+      data: {
+        ...base.data,
+        horaires: hours,
+        sections: Array.from({ length: 7 }, (_, i) => ({ titre: `Section ${i}`, articles: [] })),
+      },
     });
-    expect(proWithCatalog).toContain("Cette formule ne permet pas de catalogue.");
+    expect(tooManySections).toContain("pro: maximum 6 sections de catalogue.");
+
+    const tooManyArticles = validatePlanPayload({
+      formule: "signature",
+      ...base,
+      photo: "/portrait.webp",
+      logo: "/logo.webp",
+      data: {
+        ...base.data,
+        horaires: hours,
+        sections: [{ titre: "Menu", articles: items(13) }],
+      },
+    });
+    expect(tooManyArticles).toContain("signature: maximum 12 articles par section.");
+
+    const withinLimits = validatePlanPayload({
+      formule: "signature",
+      ...base,
+      photo: "/portrait.webp",
+      logo: "/logo.webp",
+      data: {
+        ...base.data,
+        horaires: hours,
+        sections: Array.from({ length: 6 }, (_, i) => ({ titre: `Section ${i}`, articles: items(12) })),
+      },
+    });
+    expect(withinLimits).toEqual([]);
   });
 
   it("enforces Pro and Signature media limits", () => {

@@ -50,6 +50,9 @@ const ficheFields = z.object({
               nom: z.string(),
               description: z.string(),
               prix: z.string(),
+              devise: z.enum(["XOF", "EUR"]).optional().default("XOF"),
+              photo: z.string().optional().default(""),
+              badge: z.enum(["populaire", "nouveau", "promo"]).optional(),
             })
           ),
         })

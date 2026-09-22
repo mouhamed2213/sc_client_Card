@@ -16,7 +16,7 @@ describe("client fiche capabilities", () => {
     expect(c.links.editable).toBe(false);
     expect(c.gallery.editable).toBe(false);
     expect(c.googleReview.upgradeTo).toBe("pro");
-    expect(c.catalog.upgradeTo).toBe("signature");
+    expect(c.catalog.upgradeTo).toBe("pro");
     expect(c.callbackForm.upgradeTo).toBe("signature");
   });
 
@@ -30,8 +30,10 @@ describe("client fiche capabilities", () => {
     expect(c.gallery.maxItems).toBe(4);
     expect(c.gallery.maxVideos).toBe(1);
     expect(c.googleReview.editable).toBe(true);
-    expect(c.catalog.editable).toBe(false);
-    expect(c.catalog.upgradeTo).toBe("signature");
+    // Catalogue is shared with Pro (same limits as Signature), no upgrade needed.
+    expect(c.catalog.editable).toBe(true);
+    expect(c.catalog.maxSections).toBe(6);
+    expect(c.catalog.maxArticlesPerSection).toBe(12);
     expect(c.callbackForm.upgradeTo).toBe("signature");
   });
 
@@ -43,6 +45,13 @@ describe("client fiche capabilities", () => {
       expect(capabilities.gallery.maxItems).toBe(features.maxPhotos);
       expect(capabilities.gallery.maxVideos).toBe(features.maxVideos);
     }
+    // Pro and Signature share the same catalogue caps.
+    expect(getClientFicheCapabilities("pro").catalog.maxSections).toBe(
+      getClientFicheCapabilities("signature").catalog.maxSections
+    );
+    expect(getClientFicheCapabilities("pro").catalog.maxArticlesPerSection).toBe(
+      getClientFicheCapabilities("signature").catalog.maxArticlesPerSection
+    );
   });
 
   it("allows Signature to edit the complete public content", () => {

@@ -1,4 +1,4 @@
-export type MediaKind = "profile" | "logo" | "gallery";
+export type MediaKind = "profile" | "logo" | "gallery" | "catalogArticle";
 
 export const mediaRules = {
   profile: { maxBytes: 30 * 1024, maxWidth: 400, maxHeight: 400, square: true },
@@ -8,6 +8,13 @@ export const mediaRules = {
     maxWidth: 1200,
     maxHeight: 1200,
     square: false,
+  },
+  // Small square thumbnail shown in the catalogue row, not a full gallery photo.
+  catalogArticle: {
+    maxBytes: 60 * 1024,
+    maxWidth: 600,
+    maxHeight: 600,
+    square: true,
   },
 } as const;
 
