@@ -31,9 +31,16 @@ export default function ClientLayout({
   const [premiumFeature, setPremiumFeature] = useState<"Statistiques" | "Demandes reçues" | null>(null);
   const { user, logout } = useAuth();
   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
+  // Single-fiche accounts always have one unambiguous fiche: fall back to it
+  // so the fiche-specific menu (Statistiques, Demandes, Modifier) doesn't
+  // disappear on pages that don't pass ficheId explicitly (e.g. "Mes fiches").
+  // Multi-fiche accounts keep no fallback: outside a fiche's own pages there
+  // is no single fiche to point those links at.
+  const effectiveFicheId =
+    ficheId ?? (fiches.data?.length === 1 ? fiches.data[0].id : undefined);
   const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery(
-    { ficheId: ficheId ?? 0 },
-    { enabled: ficheId !== undefined }
+    { ficheId: effectiveFicheId ?? 0 },
+    { enabled: effectiveFicheId !== undefined }
   );
 
   const currentPlan = fiche.data?.formule;
@@ -55,29 +62,29 @@ export default function ClientLayout({
       label: "Mes fiches",
       icon: Layers3,
     },
-    ...(ficheId
+    ...(effectiveFicheId
       ? [
           {
-            href: `/espace-client/fiche/${ficheId}`,
+            href: `/espace-client/fiche/${effectiveFicheId}`,
             label: (fiches.data?.length ?? 0) > 1 ? "Détail de la fiche" : "Vue d'ensemble",
             icon: LayoutDashboard,
           },
           {
-            href: `/espace-client/fiche/${ficheId}/statistiques`,
+            href: `/espace-client/fiche/${effectiveFicheId}/statistiques`,
             label: "Statistiques",
             icon: BarChart3,
             premium: currentPlan !== undefined && currentPlan !== "signature",
             requiredPlan: "signature" as const,
           },
           {
-            href: `/espace-client/fiche/${ficheId}/demandes`,
+            href: `/espace-client/fiche/${effectiveFicheId}/demandes`,
             label: "Demandes reçues",
             icon: MessageSquare,
             premium: currentPlan !== undefined && currentPlan !== "signature",
             requiredPlan: "signature" as const,
           },
           {
-            href: `/espace-client/fiche/${ficheId}/modifier`,
+            href: `/espace-client/fiche/${effectiveFicheId}/modifier`,
             label: "Modifier ma fiche",
             icon: Settings,
           },

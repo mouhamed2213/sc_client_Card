@@ -6,9 +6,10 @@ import {
   Layers3,
   MessageSquare,
   ScanLine,
+  Search,
   Sparkles,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { formuleLabels, getEcheanceStatus } from "@/lib/ficheStatus";
@@ -45,12 +46,27 @@ function formatDate(date: Date | string) {
 export default function AllFichesOverview({ fiches }: { fiches: FicheOption[] }) {
   const [, navigate] = useLocation();
   const [selected, setSelected] = useState<"all" | number>("all");
+  const [search, setSearch] = useState("");
   const overview = trpc.clientSpaceRouter.overview.useQuery(
     selected === "all" ? {} : { ficheId: selected },
     { placeholderData: keepPreviousData }
   );
 
   const data = overview.data;
+
+  const normalize = (value: string) =>
+    value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const query = normalize(search.trim());
+  const visibleFiches = useMemo(() => {
+    if (!data) return [];
+    if (!query) return data.fiches;
+    return data.fiches.filter(fiche =>
+      normalize(
+        `${fiche.prenom} ${fiche.nom} ${fiche.entreprise} ${fiche.fonction} ${fiche.slug}`
+      ).includes(query)
+    );
+  }, [data, query]);
+
   const names = new Map(fiches.map(fiche => [fiche.id, label(fiche)]));
   const filtered = selected !== "all";
   const needsAttention = data
@@ -77,25 +93,47 @@ export default function AllFichesOverview({ fiches }: { fiches: FicheOption[] })
               : `Résumé de vos ${fiches.length} fiches.`}
           </p>
         </div>
-        <label className="block w-full md:w-80">
-          <span className="mb-1.5 block text-[13px] font-semibold text-[#3a4761]">
-            Filtrer par fiche
-          </span>
-          <select
-            className="editor-input"
-            value={selected}
-            onChange={event =>
-              setSelected(event.target.value === "all" ? "all" : Number(event.target.value))
-            }
-          >
-            <option value="all">Toutes mes fiches ({fiches.length})</option>
-            {fiches.map(fiche => (
-              <option key={fiche.id} value={fiche.id}>
-                {label(fiche)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex w-full flex-col gap-4 sm:flex-row md:w-auto">
+          <label className="block w-full sm:w-64">
+            <span className="mb-1.5 block text-[13px] font-semibold text-[#3a4761]">
+              Filtrer par fiche
+            </span>
+            <select
+              className="editor-input"
+              value={selected}
+              onChange={event =>
+                setSelected(event.target.value === "all" ? "all" : Number(event.target.value))
+              }
+            >
+              <option value="all">Toutes mes fiches ({fiches.length})</option>
+              {fiches.map(fiche => (
+                <option key={fiche.id} value={fiche.id}>
+                  {label(fiche)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block w-full sm:w-64">
+            <span className="mb-1.5 block text-[13px] font-semibold text-[#3a4761]">
+              Rechercher
+            </span>
+            <div className="relative">
+              <Search
+                size={15}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#9aa3b1]"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                className="editor-input pl-9"
+                placeholder="Nom, entreprise, fonction…"
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+                aria-label="Rechercher une fiche par nom, entreprise ou fonction"
+              />
+            </div>
+          </label>
+        </div>
       </div>
 
       {overview.isError ? (
@@ -221,10 +259,17 @@ export default function AllFichesOverview({ fiches }: { fiches: FicheOption[] })
             <div className="border-b border-[#edf0f2] px-5 py-4 lg:px-7">
               <p className="panel-title">Détail par fiche</p>
               <p className="panel-sub">
-                Les passages et les demandes dépendent de la formule de chaque fiche.
+                {query
+                  ? `${visibleFiches.length} fiche${visibleFiches.length > 1 ? "s" : ""} sur ${data.fiches.length}`
+                  : "Les passages et les demandes dépendent de la formule de chaque fiche."}
               </p>
             </div>
             <div className="overflow-x-auto">
+              {visibleFiches.length === 0 ? (
+                <p className="px-7 py-10 text-center text-sm text-[#7d8798]">
+                  Aucune fiche ne correspond à « {search} ».
+                </p>
+              ) : (
               <table className="w-full min-w-[760px]">
                 <thead>
                   <tr className="border-b border-[#edf0f2] text-left text-[11px] uppercase tracking-[0.13em] text-[#99a1ad]">
@@ -240,7 +285,7 @@ export default function AllFichesOverview({ fiches }: { fiches: FicheOption[] })
                   </tr>
                 </thead>
                 <tbody>
-                  {data.fiches.map(fiche => (
+                  {visibleFiches.map(fiche => (
                     <tr key={fiche.id} className="border-b border-[#f0f2f4] transition-colors last:border-0 hover:bg-[#fcfcfd]">
                       <td className="px-7 py-4">
                         <p className="font-semibold text-[#29344a]">{fiche.prenom} {fiche.nom}</p>
@@ -278,6 +323,7 @@ export default function AllFichesOverview({ fiches }: { fiches: FicheOption[] })
                   ))}
                 </tbody>
               </table>
+              )}
             </div>
           </section>
         </div>
