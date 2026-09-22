@@ -9,7 +9,7 @@
  * "legacy" = passages counted before the event log existed (they cannot be
  * verified: admin previews and reloads may be mixed in).
  */
-import { prisma } from "../prisma/client";
+import { prisma } from "../server/database/prisma-client";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -17,7 +17,9 @@ async function main() {
   if (resetIndex >= 0) {
     const slug = args[resetIndex + 1];
     if (!slug || !args.includes("--yes")) {
-      console.error("Usage: --reset <slug> --yes (destructive: zeroes total, daily aggregates and events)");
+      console.error(
+        "Usage: --reset <slug> --yes (destructive: zeroes total, daily aggregates and events)"
+      );
       process.exit(1);
     }
     const fiche = await prisma.fiche.findUnique({ where: { slug } });
@@ -28,9 +30,14 @@ async function main() {
     await prisma.$transaction([
       prisma.ficheScanEvent.deleteMany({ where: { ficheId: fiche.id } }),
       prisma.ficheScan.deleteMany({ where: { ficheId: fiche.id } }),
-      prisma.fiche.update({ where: { id: fiche.id }, data: { scansTotal: 0, lastScanAt: null } }),
+      prisma.fiche.update({
+        where: { id: fiche.id },
+        data: { scansTotal: 0, lastScanAt: null },
+      }),
     ]);
-    console.log(`Passages remis à zéro pour ${slug} (était ${fiche.scansTotal}).`);
+    console.log(
+      `Passages remis à zéro pour ${slug} (était ${fiche.scansTotal}).`
+    );
     return;
   }
 
@@ -38,25 +45,52 @@ async function main() {
     select: { id: true, slug: true, statut: true, scansTotal: true },
     orderBy: { id: "asc" },
   });
-  const daily = await prisma.ficheScan.groupBy({ by: ["ficheId"], _sum: { count: true } });
+  const daily = await prisma.ficheScan.groupBy({
+    by: ["ficheId"],
+    _sum: { count: true },
+  });
   const events = await prisma.ficheScanEvent.groupBy({
     by: ["ficheId", "source"],
     _count: { _all: true },
   });
-  const dailyByFiche = new Map(daily.map(row => [row.ficheId, row._sum.count ?? 0]));
-  const eventsByFiche = new Map<number, { total: number; qr: number; nfc: number; direct: number }>();
+  const dailyByFiche = new Map(
+    daily.map((row : any) => [row.ficheId, row._sum.count ?? 0])
+  );
+  const eventsByFiche = new Map<
+    number,
+    { total: number; qr: number; nfc: number; direct: number }
+  >();
   for (const row of events) {
-    const entry = eventsByFiche.get(row.ficheId) ?? { total: 0, qr: 0, nfc: 0, direct: 0 };
+    const entry = eventsByFiche.get(row.ficheId) ?? {
+      total: 0,
+      qr: 0,
+      nfc: 0,
+      direct: 0,
+    };
     entry.total += row._count._all;
-    if (row.source === "qr" || row.source === "nfc" || row.source === "direct") entry[row.source] += row._count._all;
+    if (row.source === "qr" || row.source === "nfc" || row.source === "direct")
+      entry[row.source] += row._count._all;
     eventsByFiche.set(row.ficheId, entry);
   }
 
   let drift = 0;
-  console.log("slug".padEnd(34), "statut".padEnd(10), "total", "quotidien", "événements", "qr/nfc/direct", "legacy");
+  console.log(
+    "slug".padEnd(34),
+    "statut".padEnd(10),
+    "total",
+    "quotidien",
+    "événements",
+    "qr/nfc/direct",
+    "legacy"
+  );
   for (const fiche of fiches) {
     const day = dailyByFiche.get(fiche.id) ?? 0;
-    const ev = eventsByFiche.get(fiche.id) ?? { total: 0, qr: 0, nfc: 0, direct: 0 };
+    const ev = eventsByFiche.get(fiche.id) ?? {
+      total: 0,
+      qr: 0,
+      nfc: 0,
+      direct: 0,
+    };
     const legacy = Math.max(0, fiche.scansTotal - ev.total);
     const consistent = fiche.scansTotal === day && day >= ev.total;
     if (!consistent) drift++;
@@ -71,7 +105,9 @@ async function main() {
       consistent ? "" : "  ⚠ écart total/quotidien"
     );
   }
-  console.log(drift ? `\n${drift} fiche(s) avec un écart.` : "\nCompteurs cohérents.");
+  console.log(
+    drift ? `\n${drift} fiche(s) avec un écart.` : "\nCompteurs cohérents."
+  );
 }
 
 main()

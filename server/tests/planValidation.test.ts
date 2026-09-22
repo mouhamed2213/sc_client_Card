@@ -35,7 +35,6 @@ describe("planFeatures architecture", () => {
         horaires: hours,
         liens: items(1),
         galerie: items(1),
-        rendezVous: { label: "RDV", url: "https://cal.com/x" },
         reseauxSociaux: [{ label: "Instagram", url: "https://instagram.com/x" }],
         sections: [{ titre: "Menu" }],
       },
@@ -65,7 +64,6 @@ describe("planFeatures architecture", () => {
         horaires: hours,
         galerie: items(4),
         liens: items(10),
-        rendezVous: { label: "RDV", url: "https://cal.com/x" },
         reseauxSociaux: [{ label: "Instagram", url: "https://instagram.com/x" }],
       },
     });
@@ -117,7 +115,6 @@ describe("planFeatures architecture", () => {
         horaires: hours,
         liens: items(10),
         galerie: items(8),
-        rendezVous: { label: "RDV", url: "https://cal.com/x" },
         reseauxSociaux: [{ label: "Instagram", url: "https://instagram.com/x" }],
         sections: [{ titre: "Menu" }],
       },

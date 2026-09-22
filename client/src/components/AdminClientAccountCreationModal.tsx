@@ -323,7 +323,6 @@ export default function AdminClientAccountCreationModal({
           premierBouton: "whatsapp",
           messageWhatsapp: "Bonjour, je souhaite échanger avec vous.",
           presentation: "",
-          rendezVous: undefined,
           reseauxSociaux: [],
           liens: [],
           horaires: hours,

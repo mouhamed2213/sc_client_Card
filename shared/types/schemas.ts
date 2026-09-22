@@ -30,7 +30,6 @@ const ficheFields = z.object({
     premierBouton: z.enum(["whatsapp", "appel", "email"]),
     messageWhatsapp: z.string(),
     presentation: z.string().optional().default(""),
-    rendezVous: z.object({ label: z.string(), url: z.string() }).optional(),
     reseauxSociaux: z
       .array(z.object({ label: z.string(), url: z.string() }))
       .default([]),

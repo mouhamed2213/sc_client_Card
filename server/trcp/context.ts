@@ -1,5 +1,5 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import { User } from "../../generated/prisma/client";
+import { User } from "../../server/database/generated/prisma/client";
 import { sdk } from "../_core/config/sdk";
 
 export type TrpcContext = {

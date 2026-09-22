@@ -485,37 +485,12 @@ function PresentationContent({ fiche }: { fiche: FicheTemplateModel }) {
 }
 
 function ProContent({ fiche }: { fiche: FicheTemplateModel }) {
-  const appointment = fiche.data.rendezVous?.url?.trim()
-    ? fiche.data.rendezVous
-    : null;
   const socials = (fiche.data.reseauxSociaux ?? []).filter(social =>
     social.url?.trim()
   );
-  if (!appointment && !socials.length) return null;
+  if (!socials.length) return null;
   return (
     <>
-      {appointment && (
-        <section className="public-section pro-appointment">
-          <div>
-            <SectionTitle
-              icon={<CalendarDays className="h-4 w-4" />}
-              title="Rendez-vous"
-            />
-            <p className="public-address">
-              Choisissez directement votre créneau.
-            </p>
-          </div>
-          <a
-            href={appointment.url}
-            target="_blank"
-            rel="noreferrer"
-            className="public-primary-link"
-          >
-            {appointment.label || "Prendre rendez-vous"}
-            <ArrowUpRight className="h-4 w-4" />
-          </a>
-        </section>
-      )}
       {socials.length > 0 && (
         <section className="public-section">
           <SectionTitle

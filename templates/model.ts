@@ -34,7 +34,6 @@ export type FicheTemplateData = {
   premierBouton?: "whatsapp" | "appel" | "email";
   messageWhatsapp?: string;
   presentation?: string;
-  rendezVous?: TemplateLink;
   reseauxSociaux?: TemplateLink[];
   liens?: TemplateLink[];
   horaires?: TemplateHour[];

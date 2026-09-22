@@ -1,22 +1,22 @@
+import { useAuth } from "@/_core/hooks/useAuth";
+import { PremiumUpgradeModal } from "@/components/PremiumFeature";
 import { RENEWAL_WHATSAPP_NUMBER } from "@/const";
 import { trpc } from "@/lib/trpc";
-import { useAuth } from "@/_core/hooks/useAuth";
 import {
   BarChart3,
   CreditCard,
-  LayoutDashboard,
   Layers3,
+  LayoutDashboard,
   LogOut,
   Menu,
   MessageSquare,
   RefreshCw,
   Settings,
+  Sparkles,
   SquareArrowOutUpRight,
   X,
-  Sparkles,
 } from "lucide-react";
 import { ReactNode, useState } from "react";
-import { PremiumUpgradeModal } from "@/components/PremiumFeature";
 import { Link, useLocation } from "wouter";
 
 export default function ClientLayout({
@@ -28,7 +28,9 @@ export default function ClientLayout({
 }) {
   const [location, navigate] = useLocation();
   const [open, setOpen] = useState(false);
-  const [premiumFeature, setPremiumFeature] = useState<"Statistiques" | "Demandes reçues" | null>(null);
+  const [premiumFeature, setPremiumFeature] = useState<
+    "Statistiques" | "Demandes reçues" | null
+  >(null);
   const { user, logout } = useAuth();
   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
   // Single-fiche accounts always have one unambiguous fiche: fall back to it
@@ -44,7 +46,9 @@ export default function ClientLayout({
   );
 
   const currentPlan = fiche.data?.formule;
-  const lifecycleBlocked = fiche.data?.statutMetier === "suspendue" || fiche.data?.statutMetier === "expiree";
+  const lifecycleBlocked =
+    fiche.data?.statutMetier === "suspendue" ||
+    fiche.data?.statutMetier === "expiree";
 
   const nav = [
     // Aggregated overview of every fiche (only meaningful with several fiches).
@@ -66,7 +70,10 @@ export default function ClientLayout({
       ? [
           {
             href: `/espace-client/fiche/${effectiveFicheId}`,
-            label: (fiches.data?.length ?? 0) > 1 ? "Détail de la fiche" : "Vue d'ensemble",
+            label:
+              (fiches.data?.length ?? 0) > 1
+                ? "Détail de la fiche"
+                : "Vue d'ensemble",
             icon: LayoutDashboard,
           },
           {
@@ -95,7 +102,7 @@ export default function ClientLayout({
   const initials = (user?.name || user?.email || "?")
     .trim()
     .split(/\s+/)
-    .map(part => part[0])
+    .map((part: string) => part[0])
     .slice(0, 2)
     .join("")
     .toUpperCase();
@@ -144,7 +151,10 @@ export default function ClientLayout({
                     {fiche.data.entreprise}
                   </p>
                 </div>
-                <CreditCard size={14} className="ml-auto shrink-0 text-[#e5a86b]" />
+                <CreditCard
+                  size={14}
+                  className="ml-auto shrink-0 text-[#e5a86b]"
+                />
               </div>
               <div className="mt-3 flex items-center justify-between gap-2">
                 <span className="rounded-full bg-white/8 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-white/55">
@@ -173,37 +183,44 @@ export default function ClientLayout({
             (item.href === "/espace-client/fiches" &&
               location.startsWith("/espace-client/fiches"));
           return item.premium ? (
-              <button
-                key={item.href}
-                type="button"
-                onClick={() => {
-                  setPremiumFeature(item.label as "Statistiques" | "Demandes reçues");
-                  setOpen(false);
-                }}
-                className={`sidebar-link w-full ${active ? "sidebar-link-active" : ""}`}
-                aria-label={`${item.label}, disponible avec le plan ${item.requiredPlan}`}
-              >
-                <Icon size={17} />
-                <span>{item.label}</span>
-                <span className="ml-auto"><PremiumIcon /></span>
-              </button>
-            ) : (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className={`sidebar-link ${active ? "sidebar-link-active" : ""}`}
-              >
-                <Icon size={17} />
-                {item.label}
-              </Link>
-            );
+            <button
+              key={item.href}
+              type="button"
+              onClick={() => {
+                setPremiumFeature(
+                  item.label as "Statistiques" | "Demandes reçues"
+                );
+                setOpen(false);
+              }}
+              className={`sidebar-link w-full ${active ? "sidebar-link-active" : ""}`}
+              aria-label={`${item.label}, disponible avec le plan ${item.requiredPlan}`}
+            >
+              <Icon size={17} />
+              <span>{item.label}</span>
+              <span className="ml-auto">
+                <PremiumIcon />
+              </span>
+            </button>
+          ) : (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className={`sidebar-link ${active ? "sidebar-link-active" : ""}`}
+            >
+              <Icon size={17} />
+              {item.label}
+            </Link>
+          );
         })}
       </nav>
 
       <div className="mt-6 border-t border-white/10 pt-4">
         <div className="flex items-center gap-2.5 px-1">
-          <div className="avatar avatar-small" style={{ background: "#26334a" }}>
+          <div
+            className="avatar avatar-small"
+            style={{ background: "#26334a" }}
+          >
             {initials}
           </div>
           <div className="min-w-0">
@@ -274,10 +291,13 @@ export default function ClientLayout({
               <p className="text-[15px] font-semibold text-[#172033]">
                 {fiche?.data
                   ? `${fiche.data.prenom} ${fiche.data.nom}`
-                  : "Bonjour" + (user?.name ? `, ${user.name.split(" ")[0]}` : "")}
+                  : "Bonjour" +
+                    (user?.name ? `, ${user.name.split(" ")[0]}` : "")}
               </p>
               {fiche?.data && (
-                <p className="text-xs text-[#7d8798]">{fiche.data.entreprise}</p>
+                <p className="text-xs text-[#7d8798]">
+                  {fiche.data.entreprise}
+                </p>
               )}
             </div>
           </div>

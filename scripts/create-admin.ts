@@ -1,7 +1,7 @@
 import { stdin as input, stdout as output } from "node:process";
 import { createInterface } from "node:readline/promises";
 
-import { prisma } from "../prisma/client";
+import { prisma } from "../server/database/prisma/client";
 import { hashAdminPassword } from "../server/module/auth/adminAuth";
 
 function askHidden(question: string): Promise<string> {

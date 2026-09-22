@@ -62,7 +62,6 @@ type EditorForm = {
     premierBouton: "whatsapp" | "appel" | "email";
     messageWhatsapp: string;
     presentation: string;
-    rendezVous: LinkItem;
     reseauxSociaux: SocialItem[];
     liens: LinkItem[];
     horaires: HoursItem[];
@@ -116,10 +115,6 @@ export default function FicheEditor() {
         premierBouton: fiche.data.premierBouton ?? "whatsapp",
         messageWhatsapp: fiche.data.messageWhatsapp ?? "",
         presentation: fiche.data.presentation ?? "",
-        rendezVous: fiche.data.rendezVous ?? {
-          label: "Prendre rendez-vous",
-          url: "",
-        },
         reseauxSociaux: fiche.data.reseauxSociaux ?? [],
         liens: fiche.data.liens ?? [],
         horaires: fiche.data.horaires ?? [],
@@ -463,38 +458,6 @@ export default function FicheEditor() {
                     onChange={e => setData("presentation", e.target.value)}
                   />
                 </EditorField>
-              </EditorSection>
-              <EditorSection
-                title="Rendez-vous"
-                note="Un bouton direct vers la page de réservation"
-              >
-                <div className="editor-grid">
-                  <EditorField label="Libellé du bouton">
-                    <input
-                      value={form.data.rendezVous.label}
-                      onChange={e =>
-                        setData("rendezVous", {
-                          ...form.data.rendezVous,
-                          label: e.target.value,
-                        })
-                      }
-                      placeholder="Prendre rendez-vous"
-                    />
-                  </EditorField>
-                  <EditorField label="URL de réservation">
-                    <input
-                      type="url"
-                      value={form.data.rendezVous.url}
-                      onChange={e =>
-                        setData("rendezVous", {
-                          ...form.data.rendezVous,
-                          url: e.target.value,
-                        })
-                      }
-                      placeholder="https://…"
-                    />
-                  </EditorField>
-                </div>
               </EditorSection>
               <EditorSection
                 title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}
