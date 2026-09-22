@@ -13,11 +13,25 @@
   font-feature-settings: "cv11", "ss01";
 }
 
-/* The "save contact" button overlaps the hero to tie the two areas together. */
-.fiche-template .fh { padding-bottom: 46px; }
-.fiche-template .essential-save-row { position: relative; z-index: 2; margin-top: -30px; padding: 0 0 6px; }
-.fiche-template .public-save-contact { box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16); }
-.fiche-template--signature .public-save-contact { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); }
+/* "Save contact": fixed pill bar, always visible while scrolling, same on the
+ * three plans. Centred on the fiche card's own width (not the full viewport),
+ * so it lines up with the card on wide screens. Per-plan colour/border still
+ * come from templates/themes/<plan>.css. */
+.fiche-template .fh { padding-bottom: 8px; }
+.public-page.fiche-template { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+.fh-save-contact-bar {
+  position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index: 40; width: max-content; max-width: calc(100vw - 32px);
+  transform: translateX(-50%);
+}
+.fiche-template .public-save-contact {
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+  backdrop-filter: saturate(140%) blur(6px);
+}
+.fiche-template--signature .public-save-contact { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55); }
+@media (prefers-reduced-motion: reduce) {
+  .fh-save-contact-bar { transition: none; }
+}
 
 /* Sections */
 .fiche-template .public-section { padding: 24px 0; border-bottom-color: var(--theme-line); }

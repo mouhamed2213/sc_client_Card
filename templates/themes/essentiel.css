@@ -1,18 +1,16 @@
 
 
-.fiche-template--essentiel .essential-save-row {
-  padding: 16px 0 4px;
-}
 
 .fiche-template--essentiel .public-save-contact {
-  width: 100%;
+  width: auto;
   min-height: 46px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   border: 1px solid #d9e2eb;
-  border-radius: 12px;
+  border-radius: 999px;
+  padding: 0 22px;
   background: #ffffff;
   color: #17324f;
   font-size: 12px;
@@ -39,7 +37,8 @@
 
 .fiche-template--essentiel .public-link {
   min-height: 52px;
-  border-radius: 12px;
+  border-radius: 999px;
+  padding: 0 22px;
   background: #ffffff;
 }
 
