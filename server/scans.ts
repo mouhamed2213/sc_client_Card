@@ -5,9 +5,9 @@
  */
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import { createHash } from "node:crypto";
-import type { Fiche, User } from "../generated/prisma/client";
 import { ENV } from "./_core/env";
 import { recordScanEvent } from "./database/db";
+import type { Fiche, User } from "./database/generated/prisma/client";
 import { isFichePubliclyAccessible } from "./module/admin/ficheLifecycle";
 
 export const SCAN_SOURCES = ["qr", "nfc"] as const;

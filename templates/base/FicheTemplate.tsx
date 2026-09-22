@@ -18,6 +18,7 @@ import {
   Phone,
   Play,
   Star,
+  X,
   UserRound,
   Youtube,
 } from "lucide-react";
@@ -451,6 +452,8 @@ function socialKey(label: string, url: string) {
   if (value.includes("facebook")) return "facebook";
   if (value.includes("linkedin")) return "linkedin";
   if (value.includes("youtube")) return "youtube";
+  if (value.includes("tiktok")) return "tiktok";
+  if (value.includes("x.com") || value.includes("twitter") || value.includes("x /")) return "x";
   return "other";
 }
 
@@ -460,6 +463,8 @@ function SocialIcon({ label, url }: { label: string; url: string }) {
   if (key === "facebook") return <Facebook className="h-5 w-5" />;
   if (key === "linkedin") return <Linkedin className="h-5 w-5" />;
   if (key === "youtube") return <Youtube className="h-5 w-5" />;
+  if (key === "tiktok") return <Globe2 className="h-5 w-5" />;
+  if (key === "x") return <X className="h-5 w-5" />;
   return <Globe2 className="h-5 w-5" />;
 }
 

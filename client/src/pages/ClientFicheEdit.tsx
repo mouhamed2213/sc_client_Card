@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { useParams } from "wouter";
 
 type LinkItem = { label: string; url: string };
-type SocialItem = { label: string; url: string };
+type SocialItem = { label: string; url: string; actif?: boolean };
 type GalleryItem = {
   type?: "image" | "video";
   url: string;
@@ -62,6 +62,16 @@ type FormState = {
     sections: CatalogSection[];
   };
 };
+
+const RESEAUX = [
+  { label: "Facebook", domaine: "facebook.com", urlParDefaut: "https://facebook.com/votre-profil", placeholder: "https://facebook.com/...", icon: "f", description: "Page ou profil Facebook" },
+  { label: "Instagram", domaine: "instagram.com", urlParDefaut: "https://instagram.com/votre-profil", placeholder: "https://instagram.com/...", icon: "◻", description: "Compte Instagram" },
+  { label: "TikTok", domaine: "tiktok.com", urlParDefaut: "https://tiktok.com/@votre-compte", placeholder: "https://tiktok.com/@...", icon: "", description: "Compte TikTok" },
+  { label: "LinkedIn", domaine: "linkedin.com", urlParDefaut: "https://linkedin.com/in/votre-profil", placeholder: "https://linkedin.com/in/...", icon: "in", description: "Profil ou page LinkedIn" },
+  { label: "X / Twitter", domaine: "x.com", urlParDefaut: "https://x.com/votre-compte", placeholder: "https://x.com/...", icon: "𝕏", description: "Compte X (Twitter)" },
+  { label: "YouTube", domaine: "youtube.com", urlParDefaut: "https://youtube.com/@votre-chanel", placeholder: "https://youtube.com/@...", icon: "▶", description: "Chaîne YouTube" },
+  { label: "Site web", domaine: "", urlParDefaut: "", placeholder: "https://votre-site.com", icon: "🌐", description: "Lien vers votre site" },
+] as const;
 
 const weekdays = [
   "Lundi",
@@ -117,7 +127,7 @@ export default function ClientFicheEdit() {
           label: "Prendre rendez-vous",
           url: "",
         },
-        reseauxSociaux: fiche.data.data?.reseauxSociaux ?? [],
+        reseauxSociaux: fiche.data.data?.reseauxSociaux ?? RESEAUX.map(r => ({ label: r.label, url: r.urlParDefaut, actif: false })),
         liens: fiche.data.data?.liens ?? [],
         horaires:
           fiche.data.data?.horaires?.length === 7
@@ -475,110 +485,103 @@ export default function ClientFicheEdit() {
               </div>
             </EditorSection>
 
-            {/* Section Rendez-vous */}
-            <EditorSection title="Rendez-vous">
-              {!capabilities.rendezVous.editable ? (
-                <UpgradeNotice requiredPlan={upgradeLabel("rendezVous")} />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Libellé du bouton">
-                    <input
-                      value={form.data.rendezVous.label}
-                      onChange={e =>
-                        setData("rendezVous", {
-                          ...form.data.rendezVous,
-                          label: e.target.value,
-                        })
-                      }
-                      className="editor-input"
-                    />
-                  </Field>
-                  <Field label="URL de réservation">
-                    <input
-                      className="editor-input"
-                      type="url"
-                      value={form.data.rendezVous.url}
-                      onChange={e =>
-                        setData("rendezVous", {
-                          ...form.data.rendezVous,
-                          url: e.target.value,
-                        })
-                      }
-                      placeholder="https://calendly.com/..."
-                    />
-                  </Field>
-                </div>
-              )}
-            </EditorSection>
 
             {/* Section Réseaux sociaux */}
             <EditorSection
-              title={`Réseaux sociaux (${form.data.reseauxSociaux.length})`}
+              title={`Réseaux sociaux (${form.data.reseauxSociaux.filter(r => r.actif).length}/${RESEAUX.length})`}
+              subtitle="Cochez les réseaux à afficher. Vous pouvez personnaliser l'URL de chaque profil."
             >
               {!capabilities.socials.editable ? (
                 <UpgradeNotice requiredPlan={upgradeLabel("socials")} />
               ) : (
-                <Repeater
-                  items={form.data.reseauxSociaux}
-                  onAdd={() =>
-                    setData("reseauxSociaux", [
-                      ...form.data.reseauxSociaux,
-                      { label: "", url: "" },
-                    ])
-                  }
-                  onRemove={index =>
-                    setData(
-                      "reseauxSociaux",
-                      form.data.reseauxSociaux.filter((_, i) => i !== index)
-                    )
-                  }
-                  render={(item, index) => (
-                    <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr_auto] gap-2 items-center">
-                      <input
-                        className="editor-input"
-                        placeholder="Ex: Instagram, LinkedIn…"
-                        value={item.label}
-                        onChange={e =>
-                          setData(
-                            "reseauxSociaux",
-                            form.data.reseauxSociaux.map((x, i) =>
-                              i === index ? { ...x, label: e.target.value } : x
-                            )
-                          )
-                        }
-                      />
-                      <input
-                        className="editor-input"
-                        type="url"
-                        placeholder="https://instagram.com/..."
-                        value={item.url}
-                        onChange={e =>
-                          setData(
-                            "reseauxSociaux",
-                            form.data.reseauxSociaux.map((x, i) =>
-                              i === index ? { ...x, url: e.target.value } : x
-                            )
-                          )
-                        }
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setData(
-                            "reseauxSociaux",
-                            form.data.reseauxSociaux.filter(
-                              (_, i) => i !== index
-                            )
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition"
-                        title="Supprimer"
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {RESEAUX.map(reseau => {
+                    const existing = form.data.reseauxSociaux.find(r => r.label === reseau.label);
+                    const actif = existing?.actif ?? false;
+                    const currentUrl = existing?.url ?? reseau.urlParDefaut;
+                    return (
+                      <div
+                        key={reseau.label}
+                        className={`rounded-xl border p-4 transition ${
+                          actif
+                            ? "border-[#c98a4e] bg-[#fdfbf7] shadow-sm"
+                            : "border-[#e5e8ed] bg-white"
+                        }`}
                       >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  )}
-                />
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <span className="text-sm font-semibold text-[#172033]">
+                              {reseau.label}
+                            </span>
+                            {reseau.icon && (
+                              <span className="ml-2 text-base" aria-hidden="true">
+                                {reseau.icon}
+                              </span>
+                            )}
+                            {reseau.description && (
+                              <p className="mt-0.5 text-xs text-[#6b7789]">{reseau.description}</p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const others = form.data.reseauxSociaux.filter(r => r.label !== reseau.label);
+                              setData(
+                                "reseauxSociaux",
+                                actif
+                                  ? others
+                                  : [
+                                      ...others,
+                                      { label: reseau.label, url: currentUrl, actif: true },
+                                    ]
+                              );
+                            }}
+                            className={`shrink-0 rounded-lg p-1.5 text-sm font-semibold transition ${
+                              actif
+                                ? "bg-[#c98a4e] text-white"
+                                : "bg-[#f0f2f5] text-[#6b7789] hover:bg-[#e5e8ed]"
+                            }`}
+                            aria-pressed={actif}
+                            title={actif ? `Retirer ${reseau.label}` : `Ajouter ${reseau.label}`}
+                          >
+                            {actif ? "✓ Actif" : "Ajouter"}
+                          </button>
+                        </div>
+                        {actif && (
+                          <div className="mt-3 flex gap-2">
+                            <input
+                              className="flex-1 rounded-lg border border-[#cfd5dd] px-3 py-2 text-xs outline-none focus:border-[#c98a4e]"
+                              type="url"
+                              value={currentUrl}
+                              onChange={e => {
+                                setData(
+                                  "reseauxSociaux",
+                                  form.data.reseauxSociaux.map(r =>
+                                    r.label === reseau.label ? { ...r, url: e.target.value } : r
+                                  )
+                                );
+                              }}
+                              placeholder={reseau.placeholder}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setData(
+                                  "reseauxSociaux",
+                                  form.data.reseauxSociaux.filter(r => r.label !== reseau.label)
+                                );
+                              }}
+                              className="shrink-0 rounded-lg border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+                              title={`Supprimer ${reseau.label}`}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </EditorSection>
 
