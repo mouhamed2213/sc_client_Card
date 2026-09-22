@@ -1,11 +1,11 @@
 import { COOKIE_NAME } from "@shared/const";
 import type { Express, Request } from "express";
 import { z } from "zod";
-import { prisma } from "../../prisma/client";
-import { getAdminSessionCookieOptions } from "./cookies";
-import { ENV } from "./env";
-import { sdk } from "./sdk";
-import { verifyAdminPassword } from "./adminAuth";
+import { prisma } from "../../database/prisma/client";
+import { sdk } from "../../_core/config/sdk";
+import { getAdminSessionCookieOptions } from "../../_core/cookies";
+import { ENV } from "../../_core/env";
+import { verifyAdminPassword } from "../auth/adminAuth";
 
 const loginSchema = z.object({
   username: z.string().trim().min(1).max(64),
@@ -93,13 +93,10 @@ export function registerAdminRoutes(app: Express): void {
       data: { lastSignedIn: new Date() },
     });
 
-    const sessionToken = await sdk.createSessionToken(
-      credential.user.id,
-      {
-        expiresInMs: 8 * 60 * 60 * 1000,
-        name: credential.user.name || credential.username,
-      }
-    );
+    const sessionToken = await sdk.createSessionToken(credential.user.id, {
+      expiresInMs: 8 * 60 * 60 * 1000,
+      name: credential.user.name || credential.username,
+    });
 
     res.cookie(COOKIE_NAME, sessionToken, {
       ...adminCookieOptions(req),

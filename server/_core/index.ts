@@ -1,16 +1,15 @@
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
-import { registerAdminRoutes } from "./adminRoutes";
-import { registerClientRoutes } from "./clientRoutes";
-import { registerStorageProxy } from "./storageProxy";
+import { registerAdminRoutes } from "../module/admin/adminRoutes";
+import { registerClientRoutes } from "../module/client/clientRoutes";
 import { appRouter } from "../routers";
-import { createContext } from "./context";
-import { serveStatic, setupVite } from "./vite";
+import { createContext } from "../trcp/context";
 import { ENV } from "./env";
+import { registerOAuthRoutes } from "./oauth";
+import { serveStatic, setupVite } from "./vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -20,7 +19,8 @@ function isPortAvailable(port: number): Promise<boolean> {
     });
     server.on("error", () => resolve(false));
   });
-}4755.
+}
+4755;
 
 async function findAvailablePort(startPort: number = 3000): Promise<number> {
   for (let port = startPort; port < startPort + 20; port++) {
@@ -37,7 +37,6 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
-  registerStorageProxy(app);
   registerOAuthRoutes(app);
   registerAdminRoutes(app);
   registerClientRoutes(app);

@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 // import { s3Client, BUCKET_NAME } from "./s3Client";
-import { ENV } from "./_core/env";
+import { ENV } from "../env";
 
 // En local : SeaweedFS (ex: http://localhost:8333)
 // En prod : Supabase (ex: https://<project-ref>.supabase.co/storage/v1/s3)

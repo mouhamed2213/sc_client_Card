@@ -3,12 +3,12 @@ import { defineConfig } from "prisma/config";
 import { ENV } from "./server/_core/env";
 
 export default defineConfig({
-  schema: "prisma/schema.prisma",
+  schema: "server/database/prisma/schema.prisma", // ← chemin corrigé
   migrations: {
-    path: "prisma/migrations",
+    path: "server/database/prisma/migrations",
   },
   datasource: {
     url: ENV.databaseUrl,
   },
 });
-console.log(ENV.databaseUrl)
+console.log(ENV.databaseUrl);

@@ -6,10 +6,13 @@ import {
 } from "@shared/const";
 import { parse as parseCookieHeader } from "cookie";
 import type { Express, Request, Response } from "express";
-import * as db from "../db";
+import * as db from "../database/db";
+import {
+  exchangeCodeForGoogleToken,
+  getGoogleUserInfo,
+} from "../module/auth/googleAuth";
+import { sdk } from "./config/sdk";
 import { getSessionCookieOptions } from "./cookies";
-import { exchangeCodeForGoogleToken, getGoogleUserInfo } from "./googleAuth";
-import { sdk } from "./sdk";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -75,7 +78,9 @@ export function registerOAuthRoutes(app: Express) {
       const user = await db.getUserByLegacyOpenId(openId);
 
       if (!user) {
-        res.status(500).json({ error: "Authenticated user could not be loaded" });
+        res
+          .status(500)
+          .json({ error: "Authenticated user could not be loaded" });
         return;
       }
 

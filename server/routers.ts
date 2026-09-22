@@ -1,69 +1,69 @@
+import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
 import { COOKIE_NAME } from "@shared/const";
 import { mediaRules } from "@shared/mediaRules";
 import { getPlanFeatures, type PlanName } from "@shared/planFeatures";
-import { getClientFicheCapabilities } from "@shared/clientFicheCapabilities";
 import { ficheContentPayload } from "@shared/types/schemas";
+import { parseVideoUrl } from "@shared/videoUrls";
 import { TRPCError } from "@trpc/server";
-import { Fiche } from "generated/prisma/client";
 import { imageSize } from "image-size";
 import { z } from "zod";
-import { prisma } from "../prisma/client";
-import {
-  generateClientUsername,
-  generateTemporaryClientPassword,
-  hashClientPassword,
-} from "./_core/clientAuth";
+import { storagePut } from "./_core/config/storage";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import {
-  adminProcedure,
-  clientProcedure,
-  publicProcedure,
-  router,
-} from "./_core/trpc";
-import {
-  getClientOverview,
-  listClientDashboard,
-  updateMembershipCardStatus,
-  toClientFiche,
-} from "./clientSpace";
-import {
   attachFicheToOwner,
   changeFicheOwner,
-  detachFicheOwner,
-  getFicheOwner,
   createClientAccountWithFiche,
-  createStandaloneFiche,
   createContactRequest,
   createMembershipCard,
+  createStandaloneFiche,
+  detachFicheOwner,
   getFicheById,
   getFicheBySlug,
   getFicheOwnedBy,
+  getFicheOwner,
   getOverview,
   listContactRequests,
   listFiches,
-  listFichesPaginated,
-  listRecentFiches,
   listFichesByOwner,
+  listFichesPaginated,
   listMembershipCards,
+  listRecentFiches,
   listScansForFiche,
   searchClientUsers,
   updateFiche,
-} from "./db";
-import { SCAN_SOURCES, handleScan } from "./scans";
-import { validatePlanPayload } from "./planValidation";
-import { parseVideoUrl } from "@shared/videoUrls";
-import { storagePut } from "./storage";
+} from "./database/db";
+import { Fiche } from "./database/generated/prisma/client";
+import { prisma } from "./database/prisma/client";
 import {
   getFicheBusinessStatus,
   getFicheOwnerBlockedMessage,
   isFicheOwnerEditable,
   isFichePubliclyAccessible,
-} from "./ficheLifecycle";
+} from "./module/admin/ficheLifecycle";
+import {
+  generateClientUsername,
+  generateTemporaryClientPassword,
+  hashClientPassword,
+} from "./module/auth/clientAuth";
+import {
+  getClientOverview,
+  listClientDashboard,
+  toClientFiche,
+  updateMembershipCardStatus,
+} from "./module/client/clientSpace";
+import { validatePlanPayload } from "./planValidation";
+import { SCAN_SOURCES, handleScan } from "./scans";
+import {
+  adminProcedure,
+  clientProcedure,
+  publicProcedure,
+  router,
+} from "./trcp/trpc";
 
-function parseFiche<T extends { dataJson: string; statut: string; dateEcheance: Date }>(
-  fiche: T
-) {
+function parseFiche<
+  T extends { dataJson: string; statut: string; dateEcheance: Date },
+>(fiche: T) {
   const { dataJson, ...rest } = fiche;
   return {
     ...rest,
@@ -352,7 +352,12 @@ export const appRouter = router({
   }),
   admin: router({
     createStandaloneFiche: adminProcedure
-      .input(z.object({ fiche: ficheContentPayload, ownerId: z.number().int().positive().nullable().optional() }))
+      .input(
+        z.object({
+          fiche: ficheContentPayload,
+          ownerId: z.number().int().positive().nullable().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const { data, ...fields } = input.fiche;
         const createdAt = new Date();
@@ -373,10 +378,16 @@ export const appRouter = router({
           return { ok: true as const, ficheId: fiche.id, slug: fiche.slug };
         } catch (error) {
           if (error instanceof Error && error.message === "OWNER_NOT_FOUND") {
-            throw new TRPCError({ code: "BAD_REQUEST", message: "Compte client introuvable." });
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Compte client introuvable.",
+            });
           }
           if ((error as { code?: string })?.code === "P2002") {
-            throw new TRPCError({ code: "CONFLICT", message: "Ce slug existe déjà." });
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Ce slug existe déjà.",
+            });
           }
           throw error;
         }
@@ -482,23 +493,35 @@ export const appRouter = router({
       .input(z.object({ ficheId: z.number().int().positive() }))
       .query(async ({ input }) => {
         const fiche = await getFicheOwner(input.ficheId);
-        if (!fiche) throw new TRPCError({ code: "NOT_FOUND", message: "Fiche introuvable." });
+        if (!fiche)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Fiche introuvable.",
+          });
         return fiche;
       }),
     changeFicheOwner: adminProcedure
-      .input(z.object({
-        ficheId: z.number().int().positive(),
-        ownerId: z.number().int().positive(),
-      }))
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          ownerId: z.number().int().positive(),
+        })
+      )
       .mutation(async ({ input }) => {
         try {
           await changeFicheOwner(input.ficheId, input.ownerId);
           return { ok: true } as const;
         } catch (err) {
           if (err instanceof Error && err.message === "FICHE_NOT_FOUND")
-            throw new TRPCError({ code: "NOT_FOUND", message: "Fiche introuvable." });
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Fiche introuvable.",
+            });
           if (err instanceof Error && err.message === "OWNER_NOT_FOUND")
-            throw new TRPCError({ code: "BAD_REQUEST", message: "Compte client introuvable." });
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Compte client introuvable.",
+            });
           throw err;
         }
       }),
@@ -510,9 +533,15 @@ export const appRouter = router({
           return { ok: true } as const;
         } catch (err) {
           if (err instanceof Error && err.message === "FICHE_NOT_FOUND")
-            throw new TRPCError({ code: "NOT_FOUND", message: "Fiche introuvable." });
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Fiche introuvable.",
+            });
           if (err instanceof Error && err.message === "FICHE_NOT_OWNED")
-            throw new TRPCError({ code: "CONFLICT", message: "Cette fiche n'est rattachée à aucun compte." });
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Cette fiche n'est rattachée à aucun compte.",
+            });
           throw err;
         }
       }),
@@ -690,7 +719,8 @@ export const appRouter = router({
         if (fiche.formule !== "signature")
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "Les statistiques sont disponibles uniquement avec la formule Signature.",
+            message:
+              "Les statistiques sont disponibles uniquement avec la formule Signature.",
           });
         return listScansForFiche(input.ficheId, input.days ?? 30);
       }),
@@ -706,7 +736,8 @@ export const appRouter = router({
         if (!getPlanFeatures(fiche.formule).hasForm)
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "Les demandes reçues sont disponibles uniquement avec la formule Signature.",
+            message:
+              "Les demandes reçues sont disponibles uniquement avec la formule Signature.",
           });
         if (!isFicheOwnerEditable(fiche)) {
           throw new TRPCError({
@@ -741,7 +772,10 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
-          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
 
         if (!isFicheOwnerEditable(fiche)) {
           throw new TRPCError({
@@ -754,14 +788,20 @@ export const appRouter = router({
 
         const plan = fiche.formule as PlanName;
         const capabilities = getClientFicheCapabilities(plan);
-        const currentData = JSON.parse(fiche.dataJson || "{}") as Record<string, any>;
+        const currentData = JSON.parse(fiche.dataJson || "{}") as Record<
+          string,
+          any
+        >;
         const current = {
           site: fiche.site ?? "",
           photo: fiche.photo ?? "",
           logo: fiche.logo ?? "",
           googlePlaceId: fiche.googlePlaceId ?? "",
           presentation: currentData.presentation ?? "",
-          rendezVous: currentData.rendezVous ?? { label: "Prendre rendez-vous", url: "" },
+          rendezVous: currentData.rendezVous ?? {
+            label: "Prendre rendez-vous",
+            url: "",
+          },
           reseauxSociaux: currentData.reseauxSociaux ?? [],
           liens: currentData.liens ?? [],
           galerie: currentData.galerie ?? [],
@@ -774,16 +814,66 @@ export const appRouter = router({
           next: unknown;
           previous: unknown;
         }> = [
-          { key: "site", field: "site", next: input.site ?? "", previous: current.site },
-          { key: "profile", field: "photo", next: input.photo ?? "", previous: current.photo },
-          { key: "profile", field: "logo", next: input.logo ?? "", previous: current.logo },
-          { key: "googleReview", field: "googlePlaceId", next: input.googlePlaceId ?? "", previous: current.googlePlaceId },
-          { key: "presentation", field: "presentation", next: input.data.presentation ?? "", previous: current.presentation },
-          { key: "rendezVous", field: "rendezVous", next: input.data.rendezVous, previous: current.rendezVous },
-          { key: "socials", field: "reseauxSociaux", next: input.data.reseauxSociaux ?? [], previous: current.reseauxSociaux },
-          { key: "links", field: "liens", next: input.data.liens ?? [], previous: current.liens },
-          { key: "gallery", field: "galerie", next: input.data.galerie ?? [], previous: current.galerie },
-          { key: "catalog", field: "sections", next: input.data.sections ?? [], previous: current.sections },
+          {
+            key: "site",
+            field: "site",
+            next: input.site ?? "",
+            previous: current.site,
+          },
+          {
+            key: "profile",
+            field: "photo",
+            next: input.photo ?? "",
+            previous: current.photo,
+          },
+          {
+            key: "profile",
+            field: "logo",
+            next: input.logo ?? "",
+            previous: current.logo,
+          },
+          {
+            key: "googleReview",
+            field: "googlePlaceId",
+            next: input.googlePlaceId ?? "",
+            previous: current.googlePlaceId,
+          },
+          {
+            key: "presentation",
+            field: "presentation",
+            next: input.data.presentation ?? "",
+            previous: current.presentation,
+          },
+          {
+            key: "rendezVous",
+            field: "rendezVous",
+            next: input.data.rendezVous,
+            previous: current.rendezVous,
+          },
+          {
+            key: "socials",
+            field: "reseauxSociaux",
+            next: input.data.reseauxSociaux ?? [],
+            previous: current.reseauxSociaux,
+          },
+          {
+            key: "links",
+            field: "liens",
+            next: input.data.liens ?? [],
+            previous: current.liens,
+          },
+          {
+            key: "gallery",
+            field: "galerie",
+            next: input.data.galerie ?? [],
+            previous: current.galerie,
+          },
+          {
+            key: "catalog",
+            field: "sections",
+            next: input.data.sections ?? [],
+            previous: current.sections,
+          },
         ];
 
         for (const item of locked) {
@@ -809,13 +899,18 @@ export const appRouter = router({
 
         const normalizedGallery = (nextData.galerie ?? []).map(item => {
           if (item.type !== "video") {
-            return { type: "image" as const, url: item.url, alt: item.alt ?? "" };
+            return {
+              type: "image" as const,
+              url: item.url,
+              alt: item.alt ?? "",
+            };
           }
           const parsed = parseVideoUrl(item.url);
           if (!parsed) {
             throw new TRPCError({
               code: "BAD_REQUEST",
-              message: "Une ou plusieurs vidéos utilisent une URL non supportée.",
+              message:
+                "Une ou plusieurs vidéos utilisent une URL non supportée.",
             });
           }
           return {
@@ -846,7 +941,10 @@ export const appRouter = router({
         });
 
         if (errors.length)
-          throw new TRPCError({ code: "BAD_REQUEST", message: errors.join(" ") });
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: errors.join(" "),
+          });
 
         const { ficheId, data: _data, ...fields } = input;
         await updateFiche(ficheId, {
@@ -877,18 +975,17 @@ export const appRouter = router({
           ficheId: z.number().int().positive(),
           kind: z.enum(["profile", "logo", "gallery"]),
           filename: z.string().min(1).max(160),
-          mimeType: z.enum([
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-          ]),
+          mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]),
           contentBase64: z.string().min(20).max(70_000_000),
         })
       )
       .mutation(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
-          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
 
         if (!isFicheOwnerEditable(fiche)) {
           throw new TRPCError({
@@ -910,16 +1007,27 @@ export const appRouter = router({
           });
         }
 
-        const currentData = JSON.parse(fiche.dataJson || "{}") as { galerie?: unknown[] };
+        const currentData = JSON.parse(fiche.dataJson || "{}") as {
+          galerie?: unknown[];
+        };
         const gallery = currentData.galerie ?? [];
 
-        if (input.kind === "gallery" && gallery.length >= capabilities.gallery.maxItems!) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: `La galerie est limitée à ${capabilities.gallery.maxItems} photos.` });
+        if (
+          input.kind === "gallery" &&
+          gallery.length >= capabilities.gallery.maxItems!
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `La galerie est limitée à ${capabilities.gallery.maxItems} photos.`,
+          });
         }
 
         const raw = input.contentBase64.replace(/^data:[^;]+;base64,/, "");
         if (!/^[A-Za-z0-9+/]+={0,2}$/.test(raw)) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Le contenu média est invalide." });
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Le contenu média est invalide.",
+          });
         }
         const bytes = Buffer.from(raw, "base64");
 
@@ -934,11 +1042,16 @@ export const appRouter = router({
         try {
           dimensions = imageSize(bytes);
         } catch {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Le fichier ne contient pas une image valide." });
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Le fichier ne contient pas une image valide.",
+          });
         }
 
         const expectedType =
-          input.mimeType === "image/jpeg" ? "jpg" : input.mimeType.split("/")[1];
+          input.mimeType === "image/jpeg"
+            ? "jpg"
+            : input.mimeType.split("/")[1];
         if (dimensions.type !== expectedType)
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -946,13 +1059,21 @@ export const appRouter = router({
           });
 
         const rule = mediaRules[input.kind];
-        if (!dimensions.width || !dimensions.height || dimensions.width > rule.maxWidth || dimensions.height > rule.maxHeight)
+        if (
+          !dimensions.width ||
+          !dimensions.height ||
+          dimensions.width > rule.maxWidth ||
+          dimensions.height > rule.maxHeight
+        )
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: `Dimensions invalides : maximum ${rule.maxWidth} × ${rule.maxHeight} px.`,
           });
 
-        if (input.kind === "profile" && (dimensions.width !== 400 || dimensions.height !== 400))
+        if (
+          input.kind === "profile" &&
+          (dimensions.width !== 400 || dimensions.height !== 400)
+        )
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "La couverture doit mesurer exactement 400 × 400 px.",
@@ -978,7 +1099,10 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
-          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
 
         if (!isFicheOwnerEditable(fiche)) {
           throw new TRPCError({
@@ -1002,7 +1126,8 @@ export const appRouter = router({
         if (!parsed)
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "Cette URL vidéo n'est pas supportée. Utilisez YouTube, Instagram, Facebook, TikTok, Vimeo ou une URL vidéo directe HTTPS.",
+            message:
+              "Cette URL vidéo n'est pas supportée. Utilisez YouTube, Instagram, Facebook, TikTok, Vimeo ou une URL vidéo directe HTTPS.",
           });
 
         const currentData = JSON.parse(fiche.dataJson || "{}") as {
@@ -1010,7 +1135,8 @@ export const appRouter = router({
         };
         const gallery = currentData.galerie ?? [];
         const videoCount = gallery.filter(item => item.type === "video").length;
-        const maxVideos = capabilities.gallery.maxVideos ?? getPlanFeatures(plan).maxVideos;
+        const maxVideos =
+          capabilities.gallery.maxVideos ?? getPlanFeatures(plan).maxVideos;
         if (videoCount >= maxVideos) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -1037,7 +1163,10 @@ export const appRouter = router({
           data: { ...currentData, galerie: nextGallery },
         });
         if (validationErrors.length)
-          throw new TRPCError({ code: "BAD_REQUEST", message: validationErrors.join(" ") });
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: validationErrors.join(" "),
+          });
 
         await updateFiche(input.ficheId, {
           dataJson: JSON.stringify({ ...currentData, galerie: nextGallery }),
@@ -1063,7 +1192,10 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
         if (!fiche)
-          throw new TRPCError({ code: "FORBIDDEN", message: "Fiche introuvable." });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
         if (!isFicheOwnerEditable(fiche)) {
           throw new TRPCError({
             code: "FORBIDDEN",

@@ -1,6 +1,7 @@
 import { getPlanFeatures } from "@shared/planFeatures";
-import type { Fiche } from "../generated/prisma/client";
-import { prisma } from "../prisma/client";
+import type { Fiche } from "../../database/generated/prisma/client";
+
+import { prisma } from "../../database/prisma/client";
 import { buildClientOverview, getOverviewEligibility } from "./clientOverview";
 
 /**
@@ -34,27 +35,24 @@ export async function updateMembershipCardStatus(
 }
 
 export async function listClientDashboard(ficheId: number) {
-  const [fiche, scans, requests, requestCount] =
-    await Promise.all([
-      prisma.fiche.findUnique({ where: { id: ficheId } }),
-      prisma.ficheScan.findMany({
-        where: {
-          ficheId,
-          scanDate: {
-            gte: new Date(Date.now() - 30 * 86400000)
-              .toISOString()
-              .slice(0, 10),
-          },
+  const [fiche, scans, requests, requestCount] = await Promise.all([
+    prisma.fiche.findUnique({ where: { id: ficheId } }),
+    prisma.ficheScan.findMany({
+      where: {
+        ficheId,
+        scanDate: {
+          gte: new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10),
         },
-        orderBy: { scanDate: "asc" },
-      }),
-      prisma.contactRequest.findMany({
-        where: { ficheId },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }),
-      prisma.contactRequest.count({ where: { ficheId } }),
-    ]);
+      },
+      orderBy: { scanDate: "asc" },
+    }),
+    prisma.contactRequest.findMany({
+      where: { ficheId },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+    prisma.contactRequest.count({ where: { ficheId } }),
+  ]);
   return {
     fiche,
     scans,
@@ -74,9 +72,14 @@ export async function getClientOverview(ownerId: number, ficheId?: number) {
   });
   if (ficheId && owned.length === 0) return null;
 
-  const rules = owned.map(fiche => ({ fiche, ...getOverviewEligibility(fiche) }));
+  const rules = owned.map(fiche => ({
+    fiche,
+    ...getOverviewEligibility(fiche),
+  }));
   const statIds = rules.filter(r => r.statsAvailable).map(r => r.fiche.id);
-  const requestIds = rules.filter(r => r.requestsAvailable).map(r => r.fiche.id);
+  const requestIds = rules
+    .filter(r => r.requestsAvailable)
+    .map(r => r.fiche.id);
   const since = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
 
   const [scans, requestGroups, recentRequests] = await Promise.all([

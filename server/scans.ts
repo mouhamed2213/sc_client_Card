@@ -3,12 +3,12 @@
  * physical card (NFC tap) or its QR code. Everything below exists to keep that
  * number honest — see docs/passages.md for the rules and the rationale.
  */
-import { createHash } from "node:crypto";
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import { createHash } from "node:crypto";
 import type { Fiche, User } from "../generated/prisma/client";
-import { recordScanEvent } from "./db";
 import { ENV } from "./_core/env";
-import { isFichePubliclyAccessible } from "./ficheLifecycle";
+import { recordScanEvent } from "./database/db";
+import { isFichePubliclyAccessible } from "./module/admin/ficheLifecycle";
 
 export const SCAN_SOURCES = ["qr", "nfc"] as const;
 export type ScanSource = (typeof SCAN_SOURCES)[number];
@@ -77,7 +77,9 @@ const RATE_WINDOW_MS = 10 * 60 * 1000;
 const attempts = new Map<string, number[]>();
 
 export function allowScanAttempt(key: string, now = Date.now()) {
-  const recent = (attempts.get(key) ?? []).filter(t => now - t < RATE_WINDOW_MS);
+  const recent = (attempts.get(key) ?? []).filter(
+    t => now - t < RATE_WINDOW_MS
+  );
   if (recent.length >= RATE_LIMIT) {
     attempts.set(key, recent);
     return false;

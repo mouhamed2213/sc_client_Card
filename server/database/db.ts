@@ -1,18 +1,18 @@
 // ? Centralized database connection file
 
+import { pickAvailableSlug, slugBaseFromFiche } from "@shared/slug";
 import type {
   Fiche,
   Prisma,
   PrismaClient as PrismaClientType,
-} from "generated/prisma/client";
+} from "../database/generated/prisma/client";
 import { randomBytes } from "node:crypto";
-import { pickAvailableSlug, slugBaseFromFiche } from "@shared/slug";
-import { prisma } from "../prisma/client";
-import { ENV } from "./_core/env";
+import { ENV } from "../_core/env";
+import { prisma } from "../database/prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClientType };
 
-export type { Fiche, User } from "generated/prisma/client";
+export type { Fiche, User } from "../database/generated/prisma/client";
 export type InsertFiche = Prisma.FicheUncheckedCreateInput;
 export type InsertUser = Prisma.UserUncheckedCreateInput;
 export type InsertMembershipCard = Prisma.MembershipCardUncheckedCreateInput;
@@ -279,21 +279,30 @@ const MAX_SLUG_ATTEMPTS = 5;
 /** Generates a unique slug (`prenom-nom`, `prenom-nom-2`, …) inside a transaction. */
 async function generateUniqueSlug(
   tx: Tx,
-  fiche: { prenom?: string | null; nom?: string | null; entreprise?: string | null }
+  fiche: {
+    prenom?: string | null;
+    nom?: string | null;
+    entreprise?: string | null;
+  }
 ) {
   const base = slugBaseFromFiche(fiche);
   const rows = await tx.fiche.findMany({
     where: { slug: { startsWith: base } },
     select: { slug: true },
   });
-  return pickAvailableSlug(base, rows.map(row => row.slug));
+  return pickAvailableSlug(
+    base,
+    rows.map(row => row.slug)
+  );
 }
 
 function isSlugConflict(error: unknown) {
   const e = error as { code?: string; meta?: { target?: unknown } };
   if (e?.code !== "P2002") return false;
   const target = e.meta?.target;
-  return Array.isArray(target) ? target.includes("slug") : String(target ?? "").includes("slug");
+  return Array.isArray(target)
+    ? target.includes("slug")
+    : String(target ?? "").includes("slug");
 }
 
 /** Runs `work` again when two concurrent creations pick the same slug. */
@@ -316,28 +325,30 @@ export async function createStandaloneFiche(input: {
   fiche: Omit<InsertFiche, "ownerId" | "slug">;
   ownerId?: number | null;
 }) {
-  return withSlugRetry(() => prisma.$transaction(async tx => {
-    let ownerId: number | null = null;
-    if (input.ownerId != null) {
-      const owner = await tx.user.findUnique({
-        where: { id: input.ownerId },
-        include: { clientCredential: true },
-      });
-      if (
-        !owner ||
-        owner.role !== "user" ||
-        owner.loginMethod !== "local-client" ||
-        !owner.clientCredential
-      ) {
-        throw new Error("OWNER_NOT_FOUND");
+  return withSlugRetry(() =>
+    prisma.$transaction(async tx => {
+      let ownerId: number | null = null;
+      if (input.ownerId != null) {
+        const owner = await tx.user.findUnique({
+          where: { id: input.ownerId },
+          include: { clientCredential: true },
+        });
+        if (
+          !owner ||
+          owner.role !== "user" ||
+          owner.loginMethod !== "local-client" ||
+          !owner.clientCredential
+        ) {
+          throw new Error("OWNER_NOT_FOUND");
+        }
+        ownerId = owner.id;
       }
-      ownerId = owner.id;
-    }
-    const slug = await generateUniqueSlug(tx, input.fiche);
-    return tx.fiche.create({
-      data: { ...input.fiche, slug, ownerId },
-    });
-  }));
+      const slug = await generateUniqueSlug(tx, input.fiche);
+      return tx.fiche.create({
+        data: { ...input.fiche, slug, ownerId },
+      });
+    })
+  );
 }
 export async function updateFiche(
   id: number,
@@ -445,57 +456,59 @@ export async function createClientAccountWithFiche(input: {
   fiche: Omit<InsertFiche, "ownerId" | "slug">;
   cardNumero?: string;
 }) {
-  return withSlugRetry(() => prisma.$transaction(async tx => {
-    const existingUsername = await tx.clientCredential.findUnique({
-      where: { username: input.credential.username },
-    });
-    if (existingUsername) throw new Error("CLIENT_USERNAME_EXISTS");
+  return withSlugRetry(() =>
+    prisma.$transaction(async tx => {
+      const existingUsername = await tx.clientCredential.findUnique({
+        where: { username: input.credential.username },
+      });
+      if (existingUsername) throw new Error("CLIENT_USERNAME_EXISTS");
 
-    const user = await tx.user.create({
-      data: {
-        name: input.user.name ?? null,
-        email: input.user.email ?? null,
-        loginMethod: "local-client",
-        role: "user",
-        // Fiche.formule is the source of truth for client-space capabilities.
-        // User.formule is kept only as account-level compatibility metadata.
-        formule: input.fiche.formule,
-      },
-    });
-
-    const slug = await generateUniqueSlug(tx, input.fiche);
-    const fiche = await tx.fiche.create({
-      data: {
-        ...input.fiche,
-        slug,
-        ownerId: user.id,
-      },
-    });
-
-    const credential = await tx.clientCredential.create({
-      data: {
-        userId: user.id,
-        username: input.credential.username,
-        passwordHash: input.credential.passwordHash,
-        mustChangePassword: true,
-      },
-    });
-
-    let card = null;
-    if (input.cardNumero !== undefined) {
-      const numero =
-        input.cardNumero.trim() ||
-        `SC-${randomBytes(6).toString("hex").toUpperCase()}`;
-      card = await tx.membershipCard.create({
+      const user = await tx.user.create({
         data: {
-          ficheId: fiche.id,
-          numero,
+          name: input.user.name ?? null,
+          email: input.user.email ?? null,
+          loginMethod: "local-client",
+          role: "user",
+          // Fiche.formule is the source of truth for client-space capabilities.
+          // User.formule is kept only as account-level compatibility metadata.
+          formule: input.fiche.formule,
         },
       });
-    }
 
-    return { user, fiche, credential, card };
-  }));
+      const slug = await generateUniqueSlug(tx, input.fiche);
+      const fiche = await tx.fiche.create({
+        data: {
+          ...input.fiche,
+          slug,
+          ownerId: user.id,
+        },
+      });
+
+      const credential = await tx.clientCredential.create({
+        data: {
+          userId: user.id,
+          username: input.credential.username,
+          passwordHash: input.credential.passwordHash,
+          mustChangePassword: true,
+        },
+      });
+
+      let card = null;
+      if (input.cardNumero !== undefined) {
+        const numero =
+          input.cardNumero.trim() ||
+          `SC-${randomBytes(6).toString("hex").toUpperCase()}`;
+        card = await tx.membershipCard.create({
+          data: {
+            ficheId: fiche.id,
+            numero,
+          },
+        });
+      }
+
+      return { user, fiche, credential, card };
+    })
+  );
 }
 
 // --- Fiches côté client ---
