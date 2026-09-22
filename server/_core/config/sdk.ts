@@ -3,9 +3,9 @@ import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { parse as parseCookieHeader } from "cookie";
 import type { Request } from "express";
 import { SignJWT, jwtVerify } from "jose";
-import type { User } from "../../generated/prisma/client";
-import * as db from "../db";
-import { ENV } from "./env";
+import type { User } from "../../../generated/prisma/client";
+import * as db from "../../database/db";
+import { ENV } from "../env";
 
 // Utility function
 const isNonEmptyString = (value: unknown): value is string =>
@@ -50,10 +50,7 @@ class SDKServer {
     userId: number,
     options: { expiresInMs?: number; name?: string } = {}
   ): Promise<string> {
-    return this.signSession(
-      { userId, name: options.name || "" },
-      options
-    );
+    return this.signSession({ userId, name: options.name || "" }, options);
   }
 
   async signSession(
@@ -80,16 +77,25 @@ class SDKServer {
     if (!cookieValue) return null;
     try {
       const secretKey = this.getSessionSecret();
-      const { payload } = await jwtVerify(cookieValue, secretKey, { algorithms: ["HS256"] });
+      const { payload } = await jwtVerify(cookieValue, secretKey, {
+        algorithms: ["HS256"],
+      });
       const { userId, openId, name } = payload as Record<string, unknown>;
-      if (typeof userId === "number" && Number.isSafeInteger(userId) && userId > 0) {
+      if (
+        typeof userId === "number" &&
+        Number.isSafeInteger(userId) &&
+        userId > 0
+      ) {
         return { userId, name: isNonEmptyString(name) ? name : "" };
       }
       // Temporary compatibility for sessions issued before the User.id migration.
       if (isNonEmptyString(openId)) {
         const legacyUser = await db.getUserByLegacyOpenId(openId);
         if (!legacyUser) return null;
-        return { userId: legacyUser.id, name: isNonEmptyString(name) ? name : legacyUser.name ?? "" };
+        return {
+          userId: legacyUser.id,
+          name: isNonEmptyString(name) ? name : (legacyUser.name ?? ""),
+        };
       }
       return null;
     } catch (error) {

@@ -10,7 +10,7 @@
  *  - internal notes and other admin-only fields are never part of the summary.
  */
 import { getPlanFeatures } from "@shared/planFeatures";
-import { getFicheBusinessStatus } from "./ficheLifecycle";
+import { getFicheBusinessStatus } from "../admin/ficheLifecycle";
 
 export type OverviewFicheInput = {
   id: number;
@@ -25,7 +25,11 @@ export type OverviewFicheInput = {
   dateEcheance: Date;
 };
 
-export type OverviewScanRow = { ficheId: number; scanDate: string; count: number };
+export type OverviewScanRow = {
+  ficheId: number;
+  scanDate: string;
+  count: number;
+};
 export type OverviewRequestRow = {
   id: number;
   ficheId: number;
@@ -55,17 +59,23 @@ export function buildClientOverview(input: {
   const scanByFiche = new Map<number, number>();
   const scanByDay = new Map<string, number>();
   const requestByFiche = new Map<number, number>();
-  for (const row of input.requestCounts) requestByFiche.set(row.ficheId, row.count);
+  for (const row of input.requestCounts)
+    requestByFiche.set(row.ficheId, row.count);
 
   const eligibility = new Map(
-    input.fiches.map(fiche => [fiche.id, getOverviewEligibility(fiche)] as const)
+    input.fiches.map(
+      fiche => [fiche.id, getOverviewEligibility(fiche)] as const
+    )
   );
 
   // Defensive: rows for a fiche that must not expose them are ignored even if
   // the caller queried them.
   for (const row of input.scans) {
     if (!eligibility.get(row.ficheId)?.statsAvailable) continue;
-    scanByFiche.set(row.ficheId, (scanByFiche.get(row.ficheId) ?? 0) + row.count);
+    scanByFiche.set(
+      row.ficheId,
+      (scanByFiche.get(row.ficheId) ?? 0) + row.count
+    );
     scanByDay.set(row.scanDate, (scanByDay.get(row.scanDate) ?? 0) + row.count);
   }
 
@@ -84,7 +94,9 @@ export function buildClientOverview(input: {
       statutMetier: rules.status,
       dateEcheance: fiche.dateEcheance,
       scans30: rules.statsAvailable ? (scanByFiche.get(fiche.id) ?? 0) : null,
-      requestCount: rules.requestsAvailable ? (requestByFiche.get(fiche.id) ?? 0) : null,
+      requestCount: rules.requestsAvailable
+        ? (requestByFiche.get(fiche.id) ?? 0)
+        : null,
     };
   });
 
@@ -114,7 +126,10 @@ export function buildClientOverview(input: {
     },
     requests: {
       availableFor: requestFiches.length,
-      total: requestFiches.reduce((sum, fiche) => sum + (fiche.requestCount ?? 0), 0),
+      total: requestFiches.reduce(
+        (sum, fiche) => sum + (fiche.requestCount ?? 0),
+        0
+      ),
       recent: input.recentRequests
         .filter(request => requestable.has(request.ficheId))
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())

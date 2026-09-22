@@ -1,5 +1,5 @@
 import { AXIOS_TIMEOUT_MS } from "@shared/const";
-import { ENV } from "./env";
+import { ENV } from "../../_core/env";
 
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const USERINFO_ENDPOINT = "https://www.googleapis.com/oauth2/v3/userinfo";

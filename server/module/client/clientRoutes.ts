@@ -1,12 +1,12 @@
 import { COOKIE_NAME } from "@shared/const";
+import { parse as parseCookieHeader } from "cookie";
 import type { Express, Request } from "express";
 import { z } from "zod";
-import { parse as parseCookieHeader } from "cookie";
-import { prisma } from "../../prisma/client";
-import { getSessionCookieOptions } from "./cookies";
-import { sdk } from "./sdk";
-import { ENV } from "./env";
-import { hashClientPassword, verifyClientPassword } from "./clientAuth";
+import { prisma } from "../../database/prisma/client";
+import { sdk } from "../../_core/config/sdk";
+import { getSessionCookieOptions } from "../../_core/cookies";
+import { ENV } from "../../_core/env";
+import { hashClientPassword, verifyClientPassword } from "../auth/clientAuth";
 
 const loginSchema = z.object({
   username: z.string().trim().min(3).max(64),
@@ -21,7 +21,10 @@ const passwordChangeSchema = z.object({
     .regex(/[A-Z]/, "Le nouveau mot de passe doit contenir une majuscule.")
     .regex(/[a-z]/, "Le nouveau mot de passe doit contenir une minuscule.")
     .regex(/[0-9]/, "Le nouveau mot de passe doit contenir un chiffre.")
-    .regex(/[^A-Za-z0-9]/, "Le nouveau mot de passe doit contenir un caractère spécial."),
+    .regex(
+      /[^A-Za-z0-9]/,
+      "Le nouveau mot de passe doit contenir un caractère spécial."
+    ),
 });
 
 const WINDOW_MS = 15 * 60 * 1000;
@@ -60,7 +63,6 @@ function clearFailures(key: string): void {
 }
 
 export function registerClientRoutes(app: Express): void {
-  
   app.post("/api/client/login", async (req, res) => {
     const parsed = loginSchema.safeParse(req.body);
 
@@ -153,7 +155,8 @@ export function registerClientRoutes(app: Express): void {
 
     if (!user.clientCredential.mustChangePassword) {
       return res.status(400).json({
-        message: "Aucun changement de mot de passe obligatoire n'est en attente.",
+        message:
+          "Aucun changement de mot de passe obligatoire n'est en attente.",
       });
     }
 
