@@ -563,17 +563,6 @@ export function FicheTemplate({
       <div className="public-card fiche-template__card mx-auto w-full max-w-[520px] overflow-hidden rounded-[var(--theme-radius)] border border-theme-line bg-theme-card">
         <Hero fiche={fiche} actions={actions} />
         <main className="public-content px-5 pt-2">
-          {fiche.formule && (
-            <div className="essential-save-row">
-              <a
-                href={actions.contactHref}
-                download={`${fiche.slug}.vcf`}
-                className="public-save-contact"
-              >
-                <Download className="h-4 w-4" /> Enregistrer le contact
-              </a>
-            </div>
-          )}
           <PresentationContent fiche={fiche} />
           {fiche.formule !== "essentiel" && <ProContent fiche={fiche} />}
           {fiche.formule !== "essentiel" && (links.length || fiche.site) ? (
@@ -816,6 +805,19 @@ export function FicheTemplate({
           </section>
         </main>
       </div>
+
+      {/* Fixed, pill-shaped, always visible while scrolling (same on all 3 plans). */}
+      {fiche.formule && (
+        <div className="fh-save-contact-bar">
+          <a
+            href={actions.contactHref}
+            download={`${fiche.slug}.vcf`}
+            className="public-save-contact"
+          >
+            <Download className="h-4 w-4" /> Enregistrer le contact
+          </a>
+        </div>
+      )}
     </div>
   );
 }
