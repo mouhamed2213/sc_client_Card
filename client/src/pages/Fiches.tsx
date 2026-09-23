@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Link } from "wouter";
 
@@ -97,43 +97,29 @@ export default function Fiches() {
   const usersQuery = trpc.fiches.usersPaginated.useQuery({ page, pageSize, search: debouncedSearch }, { enabled: viewMode === "users" });
 
   const listQuery = trpc.fiches.listPaginated.useQuery(
-    page,
-    pageSize,
-    search: debouncedSearch,
-    ...(filter === "all" ? {} : { statut: filter }),
-  }, { enabled: viewMode === "fiches" });
+    {
+      page,
+      pageSize,
+      search: debouncedSearch,
+      ...(filter === "all" ? {} : { statut: filter }),
+    },
+    { enabled: viewMode === "fiches" }
+  );
 
+  const utils = trpc.useUtils();
   const createFicheMutation = trpc.admin.createStandaloneFiche.useMutation({
     onSuccess: async () => {
       toast.success("Fiche créée");
-      await Promise.all([utils.fiches.usersPaginated.invalidate(), utils.fiches.listPaginated.invalidate()]);
+      await Promise.all([
+        utils.fiches.usersPaginated.invalidate(),
+        utils.fiches.listPaginated.invalidate(),
+      ]);
       setSelectedUser(null);
     },
-    onError: error => toast.error("Création impossible", { description: error.message }),
-  });
-  const attachMutation = trpc.admin.attachFicheToOwner.useMutation({
-    onSuccess: async () => {
-      toast.success("Fiche rattachée au compte");
-      await utils.fiches.usersPaginated.invalidate();
-    },
-    onError: error => toast.error("Rattachement impossible", { description: error.message }),
-  });
-  const changeOwnerMutation = trpc.admin.changeFicheOwner.useMutation({
-    onSuccess: async () => {
-      toast.success("Propriétaire modifié");
-      await utils.fiches.usersPaginated.invalidate();
-    },
-    onError: error => toast.error("Modification impossible", { description: error.message }),
-  });
-  const detachMutation = trpc.admin.detachFicheOwner.useMutation({
-    onSuccess: async () => {
-      toast.success("Fiche détachée");
-      await Promise.all([utils.fiches.usersPaginated.invalidate(), utils.fiches.listPaginated.invalidate()]);
-    },
-    onError: error => toast.error("Détachement impossible", { description: error.message }),
+    onError: error =>
+      toast.error("Création impossible", { description: error.message }),
   });
 
-  const utils = trpc.useUtils();
   const statusMutation = trpc.fiches.updateStatus.useMutation({
     onSuccess: async () => {
       await Promise.all([
@@ -707,6 +693,6 @@ function UserManagementModal({ user, onClose }: { user: ClientUser; onClose: () 
 
 function CreateFicheModal({ user, onClose, onCreate }: { user: ClientUser; onClose: () => void; onCreate: (input: any) => void }) {
   const [form,setForm]=useState({prenom:user.name?.split(" ")[0]||"",nom:user.name?.split(" ").slice(1).join(" ")||"",fonction:"",entreprise:user.name||"",telephone:"",whatsapp:"",email:user.email||"",formule:"essentiel" as keyof typeof formulaLabels});
-  const submit=(e:React.FormEvent)=>{e.preventDefault(); if(form.prenom.length<1||form.nom.length<1||form.fonction.length<1||form.entreprise.length<1||form.telephone.length<8||form.whatsapp.length<8){toast.error("Complétez les champs obligatoires.");return;} onCreate({fiche:{formule:form.formule,statut:"brouillon",prenom:form.prenom,nom:form.nom,fonction:form.fonction,entreprise:form.entreprise,telephone:form.telephone,whatsapp:form.whatsapp,email:form.email,site:"",adresse:"",lienItineraire:"",googlePlaceId:"",photo:"",logo:"",data:{premierBouton:"whatsapp",messageWhatsapp:"",presentation:"",reseauxSociaux:[],liens:[],horaires:[],galerie:[],sections:[],notesInternes:""}},ownerId:user.id});};
+  const submit=(e:FormEvent)=>{e.preventDefault(); if(form.prenom.length<1||form.nom.length<1||form.fonction.length<1||form.entreprise.length<1||form.telephone.length<8||form.whatsapp.length<8){toast.error("Complétez les champs obligatoires.");return;} onCreate({fiche:{formule:form.formule,statut:"brouillon",prenom:form.prenom,nom:form.nom,fonction:form.fonction,entreprise:form.entreprise,telephone:form.telephone,whatsapp:form.whatsapp,email:form.email,site:"",adresse:"",lienItineraire:"",googlePlaceId:"",photo:"",logo:"",data:{premierBouton:"whatsapp",messageWhatsapp:"",presentation:"",reseauxSociaux:[],liens:[],horaires:[],galerie:[],sections:[],notesInternes:""}},ownerId:user.id});};
   return <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-4 sm:items-center"><form onSubmit={submit} className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl"><div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5"><div><p className="eyebrow">Nouvelle fiche</p><h2 className="mt-1 text-xl font-semibold">Créer pour {user.name||"ce client"}</h2></div><button type="button" className="icon-button" onClick={onClose} aria-label="Fermer"><X className="h-4 w-4"/></button></div><div className="grid gap-4 p-6 sm:grid-cols-2">{(["prenom","nom","fonction","entreprise","telephone","whatsapp","email"] as const).map(k=><label key={k} className="text-sm font-medium">{k==="prenom"?"Prénom":k==="nom"?"Nom":k==="fonction"?"Fonction":k==="entreprise"?"Entreprise":k==="telephone"?"Téléphone":k==="whatsapp"?"WhatsApp":"E-mail"}<input className="mt-1 w-full rounded-lg border border-[#e0e4e9] px-3 py-2" value={form[k]} onChange={e=>setForm({...form,[k]:e.target.value})}/></label>)}<label className="text-sm font-medium">Formule<select className="mt-1 w-full rounded-lg border border-[#e0e4e9] px-3 py-2" value={form.formule} onChange={e=>setForm({...form,formule:e.target.value as any})}>{Object.entries(formulaLabels).map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label></div><div className="flex justify-end gap-2 border-t border-[#edf0f2] px-6 py-4"><Button type="button" variant="outline" onClick={onClose}>Annuler</Button><Button type="submit" className="bg-[#172033] text-white">Créer la fiche</Button></div></form></div>;
 }
