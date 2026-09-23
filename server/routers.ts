@@ -31,6 +31,7 @@ import {
   listRecentFiches,
   listScansForFiche,
   searchClientUsers,
+  listClientUsersPaginated,
   updateFiche,
 } from "./database/db";
 import { Fiche } from "./database/generated/prisma/client";
@@ -114,6 +115,15 @@ export const appRouter = router({
         plan: getPlanFeatures(row.formule),
       }));
     }),
+    usersPaginated: adminProcedure
+      .input(
+        z.object({
+          page: z.number().int().positive().default(1),
+          pageSize: z.number().int().min(5).max(50).default(10),
+          search: z.string().trim().max(160).optional().default(""),
+        })
+      )
+      .query(async ({ input }) => listClientUsersPaginated(input)),
     listPaginated: adminProcedure
       .input(
         z.object({
