@@ -70,7 +70,7 @@ describe("passages — recorded against a real database", () => {
       fiche: overrides.fiche ?? (await fresh()),
       user: overrides.user ?? null,
       req: req(overrides.headers),
-      input: { slug: fiche.slug, visitorId: "visitor-default-1", ...overrides.input },
+      input: { slug: fiche.slug, visitorId: "visitor-default-1", source: "nfc", ...overrides.input },
     });
   }
   async function counters() {
@@ -204,7 +204,7 @@ describe("passages — recorded against a real database", () => {
   });
 
   it("only counts visits carrying a QR or NFC marker", async () => {
-    expect(await scan()).toMatchObject({ counted: false, reason: "missing_source" });
+    expect(await scan({ input: { source: undefined } })).toMatchObject({ counted: false, reason: "missing_source" });
     expect(await scan({ input: { source: "qr" } })).toMatchObject({ counted: true, source: "qr" });
     expect((await counters()).total).toBe(1);
   });
