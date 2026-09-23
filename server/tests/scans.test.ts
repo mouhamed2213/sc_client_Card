@@ -157,6 +157,12 @@ describe("passages — recorded against a real database", () => {
     expect(await counters()).toEqual({ total: 2, events: 2, daily: 2, qr: 0, nfc: 2 });
   });
 
+  it("keeps QR and NFC source counters aligned with the daily total", async () => {
+    await scan({ input: { source: "qr", visitorId: "source-qr-visitor" } });
+    await scan({ input: { source: "nfc", visitorId: "source-nfc-visitor" } });
+    expect(await counters()).toEqual({ total: 2, events: 2, daily: 2, qr: 1, nfc: 1 });
+  });
+
   it("counts a visitor again once the de-duplication window has passed", async () => {
     await scan();
     await prisma.ficheScanEvent.updateMany({
