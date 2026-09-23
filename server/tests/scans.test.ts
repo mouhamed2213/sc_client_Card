@@ -82,6 +82,14 @@ describe("passages — recorded against a real database", () => {
         (sum, row) => sum + row.count,
         0
       ),
+      qr: (await prisma.ficheScan.findMany({ where: { ficheId: fiche.id } })).reduce(
+        (sum, row) => sum + row.qrCount,
+        0
+      ),
+      nfc: (await prisma.ficheScan.findMany({ where: { ficheId: fiche.id } })).reduce(
+        (sum, row) => sum + row.nfcCount,
+        0
+      ),
     };
   }
 
@@ -120,20 +128,20 @@ describe("passages — recorded against a real database", () => {
 
   it("counts a genuine visit once, in the event log, the total and the daily aggregate", async () => {
     expect(await scan({ input: { source: "nfc" } })).toEqual({ ok: true, counted: true, source: "nfc" });
-    expect(await counters()).toEqual({ total: 1, events: 1, daily: 1 });
+    expect(await counters()).toEqual({ total: 1, events: 1, daily: 1, qr: 0, nfc: 1 });
     expect((await fresh()).lastScanAt).not.toBeNull();
   });
 
   it("does not count reloads or a second tab of the same visitor", async () => {
     await scan();
     expect(await scan()).toMatchObject({ counted: false, reason: "duplicate" });
-    expect(await counters()).toEqual({ total: 1, events: 1, daily: 1 });
+    expect(await counters()).toEqual({ total: 1, events: 1, daily: 1, qr: 0, nfc: 1 });
   });
 
   it("counts different visitors separately", async () => {
     await scan({ input: { visitorId: "visitor-aaaa-1" } });
     await scan({ input: { visitorId: "visitor-bbbb-2" } });
-    expect(await counters()).toEqual({ total: 2, events: 2, daily: 2 });
+    expect(await counters()).toEqual({ total: 2, events: 2, daily: 2, qr: 0, nfc: 2 });
   });
 
   it("counts a visitor again once the de-duplication window has passed", async () => {
@@ -149,7 +157,7 @@ describe("passages — recorded against a real database", () => {
   it("stays exact under concurrent requests from the same visitor", async () => {
     const results = await Promise.all(Array.from({ length: 12 }, () => scan()));
     expect(results.filter(r => r.counted)).toHaveLength(1);
-    expect(await counters()).toEqual({ total: 1, events: 1, daily: 1 });
+    expect(await counters()).toEqual({ total: 1, events: 1, daily: 1, qr: 0, nfc: 1 });
   });
 
   it("never counts the admin previewing a fiche", async () => {
@@ -207,6 +215,9 @@ describe("passages — recorded against a real database", () => {
     expect(await scan({ input: { source: undefined } })).toMatchObject({ counted: false, reason: "missing_source" });
     expect(await scan({ input: { source: "qr" } })).toMatchObject({ counted: true, source: "qr" });
     expect((await counters()).total).toBe(1);
+    const daily = await prisma.ficheScan.findFirst({ where: { ficheId: fiche.id } });
+    expect(daily?.qrCount).toBe(1);
+    expect(daily?.nfcCount).toBe(0);
   });
 
   it("caps a flood from a single IP even with fresh visitor ids", async () => {
@@ -232,6 +243,6 @@ describe("passages — recorded against a real database", () => {
     const again = await caller.fiches.recordScan({ slug: fiche.slug, source: "qr", visitorId: "trpc-visitor-01" });
     expect(first).toMatchObject({ counted: true });
     expect(again).toMatchObject({ counted: false, reason: "duplicate" });
-    expect(await counters()).toEqual({ total: 1, events: 1, daily: 1 });
+    expect(await counters()).toEqual({ total: 1, events: 1, daily: 1, qr: 1, nfc: 0 });
   });
 });
