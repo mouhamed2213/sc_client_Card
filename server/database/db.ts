@@ -639,21 +639,77 @@ export async function changeFicheOwner(ficheId: number, ownerId: number) {
       throw new Error("OWNER_NOT_FOUND");
     }
 
+    if (fiche.ownerId === ownerId) return fiche;
+
+    // Keep the invariant "one primary fiche per client". If a primary fiche
+    // is moved to an account that already has one, the moved fiche becomes
+    // secondary and the source account receives the oldest remaining fiche
+    // as its new primary.
+    if (fiche.isMain && fiche.ownerId != null) {
+      const targetMain = await tx.fiche.findFirst({
+        where: { ownerId, isMain: true },
+        select: { id: true },
+      });
+
+      if (targetMain) {
+        const replacement = await tx.fiche.findFirst({
+          where: {
+            ownerId: fiche.ownerId,
+            id: { not: fiche.id },
+          },
+          orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+          select: { id: true },
+        });
+
+        if (replacement) {
+          await tx.fiche.update({
+            where: { id: replacement.id },
+            data: { isMain: true },
+          });
+        }
+
+        return tx.fiche.update({
+          where: { id: fiche.id },
+          data: { ownerId, isMain: false },
+        });
+      }
+    }
+
     return tx.fiche.update({
-      where: { id: ficheId },
+      where: { id: fiche.id },
       data: { ownerId },
     });
   });
 }
 
 export async function detachFicheOwner(ficheId: number) {
-  const fiche = await prisma.fiche.findUnique({ where: { id: ficheId } });
-  if (!fiche) throw new Error("FICHE_NOT_FOUND");
-  if (!fiche.ownerId) throw new Error("FICHE_NOT_OWNED");
+  return prisma.$transaction(async tx => {
+    const fiche = await tx.fiche.findUnique({ where: { id: ficheId } });
+    if (!fiche) throw new Error("FICHE_NOT_FOUND");
+    if (!fiche.ownerId) throw new Error("FICHE_NOT_OWNED");
 
-  return prisma.fiche.update({
-    where: { id: ficheId },
-    data: { ownerId: null },
+    if (fiche.isMain) {
+      const replacement = await tx.fiche.findFirst({
+        where: {
+          ownerId: fiche.ownerId,
+          id: { not: fiche.id },
+        },
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+        select: { id: true },
+      });
+
+      if (replacement) {
+        await tx.fiche.update({
+          where: { id: replacement.id },
+          data: { isMain: true },
+        });
+      }
+    }
+
+    return tx.fiche.update({
+      where: { id: fiche.id },
+      data: { ownerId: null, isMain: false },
+    });
   });
 }
 
