@@ -101,7 +101,7 @@
 .fiche-template .catalog-section .fh-section-icon { width: 26px; height: 26px; }
 .fiche-template .catalog-section .fh-collapse-chevron { width: 26px; height: 26px; padding: 6px; }
 .fiche-template .catalog-row-photo {
-  flex: none; width: 56px; height: 56px; margin-top: 2px; border-radius: 12px; border: 1px solid var(--theme-line);
+  flex: none; width: 76px; height: 76px; margin-top: 2px; border-radius: 14px; border: 1px solid var(--theme-line);
   object-fit: cover; background: var(--theme-accent-soft);
 }
 .fiche-template .catalog-row-body { flex: 1 1 auto; min-width: 0; }
@@ -126,7 +126,7 @@
 }
 .fiche-template .catalog-order-button:hover { background: var(--theme-accent-soft); transform: translateY(-1px); }
 @media (max-width: 360px) {
-  .fiche-template .catalog-row-photo { width: 46px; height: 46px; }
+  .fiche-template .catalog-row-photo { width: 62px; height: 62px; }
   .fiche-template .catalog-order-button span { display: none; }
 }
 

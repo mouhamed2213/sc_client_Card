@@ -1245,7 +1245,7 @@ function CatalogEditor({
                   >
                     <div className="flex items-center gap-2">
                       <label
-                        className={`relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed transition ${
+                        className={`relative flex h-14 w-14 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed transition ${
                           article.photo
                             ? "border-transparent"
                             : "border-[#cfd5dd] hover:bg-gray-50"
@@ -1264,7 +1264,7 @@ function CatalogEditor({
                           }}
                         />
                         {isUploadingPhoto ? (
-                          <Loader2 size={16} className="animate-spin text-[#c98a4e]" />
+                          <Loader2 size={18} className="animate-spin text-[#c98a4e]" />
                         ) : article.photo ? (
                           <img
                             src={article.photo}
@@ -1272,7 +1272,7 @@ function CatalogEditor({
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <ImagePlus size={16} className="text-[#98a2b3]" />
+                          <ImagePlus size={18} className="text-[#98a2b3]" />
                         )}
                       </label>
                       <input
