@@ -23,9 +23,10 @@ export default function ClientStats() {
     { enabled: isSignature }
   );
 
-  const total = scans.data?.reduce((sum, item) => sum + item.count, 0) ?? 0;
+  const periodTotal = scans.data?.reduce((sum, item) => sum + item.count, 0) ?? 0;
+  const lifetimeTotal = fiche.data?.scansTotal ?? 0;
   const daysCount = scans.data?.length || days;
-  const average = daysCount ? Math.round((total / daysCount) * 10) / 10 : 0;
+  const average = daysCount ? Math.round((periodTotal / daysCount) * 10) / 10 : 0;
   const best = scans.data?.reduce(
     (top, item) => (item.count > (top?.count ?? -1) ? item : top),
     undefined as NonNullable<typeof scans.data>[number] | undefined
@@ -69,8 +70,8 @@ export default function ClientStats() {
         <div className="client-kpis" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
           <div className="kpi-tile">
             <ScanLine size={17} className="text-[#7d8798]" />
-            <p className="kpi-tile-value">{total}</p>
-            <p className="kpi-tile-label">Scans sur la période</p>
+            <p className="kpi-tile-value">{lifetimeTotal}</p>
+            <p className="kpi-tile-label">Total des scans</p>
           </div>
           <div className="kpi-tile">
             <BarChart3 size={17} className="text-[#7d8798]" />
