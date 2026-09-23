@@ -2,6 +2,7 @@ import { getPlanFeatures } from "@shared/planFeatures";
 import type { Fiche } from "../../database/generated/prisma/client";
 
 import { prisma } from "../../database/prisma/client";
+import { getScanDateRange, listScansForFiche } from "../../database/db";
 import { buildClientOverview, getOverviewEligibility } from "./clientOverview";
 
 /**
@@ -37,15 +38,7 @@ export async function updateMembershipCardStatus(
 export async function listClientDashboard(ficheId: number) {
   const [fiche, scans, requests, requestCount] = await Promise.all([
     prisma.fiche.findUnique({ where: { id: ficheId } }),
-    prisma.ficheScan.findMany({
-      where: {
-        ficheId,
-        scanDate: {
-          gte: new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10),
-        },
-      },
-      orderBy: { scanDate: "asc" },
-    }),
+    listScansForFiche(ficheId, 30),
     prisma.contactRequest.findMany({
       where: { ficheId },
       orderBy: { createdAt: "desc" },
@@ -80,12 +73,12 @@ export async function getClientOverview(ownerId: number, ficheId?: number) {
   const requestIds = rules
     .filter(r => r.requestsAvailable)
     .map(r => r.fiche.id);
-  const since = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+  const { startDate } = getScanDateRange(30);
 
   const [scans, requestGroups, recentRequests] = await Promise.all([
     statIds.length
       ? prisma.ficheScan.findMany({
-          where: { ficheId: { in: statIds }, scanDate: { gte: since } },
+          where: { ficheId: { in: statIds }, scanDate: { gte: startDate } },
           orderBy: { scanDate: "asc" },
         })
       : [],
