@@ -19,8 +19,6 @@
 .fiche-template .hours-row:last-child { border-bottom:0; }
 .fiche-template .hours-row span { color:var(--theme-muted); }
 .fiche-template .hours-row strong { color:var(--theme-text); }
-.fiche-template .catalog-section + .catalog-section { margin-top:18px; }
-.fiche-template .catalog-section h3 { margin:0 0 8px; font-size:13px; }
 .fiche-template .catalog-row { display:flex; align-items:flex-start; gap:14px; padding:12px 0; border-bottom:1px dashed var(--theme-line); }
 .fiche-template .catalog-row:last-child { border-bottom:0; }
 .fiche-template .catalog-row-side > span { flex-shrink:0; color:var(--theme-accent); font-size:12px; font-weight:800; }

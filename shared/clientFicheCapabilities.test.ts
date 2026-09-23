@@ -28,9 +28,9 @@ describe("client fiche capabilities", () => {
     expect(c.gallery.maxItems).toBe(4);
     expect(c.gallery.maxVideos).toBe(1);
     expect(c.googleReview.editable).toBe(true);
-    // Catalogue is shared with Pro (same limits as Signature), no upgrade needed.
+    // Catalogue is shared with Pro but with a tighter section cap (Signature keeps more room).
     expect(c.catalog.editable).toBe(true);
-    expect(c.catalog.maxSections).toBe(6);
+    expect(c.catalog.maxSections).toBe(2);
     expect(c.catalog.maxArticlesPerSection).toBe(12);
     expect(c.callbackForm.upgradeTo).toBe("signature");
   });
@@ -43,10 +43,10 @@ describe("client fiche capabilities", () => {
       expect(capabilities.gallery.maxItems).toBe(features.maxPhotos);
       expect(capabilities.gallery.maxVideos).toBe(features.maxVideos);
     }
-    // Pro and Signature share the same catalogue caps.
-    expect(getClientFicheCapabilities("pro").catalog.maxSections).toBe(
-      getClientFicheCapabilities("signature").catalog.maxSections
-    );
+    // Pro's catalogue is capped tighter than Signature's; both share the
+    // 12-articles-per-section limit.
+    expect(getClientFicheCapabilities("pro").catalog.maxSections).toBe(2);
+    expect(getClientFicheCapabilities("signature").catalog.maxSections).toBe(6);
     expect(getClientFicheCapabilities("pro").catalog.maxArticlesPerSection).toBe(
       getClientFicheCapabilities("signature").catalog.maxArticlesPerSection
     );

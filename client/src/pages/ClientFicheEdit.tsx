@@ -1202,13 +1202,13 @@ function CatalogEditor({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {sections.map((section, sectionIndex) => {
         const atArticleLimit = section.articles.length >= maxArticlesPerSection;
         return (
           <div
             key={sectionIndex}
-            className="rounded-xl border border-[#dfe4ea] bg-[#f7f9fb] p-4 space-y-3"
+            className="rounded-xl border border-[#dfe4ea] bg-[#f7f9fb] p-3 space-y-2"
           >
             <div className="flex gap-2 items-center">
               <input
@@ -1234,18 +1234,18 @@ function CatalogEditor({
                 <Trash2 size={16} />
               </button>
             </div>
-            <div className="space-y-3 pl-2 border-l-2 border-[#c98a4e]/30">
+            <div className="space-y-2 pl-2 border-l-2 border-[#c98a4e]/30">
               {section.articles.map((article, articleIndex) => {
                 const photoKey = `${sectionIndex}-${articleIndex}`;
                 const isUploadingPhoto = uploadingPhotoKey === photoKey;
                 return (
                   <div
                     key={articleIndex}
-                    className="rounded-lg border border-[#e5e8ed] bg-white p-3"
+                    className="rounded-lg border border-[#e5e8ed] bg-white p-2.5 space-y-2"
                   >
-                    <div className="flex gap-3">
+                    <div className="flex items-center gap-2">
                       <label
-                        className={`relative flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed transition ${
+                        className={`relative flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed transition ${
                           article.photo
                             ? "border-transparent"
                             : "border-[#cfd5dd] hover:bg-gray-50"
@@ -1264,7 +1264,7 @@ function CatalogEditor({
                           }}
                         />
                         {isUploadingPhoto ? (
-                          <Loader2 size={18} className="animate-spin text-[#c98a4e]" />
+                          <Loader2 size={16} className="animate-spin text-[#c98a4e]" />
                         ) : article.photo ? (
                           <img
                             src={article.photo}
@@ -1272,95 +1272,91 @@ function CatalogEditor({
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <ImagePlus size={18} className="text-[#98a2b3]" />
+                          <ImagePlus size={16} className="text-[#98a2b3]" />
                         )}
                       </label>
-
-                      <div className="min-w-0 flex-1 space-y-2">
-                        <div className="flex gap-2">
-                          <input
-                            className="editor-input flex-1"
-                            placeholder="Article / prestation"
-                            value={article.nom}
-                            onChange={e =>
-                              updateArticle(sectionIndex, articleIndex, {
-                                nom: e.target.value,
-                              })
-                            }
-                          />
-                          <select
-                            className="editor-input w-[130px] shrink-0"
-                            value={article.badge ?? ""}
-                            onChange={e =>
-                              updateArticle(sectionIndex, articleIndex, {
-                                badge: (e.target.value || undefined) as
-                                  | ArticleBadge
-                                  | undefined,
-                              })
-                            }
-                          >
-                            <option value="">Aucun badge</option>
-                            <option value="populaire">Populaire</option>
-                            <option value="nouveau">Nouveau</option>
-                            <option value="promo">Promo</option>
-                          </select>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              onChange(
-                                sections.map((x, i) =>
-                                  i === sectionIndex
-                                    ? {
-                                        ...x,
-                                        articles: x.articles.filter(
-                                          (_, ai) => ai !== articleIndex
-                                        ),
-                                      }
-                                    : x
-                                )
-                              )
-                            }
-                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition shrink-0"
-                            title="Supprimer l'article"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                        <input
-                          className="editor-input"
-                          placeholder="Description"
-                          value={article.description}
-                          onChange={e =>
-                            updateArticle(sectionIndex, articleIndex, {
-                              description: e.target.value,
-                            })
-                          }
-                        />
-                        <div className="flex gap-2">
-                          <input
-                            className="editor-input flex-1"
-                            placeholder="Prix (ex: 3 000 ou À partir de 5 000)"
-                            value={article.prix}
-                            onChange={e =>
-                              updateArticle(sectionIndex, articleIndex, {
-                                prix: e.target.value,
-                              })
-                            }
-                          />
-                          <select
-                            className="editor-input w-[110px] shrink-0"
-                            value={article.devise ?? "XOF"}
-                            onChange={e =>
-                              updateArticle(sectionIndex, articleIndex, {
-                                devise: e.target.value as "XOF" | "EUR",
-                              })
-                            }
-                          >
-                            <option value="XOF">FCFA</option>
-                            <option value="EUR">EUR</option>
-                          </select>
-                        </div>
-                      </div>
+                      <input
+                        className="editor-input min-w-0 flex-1"
+                        placeholder="Article / prestation"
+                        value={article.nom}
+                        onChange={e =>
+                          updateArticle(sectionIndex, articleIndex, {
+                            nom: e.target.value,
+                          })
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          onChange(
+                            sections.map((x, i) =>
+                              i === sectionIndex
+                                ? {
+                                    ...x,
+                                    articles: x.articles.filter(
+                                      (_, ai) => ai !== articleIndex
+                                    ),
+                                  }
+                                : x
+                            )
+                          )
+                        }
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition"
+                        title="Supprimer l'article"
+                        aria-label="Supprimer l'article"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                    <input
+                      className="editor-input"
+                      placeholder="Description (optionnel)"
+                      value={article.description}
+                      onChange={e =>
+                        updateArticle(sectionIndex, articleIndex, {
+                          description: e.target.value,
+                        })
+                      }
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        className="editor-input min-w-[100px] flex-1"
+                        placeholder="Prix (ex: 3 000)"
+                        value={article.prix}
+                        onChange={e =>
+                          updateArticle(sectionIndex, articleIndex, {
+                            prix: e.target.value,
+                          })
+                        }
+                      />
+                      <select
+                        className="editor-input w-[92px] shrink-0"
+                        value={article.devise ?? "XOF"}
+                        onChange={e =>
+                          updateArticle(sectionIndex, articleIndex, {
+                            devise: e.target.value as "XOF" | "EUR",
+                          })
+                        }
+                      >
+                        <option value="XOF">FCFA</option>
+                        <option value="EUR">EUR</option>
+                      </select>
+                      <select
+                        className="editor-input w-[124px] shrink-0"
+                        value={article.badge ?? ""}
+                        onChange={e =>
+                          updateArticle(sectionIndex, articleIndex, {
+                            badge: (e.target.value || undefined) as
+                              | ArticleBadge
+                              | undefined,
+                          })
+                        }
+                      >
+                        <option value="">Aucun badge</option>
+                        <option value="populaire">Populaire</option>
+                        <option value="nouveau">Nouveau</option>
+                        <option value="promo">Promo</option>
+                      </select>
                     </div>
                   </div>
                 );
