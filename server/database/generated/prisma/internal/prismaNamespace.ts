@@ -1143,6 +1143,9 @@ export const FicheScanScalarFieldEnum = {
   ficheId: 'ficheId',
   scanDate: 'scanDate',
   count: 'count',
+  qrCount: 'qrCount',
+  nfcCount: 'nfcCount',
+  unclassifiedCount: 'unclassifiedCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

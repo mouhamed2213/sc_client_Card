@@ -24,6 +24,11 @@ export default function ClientStats() {
   );
 
   const periodTotal = scans.data?.reduce((sum, item) => sum + item.count, 0) ?? 0;
+  const periodQr = scans.data?.reduce((sum, item) => sum + item.qrCount, 0) ?? 0;
+  const periodNfc = scans.data?.reduce((sum, item) => sum + item.nfcCount, 0) ?? 0;
+  const sourceTotal = periodQr + periodNfc;
+  const qrPercentage = sourceTotal ? Math.round((periodQr / sourceTotal) * 100) : 0;
+  const nfcPercentage = sourceTotal ? Math.round((periodNfc / sourceTotal) * 100) : 0;
   const lifetimeTotal = fiche.data?.scansTotal ?? 0;
   const daysCount = scans.data?.length || days;
   const average = daysCount ? Math.round((periodTotal / daysCount) * 10) / 10 : 0;
@@ -67,11 +72,21 @@ export default function ClientStats() {
           </div>
         </div>
 
-        <div className="client-kpis" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+        <div className="client-kpis" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
           <div className="kpi-tile">
             <ScanLine size={17} className="text-[#7d8798]" />
             <p className="kpi-tile-value">{lifetimeTotal}</p>
             <p className="kpi-tile-label">Total des scans</p>
+          </div>
+          <div className="kpi-tile">
+            <ScanLine size={17} className="text-[#7d8798]" />
+            <p className="kpi-tile-value">{periodQr}</p>
+            <p className="kpi-tile-label">QR Code · {qrPercentage}%</p>
+          </div>
+          <div className="kpi-tile">
+            <ScanLine size={17} className="text-[#7d8798]" />
+            <p className="kpi-tile-value">{periodNfc}</p>
+            <p className="kpi-tile-label">NFC · {nfcPercentage}%</p>
           </div>
           <div className="kpi-tile">
             <BarChart3 size={17} className="text-[#7d8798]" />

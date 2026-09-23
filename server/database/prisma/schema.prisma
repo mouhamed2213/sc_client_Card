@@ -124,6 +124,9 @@ model FicheScan {
   ficheId   Int
   scanDate  String   @db.VarChar(10)
   count     Int      @default(0)
+  qrCount   Int      @default(0)
+  nfcCount  Int      @default(0)
+  unclassifiedCount Int @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   fiche     Fiche    @relation(fields: [ficheId], references: [id], onDelete: Cascade)

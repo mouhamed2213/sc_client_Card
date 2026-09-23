@@ -112,6 +112,8 @@ export default function Home() {
     total: 0,
     active: 0,
     scans: 0,
+    qrScans: 0,
+    nfcScans: 0,
     expiring: 0,
   };
   const [search, setSearch] = useState("");
@@ -218,6 +220,20 @@ export default function Home() {
               value={overview.scans}
               note="depuis le début"
               icon={<Eye className="h-4 w-4" />}
+              accent="copper"
+            />
+            <StatCard
+              label="QR Code"
+              value={overview.qrScans}
+              note="passages"
+              icon={<QrCodeIcon className="h-4 w-4" />}
+              accent="blue"
+            />
+            <StatCard
+              label="NFC"
+              value={overview.nfcScans}
+              note="passages"
+              icon={<Link2 className="h-4 w-4" />}
               accent="copper"
             />
             <StatCard

@@ -30,12 +30,18 @@ export type FicheScanAvgAggregateOutputType = {
   id: number | null
   ficheId: number | null
   count: number | null
+  qrCount: number | null
+  nfcCount: number | null
+  unclassifiedCount: number | null
 }
 
 export type FicheScanSumAggregateOutputType = {
   id: number | null
   ficheId: number | null
   count: number | null
+  qrCount: number | null
+  nfcCount: number | null
+  unclassifiedCount: number | null
 }
 
 export type FicheScanMinAggregateOutputType = {
@@ -43,6 +49,9 @@ export type FicheScanMinAggregateOutputType = {
   ficheId: number | null
   scanDate: string | null
   count: number | null
+  qrCount: number | null
+  nfcCount: number | null
+  unclassifiedCount: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -52,6 +61,9 @@ export type FicheScanMaxAggregateOutputType = {
   ficheId: number | null
   scanDate: string | null
   count: number | null
+  qrCount: number | null
+  nfcCount: number | null
+  unclassifiedCount: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -61,6 +73,9 @@ export type FicheScanCountAggregateOutputType = {
   ficheId: number
   scanDate: number
   count: number
+  qrCount: number
+  nfcCount: number
+  unclassifiedCount: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -71,12 +86,18 @@ export type FicheScanAvgAggregateInputType = {
   id?: true
   ficheId?: true
   count?: true
+  qrCount?: true
+  nfcCount?: true
+  unclassifiedCount?: true
 }
 
 export type FicheScanSumAggregateInputType = {
   id?: true
   ficheId?: true
   count?: true
+  qrCount?: true
+  nfcCount?: true
+  unclassifiedCount?: true
 }
 
 export type FicheScanMinAggregateInputType = {
@@ -84,6 +105,9 @@ export type FicheScanMinAggregateInputType = {
   ficheId?: true
   scanDate?: true
   count?: true
+  qrCount?: true
+  nfcCount?: true
+  unclassifiedCount?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -93,6 +117,9 @@ export type FicheScanMaxAggregateInputType = {
   ficheId?: true
   scanDate?: true
   count?: true
+  qrCount?: true
+  nfcCount?: true
+  unclassifiedCount?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -102,6 +129,9 @@ export type FicheScanCountAggregateInputType = {
   ficheId?: true
   scanDate?: true
   count?: true
+  qrCount?: true
+  nfcCount?: true
+  unclassifiedCount?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -198,6 +228,9 @@ export type FicheScanGroupByOutputType = {
   ficheId: number
   scanDate: string
   count: number
+  qrCount: number
+  nfcCount: number
+  unclassifiedCount: number
   createdAt: Date
   updatedAt: Date
   _count: FicheScanCountAggregateOutputType | null
@@ -230,6 +263,9 @@ export type FicheScanWhereInput = {
   ficheId?: Prisma.IntFilter<"FicheScan"> | number
   scanDate?: Prisma.StringFilter<"FicheScan"> | string
   count?: Prisma.IntFilter<"FicheScan"> | number
+  qrCount?: Prisma.IntFilter<"FicheScan"> | number
+  nfcCount?: Prisma.IntFilter<"FicheScan"> | number
+  unclassifiedCount?: Prisma.IntFilter<"FicheScan"> | number
   createdAt?: Prisma.DateTimeFilter<"FicheScan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FicheScan"> | Date | string
   fiche?: Prisma.XOR<Prisma.FicheScalarRelationFilter, Prisma.FicheWhereInput>
@@ -240,6 +276,9 @@ export type FicheScanOrderByWithRelationInput = {
   ficheId?: Prisma.SortOrder
   scanDate?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  qrCount?: Prisma.SortOrder
+  nfcCount?: Prisma.SortOrder
+  unclassifiedCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   fiche?: Prisma.FicheOrderByWithRelationInput
@@ -254,6 +293,9 @@ export type FicheScanWhereUniqueInput = Prisma.AtLeast<{
   ficheId?: Prisma.IntFilter<"FicheScan"> | number
   scanDate?: Prisma.StringFilter<"FicheScan"> | string
   count?: Prisma.IntFilter<"FicheScan"> | number
+  qrCount?: Prisma.IntFilter<"FicheScan"> | number
+  nfcCount?: Prisma.IntFilter<"FicheScan"> | number
+  unclassifiedCount?: Prisma.IntFilter<"FicheScan"> | number
   createdAt?: Prisma.DateTimeFilter<"FicheScan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FicheScan"> | Date | string
   fiche?: Prisma.XOR<Prisma.FicheScalarRelationFilter, Prisma.FicheWhereInput>
@@ -264,6 +306,9 @@ export type FicheScanOrderByWithAggregationInput = {
   ficheId?: Prisma.SortOrder
   scanDate?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  qrCount?: Prisma.SortOrder
+  nfcCount?: Prisma.SortOrder
+  unclassifiedCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.FicheScanCountOrderByAggregateInput
@@ -281,6 +326,9 @@ export type FicheScanScalarWhereWithAggregatesInput = {
   ficheId?: Prisma.IntWithAggregatesFilter<"FicheScan"> | number
   scanDate?: Prisma.StringWithAggregatesFilter<"FicheScan"> | string
   count?: Prisma.IntWithAggregatesFilter<"FicheScan"> | number
+  qrCount?: Prisma.IntWithAggregatesFilter<"FicheScan"> | number
+  nfcCount?: Prisma.IntWithAggregatesFilter<"FicheScan"> | number
+  unclassifiedCount?: Prisma.IntWithAggregatesFilter<"FicheScan"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"FicheScan"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"FicheScan"> | Date | string
 }
@@ -288,6 +336,9 @@ export type FicheScanScalarWhereWithAggregatesInput = {
 export type FicheScanCreateInput = {
   scanDate: string
   count?: number
+  qrCount?: number
+  nfcCount?: number
+  unclassifiedCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   fiche: Prisma.FicheCreateNestedOneWithoutScansInput
@@ -298,6 +349,9 @@ export type FicheScanUncheckedCreateInput = {
   ficheId: number
   scanDate: string
   count?: number
+  qrCount?: number
+  nfcCount?: number
+  unclassifiedCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -305,6 +359,9 @@ export type FicheScanUncheckedCreateInput = {
 export type FicheScanUpdateInput = {
   scanDate?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  qrCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nfcCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unclassifiedCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fiche?: Prisma.FicheUpdateOneRequiredWithoutScansNestedInput
@@ -315,6 +372,9 @@ export type FicheScanUncheckedUpdateInput = {
   ficheId?: Prisma.IntFieldUpdateOperationsInput | number
   scanDate?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  qrCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nfcCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unclassifiedCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -324,6 +384,9 @@ export type FicheScanCreateManyInput = {
   ficheId: number
   scanDate: string
   count?: number
+  qrCount?: number
+  nfcCount?: number
+  unclassifiedCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -331,6 +394,9 @@ export type FicheScanCreateManyInput = {
 export type FicheScanUpdateManyMutationInput = {
   scanDate?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  qrCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nfcCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unclassifiedCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -340,6 +406,9 @@ export type FicheScanUncheckedUpdateManyInput = {
   ficheId?: Prisma.IntFieldUpdateOperationsInput | number
   scanDate?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  qrCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nfcCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unclassifiedCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -364,6 +433,9 @@ export type FicheScanCountOrderByAggregateInput = {
   ficheId?: Prisma.SortOrder
   scanDate?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  qrCount?: Prisma.SortOrder
+  nfcCount?: Prisma.SortOrder
+  unclassifiedCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -372,6 +444,9 @@ export type FicheScanAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   ficheId?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  qrCount?: Prisma.SortOrder
+  nfcCount?: Prisma.SortOrder
+  unclassifiedCount?: Prisma.SortOrder
 }
 
 export type FicheScanMaxOrderByAggregateInput = {
@@ -379,6 +454,9 @@ export type FicheScanMaxOrderByAggregateInput = {
   ficheId?: Prisma.SortOrder
   scanDate?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  qrCount?: Prisma.SortOrder
+  nfcCount?: Prisma.SortOrder
+  unclassifiedCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -388,6 +466,9 @@ export type FicheScanMinOrderByAggregateInput = {
   ficheId?: Prisma.SortOrder
   scanDate?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  qrCount?: Prisma.SortOrder
+  nfcCount?: Prisma.SortOrder
+  unclassifiedCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -396,6 +477,9 @@ export type FicheScanSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   ficheId?: Prisma.SortOrder
   count?: Prisma.SortOrder
+  qrCount?: Prisma.SortOrder
+  nfcCount?: Prisma.SortOrder
+  unclassifiedCount?: Prisma.SortOrder
 }
 
 export type FicheScanCreateNestedManyWithoutFicheInput = {
@@ -443,6 +527,9 @@ export type FicheScanUncheckedUpdateManyWithoutFicheNestedInput = {
 export type FicheScanCreateWithoutFicheInput = {
   scanDate: string
   count?: number
+  qrCount?: number
+  nfcCount?: number
+  unclassifiedCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -451,6 +538,9 @@ export type FicheScanUncheckedCreateWithoutFicheInput = {
   id?: number
   scanDate: string
   count?: number
+  qrCount?: number
+  nfcCount?: number
+  unclassifiedCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -489,6 +579,9 @@ export type FicheScanScalarWhereInput = {
   ficheId?: Prisma.IntFilter<"FicheScan"> | number
   scanDate?: Prisma.StringFilter<"FicheScan"> | string
   count?: Prisma.IntFilter<"FicheScan"> | number
+  qrCount?: Prisma.IntFilter<"FicheScan"> | number
+  nfcCount?: Prisma.IntFilter<"FicheScan"> | number
+  unclassifiedCount?: Prisma.IntFilter<"FicheScan"> | number
   createdAt?: Prisma.DateTimeFilter<"FicheScan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FicheScan"> | Date | string
 }
@@ -497,6 +590,9 @@ export type FicheScanCreateManyFicheInput = {
   id?: number
   scanDate: string
   count?: number
+  qrCount?: number
+  nfcCount?: number
+  unclassifiedCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -504,6 +600,9 @@ export type FicheScanCreateManyFicheInput = {
 export type FicheScanUpdateWithoutFicheInput = {
   scanDate?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  qrCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nfcCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unclassifiedCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -512,6 +611,9 @@ export type FicheScanUncheckedUpdateWithoutFicheInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   scanDate?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  qrCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nfcCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unclassifiedCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -520,6 +622,9 @@ export type FicheScanUncheckedUpdateManyWithoutFicheInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   scanDate?: Prisma.StringFieldUpdateOperationsInput | string
   count?: Prisma.IntFieldUpdateOperationsInput | number
+  qrCount?: Prisma.IntFieldUpdateOperationsInput | number
+  nfcCount?: Prisma.IntFieldUpdateOperationsInput | number
+  unclassifiedCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -531,6 +636,9 @@ export type FicheScanSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   ficheId?: boolean
   scanDate?: boolean
   count?: boolean
+  qrCount?: boolean
+  nfcCount?: boolean
+  unclassifiedCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   fiche?: boolean | Prisma.FicheDefaultArgs<ExtArgs>
@@ -541,6 +649,9 @@ export type FicheScanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   ficheId?: boolean
   scanDate?: boolean
   count?: boolean
+  qrCount?: boolean
+  nfcCount?: boolean
+  unclassifiedCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   fiche?: boolean | Prisma.FicheDefaultArgs<ExtArgs>
@@ -551,6 +662,9 @@ export type FicheScanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   ficheId?: boolean
   scanDate?: boolean
   count?: boolean
+  qrCount?: boolean
+  nfcCount?: boolean
+  unclassifiedCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   fiche?: boolean | Prisma.FicheDefaultArgs<ExtArgs>
@@ -561,11 +675,14 @@ export type FicheScanSelectScalar = {
   ficheId?: boolean
   scanDate?: boolean
   count?: boolean
+  qrCount?: boolean
+  nfcCount?: boolean
+  unclassifiedCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type FicheScanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ficheId" | "scanDate" | "count" | "createdAt" | "updatedAt", ExtArgs["result"]["ficheScan"]>
+export type FicheScanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ficheId" | "scanDate" | "count" | "qrCount" | "nfcCount" | "unclassifiedCount" | "createdAt" | "updatedAt", ExtArgs["result"]["ficheScan"]>
 export type FicheScanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fiche?: boolean | Prisma.FicheDefaultArgs<ExtArgs>
 }
@@ -586,6 +703,9 @@ export type $FicheScanPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     ficheId: number
     scanDate: string
     count: number
+    qrCount: number
+    nfcCount: number
+    unclassifiedCount: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["ficheScan"]>
@@ -1016,6 +1136,9 @@ export interface FicheScanFieldRefs {
   readonly ficheId: Prisma.FieldRef<"FicheScan", 'Int'>
   readonly scanDate: Prisma.FieldRef<"FicheScan", 'String'>
   readonly count: Prisma.FieldRef<"FicheScan", 'Int'>
+  readonly qrCount: Prisma.FieldRef<"FicheScan", 'Int'>
+  readonly nfcCount: Prisma.FieldRef<"FicheScan", 'Int'>
+  readonly unclassifiedCount: Prisma.FieldRef<"FicheScan", 'Int'>
   readonly createdAt: Prisma.FieldRef<"FicheScan", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"FicheScan", 'DateTime'>
 }
