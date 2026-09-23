@@ -132,10 +132,11 @@ export async function handleScan(args: {
 
   const counted = await recordScanEvent(fiche, {
     visitorKey: visitorKey(input.visitorId, ip, userAgent),
-    source: input.source,
+    source: input.source as string,
     windowMs: SCAN_DEDUP_WINDOW_MS,
   });
+
   return counted
-    ? { ok: true, counted: true, source: input.source }
+    ? { ok: true, counted: true, source: input.source as ScanSource }
     : skip("duplicate");
 }

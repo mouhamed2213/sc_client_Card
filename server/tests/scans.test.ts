@@ -1,7 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
-import type { Fiche, User } from "../../generated/prisma/client";
-import { prisma } from "../../prisma/client";
-import type { TrpcContext } from "../_core/context";
+import type { Fiche, User } from "../database/generated/prisma/client";
+import { prisma } from "../database/prisma/client";
 import { appRouter } from "../routers";
 import {
   allowScanAttempt,
@@ -10,6 +9,7 @@ import {
   resetScanRateLimit,
   visitorKey,
 } from "../scans";
+import type { TrpcContext } from "../trcp/context";
 
 const MOBILE_UA =
   "Mozilla/5.0 (Linux; Android 14; SM-A146P) AppleWebKit/537.36 Chrome/126.0 Mobile Safari/537.36";
@@ -22,14 +22,18 @@ describe("passages — pure rules", () => {
   it("recognises crawlers, scripts and empty user agents, not real phones", () => {
     expect(isBotUserAgent("")).toBe(true);
     expect(isBotUserAgent(undefined)).toBe(true);
-    expect(isBotUserAgent("Googlebot/2.1 (+http://www.google.com/bot.html)")).toBe(true);
+    expect(
+      isBotUserAgent("Googlebot/2.1 (+http://www.google.com/bot.html)")
+    ).toBe(true);
     expect(isBotUserAgent("facebookexternalhit/1.1")).toBe(true);
     expect(isBotUserAgent("WhatsApp/2.24.5 A")).toBe(true);
     expect(isBotUserAgent("curl/8.5.0")).toBe(true);
     expect(isBotUserAgent("Mozilla/5.0 HeadlessChrome/126.0")).toBe(true);
     expect(isBotUserAgent(MOBILE_UA)).toBe(false);
     expect(
-      isBotUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 17_5) AppleWebKit/605.1.15 Safari/604.1")
+      isBotUserAgent(
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5) AppleWebKit/605.1.15 Safari/604.1"
+      )
     ).toBe(false);
   });
 
@@ -43,7 +47,9 @@ describe("passages — pure rules", () => {
 
   it("blocks floods from one IP on one fiche", () => {
     resetScanRateLimit();
-    const results = Array.from({ length: 45 }, () => allowScanAttempt("ip|1", 1_000));
+    const results = Array.from({ length: 45 }, () =>
+      allowScanAttempt("ip|1", 1_000)
+    );
     expect(results.filter(Boolean)).toHaveLength(40);
     expect(allowScanAttempt("ip|2", 1_000)).toBe(true);
     expect(allowScanAttempt("ip|1", 1_000 + 11 * 60 * 1000)).toBe(true);
@@ -70,23 +76,31 @@ describe("passages — recorded against a real database", () => {
       fiche: overrides.fiche ?? (await fresh()),
       user: overrides.user ?? null,
       req: req(overrides.headers),
-      input: { slug: fiche.slug, visitorId: "visitor-default-1", source: "nfc", ...overrides.input },
+      input: {
+        slug: fiche.slug,
+        visitorId: "visitor-default-1",
+        source: "nfc",
+        ...overrides.input,
+      },
     });
   }
   async function counters() {
     const current = await fresh();
     return {
       total: current.scansTotal,
-      events: await prisma.ficheScanEvent.count({ where: { ficheId: fiche.id } }),
-      daily: (await prisma.ficheScan.findMany({ where: { ficheId: fiche.id } })).reduce(
-        (sum, row) => sum + row.count,
-        0
-      ),
+      events: await prisma.ficheScanEvent.count({
+        where: { ficheId: fiche.id },
+      }),
+      daily: (
+        await prisma.ficheScan.findMany({ where: { ficheId: fiche.id } })
+      ).reduce((sum, row) => sum + row.count, 0),
     };
   }
 
   beforeAll(async () => {
-    owner = await prisma.user.create({ data: { name: "Scan owner", role: "user" } });
+    owner = await prisma.user.create({
+      data: { name: "Scan owner", role: "user" },
+    });
     fiche = await prisma.fiche.create({
       data: {
         slug: `scan-test-${Date.now()}`,
@@ -119,7 +133,11 @@ describe("passages — recorded against a real database", () => {
   });
 
   it("counts a genuine visit once, in the event log, the total and the daily aggregate", async () => {
-    expect(await scan({ input: { source: "nfc" } })).toEqual({ ok: true, counted: true, source: "nfc" });
+    expect(await scan({ input: { source: "nfc" } })).toEqual({
+      ok: true,
+      counted: true,
+      source: "nfc",
+    });
     expect(await counters()).toEqual({ total: 1, events: 1, daily: 1 });
     expect((await fresh()).lastScanAt).not.toBeNull();
   });
@@ -153,12 +171,18 @@ describe("passages — recorded against a real database", () => {
   });
 
   it("never counts the admin previewing a fiche", async () => {
-    expect(await scan({ user: admin })).toMatchObject({ counted: false, reason: "staff" });
+    expect(await scan({ user: admin })).toMatchObject({
+      counted: false,
+      reason: "staff",
+    });
     expect((await counters()).total).toBe(0);
   });
 
   it("never counts the owner viewing their own fiche", async () => {
-    expect(await scan({ user: owner })).toMatchObject({ counted: false, reason: "owner" });
+    expect(await scan({ user: owner })).toMatchObject({
+      counted: false,
+      reason: "owner",
+    });
     expect((await counters()).total).toBe(0);
   });
 
@@ -171,13 +195,20 @@ describe("passages — recorded against a real database", () => {
   });
 
   it("never counts explicit previews", async () => {
-    expect(await scan({ input: { preview: true } })).toMatchObject({ counted: false, reason: "preview" });
+    expect(await scan({ input: { preview: true } })).toMatchObject({
+      counted: false,
+      reason: "preview",
+    });
     expect((await counters()).total).toBe(0);
   });
 
   it("never counts bots, link previews or header-less scripts", async () => {
-    expect(await scan({ headers: { "user-agent": "Googlebot/2.1" } })).toMatchObject({ reason: "bot" });
-    expect(await scan({ headers: { "user-agent": "facebookexternalhit/1.1" } })).toMatchObject({ reason: "bot" });
+    expect(
+      await scan({ headers: { "user-agent": "Googlebot/2.1" } })
+    ).toMatchObject({ reason: "bot" });
+    expect(
+      await scan({ headers: { "user-agent": "facebookexternalhit/1.1" } })
+    ).toMatchObject({ reason: "bot" });
     expect(await scan({ headers: {} })).toMatchObject({ reason: "bot" });
     expect((await counters()).total).toBe(0);
   });
@@ -185,27 +216,49 @@ describe("passages — recorded against a real database", () => {
   it("only counts active fiches", async () => {
     for (const statut of ["brouillon", "suspendue", "supprimee"] as const) {
       await prisma.fiche.update({ where: { id: fiche.id }, data: { statut } });
-      expect(await scan()).toMatchObject({ counted: false, reason: "not_active" });
+      expect(await scan()).toMatchObject({
+        counted: false,
+        reason: "not_active",
+      });
     }
     // An "active" fiche whose end date has passed is expired: not counted either.
     await prisma.fiche.update({
       where: { id: fiche.id },
-      data: { statut: "active", dateEcheance: new Date(Date.now() - 3 * 86_400_000) },
+      data: {
+        statut: "active",
+        dateEcheance: new Date(Date.now() - 3 * 86_400_000),
+      },
     });
-    expect(await scan()).toMatchObject({ counted: false, reason: "not_active" });
+    expect(await scan()).toMatchObject({
+      counted: false,
+      reason: "not_active",
+    });
     await prisma.fiche.update({
       where: { id: fiche.id },
       data: { dateEcheance: new Date(Date.now() + 30 * 86_400_000) },
     });
-    expect(await handleScan({ fiche: null, user: null, req: req(), input: { slug: "x" } })).toMatchObject({
+    expect(
+      await handleScan({
+        fiche: null,
+        user: null,
+        req: req(),
+        input: { slug: "x" },
+      })
+    ).toMatchObject({
       reason: "not_active",
     });
     expect((await counters()).total).toBe(0);
   });
 
   it("only counts visits carrying a QR or NFC marker", async () => {
-    expect(await scan({ input: { source: undefined } })).toMatchObject({ counted: false, reason: "missing_source" });
-    expect(await scan({ input: { source: "qr" } })).toMatchObject({ counted: true, source: "qr" });
+    expect(await scan({ input: { source: undefined } })).toMatchObject({
+      counted: false,
+      reason: "missing_source",
+    });
+    expect(await scan({ input: { source: "qr" } })).toMatchObject({
+      counted: true,
+      source: "qr",
+    });
     expect((await counters()).total).toBe(1);
   });
 
@@ -228,8 +281,16 @@ describe("passages — recorded against a real database", () => {
       req: req(),
       res: {} as TrpcContext["res"],
     } as unknown as TrpcContext);
-    const first = await caller.fiches.recordScan({ slug: fiche.slug, source: "qr", visitorId: "trpc-visitor-01" });
-    const again = await caller.fiches.recordScan({ slug: fiche.slug, source: "qr", visitorId: "trpc-visitor-01" });
+    const first = await caller.fiches.recordScan({
+      slug: fiche.slug,
+      source: "qr",
+      visitorId: "trpc-visitor-01",
+    });
+    const again = await caller.fiches.recordScan({
+      slug: fiche.slug,
+      source: "qr",
+      visitorId: "trpc-visitor-01",
+    });
     expect(first).toMatchObject({ counted: true });
     expect(again).toMatchObject({ counted: false, reason: "duplicate" });
     expect(await counters()).toEqual({ total: 1, events: 1, daily: 1 });

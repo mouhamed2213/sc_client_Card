@@ -37,3 +37,6 @@ export const decodeOAuthState = (state: string): OAuthState => {
   }
   return { redirectUri: decoded };
 };
+
+// scan source type
+export type ScanSource = "qr" | "nfc";

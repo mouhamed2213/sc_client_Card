@@ -74,15 +74,15 @@ async function main() {
   }
 
   let drift = 0;
-  console.log(
-    "slug".padEnd(34),
-    "statut".padEnd(10),
-    "total",
-    "quotidien",
-    "événements",
-    "qr/nfc/direct",
-    "legacy"
-  );
+  // console.log(
+  //   "slug".padEnd(34),
+  //   "statut".padEnd(10),
+  //   "total",
+  //   "quotidien",
+  //   "événements",
+  //   "qr/nfc/direct",
+  //   "legacy"
+  // );
   for (const fiche of fiches) {
     const day = dailyByFiche.get(fiche.id) ?? 0;
     const ev = eventsByFiche.get(fiche.id) ?? {
