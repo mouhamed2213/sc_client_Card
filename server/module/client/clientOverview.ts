@@ -29,6 +29,9 @@ export type OverviewScanRow = {
   ficheId: number;
   scanDate: string;
   count: number;
+  qrCount: number;
+  nfcCount: number;
+  unclassifiedCount: number;
 };
 export type OverviewRequestRow = {
   id: number;
@@ -58,6 +61,8 @@ export function buildClientOverview(input: {
 }) {
   const scanByFiche = new Map<number, number>();
   const scanByDay = new Map<string, number>();
+  let qrTotal = 0;
+  let nfcTotal = 0;
   const requestByFiche = new Map<number, number>();
   for (const row of input.requestCounts)
     requestByFiche.set(row.ficheId, row.count);
@@ -77,6 +82,8 @@ export function buildClientOverview(input: {
       (scanByFiche.get(row.ficheId) ?? 0) + row.count
     );
     scanByDay.set(row.scanDate, (scanByDay.get(row.scanDate) ?? 0) + row.count);
+    qrTotal += row.qrCount;
+    nfcTotal += row.nfcCount;
   }
 
   const fiches = input.fiches.map(fiche => {
@@ -120,6 +127,8 @@ export function buildClientOverview(input: {
     scans: {
       availableFor: statsFiches.length,
       total: statsFiches.reduce((sum, fiche) => sum + (fiche.scans30 ?? 0), 0),
+      qr: qrTotal,
+      nfc: nfcTotal,
       byDay: Array.from(scanByDay.entries())
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([scanDate, total]) => ({ scanDate, count: total })),
