@@ -4,6 +4,7 @@ import { ADMIN_HOME_PATH } from "@/const";
 import { prepareImage } from "@/lib/imageProcessing";
 import { trpc } from "@/lib/trpc";
 import type { MediaKind } from "@shared/mediaRules";
+import { MAX_CATALOG_ARTICLE_DESCRIPTION_LENGTH } from "@shared/catalogRules";
 import { getPlanFeatures, type PlanName } from "@shared/planFeatures";
 import {
   ArrowLeft,
@@ -1093,16 +1094,22 @@ function CatalogEditor({
                         <Trash2 size={15} />
                       </button>
                     </div>
-                    <input
-                      className="editor-input"
-                      placeholder="Description (optionnel)"
-                      value={article.description}
-                      onChange={e =>
-                        updateArticle(sectionIndex, articleIndex, {
-                          description: e.target.value,
-                        })
-                      }
-                    />
+                    <div>
+                      <textarea
+                        className="editor-input min-h-[72px] resize-y"
+                        placeholder="Description (optionnel)"
+                        value={article.description}
+                        maxLength={MAX_CATALOG_ARTICLE_DESCRIPTION_LENGTH}
+                        onChange={e =>
+                          updateArticle(sectionIndex, articleIndex, {
+                            description: e.target.value,
+                          })
+                        }
+                      />
+                      <div className="mt-1 text-right text-[11px] text-[#8b94a3]">
+                        {article.description.length}/{MAX_CATALOG_ARTICLE_DESCRIPTION_LENGTH}
+                      </div>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       <input
                         className="editor-input min-w-[100px] flex-1"
