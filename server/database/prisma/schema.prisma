@@ -90,6 +90,7 @@ model Fiche {
   dateEcheance    DateTime
   dataJson        String            @db.Text
   scansTotal      Int               @default(0)
+  isMain          Boolean           @default(false)
   lastScanAt      DateTime?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
