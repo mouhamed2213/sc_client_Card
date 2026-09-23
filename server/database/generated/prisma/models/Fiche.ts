@@ -29,13 +29,17 @@ export type AggregateFiche = {
 export type FicheAvgAggregateOutputType = {
   id: number | null
   scansTotal: number | null
-  ownerId: number | null
+  ownerId: number
+  isMain: boolean | null
+  isMain: boolean
 }
 
 export type FicheSumAggregateOutputType = {
   id: number | null
   scansTotal: number | null
-  ownerId: number | null
+  ownerId: number
+  isMain: boolean | null
+  isMain: boolean
 }
 
 export type FicheMinAggregateOutputType = {
@@ -63,7 +67,9 @@ export type FicheMinAggregateOutputType = {
   lastScanAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
-  ownerId: number | null
+  ownerId: number
+  isMain: boolean | null
+  isMain: boolean
 }
 
 export type FicheMaxAggregateOutputType = {
@@ -91,7 +97,9 @@ export type FicheMaxAggregateOutputType = {
   lastScanAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
-  ownerId: number | null
+  ownerId: number
+  isMain: boolean | null
+  isMain: boolean
 }
 
 export type FicheCountAggregateOutputType = {
@@ -120,6 +128,7 @@ export type FicheCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   ownerId: number
+  isMain: boolean
   _all: number
 }
 
@@ -128,12 +137,14 @@ export type FicheAvgAggregateInputType = {
   id?: true
   scansTotal?: true
   ownerId?: true
+  isMain?: true
 }
 
 export type FicheSumAggregateInputType = {
   id?: true
   scansTotal?: true
   ownerId?: true
+  isMain?: true
 }
 
 export type FicheMinAggregateInputType = {
@@ -162,6 +173,7 @@ export type FicheMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   ownerId?: true
+  isMain?: true
 }
 
 export type FicheMaxAggregateInputType = {
@@ -190,6 +202,7 @@ export type FicheMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   ownerId?: true
+  isMain?: true
 }
 
 export type FicheCountAggregateInputType = {
@@ -218,6 +231,7 @@ export type FicheCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   ownerId?: true
+  isMain?: true
   _all?: true
 }
 
@@ -332,7 +346,9 @@ export type FicheGroupByOutputType = {
   lastScanAt: Date | null
   createdAt: Date
   updatedAt: Date
-  ownerId: number | null
+  ownerId: number
+  isMain: boolean | null
+  isMain: boolean
   _count: FicheCountAggregateOutputType | null
   _avg: FicheAvgAggregateOutputType | null
   _sum: FicheSumAggregateOutputType | null
@@ -384,6 +400,7 @@ export type FicheWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   ownerId?: Prisma.IntNullableFilter<"Fiche"> | number | null
+  isMain?: Prisma.BoolFilter<"Fiche"> | boolean
   scans?: Prisma.FicheScanListRelationFilter
   scanEvents?: Prisma.FicheScanEventListRelationFilter
   contactRequests?: Prisma.ContactRequestListRelationFilter
@@ -416,7 +433,9 @@ export type FicheOrderByWithRelationInput = {
   lastScanAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
+  isMain?: Prisma.SortOrderInput | Prisma.SortOrder
+  isMain?: Prisma.SortOrder
   scans?: Prisma.FicheScanOrderByRelationAggregateInput
   scanEvents?: Prisma.FicheScanEventOrderByRelationAggregateInput
   contactRequests?: Prisma.ContactRequestOrderByRelationAggregateInput
@@ -453,6 +472,7 @@ export type FicheWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   ownerId?: Prisma.IntNullableFilter<"Fiche"> | number | null
+  isMain?: Prisma.BoolFilter<"Fiche"> | boolean
   scans?: Prisma.FicheScanListRelationFilter
   scanEvents?: Prisma.FicheScanEventListRelationFilter
   contactRequests?: Prisma.ContactRequestListRelationFilter
@@ -485,7 +505,9 @@ export type FicheOrderByWithAggregationInput = {
   lastScanAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
+  isMain?: Prisma.SortOrderInput | Prisma.SortOrder
+  isMain?: Prisma.SortOrder
   _count?: Prisma.FicheCountOrderByAggregateInput
   _avg?: Prisma.FicheAvgOrderByAggregateInput
   _max?: Prisma.FicheMaxOrderByAggregateInput
@@ -522,6 +544,7 @@ export type FicheScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Fiche"> | Date | string
   ownerId?: Prisma.IntNullableWithAggregatesFilter<"Fiche"> | number | null
+  isMain?: Prisma.BoolWithAggregatesFilter<"Fiche"> | boolean
 }
 
 export type FicheCreateInput = {
@@ -581,6 +604,7 @@ export type FicheUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
+  isMain?: boolean
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
   scanEvents?: Prisma.FicheScanEventUncheckedCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
@@ -644,6 +668,7 @@ export type FicheUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
   scanEvents?: Prisma.FicheScanEventUncheckedUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
@@ -676,6 +701,7 @@ export type FicheCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
+  isMain?: boolean
 }
 
 export type FicheUpdateManyMutationInput = {
@@ -730,6 +756,7 @@ export type FicheUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type FicheListRelationFilter = {
@@ -768,12 +795,14 @@ export type FicheCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
 }
 
 export type FicheAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
 }
 
 export type FicheMaxOrderByAggregateInput = {
@@ -802,6 +831,7 @@ export type FicheMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
 }
 
 export type FicheMinOrderByAggregateInput = {
@@ -830,12 +860,14 @@ export type FicheMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
 }
 
 export type FicheSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
 }
 
 export type FicheScalarRelationFilter = {
@@ -1077,6 +1109,7 @@ export type FicheScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   ownerId?: Prisma.IntNullableFilter<"Fiche"> | number | null
+  isMain?: Prisma.BoolFilter<"Fiche"> | boolean
 }
 
 export type FicheCreateWithoutScanEventsInput = {
@@ -1135,6 +1168,7 @@ export type FicheUncheckedCreateWithoutScanEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
+  isMain?: boolean
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
   membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
@@ -1212,6 +1246,7 @@ export type FicheUncheckedUpdateWithoutScanEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
   membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
@@ -1273,6 +1308,7 @@ export type FicheUncheckedCreateWithoutScansInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
+  isMain?: boolean
   scanEvents?: Prisma.FicheScanEventUncheckedCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
   membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
@@ -1350,6 +1386,7 @@ export type FicheUncheckedUpdateWithoutScansInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scanEvents?: Prisma.FicheScanEventUncheckedUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
   membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
@@ -1411,6 +1448,7 @@ export type FicheUncheckedCreateWithoutContactRequestsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
+  isMain?: boolean
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
   scanEvents?: Prisma.FicheScanEventUncheckedCreateNestedManyWithoutFicheInput
   membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
@@ -1488,6 +1526,7 @@ export type FicheUncheckedUpdateWithoutContactRequestsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
   scanEvents?: Prisma.FicheScanEventUncheckedUpdateManyWithoutFicheNestedInput
   membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
@@ -1549,6 +1588,7 @@ export type FicheUncheckedCreateWithoutMembershipCardsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
+  isMain?: boolean
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
   scanEvents?: Prisma.FicheScanEventUncheckedCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
@@ -1626,6 +1666,7 @@ export type FicheUncheckedUpdateWithoutMembershipCardsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
   scanEvents?: Prisma.FicheScanEventUncheckedUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
@@ -1830,6 +1871,7 @@ export type FicheSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   createdAt?: boolean
   updatedAt?: boolean
   ownerId?: boolean
+  isMain?: boolean
   scans?: boolean | Prisma.Fiche$scansArgs<ExtArgs>
   scanEvents?: boolean | Prisma.Fiche$scanEventsArgs<ExtArgs>
   contactRequests?: boolean | Prisma.Fiche$contactRequestsArgs<ExtArgs>
@@ -1864,6 +1906,7 @@ export type FicheSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   createdAt?: boolean
   updatedAt?: boolean
   ownerId?: boolean
+  isMain?: boolean
   owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["fiche"]>
 
@@ -1893,6 +1936,7 @@ export type FicheSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   createdAt?: boolean
   updatedAt?: boolean
   ownerId?: boolean
+  isMain?: boolean
   owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["fiche"]>
 
@@ -1922,9 +1966,10 @@ export type FicheSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   ownerId?: boolean
+  isMain?: boolean
 }
 
-export type FicheOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "formule" | "statut" | "nom" | "prenom" | "fonction" | "entreprise" | "photo" | "logo" | "telephone" | "whatsapp" | "email" | "site" | "adresse" | "lienItineraire" | "googlePlaceId" | "dateCreation" | "dateEcheance" | "dataJson" | "scansTotal" | "lastScanAt" | "createdAt" | "updatedAt" | "ownerId", ExtArgs["result"]["fiche"]>
+export type FicheOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "formule" | "statut" | "nom" | "prenom" | "fonction" | "entreprise" | "photo" | "logo" | "telephone" | "whatsapp" | "email" | "site" | "adresse" | "lienItineraire" | "googlePlaceId" | "dateCreation" | "dateEcheance" | "dataJson" | "scansTotal" | "lastScanAt" | "createdAt" | "updatedAt" | "ownerId" | "isMain", ExtArgs["result"]["fiche"]>
 export type FicheInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   scans?: boolean | Prisma.Fiche$scansArgs<ExtArgs>
   scanEvents?: boolean | Prisma.Fiche$scanEventsArgs<ExtArgs>
@@ -1974,7 +2019,9 @@ export type $FichePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     lastScanAt: Date | null
     createdAt: Date
     updatedAt: Date
-    ownerId: number | null
+    ownerId: number
+  isMain: boolean | null
+  isMain: boolean
   }, ExtArgs["result"]["fiche"]>
   composites: {}
 }
@@ -2428,6 +2475,7 @@ export interface FicheFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Fiche", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Fiche", 'DateTime'>
   readonly ownerId: Prisma.FieldRef<"Fiche", 'Int'>
+  readonly isMain: Prisma.FieldRef<"Fiche", 'Boolean'>
 }
     
 
