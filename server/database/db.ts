@@ -683,13 +683,19 @@ export async function listClientUsersPaginated(input: {
 }
 
 // --- Scans agrégés (réutilisé par admin ET client) ---
-export async function listScansForFiche(ficheId: number, days = 30) {
+export function getScanDateRange(days = 30) {
   const end = new Date();
   const start = new Date(end);
   start.setUTCDate(start.getUTCDate() - (days - 1));
 
-  const startDate = start.toISOString().slice(0, 10);
-  const endDate = end.toISOString().slice(0, 10);
+  return {
+    startDate: start.toISOString().slice(0, 10),
+    endDate: end.toISOString().slice(0, 10),
+  };
+}
+
+export async function listScansForFiche(ficheId: number, days = 30) {
+  const { startDate, endDate } = getScanDateRange(days);
 
   const rows = await prisma.ficheScan.findMany({
     where: {
