@@ -689,13 +689,14 @@ export function getScanDateRange(days = 30) {
   start.setUTCDate(start.getUTCDate() - (days - 1));
 
   return {
+    start,
     startDate: start.toISOString().slice(0, 10),
     endDate: end.toISOString().slice(0, 10),
   };
 }
 
 export async function listScansForFiche(ficheId: number, days = 30) {
-  const { startDate, endDate } = getScanDateRange(days);
+  const { start, startDate, endDate } = getScanDateRange(days);
 
   const rows = await prisma.ficheScan.findMany({
     where: {
