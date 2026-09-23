@@ -623,6 +623,61 @@ export async function detachFicheOwner(ficheId: number) {
   });
 }
 
+export async function listClientUsersPaginated(input: {
+  page: number;
+  pageSize: number;
+  search?: string;
+}) {
+  const search = input.search?.trim();
+  const where = {
+    role: "user" as const,
+    loginMethod: "local-client",
+    clientCredential: { isNot: null },
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
+
+  const [total, rows] = await prisma.$transaction([
+    prisma.user.count({ where }),
+    prisma.user.findMany({
+      where,
+      orderBy: { lastSignedIn: "desc" },
+      skip: (input.page - 1) * input.pageSize,
+      take: input.pageSize,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        lastSignedIn: true,
+        _count: { select: { fiche: true } },
+        fiche: {
+          orderBy: { updatedAt: "desc" },
+          select: {
+            id: true,
+            slug: true,
+            formule: true,
+            statut: true,
+            prenom: true,
+            nom: true,
+            entreprise: true,
+            dateEcheance: true,
+            scansTotal: true,
+            updatedAt: true,
+          },
+        },
+      },
+    }),
+  ]);
+
+  return { rows, total };
+}
+
 // --- Scans agrégés (réutilisé par admin ET client) ---
 export async function listScansForFiche(ficheId: number, days = 30) {
   const end = new Date();
