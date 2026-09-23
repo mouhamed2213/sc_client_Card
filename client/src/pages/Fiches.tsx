@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { trpc } from "@/lib/trpc";
 import StudioSidebar from "@/components/StudioSidebar";
+import { Button } from "@/components/ui/button";
 import { ADMIN_HOME_PATH } from "@/const";
+import { trpc } from "@/lib/trpc";
 import {
   Eye,
   Menu,
@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
-import { Link } from "wouter";
 import { toast } from "sonner";
+import { Link } from "wouter";
 
 const formulaLabels = {
   essentiel: "Essentiel",
@@ -142,10 +142,13 @@ export default function Fiches() {
   return (
     <div className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
       <StudioSidebar />
-     <main className="studio-main">
+      <main className="studio-main">
         <header className="flex items-center justify-between border-b border-[#e7e9ed] bg-white/80 px-5 py-4 backdrop-blur lg:px-10">
           <div className="flex items-center gap-3">
-            <button className="icon-button lg:hidden" aria-label="Ouvrir le menu">
+            <button
+              className="icon-button lg:hidden"
+              aria-label="Ouvrir le menu"
+            >
               <Menu className="h-5 w-5" />
             </button>
             <div>
@@ -155,7 +158,10 @@ export default function Fiches() {
               </h1>
             </div>
           </div>
-          <Link href={ADMIN_HOME_PATH} className="hidden text-sm font-medium text-[#526078] hover:text-[#172033] sm:block">
+          <Link
+            href={ADMIN_HOME_PATH}
+            className="hidden text-sm font-medium text-[#526078] hover:text-[#172033] sm:block"
+          >
             Retour au tableau de bord
           </Link>
         </header>
@@ -167,7 +173,8 @@ export default function Fiches() {
               Toutes les fiches
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-[#7d8798]">
-              Recherchez, filtrez et accédez rapidement à l'édition, à la fiche publique ou au QR code.
+              Recherchez, filtrez et accédez rapidement à l'édition, à la fiche
+              publique ou au QR code.
             </p>
           </div>
 
@@ -175,7 +182,10 @@ export default function Fiches() {
             <div className="flex flex-col gap-4 border-b border-[#edf0f2] px-5 py-5 lg:px-7">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="search-box w-full md:max-w-md">
-                  <Search className="h-4 w-4 text-[#9aa3b1]" aria-hidden="true" />
+                  <Search
+                    className="h-4 w-4 text-[#9aa3b1]"
+                    aria-hidden="true"
+                  />
                   <input
                     value={search}
                     onChange={event => changeSearch(event.target.value)}
@@ -188,14 +198,46 @@ export default function Fiches() {
                 </span>
               </div>
 
-              <div className="flex gap-1 overflow-x-auto" role="tablist" aria-label="Filtrer les fiches">
-                <FilterTab label="Toutes" active={filter === "all"} onClick={() => changeFilter("all")} />
-                <FilterTab label="Actives" active={filter === "active"} onClick={() => changeFilter("active")} />
-                <FilterTab label="À renouveler" active={filter === "a_renouveler"} onClick={() => changeFilter("a_renouveler")} />
-                <FilterTab label="Expirées" active={filter === "expiree"} onClick={() => changeFilter("expiree")} />
-                <FilterTab label="À revoir" active={filter === "brouillon"} onClick={() => changeFilter("brouillon")} />
-                <FilterTab label="Suspendues" active={filter === "suspendue"} onClick={() => changeFilter("suspendue")} />
-                <FilterTab label="Supprimées" active={filter === "supprimee"} onClick={() => changeFilter("supprimee")} />
+              <div
+                className="flex gap-1 overflow-x-auto"
+                role="tablist"
+                aria-label="Filtrer les fiches"
+              >
+                <FilterTab
+                  label="Toutes"
+                  active={filter === "all"}
+                  onClick={() => changeFilter("all")}
+                />
+                <FilterTab
+                  label="Actives"
+                  active={filter === "active"}
+                  onClick={() => changeFilter("active")}
+                />
+                <FilterTab
+                  label="À renouveler"
+                  active={filter === "a_renouveler"}
+                  onClick={() => changeFilter("a_renouveler")}
+                />
+                <FilterTab
+                  label="Expirées"
+                  active={filter === "expiree"}
+                  onClick={() => changeFilter("expiree")}
+                />
+                <FilterTab
+                  label="À revoir"
+                  active={filter === "brouillon"}
+                  onClick={() => changeFilter("brouillon")}
+                />
+                <FilterTab
+                  label="Suspendues"
+                  active={filter === "suspendue"}
+                  onClick={() => changeFilter("suspendue")}
+                />
+                <FilterTab
+                  label="Supprimées"
+                  active={filter === "supprimee"}
+                  onClick={() => changeFilter("supprimee")}
+                />
               </div>
             </div>
 
@@ -207,8 +249,11 @@ export default function Fiches() {
                     <th className="px-4 py-4 font-semibold">Formule</th>
                     <th className="px-4 py-4 font-semibold">Statut</th>
                     <th className="px-4 py-4 font-semibold">Passages</th>
+                    <th className="px-4 py-4 font-semibold">Compte rattaché</th>
                     <th className="px-4 py-4 font-semibold">Échéance</th>
-                    <th className="px-7 py-4 text-right font-semibold">Actions</th>
+                    <th className="px-7 py-4 text-right font-semibold">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -216,7 +261,10 @@ export default function Fiches() {
                     <FicheRow
                       key={fiche.id}
                       fiche={fiche}
-                      busy={statusMutation.isPending && statusMutation.variables?.id === fiche.id}
+                      busy={
+                        statusMutation.isPending &&
+                        statusMutation.variables?.id === fiche.id
+                      }
                       onQr={() => setQrFiche(fiche)}
                       onStatus={() => toggleStatus(fiche)}
                     />
@@ -230,7 +278,10 @@ export default function Fiches() {
                 <FicheCard
                   key={fiche.id}
                   fiche={fiche}
-                  busy={statusMutation.isPending && statusMutation.variables?.id === fiche.id}
+                  busy={
+                    statusMutation.isPending &&
+                    statusMutation.variables?.id === fiche.id
+                  }
                   onQr={() => setQrFiche(fiche)}
                   onStatus={() => toggleStatus(fiche)}
                 />
@@ -309,7 +360,9 @@ function FilterTab({
 function FicheIdentity({ fiche }: { fiche: Fiche }) {
   return (
     <div className="flex items-center gap-3">
-      <div className={`avatar ${fiche.formule === "signature" ? "avatar-copper" : ""}`}>
+      <div
+        className={`avatar ${fiche.formule === "signature" ? "avatar-copper" : ""}`}
+      >
         {initials(fiche)}
       </div>
       <div className="min-w-0">
@@ -342,24 +395,49 @@ function FicheRow({
           <FicheIdentity fiche={fiche} />
         </Link>
       </td>
-      <td className="px-4 py-4 text-sm text-[#657084]">{formulaLabels[fiche.formule]}</td>
+      <td className="px-4 py-4 text-sm text-[#657084]">
+        {formulaLabels[fiche.formule]}
+      </td>
       <td className="px-4 py-4">
-        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[fiche.statutMetier]}`}>
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[fiche.statutMetier]}`}
+        >
           <span className="h-1.5 w-1.5 rounded-full bg-current" />
           {statusLabels[fiche.statutMetier]}
         </span>
       </td>
-      <td className="px-4 py-4 text-sm font-medium text-[#42506a]">{fiche.scansTotal}</td>
-      <td className="px-4 py-4 text-sm text-[#657084]">{formatDate(fiche.dateEcheance)}</td>
+      <td className="px-4 py-4 text-sm font-medium text-[#42506a]">
+        {fiche.scansTotal}
+      </td>{" "}
+      <td className="px-4 py-4 text-sm font-medium text-[#42506a]">{0}</td>
+      <td className="px-4 py-4 text-sm text-[#657084]">
+        {formatDate(fiche.dateEcheance)}
+      </td>
       <td className="px-7 py-4 text-right">
         <div className="flex justify-end gap-1">
-          <Link href={`/studio/fiche/${fiche.slug}`} className="table-action" title="Ouvrir dans le studio" aria-label={`Modifier ${fiche.prenom} ${fiche.nom}`}>
+          <Link
+            href={`/studio/fiche/${fiche.slug}`}
+            className="table-action"
+            title="Ouvrir dans le studio"
+            aria-label={`Modifier ${fiche.prenom} ${fiche.nom}`}
+          >
             <Pencil className="h-4 w-4" />
           </Link>
-          <Link href={`/fiche/${fiche.slug}`} className="table-action" title="Voir la fiche publique" aria-label={`Voir ${fiche.prenom} ${fiche.nom}`}>
+          <Link
+            href={`/fiche/${fiche.slug}`}
+            className="table-action"
+            title="Voir la fiche publique"
+            aria-label={`Voir ${fiche.prenom} ${fiche.nom}`}
+          >
             <Eye className="h-4 w-4" />
           </Link>
-          <button type="button" onClick={onQr} className="table-action" title="Afficher le QR code" aria-label={`QR code de ${fiche.prenom} ${fiche.nom}`}>
+          <button
+            type="button"
+            onClick={onQr}
+            className="table-action"
+            title="Afficher le QR code"
+            aria-label={`QR code de ${fiche.prenom} ${fiche.nom}`}
+          >
             <QrCodeIcon className="h-4 w-4" />
           </button>
           <button
@@ -367,8 +445,20 @@ function FicheRow({
             onClick={onStatus}
             disabled={!canToggle || busy}
             className="table-action disabled:cursor-not-allowed disabled:opacity-40"
-            title={canToggle ? (fiche.statut === "suspendue" ? "Réactiver" : "Suspendre") : "Action indisponible pour ce statut"}
-            aria-label={canToggle ? (fiche.statut === "suspendue" ? "Réactiver" : "Suspendre") : "Action indisponible"}
+            title={
+              canToggle
+                ? fiche.statut === "suspendue"
+                  ? "Réactiver"
+                  : "Suspendre"
+                : "Action indisponible pour ce statut"
+            }
+            aria-label={
+              canToggle
+                ? fiche.statut === "suspendue"
+                  ? "Réactiver"
+                  : "Suspendre"
+                : "Action indisponible"
+            }
           >
             {fiche.statut === "suspendue" ? "↻" : "⏸"}
           </button>
@@ -395,7 +485,9 @@ function FicheCard({
     <div className="rounded-xl border border-[#edf0f2] p-4">
       <div className="flex items-start justify-between gap-3">
         <FicheIdentity fiche={fiche} />
-        <span className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statutMetier]}`}>
+        <span
+          className={`rounded-full border px-2 py-1 text-[10px] font-medium ${statusStyles[fiche.statutMetier]}`}
+        >
           {statusLabels[fiche.statutMetier]}
         </span>
       </div>
@@ -416,19 +508,44 @@ function FicheCard({
       </div>
 
       <div className="mt-4 grid grid-cols-4 gap-2">
-        <Link href={`/studio/fiche/${fiche.slug}`} className="rounded-lg bg-[#172033] py-2 text-center text-xs font-semibold text-white" title="Ouvrir dans le studio">
+        <Link
+          href={`/studio/fiche/${fiche.slug}`}
+          className="rounded-lg bg-[#172033] py-2 text-center text-xs font-semibold text-white"
+          title="Ouvrir dans le studio"
+        >
           <Pencil className="mx-auto h-4 w-4" />
           <span className="sr-only">Studio</span>
         </Link>
-        <Link href={`/fiche/${fiche.slug}`} className="rounded-lg border border-[#e6e8ec] py-2 text-center" title="Voir la fiche">
+        <Link
+          href={`/fiche/${fiche.slug}`}
+          className="rounded-lg border border-[#e6e8ec] py-2 text-center"
+          title="Voir la fiche"
+        >
           <Eye className="mx-auto h-4 w-4" />
           <span className="sr-only">Voir</span>
         </Link>
-        <button type="button" onClick={onQr} className="rounded-lg border border-[#e6e8ec] py-2" title="Afficher le QR code">
+        <button
+          type="button"
+          onClick={onQr}
+          className="rounded-lg border border-[#e6e8ec] py-2"
+          title="Afficher le QR code"
+        >
           <QrCodeIcon className="mx-auto h-4 w-4" />
           <span className="sr-only">QR code</span>
         </button>
-        <button type="button" onClick={onStatus} disabled={!canToggle || busy} className="rounded-lg border border-[#e6e8ec] py-2 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40" title={canToggle ? (fiche.statut === "suspendue" ? "Réactiver" : "Suspendre") : "Action indisponible"}>
+        <button
+          type="button"
+          onClick={onStatus}
+          disabled={!canToggle || busy}
+          className="rounded-lg border border-[#e6e8ec] py-2 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-40"
+          title={
+            canToggle
+              ? fiche.statut === "suspendue"
+                ? "Réactiver"
+                : "Suspendre"
+              : "Action indisponible"
+          }
+        >
           {fiche.statut === "suspendue" ? "Réactiver" : "Suspendre"}
         </button>
       </div>
@@ -454,25 +571,46 @@ function QrModal({ fiche, onClose }: { fiche: Fiche; onClose: () => void }) {
   }
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="fiche-qr-title">
+    <div
+      className="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="fiche-qr-title"
+    >
       <div className="qr-panel">
         <div className="flex items-start justify-between">
           <div>
             <p className="eyebrow">QR code de la fiche</p>
-            <h2 id="fiche-qr-title" className="mt-1 text-xl font-semibold tracking-[-0.03em]">
+            <h2
+              id="fiche-qr-title"
+              className="mt-1 text-xl font-semibold tracking-[-0.03em]"
+            >
               {fiche.prenom} {fiche.nom}
             </h2>
             <p className="mt-1 text-sm text-[#7d8798]">
               À imprimer sur la carte ou à partager directement.
             </p>
           </div>
-          <button type="button" onClick={onClose} className="icon-button" aria-label="Fermer">
+          <button
+            type="button"
+            onClick={onClose}
+            className="icon-button"
+            aria-label="Fermer"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="qr-preview">
-          <QRCodeSVG id={`qr-${fiche.slug}`} value={publicUrl} size={224} bgColor="#ffffff" fgColor="#172033" level="M" includeMargin />
+          <QRCodeSVG
+            id={`qr-${fiche.slug}`}
+            value={publicUrl}
+            size={224}
+            bgColor="#ffffff"
+            fgColor="#172033"
+            level="M"
+            includeMargin
+          />
         </div>
 
         <div className="qr-url">
@@ -481,8 +619,13 @@ function QrModal({ fiche, onClose }: { fiche: Fiche; onClose: () => void }) {
         </div>
 
         <div className="mt-5 flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose}>Fermer</Button>
-          <Button onClick={downloadQr} className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]">
+          <Button variant="outline" onClick={onClose}>
+            Fermer
+          </Button>
+          <Button
+            onClick={downloadQr}
+            className="gap-2 bg-[#172033] text-white hover:bg-[#27334a]"
+          >
             <QrCodeIcon className="h-4 w-4" /> Télécharger le QR
           </Button>
         </div>

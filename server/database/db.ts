@@ -1,13 +1,13 @@
 // ? Centralized database connection file
 
 import { pickAvailableSlug, slugBaseFromFiche } from "@shared/slug";
+import { randomBytes } from "node:crypto";
+import { ENV } from "../_core/env";
 import type {
   Fiche,
   Prisma,
   PrismaClient as PrismaClientType,
 } from "../database/generated/prisma/client";
-import { randomBytes } from "node:crypto";
-import { ENV } from "../_core/env";
 import { prisma } from "../database/prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClientType };
@@ -260,6 +260,7 @@ export async function listFichesPaginated(input: {
       orderBy: { updatedAt: "desc" },
       skip: (input.page - 1) * input.pageSize,
       take: input.pageSize,
+
     }),
   ]);
   return { rows, total };
@@ -662,3 +663,4 @@ export async function listMembershipCards(ficheId: number) {
 export async function createMembershipCard(input: InsertMembershipCard) {
   return prisma.membershipCard.create({ data: input });
 }
+

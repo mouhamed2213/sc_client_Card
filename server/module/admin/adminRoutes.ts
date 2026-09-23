@@ -6,6 +6,7 @@ import { sdk } from "../../_core/config/sdk";
 import { getAdminSessionCookieOptions } from "../../_core/cookies";
 import { ENV } from "../../_core/env";
 import { verifyAdminPassword } from "../auth/adminAuth";
+import { adminProcedure, router } from "server/trcp/trpc";
 
 const loginSchema = z.object({
   username: z.string().trim().min(1).max(64),
@@ -118,4 +119,4 @@ export function registerAdminRoutes(app: Express): void {
 
 
 // ROUTER 
-// export const authRouter = router
+

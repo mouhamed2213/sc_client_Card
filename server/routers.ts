@@ -99,8 +99,6 @@ export const appRouter = router({
     }),
   }),
 
-
-
   fiches: router({
     list: adminProcedure.query(async () => {
       const rows = await listFiches();
@@ -280,7 +278,9 @@ export const appRouter = router({
           });
         return listContactRequests(fiche.id);
       }),
+
   }),
+
   media: router({
     upload: adminProcedure
       .input(
@@ -645,8 +645,6 @@ export const appRouter = router({
       }),
   }),
 
-
-
   clientSpaceRouter: router({
     myFiches: clientProcedure.query(async ({ ctx }) => {
       const fiches = await listFichesByOwner(ctx.user.id);
@@ -1000,7 +998,9 @@ export const appRouter = router({
         const plan = fiche.formule as PlanName;
         const capabilities = getClientFicheCapabilities(plan);
         const capability =
-          input.kind === "catalogArticle" ? capabilities.catalog : capabilities.gallery;
+          input.kind === "catalogArticle"
+            ? capabilities.catalog
+            : capabilities.gallery;
 
         if (!capability.editable) {
           throw new TRPCError({
