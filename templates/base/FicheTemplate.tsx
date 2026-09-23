@@ -783,25 +783,10 @@ export function FicheTemplate({
               </div>
             </section>
           ) : null}
-          {fiche.adresse ? (
-            <section className="public-section py-[22px] border-b border-theme-line">
-              <SectionTitle
-                icon={<MapPin className="h-4 w-4" />}
-                title="Localisation"
-              />
-              <p className="public-address">{fiche.adresse}</p>
-              {fiche.lienItineraire && (
-                <a
-                  href={fiche.lienItineraire}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="public-primary-link"
-                >
-                  Ouvrir Google Maps <ArrowUpRight className="h-4 w-4" />
-                </a>
-              )}
-            </section>
-          ) : null}
+
+
+
+          {/*  */}
           {features.hasGoogleReview && fiche.googlePlaceId ? (
             <section className="review-panel">
               <div>
@@ -1007,6 +992,29 @@ export function FicheTemplate({
           </a>
         </div>
       )}
+
+
+                
+          {fiche.adresse ? (
+            <section className="public-section py-[22px] border-b border-theme-line">
+              <SectionTitle
+                icon={<MapPin className="h-4 w-4" />}
+                title="Localisation"
+              />
+              <p className="public-address">{fiche.adresse}</p>
+              {fiche.lienItineraire && (
+                <a
+                  href={fiche.lienItineraire}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="public-primary-link"
+                >
+                  Ouvrir Google Maps <ArrowUpRight className="h-4 w-4" />
+                </a>
+              )}
+            </section>
+          ) : null}
+
     </div>
   );
 }

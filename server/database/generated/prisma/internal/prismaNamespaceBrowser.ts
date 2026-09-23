@@ -140,6 +140,7 @@ export const FicheScalarFieldEnum = {
   dateEcheance: 'dateEcheance',
   dataJson: 'dataJson',
   scansTotal: 'scansTotal',
+  isMain: 'isMain',
   lastScanAt: 'lastScanAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

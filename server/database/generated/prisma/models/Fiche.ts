@@ -29,17 +29,13 @@ export type AggregateFiche = {
 export type FicheAvgAggregateOutputType = {
   id: number | null
   scansTotal: number | null
-  ownerId: number
-  isMain: boolean | null
-  isMain: boolean
+  ownerId: number | null
 }
 
 export type FicheSumAggregateOutputType = {
   id: number | null
   scansTotal: number | null
-  ownerId: number
-  isMain: boolean | null
-  isMain: boolean
+  ownerId: number | null
 }
 
 export type FicheMinAggregateOutputType = {
@@ -64,12 +60,11 @@ export type FicheMinAggregateOutputType = {
   dateEcheance: Date | null
   dataJson: string | null
   scansTotal: number | null
+  isMain: boolean | null
   lastScanAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
-  ownerId: number
-  isMain: boolean | null
-  isMain: boolean
+  ownerId: number | null
 }
 
 export type FicheMaxAggregateOutputType = {
@@ -94,12 +89,11 @@ export type FicheMaxAggregateOutputType = {
   dateEcheance: Date | null
   dataJson: string | null
   scansTotal: number | null
+  isMain: boolean | null
   lastScanAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
-  ownerId: number
-  isMain: boolean | null
-  isMain: boolean
+  ownerId: number | null
 }
 
 export type FicheCountAggregateOutputType = {
@@ -124,11 +118,11 @@ export type FicheCountAggregateOutputType = {
   dateEcheance: number
   dataJson: number
   scansTotal: number
+  isMain: number
   lastScanAt: number
   createdAt: number
   updatedAt: number
   ownerId: number
-  isMain: boolean
   _all: number
 }
 
@@ -137,14 +131,12 @@ export type FicheAvgAggregateInputType = {
   id?: true
   scansTotal?: true
   ownerId?: true
-  isMain?: true
 }
 
 export type FicheSumAggregateInputType = {
   id?: true
   scansTotal?: true
   ownerId?: true
-  isMain?: true
 }
 
 export type FicheMinAggregateInputType = {
@@ -169,11 +161,11 @@ export type FicheMinAggregateInputType = {
   dateEcheance?: true
   dataJson?: true
   scansTotal?: true
+  isMain?: true
   lastScanAt?: true
   createdAt?: true
   updatedAt?: true
   ownerId?: true
-  isMain?: true
 }
 
 export type FicheMaxAggregateInputType = {
@@ -198,11 +190,11 @@ export type FicheMaxAggregateInputType = {
   dateEcheance?: true
   dataJson?: true
   scansTotal?: true
+  isMain?: true
   lastScanAt?: true
   createdAt?: true
   updatedAt?: true
   ownerId?: true
-  isMain?: true
 }
 
 export type FicheCountAggregateInputType = {
@@ -227,11 +219,11 @@ export type FicheCountAggregateInputType = {
   dateEcheance?: true
   dataJson?: true
   scansTotal?: true
+  isMain?: true
   lastScanAt?: true
   createdAt?: true
   updatedAt?: true
   ownerId?: true
-  isMain?: true
   _all?: true
 }
 
@@ -343,12 +335,11 @@ export type FicheGroupByOutputType = {
   dateEcheance: Date
   dataJson: string
   scansTotal: number
+  isMain: boolean
   lastScanAt: Date | null
   createdAt: Date
   updatedAt: Date
-  ownerId: number
-  isMain: boolean | null
-  isMain: boolean
+  ownerId: number | null
   _count: FicheCountAggregateOutputType | null
   _avg: FicheAvgAggregateOutputType | null
   _sum: FicheSumAggregateOutputType | null
@@ -396,11 +387,11 @@ export type FicheWhereInput = {
   dateEcheance?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   dataJson?: Prisma.StringFilter<"Fiche"> | string
   scansTotal?: Prisma.IntFilter<"Fiche"> | number
+  isMain?: Prisma.BoolFilter<"Fiche"> | boolean
   lastScanAt?: Prisma.DateTimeNullableFilter<"Fiche"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   ownerId?: Prisma.IntNullableFilter<"Fiche"> | number | null
-  isMain?: Prisma.BoolFilter<"Fiche"> | boolean
   scans?: Prisma.FicheScanListRelationFilter
   scanEvents?: Prisma.FicheScanEventListRelationFilter
   contactRequests?: Prisma.ContactRequestListRelationFilter
@@ -430,12 +421,11 @@ export type FicheOrderByWithRelationInput = {
   dateEcheance?: Prisma.SortOrder
   dataJson?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
   lastScanAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  ownerId?: Prisma.SortOrder
-  isMain?: Prisma.SortOrderInput | Prisma.SortOrder
-  isMain?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
   scans?: Prisma.FicheScanOrderByRelationAggregateInput
   scanEvents?: Prisma.FicheScanEventOrderByRelationAggregateInput
   contactRequests?: Prisma.ContactRequestOrderByRelationAggregateInput
@@ -468,11 +458,11 @@ export type FicheWhereUniqueInput = Prisma.AtLeast<{
   dateEcheance?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   dataJson?: Prisma.StringFilter<"Fiche"> | string
   scansTotal?: Prisma.IntFilter<"Fiche"> | number
+  isMain?: Prisma.BoolFilter<"Fiche"> | boolean
   lastScanAt?: Prisma.DateTimeNullableFilter<"Fiche"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   ownerId?: Prisma.IntNullableFilter<"Fiche"> | number | null
-  isMain?: Prisma.BoolFilter<"Fiche"> | boolean
   scans?: Prisma.FicheScanListRelationFilter
   scanEvents?: Prisma.FicheScanEventListRelationFilter
   contactRequests?: Prisma.ContactRequestListRelationFilter
@@ -502,12 +492,11 @@ export type FicheOrderByWithAggregationInput = {
   dateEcheance?: Prisma.SortOrder
   dataJson?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
   lastScanAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  ownerId?: Prisma.SortOrder
-  isMain?: Prisma.SortOrderInput | Prisma.SortOrder
-  isMain?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.FicheCountOrderByAggregateInput
   _avg?: Prisma.FicheAvgOrderByAggregateInput
   _max?: Prisma.FicheMaxOrderByAggregateInput
@@ -540,11 +529,11 @@ export type FicheScalarWhereWithAggregatesInput = {
   dateEcheance?: Prisma.DateTimeWithAggregatesFilter<"Fiche"> | Date | string
   dataJson?: Prisma.StringWithAggregatesFilter<"Fiche"> | string
   scansTotal?: Prisma.IntWithAggregatesFilter<"Fiche"> | number
+  isMain?: Prisma.BoolWithAggregatesFilter<"Fiche"> | boolean
   lastScanAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Fiche"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Fiche"> | Date | string
   ownerId?: Prisma.IntNullableWithAggregatesFilter<"Fiche"> | number | null
-  isMain?: Prisma.BoolWithAggregatesFilter<"Fiche"> | boolean
 }
 
 export type FicheCreateInput = {
@@ -568,6 +557,7 @@ export type FicheCreateInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -600,11 +590,11 @@ export type FicheUncheckedCreateInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
-  isMain?: boolean
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
   scanEvents?: Prisma.FicheScanEventUncheckedCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
@@ -632,6 +622,7 @@ export type FicheUpdateInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -664,11 +655,11 @@ export type FicheUncheckedUpdateInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
   scanEvents?: Prisma.FicheScanEventUncheckedUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
@@ -697,11 +688,11 @@ export type FicheCreateManyInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
-  isMain?: boolean
 }
 
 export type FicheUpdateManyMutationInput = {
@@ -725,6 +716,7 @@ export type FicheUpdateManyMutationInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -752,11 +744,11 @@ export type FicheUncheckedUpdateManyInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type FicheListRelationFilter = {
@@ -791,18 +783,17 @@ export type FicheCountOrderByAggregateInput = {
   dateEcheance?: Prisma.SortOrder
   dataJson?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
   lastScanAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  isMain?: Prisma.SortOrder
 }
 
 export type FicheAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  isMain?: Prisma.SortOrder
 }
 
 export type FicheMaxOrderByAggregateInput = {
@@ -827,11 +818,11 @@ export type FicheMaxOrderByAggregateInput = {
   dateEcheance?: Prisma.SortOrder
   dataJson?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
   lastScanAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  isMain?: Prisma.SortOrder
 }
 
 export type FicheMinOrderByAggregateInput = {
@@ -856,18 +847,17 @@ export type FicheMinOrderByAggregateInput = {
   dateEcheance?: Prisma.SortOrder
   dataJson?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
+  isMain?: Prisma.SortOrder
   lastScanAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  isMain?: Prisma.SortOrder
 }
 
 export type FicheSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   scansTotal?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
-  isMain?: Prisma.SortOrder
 }
 
 export type FicheScalarRelationFilter = {
@@ -1014,6 +1004,7 @@ export type FicheCreateWithoutOwnerInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1045,6 +1036,7 @@ export type FicheUncheckedCreateWithoutOwnerInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1105,11 +1097,11 @@ export type FicheScalarWhereInput = {
   dateEcheance?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   dataJson?: Prisma.StringFilter<"Fiche"> | string
   scansTotal?: Prisma.IntFilter<"Fiche"> | number
+  isMain?: Prisma.BoolFilter<"Fiche"> | boolean
   lastScanAt?: Prisma.DateTimeNullableFilter<"Fiche"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Fiche"> | Date | string
   ownerId?: Prisma.IntNullableFilter<"Fiche"> | number | null
-  isMain?: Prisma.BoolFilter<"Fiche"> | boolean
 }
 
 export type FicheCreateWithoutScanEventsInput = {
@@ -1133,6 +1125,7 @@ export type FicheCreateWithoutScanEventsInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1164,11 +1157,11 @@ export type FicheUncheckedCreateWithoutScanEventsInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
-  isMain?: boolean
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
   membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
@@ -1211,6 +1204,7 @@ export type FicheUpdateWithoutScanEventsInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1242,11 +1236,11 @@ export type FicheUncheckedUpdateWithoutScanEventsInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
   membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
@@ -1273,6 +1267,7 @@ export type FicheCreateWithoutScansInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1304,11 +1299,11 @@ export type FicheUncheckedCreateWithoutScansInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
-  isMain?: boolean
   scanEvents?: Prisma.FicheScanEventUncheckedCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
   membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
@@ -1351,6 +1346,7 @@ export type FicheUpdateWithoutScansInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1382,11 +1378,11 @@ export type FicheUncheckedUpdateWithoutScansInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scanEvents?: Prisma.FicheScanEventUncheckedUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
   membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
@@ -1413,6 +1409,7 @@ export type FicheCreateWithoutContactRequestsInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1444,11 +1441,11 @@ export type FicheUncheckedCreateWithoutContactRequestsInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
-  isMain?: boolean
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
   scanEvents?: Prisma.FicheScanEventUncheckedCreateNestedManyWithoutFicheInput
   membershipCards?: Prisma.MembershipCardUncheckedCreateNestedManyWithoutFicheInput
@@ -1491,6 +1488,7 @@ export type FicheUpdateWithoutContactRequestsInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1522,11 +1520,11 @@ export type FicheUncheckedUpdateWithoutContactRequestsInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
   scanEvents?: Prisma.FicheScanEventUncheckedUpdateManyWithoutFicheNestedInput
   membershipCards?: Prisma.MembershipCardUncheckedUpdateManyWithoutFicheNestedInput
@@ -1553,6 +1551,7 @@ export type FicheCreateWithoutMembershipCardsInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1584,11 +1583,11 @@ export type FicheUncheckedCreateWithoutMembershipCardsInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   ownerId?: number | null
-  isMain?: boolean
   scans?: Prisma.FicheScanUncheckedCreateNestedManyWithoutFicheInput
   scanEvents?: Prisma.FicheScanEventUncheckedCreateNestedManyWithoutFicheInput
   contactRequests?: Prisma.ContactRequestUncheckedCreateNestedManyWithoutFicheInput
@@ -1631,6 +1630,7 @@ export type FicheUpdateWithoutMembershipCardsInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1662,11 +1662,11 @@ export type FicheUncheckedUpdateWithoutMembershipCardsInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   ownerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   scans?: Prisma.FicheScanUncheckedUpdateManyWithoutFicheNestedInput
   scanEvents?: Prisma.FicheScanEventUncheckedUpdateManyWithoutFicheNestedInput
   contactRequests?: Prisma.ContactRequestUncheckedUpdateManyWithoutFicheNestedInput
@@ -1694,6 +1694,7 @@ export type FicheCreateManyOwnerInput = {
   dateEcheance: Date | string
   dataJson: string
   scansTotal?: number
+  isMain?: boolean
   lastScanAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1720,6 +1721,7 @@ export type FicheUpdateWithoutOwnerInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1751,6 +1753,7 @@ export type FicheUncheckedUpdateWithoutOwnerInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1782,6 +1785,7 @@ export type FicheUncheckedUpdateManyWithoutOwnerInput = {
   dateEcheance?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataJson?: Prisma.StringFieldUpdateOperationsInput | string
   scansTotal?: Prisma.IntFieldUpdateOperationsInput | number
+  isMain?: Prisma.BoolFieldUpdateOperationsInput | boolean
   lastScanAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1867,11 +1871,11 @@ export type FicheSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   dateEcheance?: boolean
   dataJson?: boolean
   scansTotal?: boolean
+  isMain?: boolean
   lastScanAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   ownerId?: boolean
-  isMain?: boolean
   scans?: boolean | Prisma.Fiche$scansArgs<ExtArgs>
   scanEvents?: boolean | Prisma.Fiche$scanEventsArgs<ExtArgs>
   contactRequests?: boolean | Prisma.Fiche$contactRequestsArgs<ExtArgs>
@@ -1902,11 +1906,11 @@ export type FicheSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   dateEcheance?: boolean
   dataJson?: boolean
   scansTotal?: boolean
+  isMain?: boolean
   lastScanAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   ownerId?: boolean
-  isMain?: boolean
   owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["fiche"]>
 
@@ -1932,11 +1936,11 @@ export type FicheSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   dateEcheance?: boolean
   dataJson?: boolean
   scansTotal?: boolean
+  isMain?: boolean
   lastScanAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   ownerId?: boolean
-  isMain?: boolean
   owner?: boolean | Prisma.Fiche$ownerArgs<ExtArgs>
 }, ExtArgs["result"]["fiche"]>
 
@@ -1962,14 +1966,14 @@ export type FicheSelectScalar = {
   dateEcheance?: boolean
   dataJson?: boolean
   scansTotal?: boolean
+  isMain?: boolean
   lastScanAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   ownerId?: boolean
-  isMain?: boolean
 }
 
-export type FicheOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "formule" | "statut" | "nom" | "prenom" | "fonction" | "entreprise" | "photo" | "logo" | "telephone" | "whatsapp" | "email" | "site" | "adresse" | "lienItineraire" | "googlePlaceId" | "dateCreation" | "dateEcheance" | "dataJson" | "scansTotal" | "lastScanAt" | "createdAt" | "updatedAt" | "ownerId" | "isMain", ExtArgs["result"]["fiche"]>
+export type FicheOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "formule" | "statut" | "nom" | "prenom" | "fonction" | "entreprise" | "photo" | "logo" | "telephone" | "whatsapp" | "email" | "site" | "adresse" | "lienItineraire" | "googlePlaceId" | "dateCreation" | "dateEcheance" | "dataJson" | "scansTotal" | "isMain" | "lastScanAt" | "createdAt" | "updatedAt" | "ownerId", ExtArgs["result"]["fiche"]>
 export type FicheInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   scans?: boolean | Prisma.Fiche$scansArgs<ExtArgs>
   scanEvents?: boolean | Prisma.Fiche$scanEventsArgs<ExtArgs>
@@ -2016,12 +2020,11 @@ export type $FichePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     dateEcheance: Date
     dataJson: string
     scansTotal: number
+    isMain: boolean
     lastScanAt: Date | null
     createdAt: Date
     updatedAt: Date
-    ownerId: number
-  isMain: boolean | null
-  isMain: boolean
+    ownerId: number | null
   }, ExtArgs["result"]["fiche"]>
   composites: {}
 }
@@ -2471,11 +2474,11 @@ export interface FicheFieldRefs {
   readonly dateEcheance: Prisma.FieldRef<"Fiche", 'DateTime'>
   readonly dataJson: Prisma.FieldRef<"Fiche", 'String'>
   readonly scansTotal: Prisma.FieldRef<"Fiche", 'Int'>
+  readonly isMain: Prisma.FieldRef<"Fiche", 'Boolean'>
   readonly lastScanAt: Prisma.FieldRef<"Fiche", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Fiche", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Fiche", 'DateTime'>
   readonly ownerId: Prisma.FieldRef<"Fiche", 'Int'>
-  readonly isMain: Prisma.FieldRef<"Fiche", 'Boolean'>
 }
     
 

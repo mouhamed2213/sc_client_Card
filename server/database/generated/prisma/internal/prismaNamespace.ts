@@ -1118,11 +1118,11 @@ export const FicheScalarFieldEnum = {
   dateEcheance: 'dateEcheance',
   dataJson: 'dataJson',
   scansTotal: 'scansTotal',
+  isMain: 'isMain',
   lastScanAt: 'lastScanAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  ownerId: 'ownerId',
-  isMain: 'isMain'
+  ownerId: 'ownerId'
 } as const
 
 export type FicheScalarFieldEnum = (typeof FicheScalarFieldEnum)[keyof typeof FicheScalarFieldEnum]
