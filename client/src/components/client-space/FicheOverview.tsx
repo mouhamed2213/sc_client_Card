@@ -47,7 +47,6 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
   }
 
   const plan = fiche.plan ?? getPlanFeatures(fiche.formule);
-  const scans = data.scans.reduce((sum, item) => sum + item.count, 0);
   const echeance = getEcheanceStatus(fiche.dateEcheance);
 
   return (
@@ -93,10 +92,10 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
             {!plan.hasPanel && <Sparkles size={14} className="text-[#c98a4e]" aria-hidden="true" />}
           </div>
           <p className="kpi-tile-value" style={{ fontSize: 15 }}>
-            {plan.hasPanel ? scans : "Premium"}
+            {plan.hasPanel ? fiche.scansTotal : "Premium"}
           </p>
           <p className="kpi-tile-label">
-            {plan.hasPanel ? "Scans · 30 jours" : "Statistiques · Signature"}
+            {plan.hasPanel ? "Total des scans" : "Statistiques · Signature"}
           </p>
         </button>
         <button
