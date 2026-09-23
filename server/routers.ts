@@ -680,6 +680,14 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "Fiche introuvable.",
           });
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche est indisponible depuis l’espace client.",
+          });
+        }
         const dashboard = await listClientDashboard(input.ficheId);
         const plan = dashboard.fiche
           ? getPlanFeatures(dashboard.fiche.formule)
@@ -714,6 +722,14 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "Fiche introuvable.",
           });
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche est indisponible depuis l’espace client.",
+          });
+        }
         return {
           ...parseFiche(toClientFiche(fiche)),
           plan: getPlanFeatures(fiche.formule),
@@ -735,6 +751,14 @@ export const appRouter = router({
             code: "FORBIDDEN",
             message: "Fiche introuvable.",
           });
+        if (!isFicheOwnerEditable(fiche)) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              getFicheOwnerBlockedMessage(fiche) ??
+              "Cette fiche est indisponible depuis l’espace client.",
+          });
+        }
         if (fiche.formule !== "signature")
           throw new TRPCError({
             code: "FORBIDDEN",
