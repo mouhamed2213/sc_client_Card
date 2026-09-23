@@ -98,6 +98,9 @@ export const appRouter = router({
       return { success: true } as const;
     }),
   }),
+
+
+
   fiches: router({
     list: adminProcedure.query(async () => {
       const rows = await listFiches();
@@ -641,6 +644,9 @@ export const appRouter = router({
         }
       }),
   }),
+
+
+
   clientSpaceRouter: router({
     myFiches: clientProcedure.query(async ({ ctx }) => {
       const fiches = await listFichesByOwner(ctx.user.id);
@@ -803,10 +809,6 @@ export const appRouter = router({
           logo: fiche.logo ?? "",
           googlePlaceId: fiche.googlePlaceId ?? "",
           presentation: currentData.presentation ?? "",
-          rendezVous: currentData.rendezVous ?? {
-            label: "Prendre rendez-vous",
-            url: "",
-          },
           reseauxSociaux: currentData.reseauxSociaux ?? [],
           liens: currentData.liens ?? [],
           galerie: currentData.galerie ?? [],
@@ -848,12 +850,6 @@ export const appRouter = router({
             field: "presentation",
             next: input.data.presentation ?? "",
             previous: current.presentation,
-          },
-          {
-            key: "rendezVous",
-            field: "rendezVous",
-            next: input.data.rendezVous,
-            previous: current.rendezVous,
           },
           {
             key: "socials",

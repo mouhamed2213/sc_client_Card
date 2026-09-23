@@ -62,7 +62,6 @@ type FormState = {
     premierBouton: "whatsapp" | "appel" | "email";
     messageWhatsapp: string;
     presentation: string;
-    rendezVous: LinkItem;
     reseauxSociaux: SocialItem[];
     liens: LinkItem[];
     horaires: HoursItem[];
@@ -132,10 +131,6 @@ export default function ClientFicheEdit() {
         premierBouton: fiche.data.data?.premierBouton ?? "whatsapp",
         messageWhatsapp: fiche.data.data?.messageWhatsapp ?? "",
         presentation: fiche.data.data?.presentation ?? "",
-        rendezVous: fiche.data.data?.rendezVous ?? {
-          label: "Prendre rendez-vous",
-          url: "",
-        },
         reseauxSociaux: fiche.data.data?.reseauxSociaux ?? RESEAUX.map(r => ({ label: r.label, url: r.urlParDefaut, actif: false })),
         liens: fiche.data.data?.liens ?? [],
         horaires:

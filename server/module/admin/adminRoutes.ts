@@ -115,3 +115,7 @@ export function registerAdminRoutes(app: Express): void {
     return res.json({ success: true });
   });
 }
+
+
+// ROUTER 
+// export const authRouter = router

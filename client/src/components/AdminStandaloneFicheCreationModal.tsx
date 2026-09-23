@@ -87,7 +87,6 @@ export default function AdminStandaloneFicheCreationModal({ open, onClose }: Pro
           premierBouton: "whatsapp",
           messageWhatsapp: "Bonjour, je souhaite échanger avec vous.",
           presentation: "",
-          rendezVous: { label: "Prendre rendez-vous", url: "" },
           reseauxSociaux: [],
           liens: [],
           horaires: days.map(jour => ({ jour, horaire: "Sur rendez-vous" })),

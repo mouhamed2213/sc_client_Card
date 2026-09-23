@@ -8,7 +8,6 @@ type PlanData = {
   horaires?: { jour?: string; horaire?: string }[];
   sections?: Array<{ titre?: string; articles?: unknown[] }>;
   presentation?: string;
-  rendezVous?: { label?: string; url?: string };
   reseauxSociaux?: { label?: string; url?: string }[];
 };
 
@@ -28,7 +27,6 @@ export function validatePlanPayload(input: {
   const photos = gallery.filter(item => item.type !== "video");
   const videos = gallery.filter(item => item.type === "video");
   const sections = input.data.sections ?? [];
-  const appointment = input.data.rendezVous;
   const socials = input.data.reseauxSociaux ?? [];
 
   if (links.length > features.maxLinks) {
@@ -51,7 +49,6 @@ export function validatePlanPayload(input: {
   }
 
   if (!capabilities.site.editable && input.site?.trim()) errors.push("Cette formule ne permet pas de site internet.");
-  if (!capabilities.rendezVous.editable && appointment?.url?.trim()) errors.push("Cette formule ne permet pas de prise de rendez-vous.");
   if (!capabilities.socials.editable && socials.some(item => item.url?.trim())) errors.push("Cette formule ne permet pas de réseaux sociaux.");
   if (!capabilities.googleReview.editable && input.googlePlaceId?.trim()) errors.push("Cette formule ne permet pas les avis Google.");
   if (!capabilities.catalog.editable && sections.length > 0) errors.push("Cette formule ne permet pas de catalogue.");

@@ -11,7 +11,6 @@ describe("client fiche capabilities", () => {
     expect(c.presentation.editable).toBe(true);
     expect(c.hours.editable).toBe(true);
     expect(c.site.upgradeTo).toBe("pro");
-    expect(c.rendezVous.upgradeTo).toBe("pro");
     expect(c.socials.upgradeTo).toBe("pro");
     expect(c.links.editable).toBe(false);
     expect(c.gallery.editable).toBe(false);
@@ -24,7 +23,6 @@ describe("client fiche capabilities", () => {
     const c = getClientFicheCapabilities("pro");
     expect(c.profile.editable).toBe(true);
     expect(c.presentation.editable).toBe(true);
-    expect(c.rendezVous.editable).toBe(true);
     expect(c.socials.editable).toBe(true);
     expect(c.links.maxItems).toBe(10);
     expect(c.gallery.maxItems).toBe(4);

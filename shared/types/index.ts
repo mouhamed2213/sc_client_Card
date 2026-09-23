@@ -13,7 +13,7 @@ export type {
   Statut,
   User,
   UserRole,
-} from "../../generated/prisma/client";
+} from "../../server/database/generated/prisma/client";
 export * from "../_core/errors";
 
 export type OAuthState = {

@@ -6,7 +6,6 @@ export type ClientEditableKey =
   | "site"
   | "profile"
   | "presentation"
-  | "rendezVous"
   | "socials"
   | "links"
   | "gallery"
@@ -34,7 +33,6 @@ export const clientFicheCapabilities: Record<
     site: { editable: false, upgradeTo: "pro" },
     profile: { editable: true },
     presentation: { editable: true },
-    rendezVous: { editable: false, upgradeTo: "pro" },
     socials: { editable: false, upgradeTo: "pro" },
     links: { editable: false, upgradeTo: "pro", maxItems: getPlanFeatures("essentiel").maxLinks },
     gallery: {
@@ -55,7 +53,6 @@ export const clientFicheCapabilities: Record<
     site: { editable: true },
     profile: { editable: true },
     presentation: { editable: true },
-    rendezVous: { editable: true },
     socials: { editable: true },
     links: { editable: true, maxItems: getPlanFeatures("pro").maxLinks },
     gallery: {
@@ -78,7 +75,6 @@ export const clientFicheCapabilities: Record<
     site: { editable: true },
     profile: { editable: true },
     presentation: { editable: true },
-    rendezVous: { editable: true },
     socials: { editable: true },
     links: { editable: true, maxItems: getPlanFeatures("signature").maxLinks },
     gallery: {
