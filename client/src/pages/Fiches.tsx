@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { ADMIN_HOME_PATH } from "@/const";
 import { trpc } from "@/lib/trpc";
 import {
+  ChevronDown,
   Eye,
   Menu,
   Pencil,
   QrCode as QrCodeIcon,
   Search,
+  UserRound,
   X,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
@@ -51,7 +53,10 @@ type Fiche = {
   entreprise: string;
   dateEcheance: Date | string;
   scansTotal: number;
+  owner?: { id: number; name: string | null; email: string | null } | null;
 };
+
+type ClientUser = { id: number; name: string | null; email: string | null; _count: { fiche: number }; fiche: Array<{ id:number; slug:string; formule:keyof typeof formulaLabels; statut:string; prenom:string; nom:string; entreprise:string; scansTotal:number }> };
 
 type StatusFilter = "all" | keyof typeof statusLabels;
 
@@ -73,6 +78,7 @@ export default function Fiches() {
   const [page, setPage] = useState(1);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
+  const [viewMode, setViewMode] = useState<"users" | "fiches">("users");
   const pageSize = 10;
 
   useEffect(() => {
@@ -82,6 +88,8 @@ export default function Fiches() {
     }, 300);
     return () => window.clearTimeout(timer);
   }, [search]);
+
+  const usersQuery = trpc.fiches.usersPaginated.useQuery({ page, pageSize, search: debouncedSearch }, { enabled: viewMode === "users" });
 
   const listQuery = trpc.fiches.listPaginated.useQuery({
     page,
@@ -105,7 +113,10 @@ export default function Fiches() {
   });
 
   const rows = (listQuery.data?.rows ?? []) as Fiche[];
-  const total = listQuery.data?.total ?? 0;
+  const users = (usersQuery.data?.rows ?? []) as ClientUser[];
+  const total = viewMode === "users" ? usersQuery.data?.total ?? 0 : listQuery.data?.total ?? 0;
+  const isLoading = viewMode === "users" ? usersQuery.isLoading : listQuery.isLoading;
+  const isFetching = viewMode === "users" ? usersQuery.isFetching : listQuery.isFetching;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   useEffect(() => {
@@ -194,11 +205,12 @@ export default function Fiches() {
                   />
                 </div>
                 <span className="text-xs text-[#8b94a3]">
-                  {total} fiche{total > 1 ? "s" : ""} au total
+                  {total} {viewMode === "users" ? "client" + (total > 1 ? "s" : "") : "fiche" + (total > 1 ? "s" : "")} au total
                 </span>
               </div>
 
-              <div
+              <div className="flex flex-wrap gap-2" role="tablist" aria-label="Mode d'affichage"><button type="button" role="tab" aria-selected={viewMode === "users"} onClick={() => {setViewMode("users");setPage(1);}} className={`tab-button ${viewMode === "users" ? "tab-button-active" : ""}`}><UserRound className="mr-1 inline h-4 w-4"/>Utilisateurs</button><button type="button" role="tab" aria-selected={viewMode === "fiches"} onClick={() => {setViewMode("fiches");setPage(1);}} className={`tab-button ${viewMode === "fiches" ? "tab-button-active" : ""}`}>Toutes les fiches</button></div>
+              {viewMode === "fiches" && (<div
                 className="flex gap-1 overflow-x-auto"
                 role="tablist"
                 aria-label="Filtrer les fiches"
@@ -238,9 +250,10 @@ export default function Fiches() {
                   active={filter === "supprimee"}
                   onClick={() => changeFilter("supprimee")}
                 />
-              </div>
+              </div>)}
             </div>
 
+            {viewMode === "users" ? <UsersTable users={users} /> : <>
             <div className="hidden overflow-x-auto md:block">
               <table className="w-full">
                 <thead>
@@ -288,13 +301,15 @@ export default function Fiches() {
               ))}
             </div>
 
-            {!listQuery.isLoading && !listQuery.isFetching && !rows.length && (
+            </>}
+
+            {!isLoading && !isFetching && (viewMode === "users" ? !users.length : !rows.length) && (
               <div className="px-7 py-14 text-center text-sm text-[#7d8798]">
                 Aucune fiche ne correspond à cette recherche.
               </div>
             )}
 
-            {listQuery.isLoading && (
+            {isLoading && (
               <div className="px-7 py-14 text-center text-sm text-[#7d8798]">
                 Chargement des fiches…
               </div>
@@ -308,7 +323,7 @@ export default function Fiches() {
                 <button
                   type="button"
                   onClick={() => changePage(page - 1)}
-                  disabled={page === 1 || listQuery.isFetching}
+                  disabled={page === 1 || isFetching}
                   className="rounded-lg border border-[#e6e8ec] px-3 py-2 font-medium text-[#526078] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Précédent
@@ -319,7 +334,7 @@ export default function Fiches() {
                 <button
                   type="button"
                   onClick={() => changePage(page + 1)}
-                  disabled={page >= totalPages || listQuery.isFetching}
+                  disabled={page >= totalPages || isFetching}
                   className="rounded-lg border border-[#e6e8ec] px-3 py-2 font-medium text-[#526078] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Suivante
@@ -334,6 +349,10 @@ export default function Fiches() {
     </div>
   );
 }
+
+
+function UsersTable({ users }: { users: ClientUser[] }) { return <div className="hidden overflow-x-auto md:block"><table className="w-full"><thead><tr className="border-b border-[#edf0f2] text-left text-[11px] uppercase tracking-[0.13em] text-[#99a1ad]"><th className="px-7 py-4 font-semibold">Utilisateur</th><th className="px-4 py-4 font-semibold">Fiches</th><th className="px-4 py-4 font-semibold">Formules</th><th className="px-7 py-4 text-right font-semibold">Détail</th></tr></thead><tbody>{users.map(user => <UserRow key={user.id} user={user}/>)}</tbody></table></div> }
+function UserRow({ user }: { user: ClientUser }) { const [open,setOpen]=useState(false); const formulas=Array.from(new Set(user.fiche.map(f=>formulaLabels[f.formule]))).join(", ")||"—"; return <><tr className="border-b border-[#f0f2f4]"><td className="px-7 py-4"><div className="flex items-center gap-3"><div className="avatar"><UserRound className="h-4 w-4"/></div><div><p className="font-semibold text-[#29344a]">{user.name||"Client sans nom"}</p><p className="text-xs text-[#8b94a3]">{user.email||"Aucun email"}</p></div></div></td><td className="px-4 py-4">{user._count.fiche}</td><td className="px-4 py-4 text-sm text-[#657084]">{formulas}</td><td className="px-7 py-4 text-right"><button type="button" onClick={()=>setOpen(v=>!v)} className="table-action" aria-expanded={open}><ChevronDown className={`h-4 w-4 ${open?"rotate-180":""}`}/></button></td></tr>{open&&<tr className="border-b border-[#edf0f2] bg-[#fafbfc]"><td colSpan={4} className="px-7 py-4"><div className="space-y-2 pl-10">{user.fiche.map(f=><Link key={f.id} href={`/studio/fiche/${f.slug}`} className="flex items-center justify-between rounded-lg border border-[#e6e8ec] bg-white px-4 py-3"><div><p className="text-sm font-semibold">{f.prenom} {f.nom}</p><p className="text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></div><div className="flex gap-4 text-xs text-[#657084]"><span>{formulaLabels[f.formule]}</span><span>{f.statut}</span><span>{f.scansTotal} passages</span></div></Link>)}</div></td></tr>}</> }
 
 function FilterTab({
   label,
@@ -409,7 +428,7 @@ function FicheRow({
       <td className="px-4 py-4 text-sm font-medium text-[#42506a]">
         {fiche.scansTotal}
       </td>{" "}
-      <td className="px-4 py-4 text-sm font-medium text-[#42506a]">{0}</td>
+      <td className="px-4 py-4 text-sm text-[#657084]">{fiche.owner ? <><p className="truncate font-medium">{fiche.owner.name || "Client sans nom"}</p><p className="truncate text-xs text-[#9aa3b1]">{fiche.owner.email || "—"}</p></> : <span className="text-[#9aa3b1]">Non rattachée</span>}</td>
       <td className="px-4 py-4 text-sm text-[#657084]">
         {formatDate(fiche.dateEcheance)}
       </td>
