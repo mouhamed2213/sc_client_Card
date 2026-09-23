@@ -33,7 +33,15 @@ type GalleryItem = {
   embedUrl?: string;
 };
 type HoursItem = { jour: string; horaire: string };
-type Article = { nom: string; description: string; prix: string };
+type ArticleBadge = "populaire" | "nouveau" | "promo";
+type Article = {
+  nom: string;
+  description: string;
+  prix: string;
+  devise?: "XOF" | "EUR";
+  photo?: string;
+  badge?: ArticleBadge;
+};
 type CatalogSection = { titre: string; articles: Article[] };
 
 type FormState = {
@@ -100,6 +108,7 @@ export default function ClientFicheEdit() {
   const fiche = trpc.clientSpaceRouter.ficheDetail.useQuery({ ficheId: id });
   const [form, setForm] = useState<FormState | null>(null);
   const [uploading, setUploading] = useState<MediaKind | null>(null);
+  const [uploadingArticlePhoto, setUploadingArticlePhoto] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
   const [videoAlt, setVideoAlt] = useState("");
 
@@ -247,6 +256,52 @@ export default function ClientFicheEdit() {
       });
     } finally {
       setUploading(null);
+    }
+  }
+
+  async function uploadCatalogPhoto(
+    file: File,
+    sectionIndex: number,
+    articleIndex: number
+  ) {
+    if (!capabilities.catalog.editable) {
+      toast.error("Fonction verrouillée", {
+        description: `Disponible à partir du plan ${upgradeLabel("catalog")}.`,
+      });
+      return;
+    }
+    const key = `${sectionIndex}-${articleIndex}`;
+    try {
+      setUploadingArticlePhoto(key);
+      const prepared = await prepareImage(file, "catalogArticle");
+      const result = await upload.mutateAsync({
+        ficheId: id,
+        kind: "catalogArticle",
+        filename: prepared.name,
+        mimeType: "image/webp",
+        contentBase64: await fileToDataUrl(prepared),
+      });
+      setData(
+        "sections",
+        (form?.data.sections ?? []).map((section, si) =>
+          si === sectionIndex
+            ? {
+                ...section,
+                articles: section.articles.map((article, ai) =>
+                  ai === articleIndex ? { ...article, photo: result.url } : article
+                ),
+              }
+            : section
+        )
+      );
+      toast.success("Photo ajoutée");
+    } catch (error) {
+      toast.error("Image refusée", {
+        description:
+          error instanceof Error ? error.message : "Le traitement a échoué.",
+      });
+    } finally {
+      setUploadingArticlePhoto(null);
     }
   }
 
@@ -903,6 +958,12 @@ export default function ClientFicheEdit() {
                 <CatalogEditor
                   sections={form.data.sections}
                   onChange={sections => setData("sections", sections)}
+                  maxSections={capabilities.catalog.maxSections ?? 6}
+                  maxArticlesPerSection={capabilities.catalog.maxArticlesPerSection ?? 12}
+                  uploadingPhotoKey={uploadingArticlePhoto}
+                  onUploadPhoto={(file, sectionIndex, articleIndex) =>
+                    uploadCatalogPhoto(file, sectionIndex, articleIndex)
+                  }
                 />
               )}
             </EditorSection>
@@ -1114,169 +1175,253 @@ function MediaCard({
 function CatalogEditor({
   sections,
   onChange,
+  maxSections,
+  maxArticlesPerSection,
+  uploadingPhotoKey,
+  onUploadPhoto,
 }: {
   sections: CatalogSection[];
   onChange: (value: CatalogSection[]) => void;
+  maxSections: number;
+  maxArticlesPerSection: number;
+  uploadingPhotoKey: string | null;
+  onUploadPhoto: (file: File, sectionIndex: number, articleIndex: number) => void;
 }) {
+  function updateArticle(
+    sectionIndex: number,
+    articleIndex: number,
+    patch: Partial<Article>
+  ) {
+    onChange(
+      sections.map((section, si) =>
+        si === sectionIndex
+          ? {
+              ...section,
+              articles: section.articles.map((article, ai) =>
+                ai === articleIndex ? { ...article, ...patch } : article
+              ),
+            }
+          : section
+      )
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {sections.map((section, sectionIndex) => (
-        <div
-          key={sectionIndex}
-          className="rounded-xl border border-[#dfe4ea] bg-[#f7f9fb] p-4 space-y-3"
-        >
-          <div className="flex gap-2 items-center">
-            <input
-              className="editor-input flex-1 font-semibold"
-              placeholder="Nom de la section (Ex: Entrées, Services...)"
-              value={section.titre}
-              onChange={e =>
-                onChange(
-                  sections.map((x, i) =>
-                    i === sectionIndex ? { ...x, titre: e.target.value } : x
+      {sections.map((section, sectionIndex) => {
+        const atArticleLimit = section.articles.length >= maxArticlesPerSection;
+        return (
+          <div
+            key={sectionIndex}
+            className="rounded-xl border border-[#dfe4ea] bg-[#f7f9fb] p-4 space-y-3"
+          >
+            <div className="flex gap-2 items-center">
+              <input
+                className="editor-input flex-1 font-semibold"
+                placeholder="Nom de la section (Ex: Entrées, Services...)"
+                value={section.titre}
+                onChange={e =>
+                  onChange(
+                    sections.map((x, i) =>
+                      i === sectionIndex ? { ...x, titre: e.target.value } : x
+                    )
                   )
-                )
-              }
-            />
-            <button
-              type="button"
-              onClick={() =>
-                onChange(sections.filter((_, i) => i !== sectionIndex))
-              }
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition shrink-0"
-              title="Supprimer la section"
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
-          <div className="space-y-2 pl-2 border-l-2 border-[#c98a4e]/30">
-            {section.articles.map((article, articleIndex) => (
-              <div
-                key={articleIndex}
-                className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr_120px_auto] gap-2 items-center"
+                }
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  onChange(sections.filter((_, i) => i !== sectionIndex))
+                }
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition shrink-0"
+                title="Supprimer la section"
               >
-                <input
-                  className="editor-input"
-                  placeholder="Article / prestation"
-                  value={article.nom}
-                  onChange={e =>
-                    onChange(
-                      sections.map((x, i) =>
-                        i === sectionIndex
-                          ? {
-                              ...x,
-                              articles: x.articles.map((a, ai) =>
-                                ai === articleIndex
-                                  ? { ...a, nom: e.target.value }
-                                  : a
-                              ),
+                <Trash2 size={16} />
+              </button>
+            </div>
+            <div className="space-y-3 pl-2 border-l-2 border-[#c98a4e]/30">
+              {section.articles.map((article, articleIndex) => {
+                const photoKey = `${sectionIndex}-${articleIndex}`;
+                const isUploadingPhoto = uploadingPhotoKey === photoKey;
+                return (
+                  <div
+                    key={articleIndex}
+                    className="rounded-lg border border-[#e5e8ed] bg-white p-3"
+                  >
+                    <div className="flex gap-3">
+                      <label
+                        className={`relative flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed transition ${
+                          article.photo
+                            ? "border-transparent"
+                            : "border-[#cfd5dd] hover:bg-gray-50"
+                        }`}
+                        title="Photo de l'article"
+                      >
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          disabled={isUploadingPhoto}
+                          onChange={e => {
+                            const file = e.target.files?.[0];
+                            if (file) onUploadPhoto(file, sectionIndex, articleIndex);
+                            e.currentTarget.value = "";
+                          }}
+                        />
+                        {isUploadingPhoto ? (
+                          <Loader2 size={18} className="animate-spin text-[#c98a4e]" />
+                        ) : article.photo ? (
+                          <img
+                            src={article.photo}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <ImagePlus size={18} className="text-[#98a2b3]" />
+                        )}
+                      </label>
+
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex gap-2">
+                          <input
+                            className="editor-input flex-1"
+                            placeholder="Article / prestation"
+                            value={article.nom}
+                            onChange={e =>
+                              updateArticle(sectionIndex, articleIndex, {
+                                nom: e.target.value,
+                              })
                             }
-                          : x
-                      )
-                    )
-                  }
-                />
-                <input
-                  className="editor-input"
-                  placeholder="Description"
-                  value={article.description}
-                  onChange={e =>
-                    onChange(
-                      sections.map((x, i) =>
-                        i === sectionIndex
-                          ? {
-                              ...x,
-                              articles: x.articles.map((a, ai) =>
-                                ai === articleIndex
-                                  ? { ...a, description: e.target.value }
-                                  : a
-                              ),
+                          />
+                          <select
+                            className="editor-input w-[130px] shrink-0"
+                            value={article.badge ?? ""}
+                            onChange={e =>
+                              updateArticle(sectionIndex, articleIndex, {
+                                badge: (e.target.value || undefined) as
+                                  | ArticleBadge
+                                  | undefined,
+                              })
                             }
-                          : x
-                      )
-                    )
-                  }
-                />
-                <input
-                  className="editor-input"
-                  placeholder="Prix"
-                  value={article.prix}
-                  onChange={e =>
-                    onChange(
-                      sections.map((x, i) =>
-                        i === sectionIndex
-                          ? {
-                              ...x,
-                              articles: x.articles.map((a, ai) =>
-                                ai === articleIndex
-                                  ? { ...a, prix: e.target.value }
-                                  : a
-                              ),
+                          >
+                            <option value="">Aucun badge</option>
+                            <option value="populaire">Populaire</option>
+                            <option value="nouveau">Nouveau</option>
+                            <option value="promo">Promo</option>
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onChange(
+                                sections.map((x, i) =>
+                                  i === sectionIndex
+                                    ? {
+                                        ...x,
+                                        articles: x.articles.filter(
+                                          (_, ai) => ai !== articleIndex
+                                        ),
+                                      }
+                                    : x
+                                )
+                              )
                             }
-                          : x
-                      )
-                    )
-                  }
-                />
+                            className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition shrink-0"
+                            title="Supprimer l'article"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                        <input
+                          className="editor-input"
+                          placeholder="Description"
+                          value={article.description}
+                          onChange={e =>
+                            updateArticle(sectionIndex, articleIndex, {
+                              description: e.target.value,
+                            })
+                          }
+                        />
+                        <div className="flex gap-2">
+                          <input
+                            className="editor-input flex-1"
+                            placeholder="Prix (ex: 3 000 ou À partir de 5 000)"
+                            value={article.prix}
+                            onChange={e =>
+                              updateArticle(sectionIndex, articleIndex, {
+                                prix: e.target.value,
+                              })
+                            }
+                          />
+                          <select
+                            className="editor-input w-[110px] shrink-0"
+                            value={article.devise ?? "XOF"}
+                            onChange={e =>
+                              updateArticle(sectionIndex, articleIndex, {
+                                devise: e.target.value as "XOF" | "EUR",
+                              })
+                            }
+                          >
+                            <option value="XOF">FCFA</option>
+                            <option value="EUR">EUR</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="flex items-center justify-between gap-3 pt-1">
                 <button
                   type="button"
+                  disabled={atArticleLimit}
                   onClick={() =>
                     onChange(
                       sections.map((x, i) =>
                         i === sectionIndex
                           ? {
                               ...x,
-                              articles: x.articles.filter(
-                                (_, ai) => ai !== articleIndex
-                              ),
+                              articles: [
+                                ...x.articles,
+                                { nom: "", description: "", prix: "", devise: "XOF" },
+                              ],
                             }
                           : x
                       )
                     )
                   }
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition shrink-0"
-                  title="Supprimer l'article"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2 text-xs font-semibold text-[#52607a] hover:bg-gray-50 transition disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Trash2 size={16} />
+                  <Plus size={14} /> Ajouter un article
                 </button>
+                <span className="text-[11px] text-[#98a2b3]">
+                  {section.articles.length} / {maxArticlesPerSection} articles
+                </span>
               </div>
-            ))}
-            <button
-              type="button"
-              onClick={() =>
-                onChange(
-                  sections.map((x, i) =>
-                    i === sectionIndex
-                      ? {
-                          ...x,
-                          articles: [
-                            ...x.articles,
-                            { nom: "", description: "", prix: "" },
-                          ],
-                        }
-                      : x
-                  )
-                )
-              }
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#cfd5dd] bg-white px-3 py-2 text-xs font-semibold text-[#52607a] hover:bg-gray-50 transition mt-2"
-            >
-              <Plus size={14} /> Ajouter un article
-            </button>
+            </div>
           </div>
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={() =>
-          onChange([
-            ...sections,
-            { titre: "", articles: [{ nom: "", description: "", prix: "" }] },
-          ])
-        }
-        className="inline-flex items-center gap-2 rounded-lg border border-[#cfd5dd] bg-white px-4 py-2.5 text-xs font-semibold text-[#52607a] hover:bg-gray-50 transition"
-      >
-        <Plus size={14} /> Ajouter une section
-      </button>
+        );
+      })}
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          disabled={sections.length >= maxSections}
+          onClick={() =>
+            onChange([
+              ...sections,
+              {
+                titre: "",
+                articles: [{ nom: "", description: "", prix: "", devise: "XOF" }],
+              },
+            ])
+          }
+          className="inline-flex items-center gap-2 rounded-lg border border-[#cfd5dd] bg-white px-4 py-2.5 text-xs font-semibold text-[#52607a] hover:bg-gray-50 transition disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Plus size={14} /> Ajouter une section
+        </button>
+        <span className="text-[11px] text-[#98a2b3]">
+          {sections.length} / {maxSections} sections
+        </span>
+      </div>
     </div>
   );
 }

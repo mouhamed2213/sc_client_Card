@@ -20,6 +20,8 @@ type Capability = {
   upgradeTo?: PlanName;
   maxItems?: number;
   maxVideos?: number;
+  maxSections?: number;
+  maxArticlesPerSection?: number;
 };
 
 export const clientFicheCapabilities: Record<
@@ -43,7 +45,8 @@ export const clientFicheCapabilities: Record<
     },
     googleReview: { editable: false, upgradeTo: "pro" },
     hours: { editable: true },
-    catalog: { editable: false, upgradeTo: "signature" },
+    // Catalogue is now shared with Pro: the cheapest upgrade path is Pro, not Signature.
+    catalog: { editable: false, upgradeTo: "pro" },
     callbackForm: { editable: false, upgradeTo: "signature" },
   },
   pro: {
@@ -62,7 +65,11 @@ export const clientFicheCapabilities: Record<
     },
     googleReview: { editable: true },
     hours: { editable: true },
-    catalog: { editable: false, upgradeTo: "signature" },
+    catalog: {
+      editable: true,
+      maxSections: getPlanFeatures("pro").maxCatalogSections,
+      maxArticlesPerSection: getPlanFeatures("pro").maxCatalogArticlesPerSection,
+    },
     callbackForm: { editable: false, upgradeTo: "signature" },
   },
   signature: {
@@ -81,7 +88,11 @@ export const clientFicheCapabilities: Record<
     },
     googleReview: { editable: true },
     hours: { editable: true },
-    catalog: { editable: true },
+    catalog: {
+      editable: true,
+      maxSections: getPlanFeatures("signature").maxCatalogSections,
+      maxArticlesPerSection: getPlanFeatures("signature").maxCatalogArticlesPerSection,
+    },
     callbackForm: { editable: true },
   },
 };
