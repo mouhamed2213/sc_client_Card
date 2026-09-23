@@ -43,12 +43,18 @@ export function isFichePubliclyAccessible(fiche: {
   return status === "active" || status === "a_renouveler";
 }
 
+/**
+ * Client-side edit/access rule.
+ *
+ * Admin procedures are intentionally not governed by this helper: an
+ * administrator must keep control over drafts and suspended fiches.
+ */
 export function isFicheOwnerEditable(fiche: {
   statut: string;
   dateEcheance: Date;
 }) {
   const status = getFicheBusinessStatus(fiche);
-  return status !== "suspendue" && status !== "expiree";
+  return status === "active" || status === "a_renouveler";
 }
 
 export function getFicheOwnerBlockedMessage(
@@ -60,6 +66,12 @@ export function getFicheOwnerBlockedMessage(
   }
   if (status === "expiree") {
     return "Cette fiche est expirée. La consultation des demandes et les modifications sont indisponibles jusqu’au renouvellement.";
+  }
+  if (status === "brouillon") {
+    return "Cette fiche est encore en brouillon. La consultation et les modifications depuis l’espace client sont indisponibles jusqu’à son activation.";
+  }
+  if (status === "supprimee") {
+    return "Cette fiche a été supprimée. La consultation et les modifications depuis l’espace client sont indisponibles.";
   }
   return null;
 }
