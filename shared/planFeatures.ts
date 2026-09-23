@@ -21,9 +21,9 @@ export const planFeatures = {
     requiresProfile: true,
     requiresHours: true,
     hasCatalog: true,
-    // Same cap as Signature: the catalogue itself isn't a Signature-exclusive
-    // depth advantage, only its access is now shared between the two plans.
-    maxCatalogSections: 6,
+    // Pro's catalogue is capped tighter than Signature's, both stay at 12
+    // articles per category.
+    maxCatalogSections: 2,
     maxCatalogArticlesPerSection: 12,
     hasPanel: false,
   },

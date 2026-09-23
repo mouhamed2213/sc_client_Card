@@ -19,7 +19,7 @@ describe("planFeatures architecture", () => {
   it("declares the exact capabilities of the three formulas", () => {
     expect(planFeatures).toEqual({
       essentiel: { maxLinks: 0, maxPhotos: 0, maxVideos: 0, hasForm: false, hasGoogleReview: false, requiresProfile: false, requiresHours: true, hasCatalog: false, maxCatalogSections: 0, maxCatalogArticlesPerSection: 0, hasPanel: false },
-      pro: { maxLinks: 10, maxPhotos: 4, maxVideos: 1, hasForm: false, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true, maxCatalogSections: 6, maxCatalogArticlesPerSection: 12, hasPanel: false },
+      pro: { maxLinks: 10, maxPhotos: 4, maxVideos: 1, hasForm: false, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true, maxCatalogSections: 2, maxCatalogArticlesPerSection: 12, hasPanel: false },
       signature: { maxLinks: 10, maxPhotos: 8, maxVideos: 3, hasForm: true, hasGoogleReview: true, requiresProfile: true, requiresHours: true, hasCatalog: true, maxCatalogSections: 6, maxCatalogArticlesPerSection: 12, hasPanel: true },
     });
   });
@@ -52,7 +52,7 @@ describe("planFeatures architecture", () => {
     expect(getPlanFeatures("essentiel").hasForm).toBe(false);
   });
 
-  it("allows Pro features, including a catalogue within the shared limits", () => {
+  it("allows Pro features, including a catalogue within its own limit", () => {
     const validPro = validatePlanPayload({
       formule: "pro",
       ...base,
@@ -74,9 +74,22 @@ describe("planFeatures architecture", () => {
     expect(getPlanFeatures("pro").hasForm).toBe(false);
   });
 
-  it("caps the catalogue at 6 sections / 12 articles per section, for both Pro and Signature", () => {
-    const tooManySections = validatePlanPayload({
+  it("caps the catalogue: Pro at 2 sections, Signature at 6, both at 12 articles per section", () => {
+    const proTooManySections = validatePlanPayload({
       formule: "pro",
+      ...base,
+      photo: "/portrait.webp",
+      logo: "/logo.webp",
+      data: {
+        ...base.data,
+        horaires: hours,
+        sections: Array.from({ length: 3 }, (_, i) => ({ titre: `Section ${i}`, articles: [] })),
+      },
+    });
+    expect(proTooManySections).toContain("pro: maximum 2 sections de catalogue.");
+
+    const signatureTooManySections = validatePlanPayload({
+      formule: "signature",
       ...base,
       photo: "/portrait.webp",
       logo: "/logo.webp",
@@ -86,7 +99,7 @@ describe("planFeatures architecture", () => {
         sections: Array.from({ length: 7 }, (_, i) => ({ titre: `Section ${i}`, articles: [] })),
       },
     });
-    expect(tooManySections).toContain("pro: maximum 6 sections de catalogue.");
+    expect(signatureTooManySections).toContain("signature: maximum 6 sections de catalogue.");
 
     const tooManyArticles = validatePlanPayload({
       formule: "signature",
@@ -101,7 +114,20 @@ describe("planFeatures architecture", () => {
     });
     expect(tooManyArticles).toContain("signature: maximum 12 articles par section.");
 
-    const withinLimits = validatePlanPayload({
+    const proWithinLimits = validatePlanPayload({
+      formule: "pro",
+      ...base,
+      photo: "/portrait.webp",
+      logo: "/logo.webp",
+      data: {
+        ...base.data,
+        horaires: hours,
+        sections: Array.from({ length: 2 }, (_, i) => ({ titre: `Section ${i}`, articles: items(12) })),
+      },
+    });
+    expect(proWithinLimits).toEqual([]);
+
+    const signatureWithinLimits = validatePlanPayload({
       formule: "signature",
       ...base,
       photo: "/portrait.webp",
@@ -112,7 +138,7 @@ describe("planFeatures architecture", () => {
         sections: Array.from({ length: 6 }, (_, i) => ({ titre: `Section ${i}`, articles: items(12) })),
       },
     });
-    expect(withinLimits).toEqual([]);
+    expect(signatureWithinLimits).toEqual([]);
   });
 
   it("enforces Pro and Signature media limits", () => {
