@@ -1,6 +1,7 @@
 import { getClientFicheCapabilities } from "./clientFicheCapabilities";
 import { getPlanFeatures, type PlanName } from "./planFeatures";
 import { parseVideoUrl } from "./videoUrls";
+import { MAX_CATALOG_ARTICLE_DESCRIPTION_LENGTH } from "./catalogRules";
 
 type PlanData = {
   liens?: unknown[];
@@ -58,6 +59,22 @@ export function validatePlanPayload(input: {
     if (sections.length > maxSections) errors.push(`${input.formule}: maximum ${maxSections} sections de catalogue.`);
     if (sections.some(section => (section.articles ?? []).length > maxArticles)) {
       errors.push(`${input.formule}: maximum ${maxArticles} articles par section.`);
+    }
+    for (const section of sections) {
+      for (const article of section.articles ?? []) {
+        if (
+          typeof article === "object" &&
+          article !== null &&
+          "description" in article &&
+          typeof article.description === "string" &&
+          article.description.length > MAX_CATALOG_ARTICLE_DESCRIPTION_LENGTH
+        ) {
+          errors.push(
+            `La description d’un article du catalogue ne peut pas dépasser ${MAX_CATALOG_ARTICLE_DESCRIPTION_LENGTH} caractères.`
+          );
+          break;
+        }
+      }
     }
   }
   if (features.requiresProfile && (!input.photo || !input.logo)) errors.push(`${input.formule}: la couverture et la photo / le logo sont obligatoires.`);
