@@ -661,11 +661,12 @@ export async function changeFicheOwner(ficheId: number, ownerId: number) {
           select: { id: true },
         });
 
+        await tx.fiche.update({
+          where: { id: fiche.id },
+          data: { isMain: false },
+        });
+
         if (replacement) {
-          await tx.fiche.update({
-            where: { id: fiche.id },
-            data: { isMain: false },
-          });
           await tx.fiche.update({
             where: { id: replacement.id },
             data: { isMain: true },
