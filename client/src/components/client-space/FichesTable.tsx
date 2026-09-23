@@ -11,6 +11,7 @@ import { formuleLabels, getEcheanceStatus } from "@/lib/ficheStatus";
 
 export type ClientFicheRow = {
   id: number;
+  isMain: boolean;
   slug: string;
   formule: string;
   statut: string;
