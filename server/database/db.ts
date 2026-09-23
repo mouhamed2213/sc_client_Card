@@ -550,7 +550,7 @@ export async function createClientAccountWithFiche(input: {
 export async function listFichesByOwner(ownerId: number) {
   return prisma.fiche.findMany({
     where: { ownerId },
-    orderBy: { updatedAt: "desc" },
+    orderBy: [{ isMain: "desc" }, { updatedAt: "desc" }],
   });
 }
 
