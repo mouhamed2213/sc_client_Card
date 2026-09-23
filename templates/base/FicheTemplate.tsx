@@ -501,6 +501,147 @@ function GalleryCarousel({ items }: { items: TemplateGalleryItem[] }) {
   );
 }
 
+function CatalogCarousel({
+  articles,
+  whatsapp,
+}: {
+  articles: TemplateArticle[];
+  whatsapp?: string;
+}) {
+  const [requested, setRequested] = useState(0);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  if (!articles.length) return null;
+
+  const current = Math.min(requested, articles.length - 1);
+  const article = articles[current];
+  const go = (index: number) =>
+    setRequested((index + articles.length) % articles.length);
+
+  const onTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    if (touchStartX === null) return;
+    const delta = event.changedTouches[0].clientX - touchStartX;
+    setTouchStartX(null);
+    if (Math.abs(delta) > 40) go(current + (delta < 0 ? 1 : -1));
+  };
+
+  return (
+    <div
+      className="catalog-carousel"
+      role="region"
+      aria-roledescription="carrousel"
+      aria-label="Articles de la section"
+    >
+      <div
+        className="catalog-carousel-stage"
+        tabIndex={0}
+        onKeyDown={event => {
+          if (event.key === "ArrowLeft") go(current - 1);
+          if (event.key === "ArrowRight") go(current + 1);
+        }}
+        onTouchStart={event => setTouchStartX(event.touches[0].clientX)}
+        onTouchEnd={onTouchEnd}
+      >
+        {article.photo ? (
+          <div className="catalog-carousel-media">
+            <img
+              src={article.photo}
+              alt=""
+              loading="lazy"
+              draggable={false}
+            />
+          </div>
+        ) : (
+          <div
+            className="catalog-carousel-media catalog-carousel-media--empty"
+            aria-hidden="true"
+          >
+            <CalendarDays className="h-8 w-8" />
+          </div>
+        )}
+
+        {articles.length > 1 && (
+          <>
+            <button
+              type="button"
+              className="pro-gallery-control gallery-control gallery-control--prev"
+              onClick={() => go(current - 1)}
+              aria-label="Article précédent"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              className="pro-gallery-control gallery-control gallery-control--next"
+              onClick={() => go(current + 1)}
+              aria-label="Article suivant"
+            >
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="catalog-carousel-content">
+        <div className="catalog-carousel-heading">
+          <p className="catalog-carousel-name">
+            {article.nom || "Article sans nom"}
+            {article.badge ? (
+              <span className={"catalog-badge catalog-badge--" + article.badge}>
+                {catalogBadgeLabels[article.badge]}
+              </span>
+            ) : null}
+          </p>
+          {article.prix ? (
+            <span className="catalog-carousel-price">
+              {formatArticlePrice(article)}
+            </span>
+          ) : null}
+        </div>
+
+        {article.description ? (
+          <p className="catalog-carousel-description">{article.description}</p>
+        ) : null}
+
+        {whatsapp && article.nom ? (
+          <a
+            href={catalogOrderHref(whatsapp, article)}
+            target="_blank"
+            rel="noreferrer"
+            className="catalog-order-button catalog-carousel-order"
+            aria-label={"Commander " + article.nom + " sur WhatsApp"}
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            <span>Commander</span>
+          </a>
+        ) : null}
+      </div>
+
+      <div className="catalog-carousel-meta">
+        <span aria-live="polite">
+          Article {current + 1} / {articles.length}
+        </span>
+        {articles.length > 1 && (
+          <div className="catalog-carousel-dots">
+            {articles.map((entry, index) => (
+              <button
+                key={(entry.nom || "article") + "-" + index}
+                type="button"
+                className={
+                  "catalog-carousel-dot" +
+                  (index === current ? " is-active" : "")
+                }
+                onClick={() => go(index)}
+                aria-label={"Aller à l’article " + (index + 1)}
+                aria-current={index === current}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function socialKey(label: string, url: string) {
   const value = `${label} ${url}`.toLowerCase();
   if (value.includes("instagram")) return "instagram";
@@ -819,52 +960,10 @@ export function FicheTemplate({
                       )
                     }
                   >
-                    {section.articles.map(article => (
-                      <div key={article.nom} className="catalog-row">
-                        {article.photo ? (
-                          <img
-                            src={article.photo}
-                            alt=""
-                            className="catalog-row-photo"
-                            loading="lazy"
-                          />
-                        ) : null}
-                        <div className="catalog-row-body">
-                          <p className="font-semibold text-theme-text">
-                            {article.nom}
-                            {article.badge ? (
-                              <span
-                                className={`catalog-badge catalog-badge--${article.badge}`}
-                              >
-                                {catalogBadgeLabels[article.badge]}
-                              </span>
-                            ) : null}
-                          </p>
-                          {article.description ? (
-                            <p className="mt-1 text-xs leading-5 text-theme-muted">
-                              {article.description}
-                            </p>
-                          ) : null}
-                        </div>
-                        <div className="catalog-row-side">
-                          {article.prix ? (
-                            <span>{formatArticlePrice(article)}</span>
-                          ) : null}
-                          {fiche.whatsapp && article.nom ? (
-                            <a
-                              href={catalogOrderHref(fiche.whatsapp, article)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="catalog-order-button"
-                              aria-label={`Commander ${article.nom} sur WhatsApp`}
-                            >
-                              <MessageCircle className="h-3.5 w-3.5" />
-                              <span>Commander</span>
-                            </a>
-                          ) : null}
-                        </div>
-                      </div>
-                    ))}
+                    <CatalogCarousel
+                      articles={section.articles}
+                      whatsapp={fiche.whatsapp}
+                    />
                   </CollapsibleSection>
                 ))}
               </div>
