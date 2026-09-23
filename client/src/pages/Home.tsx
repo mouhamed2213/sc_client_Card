@@ -225,14 +225,14 @@ export default function Home() {
             <StatCard
               label="QR Code"
               value={overview.qrScans}
-              note="passages"
+              note="depuis le début"
               icon={<QrCodeIcon className="h-4 w-4" />}
               accent="blue"
             />
             <StatCard
               label="NFC"
               value={overview.nfcScans}
-              note="passages"
+              note="depuis le début"
               icon={<Link2 className="h-4 w-4" />}
               accent="copper"
             />
