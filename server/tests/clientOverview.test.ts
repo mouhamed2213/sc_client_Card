@@ -40,11 +40,11 @@ describe("client overview across fiches", () => {
   const result = buildClientOverview({
     fiches,
     scans: [
-      { ficheId: 3, scanDate: "2026-09-19", count: 4 },
-      { ficheId: 3, scanDate: "2026-09-20", count: 6 },
-      { ficheId: 4, scanDate: "2026-09-20", count: 3 },
+      { ficheId: 3, scanDate: "2026-09-19", count: 4, qrCount: 3, nfcCount: 1, unclassifiedCount: 0 },
+      { ficheId: 3, scanDate: "2026-09-20", count: 6, qrCount: 2, nfcCount: 4, unclassifiedCount: 0 },
+      { ficheId: 4, scanDate: "2026-09-20", count: 3, qrCount: 1, nfcCount: 2, unclassifiedCount: 0 },
       // A row for a plan without statistics must never be counted.
-      { ficheId: 1, scanDate: "2026-09-20", count: 99 },
+      { ficheId: 1, scanDate: "2026-09-20", count: 99, qrCount: 99, nfcCount: 0, unclassifiedCount: 0 },
     ],
     requestCounts: [
       { ficheId: 3, count: 2 },
@@ -73,6 +73,8 @@ describe("client overview across fiches", () => {
   it("only counts passages of plans with the statistics panel", () => {
     expect(result.scans.availableFor).toBe(3);
     expect(result.scans.total).toBe(4 + 6 + 3);
+    expect(result.scans.qr).toBe(3 + 2 + 1);
+    expect(result.scans.nfc).toBe(1 + 4 + 2);
     expect(result.scans.byDay).toEqual([
       { scanDate: "2026-09-19", count: 4 },
       { scanDate: "2026-09-20", count: 9 },
