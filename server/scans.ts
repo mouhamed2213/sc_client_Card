@@ -27,7 +27,7 @@ export type ScanSkipReason =
   | "duplicate";
 
 export type ScanResult =
-  | { ok: true; counted: true; source: ScanSource | "direct" }
+  | { ok: true; counted: true; source: ScanSource }
   | { ok: true; counted: false; reason: ScanSkipReason };
 
 export type ScanInput = {
@@ -132,10 +132,10 @@ export async function handleScan(args: {
 
   const counted = await recordScanEvent(fiche, {
     visitorKey: visitorKey(input.visitorId, ip, userAgent),
-    source: input.source ?? "direct",
+    source: input.source,
     windowMs: SCAN_DEDUP_WINDOW_MS,
   });
   return counted
-    ? { ok: true, counted: true, source: input.source ?? "direct" }
+    ? { ok: true, counted: true, source: input.source }
     : skip("duplicate");
 }
