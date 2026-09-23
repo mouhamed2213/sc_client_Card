@@ -5,6 +5,7 @@ import {
   MapPin,
   Pencil,
   Phone,
+  Star,
 } from "lucide-react";
 import { Link } from "wouter";
 import { formuleLabels, getEcheanceStatus } from "@/lib/ficheStatus";
@@ -97,9 +98,20 @@ function FicheIdentity({ fiche }: { fiche: ClientFicheRow }) {
         </div>
       )}
       <div className="min-w-0">
-        <p className="truncate font-semibold text-[#29344a]">
-          {fiche.prenom} {fiche.nom}
-        </p>
+        <div className="flex min-w-0 items-center gap-2">
+          <p className="truncate font-semibold text-[#29344a]">
+            {fiche.prenom} {fiche.nom}
+          </p>
+          {fiche.isMain ? (
+            <span
+              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#ead8c7] bg-[#fff8f1] px-2 py-0.5 text-[10px] font-semibold text-[#9a5c10]"
+              title="Fiche principale du compte client"
+            >
+              <Star className="h-3 w-3 fill-current" aria-hidden="true" />
+              Principale
+            </span>
+          ) : null}
+        </div>
         <p className="truncate text-xs text-[#8b94a3]">
           {[fiche.fonction, fiche.entreprise].filter(Boolean).join(" · ")}
         </p>
@@ -248,7 +260,7 @@ export default function FichesTable({ fiches }: { fiches: ClientFicheRow[] }) {
             {fiches.map(fiche => (
               <tr
                 key={fiche.id}
-                className="border-b border-[#f0f2f4] align-top transition-colors last:border-0 hover:bg-[#fcfcfd]"
+                className={`border-b border-[#f0f2f4] align-top transition-colors last:border-0 hover:bg-[#fcfcfd] ${fiche.isMain ? "bg-[#fffdf9]" : ""}`}
               >
                 <td className="px-7 py-4">
                   <Link href={`/espace-client/fiche/${fiche.id}`}>
@@ -274,7 +286,7 @@ export default function FichesTable({ fiches }: { fiches: ClientFicheRow[] }) {
 
       <div className="space-y-3 p-4 md:hidden">
         {fiches.map(fiche => (
-          <div key={fiche.id} className="rounded-xl border border-[#edf0f2] p-4">
+          <div key={fiche.id} className={`rounded-xl border border-[#edf0f2] p-4 ${fiche.isMain ? "border-[#ead8c7] bg-[#fffdf9]" : ""}`}>
             <div className="flex items-start justify-between gap-3">
               <FicheIdentity fiche={fiche} />
               <StatusPill fiche={fiche} />
