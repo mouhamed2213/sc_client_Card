@@ -11,7 +11,6 @@ import {
   QrCode as QrCodeIcon,
   Search,
   Plus,
-  Loader2,
   UserRound,
   X,
 } from "lucide-react";
@@ -367,6 +366,8 @@ export default function Fiches() {
       </main>
 
       {qrFiche && <QrModal fiche={qrFiche} onClose={() => setQrFiche(null)} />}
+      {managementUser && <UserManagementModal user={managementUser} onClose={() => setManagementUser(null)} />}
+      {selectedUser && <CreateFicheModal user={selectedUser} onClose={() => setSelectedUser(null)} onCreate={input => createFicheMutation.mutate(input)} />}
     </div>
   );
 }
