@@ -163,18 +163,23 @@ export const appRouter = router({
     overview: adminProcedure.query(async () => getOverview()),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
         const fiche = await getFicheBySlug(input.slug);
         if (!fiche)
           throw new TRPCError({
             code: "NOT_FOUND",
             message: "Fiche introuvable",
           });
-        if (!isFichePubliclyAccessible(fiche))
+
+        // Public access remains restricted by lifecycle status, while an
+        // authenticated administrator must keep full control of every fiche.
+        const isAdmin = ctx.user?.role === "admin";
+        if (!isAdmin && !isFichePubliclyAccessible(fiche))
           throw new TRPCError({
             code: "FORBIDDEN",
             message: "Cette fiche est temporairement indisponible.",
           });
+
         return { ...parseFiche(fiche), plan: getPlanFeatures(fiche.formule) };
       }),
     recordScan: publicProcedure
