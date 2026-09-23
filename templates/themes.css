@@ -107,20 +107,3 @@
   .fiche-template .gallery-stage { border-radius: 13px; }
   .fiche-template .gallery-control { width: 34px; height: 34px; }
 }
-
-/* Catalog carousel controls mirror the gallery controls. */
-.fiche-template .catalog-carousel-control {
-  border: 1px solid rgba(255,255,255,.55);
-  border-radius: 50%;
-  background: rgba(25,22,19,.62);
-  color: white;
-  backdrop-filter: blur(6px);
-  transition: background .18s ease, transform .18s ease;
-}
-.fiche-template .catalog-carousel-control:hover { background: rgba(25,22,19,.82); }
-.fiche-template .catalog-carousel-control--prev { left: 10px; }
-.fiche-template .catalog-carousel-control--next { right: 10px; }
-.fiche-template--signature .catalog-carousel-control {
-  border-color: rgba(201,164,106,.35);
-  background: rgba(15,14,13,.72);
-}
