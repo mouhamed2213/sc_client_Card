@@ -126,6 +126,9 @@ export async function handleScan(args: {
   const userAgent = String(req.headers?.["user-agent"] ?? "");
   if (isBotUserAgent(userAgent)) return skip("bot");
   // A passage is exclusively a QR/NFC arrival. A direct URL is never a passage.
+  if (!input.source || !SCAN_SOURCES.includes(input.source)) {
+    return skip("missing_source");
+  }
 
   const ip = clientIp(req);
   if (!allowScanAttempt(`${ip}|${fiche.id}`)) return skip("rate_limited");
