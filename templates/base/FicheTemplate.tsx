@@ -563,7 +563,7 @@ function CatalogCarousel({
           <>
             <button
               type="button"
-              className="catalog-carousel-control catalog-carousel-control--prev"
+              className="pro-gallery-control gallery-control gallery-control--prev"
               onClick={() => go(current - 1)}
               aria-label="Article précédent"
             >
@@ -571,7 +571,7 @@ function CatalogCarousel({
             </button>
             <button
               type="button"
-              className="catalog-carousel-control catalog-carousel-control--next"
+              className="pro-gallery-control gallery-control gallery-control--next"
               onClick={() => go(current + 1)}
               aria-label="Article suivant"
             >
