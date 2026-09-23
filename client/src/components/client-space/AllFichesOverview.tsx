@@ -5,6 +5,8 @@ import {
   CalendarClock,
   Layers3,
   MessageSquare,
+  QrCode,
+  Radio,
   ScanLine,
   Search,
   Sparkles,
@@ -181,6 +183,16 @@ export default function AllFichesOverview({ fiches }: { fiches: FicheOption[] })
                   ? `Passages · 30 jours (${data.scans.availableFor} fiche${data.scans.availableFor > 1 ? "s" : ""})`
                   : "Passages · formule Signature"
               }
+            />
+            <KpiTile
+              icon={QrCode}
+              value={data.scans.availableFor > 0 ? data.scans.qr : "—"}
+              label="QR Code · 30 jours"
+            />
+            <KpiTile
+              icon={Radio}
+              value={data.scans.availableFor > 0 ? data.scans.nfc : "—"}
+              label="NFC · 30 jours"
             />
             <KpiTile
               icon={MessageSquare}
