@@ -90,6 +90,8 @@ function CollapsibleSection({
   summary,
   defaultOpen = true,
   className = "public-section",
+  open: controlledOpen,
+  onToggle,
   children,
 }: {
   icon: ReactNode;
@@ -97,9 +99,15 @@ function CollapsibleSection({
   summary?: string;
   defaultOpen?: boolean;
   className?: string;
+  /** Pass open + onToggle to drive this from a parent (accordion behaviour);
+   * omit both to let the section manage its own open/closed state. */
+  open?: boolean;
+  onToggle?: () => void;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const open = controlledOpen ?? internalOpen;
+  const toggle = onToggle ?? (() => setInternalOpen(value => !value));
   const bodyId = useId();
   return (
     <section className={`${className} fh-collapsible`} data-open={open}>
@@ -108,7 +116,7 @@ function CollapsibleSection({
         className="fh-collapse-toggle"
         aria-expanded={open}
         aria-controls={bodyId}
-        onClick={() => setOpen(value => !value)}
+        onClick={toggle}
       >
         <SectionTitle icon={icon} title={title} />
         {!open && summary ? (
@@ -586,6 +594,10 @@ export function FicheTemplate({
     features.maxPhotos,
     features.maxVideos
   );
+  // Catalogue: accordion behaviour — opening a category folds any other open
+  // one, so the page never has to show several long lists at once. The first
+  // category starts open.
+  const [openCatalogSection, setOpenCatalogSection] = useState<number | null>(0);
 
   return (
     <div
@@ -792,57 +804,70 @@ export function FicheTemplate({
                 icon={<CalendarDays className="h-4 w-4" />}
                 title="Carte & prestations"
               />
-              {fiche.data.sections.map(section => (
-                <div key={section.titre} className="catalog-section">
-                  <h3>{section.titre}</h3>
-                  {section.articles.map(article => (
-                    <div key={article.nom} className="catalog-row">
-                      {article.photo ? (
-                        <img
-                          src={article.photo}
-                          alt=""
-                          className="catalog-row-photo"
-                          loading="lazy"
-                        />
-                      ) : null}
-                      <div className="catalog-row-body">
-                        <p className="font-semibold text-theme-text">
-                          {article.nom}
-                          {article.badge ? (
-                            <span
-                              className={`catalog-badge catalog-badge--${article.badge}`}
-                            >
-                              {catalogBadgeLabels[article.badge]}
-                            </span>
-                          ) : null}
-                        </p>
-                        {article.description ? (
-                          <p className="mt-1 text-xs leading-5 text-theme-muted">
-                            {article.description}
+              <div className="catalog-accordion">
+                {fiche.data.sections.map((section, sectionIndex) => (
+                  <CollapsibleSection
+                    key={section.titre}
+                    className="catalog-section"
+                    icon={<UserRound className="h-3.5 w-3.5" />}
+                    title={section.titre}
+                    summary={`${section.articles.length} article${section.articles.length > 1 ? "s" : ""}`}
+                    open={openCatalogSection === sectionIndex}
+                    onToggle={() =>
+                      setOpenCatalogSection(current =>
+                        current === sectionIndex ? null : sectionIndex
+                      )
+                    }
+                  >
+                    {section.articles.map(article => (
+                      <div key={article.nom} className="catalog-row">
+                        {article.photo ? (
+                          <img
+                            src={article.photo}
+                            alt=""
+                            className="catalog-row-photo"
+                            loading="lazy"
+                          />
+                        ) : null}
+                        <div className="catalog-row-body">
+                          <p className="font-semibold text-theme-text">
+                            {article.nom}
+                            {article.badge ? (
+                              <span
+                                className={`catalog-badge catalog-badge--${article.badge}`}
+                              >
+                                {catalogBadgeLabels[article.badge]}
+                              </span>
+                            ) : null}
                           </p>
-                        ) : null}
+                          {article.description ? (
+                            <p className="mt-1 text-xs leading-5 text-theme-muted">
+                              {article.description}
+                            </p>
+                          ) : null}
+                        </div>
+                        <div className="catalog-row-side">
+                          {article.prix ? (
+                            <span>{formatArticlePrice(article)}</span>
+                          ) : null}
+                          {fiche.whatsapp && article.nom ? (
+                            <a
+                              href={catalogOrderHref(fiche.whatsapp, article)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="catalog-order-button"
+                              aria-label={`Commander ${article.nom} sur WhatsApp`}
+                            >
+                              <MessageCircle className="h-3.5 w-3.5" />
+                              <span>Commander</span>
+                            </a>
+                          ) : null}
+                        </div>
                       </div>
-                      <div className="catalog-row-side">
-                        {article.prix ? (
-                          <span>{formatArticlePrice(article)}</span>
-                        ) : null}
-                        {fiche.whatsapp && article.nom ? (
-                          <a
-                            href={catalogOrderHref(fiche.whatsapp, article)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="catalog-order-button"
-                            aria-label={`Commander ${article.nom} sur WhatsApp`}
-                          >
-                            <MessageCircle className="h-3.5 w-3.5" />
-                            <span>Commander</span>
-                          </a>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ))}
+                    ))}
+                  </CollapsibleSection>
+                ))}
+              </div>
             </section>
           ) : null}
           {gallery.length ? (

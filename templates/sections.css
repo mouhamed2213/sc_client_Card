@@ -91,11 +91,15 @@
 }
 .fiche-template--signature .hours-today { color: #17130d; }
 
-/* Catalogue */
-.fiche-template .catalog-section h3 {
-  display: inline-block; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 2px solid var(--theme-accent);
-  color: var(--theme-text); font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
-}
+/* Catalogue: an accordion of categories (CollapsibleSection), each with its
+ * own list of rows. Sub-heading treatment (smaller than Présentation/Horaires)
+ * since it is nested one level deeper. */
+.fiche-template .catalog-accordion .catalog-section { padding: 12px 0; border-bottom: 1px solid var(--theme-line); }
+.fiche-template .catalog-accordion .catalog-section:first-child { padding-top: 0; }
+.fiche-template .catalog-accordion .catalog-section:last-child { padding-bottom: 0; border-bottom: 0; }
+.fiche-template .catalog-section .fh-section-title h2 { font-size: 12px; }
+.fiche-template .catalog-section .fh-section-icon { width: 26px; height: 26px; }
+.fiche-template .catalog-section .fh-collapse-chevron { width: 26px; height: 26px; padding: 6px; }
 .fiche-template .catalog-row-photo {
   flex: none; width: 56px; height: 56px; margin-top: 2px; border-radius: 12px; border: 1px solid var(--theme-line);
   object-fit: cover; background: var(--theme-accent-soft);
