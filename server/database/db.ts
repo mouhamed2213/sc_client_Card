@@ -260,7 +260,11 @@ export async function listFichesPaginated(input: {
       orderBy: { updatedAt: "desc" },
       skip: (input.page - 1) * input.pageSize,
       take: input.pageSize,
-
+      include: {
+        owner: {
+          select: { id: true, name: true, email: true },
+        },
+      },
     }),
   ]);
   return { rows, total };
