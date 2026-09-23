@@ -1,7 +1,6 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { Fiche, User } from "../../generated/prisma/client";
 import { prisma } from "../../prisma/client";
-import { ENV } from "../_core/env";
 import type { TrpcContext } from "../_core/context";
 import { appRouter } from "../routers";
 import {
@@ -107,7 +106,6 @@ describe("passages — recorded against a real database", () => {
   });
   afterEach(async () => {
     resetScanRateLimit();
-    ENV.scanRequireSource = false;
     await prisma.ficheScanEvent.deleteMany({ where: { ficheId: fiche.id } });
     await prisma.ficheScan.deleteMany({ where: { ficheId: fiche.id } });
     await prisma.fiche.update({
@@ -164,9 +162,12 @@ describe("passages — recorded against a real database", () => {
     expect((await counters()).total).toBe(0);
   });
 
-  it("does not count another logged-in client (only staff/owner are excluded)", async () => {
+  it("does not count a direct URL, even for another logged-in client", async () => {
     const other = { id: owner.id + 1000, role: "user" } as User;
-    expect(await scan({ user: other })).toMatchObject({ counted: true });
+    expect(await scan({ user: other })).toMatchObject({
+      counted: false,
+      reason: "missing_source",
+    });
   });
 
   it("never counts explicit previews", async () => {
@@ -202,8 +203,7 @@ describe("passages — recorded against a real database", () => {
     expect((await counters()).total).toBe(0);
   });
 
-  it("strict mode only counts visits carrying a card marker", async () => {
-    ENV.scanRequireSource = true;
+  it("only counts visits carrying a QR or NFC marker", async () => {
     expect(await scan()).toMatchObject({ counted: false, reason: "missing_source" });
     expect(await scan({ input: { source: "qr" } })).toMatchObject({ counted: true, source: "qr" });
     expect((await counters()).total).toBe(1);
