@@ -398,10 +398,27 @@ export async function recordScanEvent(
       where: { id: fiche.id },
       data: { scansTotal: { increment: 1 }, lastScanAt: now },
     });
+    const sourceIncrement =
+      event.source === "qr"
+        ? { qrCount: { increment: 1 } }
+        : event.source === "nfc"
+          ? { nfcCount: { increment: 1 } }
+          : { unclassifiedCount: { increment: 1 } };
+
     await tx.ficheScan.upsert({
       where: { ficheId_scanDate: { ficheId: fiche.id, scanDate: today } },
-      create: { ficheId: fiche.id, scanDate: today, count: 1 },
-      update: { count: { increment: 1 } },
+      create: {
+        ficheId: fiche.id,
+        scanDate: today,
+        count: 1,
+        qrCount: event.source === "qr" ? 1 : 0,
+        nfcCount: event.source === "nfc" ? 1 : 0,
+        unclassifiedCount: event.source === "qr" || event.source === "nfc" ? 0 : 1,
+      },
+      update: {
+        count: { increment: 1 },
+        ...sourceIncrement,
+      },
     });
     return true;
   });
@@ -428,7 +445,7 @@ export async function getOverview() {
   const renewalLimit = new Date(startOfToday);
   renewalLimit.setUTCDate(renewalLimit.getUTCDate() + 30);
   renewalLimit.setUTCHours(23, 59, 59, 999);
-  const [total, active, scans, expiring] = await Promise.all([
+  const [total, active, scans, sourceScans, expiring] = await Promise.all([
     prisma.fiche.count(),
     prisma.fiche.count({
       where: {
@@ -436,7 +453,12 @@ export async function getOverview() {
         dateEcheance: { gte: startOfToday },
       },
     }),
-    prisma.fiche.aggregate({ _sum: { scansTotal: true } }),
+    prisma.fiche.aggregate({
+      _sum: { scansTotal: true },
+    }),
+    prisma.ficheScan.aggregate({
+      _sum: { qrCount: true, nfcCount: true },
+    }),
     prisma.fiche.count({
       where: {
         statut: "active",
@@ -444,7 +466,14 @@ export async function getOverview() {
       },
     }),
   ]);
-  return { total, active, scans: scans._sum.scansTotal ?? 0, expiring };
+  return {
+    total,
+    active,
+    scans: scans._sum.scansTotal ?? 0,
+    qrScans: sourceScans._sum.qrCount ?? 0,
+    nfcScans: sourceScans._sum.nfcCount ?? 0,
+    expiring,
+  };
 }
 
 // Espace client
@@ -706,14 +735,18 @@ export async function listScansForFiche(ficheId: number, days = 30) {
     orderBy: { scanDate: "asc" },
   });
 
-  const byDate = new Map(rows.map(row => [row.scanDate, row.count]));
+  const byDate = new Map(rows.map(row => [row.scanDate, row]));
   return Array.from({ length: days }, (_, index) => {
     const date = new Date(start);
     date.setUTCDate(start.getUTCDate() + index);
     const scanDate = date.toISOString().slice(0, 10);
+    const row = byDate.get(scanDate);
     return {
       scanDate,
-      count: byDate.get(scanDate) ?? 0,
+      count: row?.count ?? 0,
+      qrCount: row?.qrCount ?? 0,
+      nfcCount: row?.nfcCount ?? 0,
+      unclassifiedCount: row?.unclassifiedCount ?? 0,
     };
   });
 }
