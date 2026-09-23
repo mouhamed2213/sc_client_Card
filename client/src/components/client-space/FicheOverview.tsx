@@ -6,6 +6,8 @@ import {
   CheckCircle2,
   MessageSquare,
   Pencil,
+  QrCode,
+  Radio,
   ScanLine,
   Sparkles,
 } from "lucide-react";
@@ -48,6 +50,8 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
 
   const plan = fiche.plan ?? getPlanFeatures(fiche.formule);
   const echeance = getEcheanceStatus(fiche.dateEcheance);
+  const qrScans = data.scans.reduce((sum, item) => sum + item.qrCount, 0);
+  const nfcScans = data.scans.reduce((sum, item) => sum + item.nfcCount, 0);
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
@@ -96,6 +100,32 @@ export default function FicheOverview({ ficheId }: { ficheId: number }) {
           </p>
           <p className="kpi-tile-label">
             {plan.hasPanel ? "Total des scans" : "Statistiques · Signature"}
+          </p>
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(`/espace-client/fiche/${ficheId}/statistiques`)}
+          className="kpi-tile text-left transition hover:border-[#c98a4e]"
+        >
+          <QrCode size={17} className="text-[#7d8798]" />
+          <p className="kpi-tile-value" style={{ fontSize: 15 }}>
+            {plan.hasPanel ? qrScans : "Premium"}
+          </p>
+          <p className="kpi-tile-label">
+            {plan.hasPanel ? "QR Code · 30 jours" : "Statistiques · Signature"}
+          </p>
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(`/espace-client/fiche/${ficheId}/statistiques`)}
+          className="kpi-tile text-left transition hover:border-[#c98a4e]"
+        >
+          <Radio size={17} className="text-[#7d8798]" />
+          <p className="kpi-tile-value" style={{ fontSize: 15 }}>
+            {plan.hasPanel ? nfcScans : "Premium"}
+          </p>
+          <p className="kpi-tile-label">
+            {plan.hasPanel ? "NFC · 30 jours" : "Statistiques · Signature"}
           </p>
         </button>
         <button
