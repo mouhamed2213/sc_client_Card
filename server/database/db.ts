@@ -515,6 +515,7 @@ export async function createClientAccountWithFiche(input: {
           ...input.fiche,
           slug,
           ownerId: user.id,
+          isMain: true,
         },
       });
 
