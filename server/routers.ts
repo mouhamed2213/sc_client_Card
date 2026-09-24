@@ -9,6 +9,7 @@ import { imageSize } from "image-size";
 import { z } from "zod";
 import { storagePut } from "./_core/config/storage";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { logger } from "./_core/logger";
 import { systemRouter } from "./_core/systemRouter";
 import {
   attachFicheToOwner,
@@ -94,6 +95,7 @@ export const appRouter = router({
       };
     }),
     logout: publicProcedure.mutation(({ ctx }) => {
+      logger.info("auth.logout", { userId: ctx.user?.id ?? null, role: ctx.user?.role ?? null });
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
@@ -215,6 +217,7 @@ export const appRouter = router({
         }
         const { id, data, ...fields } = input;
         await updateFiche(id, { ...fields, dataJson: JSON.stringify(data) });
+        logger.info("fiche.updated", { ficheId: id, slug: current.slug });
         return { ok: true, slug: current.slug } as const;
       }),
     updateStatus: adminProcedure
@@ -246,6 +249,7 @@ export const appRouter = router({
             });
         }
         const ok = await updateFiche(input.id, { statut: input.statut });
+        logger.info("fiche.status_updated", { ficheId: input.id, statut: input.statut });
         return { ok };
       }),
     contact: publicProcedure
@@ -280,6 +284,7 @@ export const appRouter = router({
           phone: input.phone.trim(),
           message: input.message.trim(),
         });
+        logger.info("contact_request.created", { ficheId: fiche.id });
         return { ok: true } as const;
       }),
     contactRequests: adminProcedure
@@ -370,6 +375,7 @@ export const appRouter = router({
           bytes,
           input.mimeType
         );
+        logger.info("media.uploaded", { kind: input.kind, formula: input.formula, bytes: bytes.byteLength });
         return { ...result, bytes: bytes.byteLength };
       }),
   }),
@@ -398,7 +404,8 @@ export const appRouter = router({
               dateEcheance,
             },
           });
-          logger.info("fiche.created", { ficheId: fiche.id, slug: fiche.slug, ownerId: input.ownerId ?? null, formule: fields.formule });\n          return { ok: true as const, ficheId: fiche.id, slug: fiche.slug };
+          logger.info("fiche.created", { ficheId: fiche.id, slug: fiche.slug, ownerId: input.ownerId ?? null, formule: fields.formule });
+          return { ok: true as const, ficheId: fiche.id, slug: fiche.slug };
         } catch (error) {
           if (error instanceof Error && error.message === "OWNER_NOT_FOUND") {
             throw new TRPCError({
@@ -479,6 +486,13 @@ export const appRouter = router({
             cardNumero: input.createCard ? input.cardNumero : undefined,
           });
 
+          logger.info("client_account.created", {
+            userId: result.user.id,
+            ficheId: result.fiche.id,
+            formule: fields.formule,
+            createCard: input.createCard,
+          });
+
           return {
             ok: true as const,
             userId: result.user.id,
@@ -533,6 +547,7 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         try {
           await changeFicheOwner(input.ficheId, input.ownerId);
+          logger.info("fiche.owner_changed", { ficheId: input.ficheId, ownerId: input.ownerId });
           return { ok: true } as const;
         } catch (err) {
           if (err instanceof Error && err.message === "FICHE_NOT_FOUND")
@@ -553,6 +568,7 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         try {
           await detachFicheOwner(input.ficheId);
+          logger.info("fiche.owner_detached", { ficheId: input.ficheId });
           return { ok: true } as const;
         } catch (err) {
           if (err instanceof Error && err.message === "FICHE_NOT_FOUND")
@@ -592,6 +608,7 @@ export const appRouter = router({
           });
         try {
           await attachFicheToOwner(input.ficheId, input.ownerId);
+          logger.info("fiche.owner_attached", { ficheId: input.ficheId, ownerId: input.ownerId });
         } catch (err) {
           throw new TRPCError({
             code: "BAD_REQUEST",
