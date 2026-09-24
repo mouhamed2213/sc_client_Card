@@ -189,7 +189,7 @@ export default function Home() {
         </header>
 
         <div className="mx-auto max-w-[1440px] px-5 py-8 lg:px-10 lg:py-10">
-          <section className="mb-9 grid gap-5 xl:grid-cols-[1.6fr_1fr_1fr_1fr]">
+          <section className="mb-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-[1.6fr_1fr_1fr_1fr]">
             <div className="hero-panel">
               <div className="relative z-10 max-w-lg">
                 <p className="eyebrow text-[#e5a86b]">Vue d’ensemble</p>
