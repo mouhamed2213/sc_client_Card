@@ -6,6 +6,7 @@ import { SignJWT, jwtVerify } from "jose";
 import type { User } from "../../../server/database/generated/prisma/client";
 import * as db from "../../database/db";
 import { ENV } from "../env";
+import { logger } from "../logger";
 
 // Utility function
 const isNonEmptyString = (value: unknown): value is string =>
@@ -99,7 +100,7 @@ class SDKServer {
       }
       return null;
     } catch (error) {
-      console.warn("[Auth] Session verification failed", String(error));
+      logger.warn("auth.session_verification_failed", { error: error instanceof Error ? error.message : String(error) });
       return null;
     }
   }
@@ -126,7 +127,7 @@ class SDKServer {
 
     const signedInAt = new Date();
     const user = await db.getUserById(session.userId);
-    if (!user) throw ForbiddenError("User not found — please sign in again");
+    if (!user) {\n      logger.warn("auth.user_not_found", { userId: session.userId });\n      throw ForbiddenError("User not found — please sign in again");\n    }
     await db.updateUserLastSignedIn(user.id, signedInAt);
 
     return user;
