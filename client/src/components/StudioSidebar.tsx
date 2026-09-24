@@ -1,5 +1,6 @@
 import { Bell, LayoutDashboard, LayoutGrid, Link2, LogOut, MoreHorizontal, Sparkles, X } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { ADMIN_HOME_PATH } from "@/const";
 
@@ -24,6 +25,9 @@ export default function StudioSidebar({
       await utils.auth.me.invalidate();
       onClose?.();
       window.location.replace("/admin/login");
+    },
+    onError: error => {
+      toast.error("Déconnexion impossible", { description: error.message });
     },
   });
 
