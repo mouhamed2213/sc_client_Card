@@ -133,6 +133,9 @@
   --fh-btn-bg: rgba(255, 255, 255, 0.1); --fh-btn-bg-hover: rgba(255, 255, 255, 0.18); --fh-btn-line: rgba(255, 255, 255, 0.22);
   --fh-cta-bg: #ffffff; --fh-cta-text: #17324f; --fh-cta-shadow: rgba(4, 14, 28, 0.35);
 }
+.fiche-template--essentiel .fh {
+  padding: 20px 22px 26px;
+}
 .fiche-template--essentiel .fh-name {
   font-size: clamp(23px, 5.6vw, 30px);
   font-weight: 700;
@@ -195,6 +198,7 @@
   .fiche-template .fh { min-height: 570px; padding: 16px 16px 20px; }
   .fiche-template .fh[data-cover="no"] { min-height: 0; }
   .fiche-template--signature .fh { padding: 18px 16px 22px; }
+  .fiche-template--essentiel .fh { padding: 18px 16px 22px; }
   .fiche-template .fh-action { min-height: 56px; }
   .fiche-template .fh-avatar, .fiche-template .fh-initials { width: 96px; height: 96px; }
   .fiche-template .fh-body { column-gap: 12px; }
