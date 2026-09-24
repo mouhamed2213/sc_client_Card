@@ -123,6 +123,7 @@ select:focus-visible {
   min-height: 100vh;
 }
 .studio-sidebar {
+  display: flex;
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 40;
@@ -139,12 +140,55 @@ select:focus-visible {
   margin-left: 256px;
   min-height: 100vh;
 }
+.studio-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(2px);
+}
+
+.studio-sidebar-close {
+  display: inline-flex;
+  height: 34px;
+  width: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.studio-sidebar-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
 @media (max-width: 1023px) {
-  .studio-shell > .studio-sidebar {
+  .studio-sidebar {
+    display: none;
+    width: min(84vw, 300px);
+    padding: 22px 18px;
+    transform: translateX(-105%);
+    transition: transform 0.22s ease;
+  }
+
+  .studio-sidebar-mobile-open {
+    display: flex;
+    transform: translateX(0);
+  }
+
+  .studio-sidebar-mobile-closed {
     display: none;
   }
+
   .studio-shell > .studio-main {
     margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-sidebar {
+    transition: none;
   }
 }
 .studio-main {
