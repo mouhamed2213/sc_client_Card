@@ -142,7 +142,7 @@ export default function Home() {
     <div className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
       <StudioSidebar mobileOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
      <main className="studio-main">
-        <header className="flex items-center justify-between border-b border-[#e7e9ed] bg-white/80 px-5 py-4 backdrop-blur lg:px-10">
+        <header className="flex flex-col gap-4 border-b border-[#e7e9ed] bg-white/80 px-4 py-3 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4 lg:px-10">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -161,22 +161,22 @@ export default function Home() {
               </h1>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
             <Button
               onClick={() => setIsStandaloneFicheOpen(true)}
               variant="outline"
-              className="flex gap-2 border-[#d9dde4]"
+              className="min-w-0 flex-1 gap-2 border-[#d9dde4] sm:flex-none"
             >
-              <UserPlus className="h-4 w-4" />
+              <UserPlus className="h-4 w-4 shrink-0" />
               <span>Nouvelle fiche</span>
             </Button>
             <Button
               onClick={() => setIsClientAccountOpen(true)}
               variant="outline"
-              className="hidden gap-2 border-[#d9dde4] sm:flex"
+              className="min-w-0 flex-1 gap-2 border-[#d9dde4] sm:flex-none"
             >
-              <UserPlus className="h-4 w-4" />
-              Nouveau compte client
+              <UserPlus className="h-4 w-4 shrink-0" />
+              <span>Nouveau compte client</span>
             </Button>
             <button
               className="icon-button hidden sm:flex"
