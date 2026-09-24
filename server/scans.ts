@@ -5,7 +5,7 @@
  */
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import { createHash } from "node:crypto";
-import { ENV } from "./_core/env";
+import { ENV } from "./_core/env";\nimport { logger } from "./_core/logger";
 import { recordScanEvent } from "./database/db";
 import type { Fiche, User } from "./database/generated/prisma/client";
 import { isFichePubliclyAccessible } from "./module/admin/ficheLifecycle";
@@ -133,7 +133,7 @@ export async function handleScan(args: {
   const ip = clientIp(req);
   if (!allowScanAttempt(`${ip}|${fiche.id}`)) return skip("rate_limited");
 
-  const counted = await recordScanEvent(fiche, {
+  let counted: boolean;\n  try {\n    counted = await recordScanEvent(fiche, {
     visitorKey: visitorKey(input.visitorId, ip, userAgent),
     source: input.source as string,
     windowMs: SCAN_DEDUP_WINDOW_MS,
