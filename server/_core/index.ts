@@ -45,6 +45,15 @@ async function startServer() {
     createExpressMiddleware({
       router: appRouter,
       createContext,
+      onError({ path, type, error, ctx }) {
+        logger.error("trpc.error", {
+          path,
+          type,
+          code: error.code,
+          message: error.message,
+          userId: ctx?.user?.id ?? null,
+        });
+      },
     })
   );
   // development mode uses Vite, production mode uses static files
