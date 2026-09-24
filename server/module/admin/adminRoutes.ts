@@ -5,6 +5,7 @@ import { prisma } from "../../database/prisma/client";
 import { sdk } from "../../_core/config/sdk";
 import { getAdminSessionCookieOptions } from "../../_core/cookies";
 import { ENV } from "../../_core/env";
+import { logger } from "../../_core/logger";
 import { verifyAdminPassword } from "../auth/adminAuth";
 import { adminProcedure, router } from "server/trcp/trpc";
 
@@ -108,7 +109,7 @@ export function registerAdminRoutes(app: Express): void {
     return res.json({ success: true, username: credential.username });
   });
 
-  app.post("/api/admin/logout", (req, res) => {
+  app.post("/api/admin/logout", (req, res) => {\n    logger.info("auth.admin_logout");
     res.clearCookie(COOKIE_NAME, {
       ...adminCookieOptions(req),
       maxAge: -1,
