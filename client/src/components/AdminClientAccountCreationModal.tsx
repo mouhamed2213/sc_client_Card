@@ -342,7 +342,7 @@ export default function AdminClientAccountCreationModal({
         aria-modal="true"
         aria-labelledby="client-account-created-title"
       >
-        <div className="modal-panel max-w-xl">
+        <div className="modal-panel flex max-h-[calc(100vh-32px)] flex-col max-w-xl">
           <div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5">
             <div>
               <p className="eyebrow text-emerald-600">Création terminée</p>
@@ -367,7 +367,7 @@ export default function AdminClientAccountCreationModal({
             </button>
           </div>
 
-          <div className="space-y-5 px-6 py-6">
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
               <div className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
                 <Check className="h-4 w-4" />
@@ -465,13 +465,13 @@ export default function AdminClientAccountCreationModal({
 
   return (
     <div
-      className="modal-backdrop overflow-scroll"
+      className="modal-backdrop"
       role="dialog"
       aria-modal="true"
       aria-labelledby="new-client-account-title"
     >
-      <div className="modal-panel">
-        <div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5">
+      <div className="modal-panel flex max-h-[calc(100vh-32px)] flex-col">
+        <div className="flex shrink-0 items-start justify-between border-b border-[#edf0f2] px-6 py-5">
           <div>
             <p className="eyebrow">Nouveau compte client</p>
             <h2
@@ -495,7 +495,7 @@ export default function AdminClientAccountCreationModal({
           </button>
         </div>
 
-        <form onSubmit={submit} className="space-y-5 overflow-y-auto px-6 py-6">
+        <form onSubmit={submit} className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
           <div>
             <span className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-[#7d8798]">
               Formule
