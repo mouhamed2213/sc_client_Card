@@ -902,11 +902,13 @@ export function FicheTemplate({
           ) : null}
 {/* --------------------------- */}
           {features.hasCatalog && fiche.data.sections?.length ? (
-            <section className="public-section py-[22px] border-b border-theme-line">
-              <SectionTitle
-                icon={<CalendarDays className="h-4 w-4" />}
-                title="Carte & prestations"
-              />
+            <CollapsibleSection
+              className="public-section py-[22px] border-b border-theme-line"
+              icon={<CalendarDays className="h-4 w-4" />}
+              title="Carte & prestations"
+              summary={`${fiche.data.sections.length} section${fiche.data.sections.length > 1 ? "s" : ""}`}
+              defaultOpen
+            >
               <div className="catalog-accordion">
                 {fiche.data.sections.map((section, sectionIndex) => (
                   <CollapsibleSection
@@ -929,7 +931,7 @@ export function FicheTemplate({
                   </CollapsibleSection>
                 ))}
               </div>
-            </section>
+            </CollapsibleSection>
           ) : null}
 
 
