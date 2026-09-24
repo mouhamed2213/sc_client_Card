@@ -46,6 +46,7 @@ export default function StudioSidebar({
       )}
 
       <aside
+        id="studio-mobile-navigation"
         className={`studio-sidebar ${mobileOpen ? "studio-sidebar-mobile-open" : "studio-sidebar-mobile-closed"}`}
         aria-label="Navigation du studio"
       >
