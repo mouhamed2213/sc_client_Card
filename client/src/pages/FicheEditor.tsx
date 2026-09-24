@@ -1,4 +1,3 @@
-import AdminClientAccessPanel from "@/components/AdminClientAccessPanel";
 import { Button } from "@/components/ui/button";
 import { ADMIN_HOME_PATH } from "@/const";
 import { prepareImage } from "@/lib/imageProcessing";
@@ -324,10 +323,6 @@ export default function FicheEditor() {
           </div>
         </div>
       </header>
-      <div className="mx-auto max-w-[1300px] px-5 pt-6">
-        <AdminClientAccessPanel />
-      </div>
-
       <main className="mx-auto grid max-w-[1300px] gap-6 px-5 py-7 lg:grid-cols-[290px_1fr]">
         <aside className="space-y-5">
           <section className="editor-card sticky top-24">
