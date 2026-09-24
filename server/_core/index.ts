@@ -8,6 +8,7 @@ import { registerClientRoutes } from "../module/client/clientRoutes";
 import { appRouter } from "../routers";
 import { createContext } from "../trcp/context";
 import { ENV } from "./env";
+import { logger } from "./logger";
 import { registerOAuthRoutes } from "./oauth";
 import { serveStatic, setupVite } from "./vite";
 function isPortAvailable(port: number): Promise<boolean> {
@@ -57,12 +58,12 @@ async function startServer() {
   const port = await findAvailablePort(preferredPort);
 
   if (port !== preferredPort) {
-    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+    logger.warn("server.port_fallback", { preferredPort, port });
   }
 
   server.listen(port, () => {
-    console.log(`Server running on ${ENV.host}:${port}`);
+    logger.info("server.started", { host: ENV.host, port, environment: process.env.NODE_ENV ?? "development" });
   });
 }
 
-startServer().catch(console.error);
+startServer().catch(error => {\n  logger.error("server.start_failed", { error: error instanceof Error ? error.message : String(error) });\n  process.exitCode = 1;\n});
