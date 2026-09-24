@@ -120,7 +120,8 @@ export default function Home() {
   const [filter, setFilter] = useState<"all" | keyof typeof statusLabels>(
     "all"
   );
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);\n  const [isClientAccountOpen, setIsClientAccountOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isClientAccountOpen, setIsClientAccountOpen] = useState(false);
   const [isStandaloneFicheOpen, setIsStandaloneFicheOpen] = useState(false);
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
 
@@ -138,7 +139,7 @@ export default function Home() {
   );
 
   return (
-    <div id="studio-mobile-navigation" className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
+    <div className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
       <StudioSidebar mobileOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
      <main className="studio-main">
         <header className="flex items-center justify-between border-b border-[#e7e9ed] bg-white/80 px-5 py-4 backdrop-blur lg:px-10">
