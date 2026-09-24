@@ -23,7 +23,8 @@ function sanitize(context: LogContext): LogContext {
   );
 }
 
-function write(level: LogLevel, message: string, context?: LogContext) {\n  if (level === "debug" && process.env.LOG_LEVEL !== "debug") return;
+function write(level: LogLevel, message: string, context?: LogContext) {
+  if (level === "debug" && process.env.LOG_LEVEL !== "debug") return;
   const entry = {
     timestamp: new Date().toISOString(),
     level,

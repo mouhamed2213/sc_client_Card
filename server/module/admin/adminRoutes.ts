@@ -1,13 +1,12 @@
 import { COOKIE_NAME } from "@shared/const";
 import type { Express, Request } from "express";
 import { z } from "zod";
-import { prisma } from "../../database/prisma/client";
 import { sdk } from "../../_core/config/sdk";
 import { getAdminSessionCookieOptions } from "../../_core/cookies";
 import { ENV } from "../../_core/env";
 import { logger } from "../../_core/logger";
+import { prisma } from "../../database/prisma/client";
 import { verifyAdminPassword } from "../auth/adminAuth";
-import { adminProcedure, router } from "server/trcp/trpc";
 
 const loginSchema = z.object({
   username: z.string().trim().min(1).max(64),
@@ -109,7 +108,8 @@ export function registerAdminRoutes(app: Express): void {
     return res.json({ success: true, username: credential.username });
   });
 
-  app.post("/api/admin/logout", (req, res) => {\n    logger.info("auth.admin_logout");
+  app.post("/api/admin/logout", (req, res) => {
+    logger.info("auth.admin_logout");
     res.clearCookie(COOKIE_NAME, {
       ...adminCookieOptions(req),
       maxAge: -1,
@@ -118,6 +118,4 @@ export function registerAdminRoutes(app: Express): void {
   });
 }
 
-
-// ROUTER 
-
+// ROUTER

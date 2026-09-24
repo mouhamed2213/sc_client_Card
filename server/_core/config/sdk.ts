@@ -100,7 +100,9 @@ class SDKServer {
       }
       return null;
     } catch (error) {
-      logger.warn("auth.session_verification_failed", { error: error instanceof Error ? error.message : String(error) });
+      logger.warn("auth.session_verification_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -127,7 +129,10 @@ class SDKServer {
 
     const signedInAt = new Date();
     const user = await db.getUserById(session.userId);
-    if (!user) {\n      logger.warn("auth.user_not_found", { userId: session.userId });\n      throw ForbiddenError("User not found — please sign in again");\n    }
+    if (!user) {
+      logger.warn("auth.user_not_found", { userId: session.userId });
+      throw ForbiddenError("User not found — please sign in again");
+    }
     await db.updateUserLastSignedIn(user.id, signedInAt);
 
     return user;

@@ -5,7 +5,8 @@
  */
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import { createHash } from "node:crypto";
-import { ENV } from "./_core/env";\nimport { logger } from "./_core/logger";
+import { ENV } from "./_core/env";
+import { logger } from "./_core/logger";
 import { recordScanEvent } from "./database/db";
 import type { Fiche, User } from "./database/generated/prisma/client";
 import { isFichePubliclyAccessible } from "./module/admin/ficheLifecycle";
@@ -159,5 +160,4 @@ export async function handleScan(args: {
   return counted
     ? { ok: true, counted: true, source: input.source as ScanSource }
     : skip("duplicate");
-
 }

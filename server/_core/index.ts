@@ -75,4 +75,4 @@ async function startServer() {
   });
 }
 
-startServer().catch(error => {\n  logger.error("server.start_failed", { error: error instanceof Error ? error.message : String(error) });\n  process.exitCode = 1;\n});
+startServer().catch(error => {  logger.error("server.start_failed", { error: error instanceof Error ? error.message : String(error) });  process.exitCode = 1;});
