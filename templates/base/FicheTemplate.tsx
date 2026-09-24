@@ -543,12 +543,7 @@ function CatalogCarousel({
       >
         {article.photo ? (
           <div className="catalog-carousel-media">
-            <img
-              src={article.photo}
-              alt=""
-              loading="lazy"
-              draggable={false}
-            />
+            <img src={article.photo} alt="" loading="lazy" draggable={false} />
           </div>
         ) : (
           <div
@@ -738,7 +733,9 @@ export function FicheTemplate({
   // Catalogue: accordion behaviour — opening a category folds any other open
   // one, so the page never has to show several long lists at once. The first
   // category starts open.
-  const [openCatalogSection, setOpenCatalogSection] = useState<number | null>(0);
+  const [openCatalogSection, setOpenCatalogSection] = useState<number | null>(
+    0
+  );
 
   return (
     <div
@@ -784,29 +781,8 @@ export function FicheTemplate({
             </section>
           ) : null}
 
-
-
           {/*  */}
-          {features.hasGoogleReview && fiche.googlePlaceId ? (
-            <section className="review-panel">
-              <div>
-                <p className="text-sm font-semibold text-theme-text">
-                  Votre expérience compte
-                </p>
-                <p className="mt-1 text-xs leading-5 text-theme-muted">
-                  Partagez votre avis sur Google en un clic.
-                </p>
-              </div>
-              <a
-                href={`https://search.google.com/local/writereview?placeid=${fiche.googlePlaceId}`}
-                target="_blank"
-                rel="noreferrer"
-                className="review-button"
-              >
-                <Star className="h-4 w-4" /> Laisser un avis
-              </a>
-            </section>
-          ) : null}
+
           {features.requiresHours && fiche.data.horaires?.length ? (
             <CollapsibleSection
               className="public-section py-[22px] border-b border-theme-line"
@@ -924,6 +900,7 @@ export function FicheTemplate({
               )}
             </section>
           ) : null}
+{/* --------------------------- */}
           {features.hasCatalog && fiche.data.sections?.length ? (
             <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
@@ -954,6 +931,10 @@ export function FicheTemplate({
               </div>
             </section>
           ) : null}
+
+
+
+
           {gallery.length ? (
             <section className="public-section py-[22px] border-b border-theme-line">
               <SectionTitle
@@ -963,6 +944,48 @@ export function FicheTemplate({
               <GalleryCarousel items={gallery} />
             </section>
           ) : null}
+
+          {fiche.adresse ? (
+            <section className="public-section py-[22px] border-b border-theme-line">
+              <SectionTitle
+                icon={<MapPin className="h-4 w-4" />}
+                title="Localisation"
+              />
+              <p className="public-address">{fiche.adresse}</p>
+              {fiche.lienItineraire && (
+                <a
+                  href={fiche.lienItineraire}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="public-primary-link"
+                >
+                  Ouvrir Google Maps <ArrowUpRight className="h-4 w-4" />
+                </a>
+              )}
+            </section>
+          ) : null}
+
+          {features.hasGoogleReview && fiche.googlePlaceId ? (
+            <section className="review-panel">
+              <div>
+                <p className="text-sm font-semibold text-theme-text">
+                  Votre expérience compte
+                </p>
+                <p className="mt-1 text-xs leading-5 text-theme-muted">
+                  Partagez votre avis sur Google en un clic.
+                </p>
+              </div>
+              <a
+                href={`https://search.google.com/local/writereview?placeid=${fiche.googlePlaceId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="review-button"
+              >
+                <Star className="h-4 w-4" /> Laisser un avis
+              </a>
+            </section>
+          ) : null}
+
           {children}
           <section className="public-footer py-[22px] pb-6 text-[10px]">
             <div className="flex items-center justify-between gap-3">
@@ -992,29 +1015,6 @@ export function FicheTemplate({
           </a>
         </div>
       )}
-
-
-                
-          {fiche.adresse ? (
-            <section className="public-section py-[22px] border-b border-theme-line">
-              <SectionTitle
-                icon={<MapPin className="h-4 w-4" />}
-                title="Localisation"
-              />
-              <p className="public-address">{fiche.adresse}</p>
-              {fiche.lienItineraire && (
-                <a
-                  href={fiche.lienItineraire}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="public-primary-link"
-                >
-                  Ouvrir Google Maps <ArrowUpRight className="h-4 w-4" />
-                </a>
-              )}
-            </section>
-          ) : null}
-
     </div>
   );
 }
