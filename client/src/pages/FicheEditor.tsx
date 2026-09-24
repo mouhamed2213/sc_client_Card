@@ -11,6 +11,7 @@ import {
   Eye,
   ImagePlus,
   Loader2,
+  LogOut,
   Plus,
   Save,
   Trash2,
@@ -95,6 +96,16 @@ export default function FicheEditor() {
   const requestsQuery = trpc.fiches.contactRequests.useQuery({ slug });
   const updateMutation = trpc.fiches.update.useMutation();
   const uploadMutation = trpc.media.upload.useMutation();
+  const utils = trpc.useUtils();
+  const logoutMutation = trpc.auth.logout.useMutation({
+    onSuccess: async () => {
+      await utils.auth.me.invalidate();
+      window.location.replace("/admin/login");
+    },
+    onError: error => {
+      toast.error("Déconnexion impossible", { description: error.message });
+    },
+  });
   const [form, setForm] = useState<EditorForm | null>(null);
   const [uploading, setUploading] = useState<MediaKind | null>(null);
   const [uploadingArticlePhoto, setUploadingArticlePhoto] = useState<string | null>(null);
@@ -289,7 +300,7 @@ export default function FicheEditor() {
   return (
     <div className="min-h-screen bg-[#f5f6f8] text-[#172033]">
       <header className="sticky top-0 z-20 border-b border-[#e3e6ea] bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1300px] items-center justify-between gap-4 px-5 py-4">
+        <div className="mx-auto flex max-w-[1300px] flex-col gap-4 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
           <div className="flex items-center gap-3">
             <Link href={ADMIN_HOME_PATH} className="icon-button" title="Retour">
               <ArrowLeft className="h-4 w-4" />
@@ -301,7 +312,7 @@ export default function FicheEditor() {
               </h1>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 sm:justify-end">
             <Button>
               <Eye className="h4 w-4" /> Voir la fiche
             </Button>
@@ -319,6 +330,16 @@ export default function FicheEditor() {
               className="bg-[#172033] text-white"
             >
               <Check className="h-4 w-4" /> Valider et activer
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+              className="text-[#657084]"
+            >
+              <LogOut className="h-4 w-4" />
+              {logoutMutation.isPending ? "Déconnexion…" : "Déconnexion"}
             </Button>
           </div>
         </div>

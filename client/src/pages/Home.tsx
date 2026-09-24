@@ -120,6 +120,7 @@ export default function Home() {
   const [filter, setFilter] = useState<"all" | keyof typeof statusLabels>(
     "all"
   );
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isClientAccountOpen, setIsClientAccountOpen] = useState(false);
   const [isStandaloneFicheOpen, setIsStandaloneFicheOpen] = useState(false);
   const [qrFiche, setQrFiche] = useState<Fiche | null>(null);
@@ -139,13 +140,17 @@ export default function Home() {
 
   return (
     <div className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
-      <StudioSidebar />
+      <StudioSidebar mobileOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
      <main className="studio-main">
         <header className="flex items-center justify-between border-b border-[#e7e9ed] bg-white/80 px-5 py-4 backdrop-blur lg:px-10">
           <div className="flex items-center gap-3">
             <button
+              type="button"
               className="icon-button lg:hidden"
               aria-label="Ouvrir le menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="studio-mobile-navigation"
+              onClick={() => setMobileMenuOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -184,7 +189,7 @@ export default function Home() {
         </header>
 
         <div className="mx-auto max-w-[1440px] px-5 py-8 lg:px-10 lg:py-10">
-          <section className="mb-9 grid gap-5 xl:grid-cols-[1.6fr_1fr_1fr_1fr]">
+          <section className="mb-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-[1.6fr_1fr_1fr_1fr]">
             <div className="hero-panel">
               <div className="relative z-10 max-w-lg">
                 <p className="eyebrow text-[#e5a86b]">Vue d’ensemble</p>

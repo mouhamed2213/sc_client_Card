@@ -75,6 +75,7 @@ function formatDate(date: Date | string) {
 }
 
 export default function Fiches() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [page, setPage] = useState(1);
@@ -172,13 +173,17 @@ export default function Fiches() {
 
   return (
     <div className="studio-shell min-h-screen bg-[#f7f8fa] text-[#172033]">
-      <StudioSidebar />
+      <StudioSidebar mobileOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
       <main className="studio-main">
         <header className="flex items-center justify-between border-b border-[#e7e9ed] bg-white/80 px-5 py-4 backdrop-blur lg:px-10">
           <div className="flex items-center gap-3">
             <button
+              type="button"
               className="icon-button lg:hidden"
               aria-label="Ouvrir le menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="studio-mobile-navigation"
+              onClick={() => setMobileMenuOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </button>
