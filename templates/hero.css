@@ -24,8 +24,7 @@
   color: var(--fh-text, #fff);
   background: var(--fh-bg);
 }
-/* No cover: the hero is only as tall as its content. */
-.fiche-template .fh[data-cover="no"] { min-height: 0; }
+/* The Hero keeps the same proportions with or without a cover image. */
 
 /* ---- backdrop ---------------------------------------------------- */
 .fiche-template .fh-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
@@ -196,7 +195,7 @@
 /* ---- small screens ---------------------------------------------- */
 @media (max-width: 420px) {
   .fiche-template .fh { min-height: 570px; padding: 16px 16px 20px; }
-  .fiche-template .fh[data-cover="no"] { min-height: 0; }
+  /* Keep the same Hero height when no cover image is provided. */
   .fiche-template--signature .fh { padding: 18px 16px 22px; }
   .fiche-template--essentiel .fh { padding: 18px 16px 22px; }
   .fiche-template .fh-action { min-height: 56px; }
