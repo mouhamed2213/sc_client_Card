@@ -144,8 +144,12 @@ export default function Home() {
         <header className="flex items-center justify-between border-b border-[#e7e9ed] bg-white/80 px-5 py-4 backdrop-blur lg:px-10">
           <div className="flex items-center gap-3">
             <button
+              type="button"
               className="icon-button lg:hidden"
               aria-label="Ouvrir le menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="studio-mobile-navigation"
+              onClick={() => setMobileMenuOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </button>
