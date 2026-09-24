@@ -110,11 +110,14 @@ export async function handleScan(args: {
   input: ScanInput;
 }): Promise<ScanResult> {
   const { fiche, user, req, input } = args;
-  const skip = (reason: ScanSkipReason): ScanResult => ({
-    ok: true,
-    counted: false,
-    reason,
-  });
+  const skip = (reason: ScanSkipReason): ScanResult => {
+    if (reason === "rate_limited") {
+      logger.warn("scan.rate_limited", { ficheId: fiche?.id ?? null });
+    } else {
+      logger.debug("scan.skipped", { ficheId: fiche?.id ?? null, reason });
+    }
+    return { ok: true, counted: false, reason };
+  };
 
   // Suspended, deleted, draft and expired fiches are not publicly visible.
   if (!fiche || !isFichePubliclyAccessible(fiche)) return skip("not_active");
@@ -133,13 +136,28 @@ export async function handleScan(args: {
   const ip = clientIp(req);
   if (!allowScanAttempt(`${ip}|${fiche.id}`)) return skip("rate_limited");
 
-  let counted: boolean;\n  try {\n    counted = await recordScanEvent(fiche, {
-    visitorKey: visitorKey(input.visitorId, ip, userAgent),
-    source: input.source as string,
-    windowMs: SCAN_DEDUP_WINDOW_MS,
-  });
+  let counted: boolean;
+  try {
+    counted = await recordScanEvent(fiche, {
+      visitorKey: visitorKey(input.visitorId, ip, userAgent),
+      source: input.source as string,
+      windowMs: SCAN_DEDUP_WINDOW_MS,
+    });
+  } catch (error) {
+    logger.error("scan.record_failed", {
+      ficheId: fiche.id,
+      source: input.source,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
+
+  if (counted) {
+    logger.info("scan.recorded", { ficheId: fiche.id, source: input.source });
+  }
 
   return counted
     ? { ok: true, counted: true, source: input.source as ScanSource }
     : skip("duplicate");
+
 }
