@@ -398,7 +398,7 @@ export const appRouter = router({
               dateEcheance,
             },
           });
-          return { ok: true as const, ficheId: fiche.id, slug: fiche.slug };
+          logger.info("fiche.created", { ficheId: fiche.id, slug: fiche.slug, ownerId: input.ownerId ?? null, formule: fields.formule });\n          return { ok: true as const, ficheId: fiche.id, slug: fiche.slug };
         } catch (error) {
           if (error instanceof Error && error.message === "OWNER_NOT_FOUND") {
             throw new TRPCError({
