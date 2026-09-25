@@ -40,7 +40,6 @@ function Router() {
       <Switch>
         <Route path="/admin/login" component={AdminLogin} />
         <Route path="/fiche/:slug" component={PublicFiche} />
-        <Route path="/" component={LandingPage} />
         <Route
           path={ADMIN_HOME_PATH}
           component={() => (
