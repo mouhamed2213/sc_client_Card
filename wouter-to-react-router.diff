@@ -1,0 +1,1057 @@
+diff --git a/client/src/App.tsx b/client/src/App.tsx
+index 4ed62e7..a0fefa1 100644
+--- a/client/src/App.tsx
++++ b/client/src/App.tsx
+@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
+ import { TooltipProvider } from "@/components/ui/tooltip";
+ import NotFound from "@/pages/NotFound";
+ import { Suspense, lazy, type ReactNode } from "react";
+-import { Route, Switch } from "wouter";
++import { Route, Routes } from "react-router-dom";
+ import AdminGuard from "./components/AdminGuard";
+ import ClientGuard from "./components/ClientGuard";
+ import ErrorBoundary from "./components/ErrorBoundary";
+@@ -37,85 +37,85 @@ function Router() {
+         </div>
+       }
+     >
+-      <Switch>
+-        <Route path="/admin/login" component={AdminLogin} />
+-        <Route path="/fiche/:slug" component={PublicFiche} />
++      <Routes>
++        <Route path="/admin/login" element={<AdminLogin />} />
++        <Route path="/fiche/:slug" element={<PublicFiche />} />
+         <Route
+           path={ADMIN_HOME_PATH}
+-          component={() => (
++          element={
+             <AdminRoute>
+               <Home />
+             </AdminRoute>
+-          )}
++          }
+         />
+         <Route
+           path="/studio/fiches"
+-          component={() => (
++          element={
+             <AdminRoute>
+               <Fiches />
+             </AdminRoute>
+-          )}
++          }
+         />
+         <Route
+           path="/studio/fiche/:slug"
+-          component={() => (
++          element={
+             <AdminRoute>
+               <FicheEditor />
+             </AdminRoute>
+-          )}
++          }
+         />
+-        <Route path="/espace-client/connexion" component={ClientLogin} />
++        <Route path="/espace-client/connexion" element={<ClientLogin />} />
+         <Route
+           path="/espace-client/fiches"
+-          component={() => (
++          element={
+             <ClientRoute>
+               <ClientFiches />
+             </ClientRoute>
+-          )}
++          }
+         />
+         <Route
+           path="/espace-client"
+-          component={() => (
++          element={
+             <ClientRoute>
+               <ClientDashboard />
+             </ClientRoute>
+-          )}
++          }
+         />
+         <Route
+           path="/espace-client/fiche/:ficheId/statistiques"
+-          component={() => (
++          element={
+             <ClientRoute>
+               <ClientStats />
+             </ClientRoute>
+-          )}
++          }
+         />
+         <Route
+           path="/espace-client/fiche/:ficheId/demandes"
+-          component={() => (
++          element={
+             <ClientRoute>
+               <ClientRequests />
+             </ClientRoute>
+-          )}
++          }
+         />
+         <Route
+           path="/espace-client/fiche/:ficheId/modifier"
+-          component={() => (
++          element={
+             <ClientRoute>
+               <ClientFicheEdit />
+             </ClientRoute>
+-          )}
++          }
+         />
+         <Route
+           path="/espace-client/fiche/:ficheId"
+-          component={() => (
++          element={
+             <ClientRoute>
+               <FicheClientDetail />
+             </ClientRoute>
+-          )}
++          }
+         />
+-        <Route path="/404" component={NotFound} />
+-        <Route component={NotFound} />
+-      </Switch>
++        <Route path="/404" element={<NotFound />} />
++        <Route path="*" element={<NotFound />} />
++      </Routes>
+     </Suspense>
+   );
+ }
+diff --git a/client/src/components/AdminClientAccountCreationModal.tsx b/client/src/components/AdminClientAccountCreationModal.tsx
+index c243645..7a85099 100644
+--- a/client/src/components/AdminClientAccountCreationModal.tsx
++++ b/client/src/components/AdminClientAccountCreationModal.tsx
+@@ -19,7 +19,7 @@ import {
+ } from "lucide-react";
+ import { useMemo, useState } from "react";
+ import { toast } from "sonner";
+-import { Link } from "wouter";
++import { Link } from "react-router-dom";
+ 
+ const days = [
+   "Lundi",
+@@ -397,7 +397,7 @@ export default function AdminClientAccountCreationModal({
+                   fiche.
+                 </p>
+                 <Link
+-                  href={`/studio/fiche/${credentials.slug}`}
++                  to={`/studio/fiche/${credentials.slug}`}
+                   onClick={close}
+                   className="mt-3 inline-flex text-xs font-semibold underline"
+                 >
+diff --git a/client/src/components/AdminGuard.tsx b/client/src/components/AdminGuard.tsx
+index 4821b02..aa05ae6 100644
+--- a/client/src/components/AdminGuard.tsx
++++ b/client/src/components/AdminGuard.tsx
+@@ -1,5 +1,5 @@
+ import type { ReactNode } from "react";
+-import { Redirect } from "wouter";
++import { Navigate } from "react-router-dom";
+ import { trpc } from "@/lib/trpc";
+ 
+ export default function AdminGuard({ children }: { children: ReactNode }) {
+@@ -36,7 +36,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
+   }
+ 
+   if (!meQuery.data || meQuery.data.role !== "admin") {
+-    return <Redirect to="/admin/login" />;
++    return <Navigate to="/admin/login" replace />;
+   }
+ 
+   return <>{children}</>;
+diff --git a/client/src/components/AdminStandaloneFicheCreationModal.tsx b/client/src/components/AdminStandaloneFicheCreationModal.tsx
+index b1b5dcf..f843fb5 100644
+--- a/client/src/components/AdminStandaloneFicheCreationModal.tsx
++++ b/client/src/components/AdminStandaloneFicheCreationModal.tsx
+@@ -5,7 +5,7 @@ import { planLabels, type PlanName } from "@shared/planFeatures";
+ import { Check, Loader2, Search, UserPlus, X } from "lucide-react";
+ import { useMemo, useState } from "react";
+ import { toast } from "sonner";
+-import { useLocation } from "wouter";
++import { useNavigate } from "react-router-dom";
+ 
+ const plans: PlanName[] = ["essentiel", "pro", "signature"];
+ const days = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+@@ -14,7 +14,7 @@ type Props = { open: boolean; onClose: () => void };
+ 
+ export default function AdminStandaloneFicheCreationModal({ open, onClose }: Props) {
+   const utils = trpc.useUtils();
+-  const [, navigate] = useLocation();
++  const navigate = useNavigate();
+   const [plan, setPlan] = useState<PlanName>("essentiel");
+   const [prenom, setPrenom] = useState("");
+   const [nom, setNom] = useState("");
+diff --git a/client/src/components/ClientGuard.tsx b/client/src/components/ClientGuard.tsx
+index 902065b..f3cfa80 100644
+--- a/client/src/components/ClientGuard.tsx
++++ b/client/src/components/ClientGuard.tsx
+@@ -1,6 +1,6 @@
+ import { trpc } from "@/lib/trpc";
+ import { ReactNode } from "react";
+-import { Redirect } from "wouter";
++import { Navigate } from "react-router-dom";
+ import ClientSplash from "./client-space/ClientSplash";
+ 
+ export default function ClientGuard({ children }: { children: ReactNode }) {
+@@ -16,11 +16,11 @@ export default function ClientGuard({ children }: { children: ReactNode }) {
+   }
+ 
+   if (!meQuery.data || meQuery.data.role !== "user" || meQuery.data.loginMethod !== "local-client") {
+-    return <Redirect to="/espace-client/connexion" />;
++    return <Navigate to="/espace-client/connexion" replace />;
+   }
+ 
+   if (meQuery.data.mustChangePassword) {
+-    return <Redirect to="/espace-client/connexion" />;
++    return <Navigate to="/espace-client/connexion" replace />;
+   }
+ 
+   return <>{children}</>;
+diff --git a/client/src/components/ClientLayout.tsx b/client/src/components/ClientLayout.tsx
+index 649fc6d..ad191b4 100644
+--- a/client/src/components/ClientLayout.tsx
++++ b/client/src/components/ClientLayout.tsx
+@@ -17,7 +17,7 @@ import {
+   X,
+ } from "lucide-react";
+ import { ReactNode, useState } from "react";
+-import { Link, useLocation } from "wouter";
++import { Link, useLocation, useNavigate } from "react-router-dom";
+ 
+ export default function ClientLayout({
+   children,
+@@ -26,7 +26,8 @@ export default function ClientLayout({
+   children: ReactNode;
+   ficheId?: number;
+ }) {
+-  const [location, navigate] = useLocation();
++  const { pathname: location } = useLocation();
++  const navigate = useNavigate();
+   const [open, setOpen] = useState(false);
+   const [premiumFeature, setPremiumFeature] = useState<
+     "Statistiques" | "Demandes reçues" | null
+@@ -204,7 +205,7 @@ export default function ClientLayout({
+           ) : (
+             <Link
+               key={item.href}
+-              href={item.href}
++              to={item.href}
+               onClick={() => setOpen(false)}
+               className={`sidebar-link ${active ? "sidebar-link-active" : ""}`}
+             >
+diff --git a/client/src/components/DashboardLayout.tsx b/client/src/components/DashboardLayout.tsx
+index 2218f59..c67cb78 100644
+--- a/client/src/components/DashboardLayout.tsx
++++ b/client/src/components/DashboardLayout.tsx
+@@ -23,7 +23,7 @@ import { startLogin } from "@/const";
+ import { useIsMobile } from "@/hooks/useMobile";
+ import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+ import { CSSProperties, useEffect, useRef, useState } from "react";
+-import { useLocation } from "wouter";
++import { useLocation, useNavigate } from "react-router-dom";
+ import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
+ import { Button } from "./ui/button";
+ 
+@@ -105,7 +105,8 @@ function DashboardLayoutContent({
+   setSidebarWidth,
+ }: DashboardLayoutContentProps) {
+   const { user, logout } = useAuth();
+-  const [location, setLocation] = useLocation();
++  const { pathname: location } = useLocation();
++  const setLocation = useNavigate();
+   const { state, toggleSidebar } = useSidebar();
+   const isCollapsed = state === "collapsed";
+   const [isResizing, setIsResizing] = useState(false);
+diff --git a/client/src/components/StudioSidebar.tsx b/client/src/components/StudioSidebar.tsx
+index 3a471e3..b451adf 100644
+--- a/client/src/components/StudioSidebar.tsx
++++ b/client/src/components/StudioSidebar.tsx
+@@ -1,5 +1,5 @@
+ import { Bell, LayoutDashboard, LayoutGrid, Link2, LogOut, MoreHorizontal, Sparkles, X } from "lucide-react";
+-import { Link, useLocation } from "wouter";
++import { Link, useLocation } from "react-router-dom";
+ import { toast } from "sonner";
+ import { trpc } from "@/lib/trpc";
+ import { ADMIN_HOME_PATH } from "@/const";
+@@ -11,7 +11,7 @@ export default function StudioSidebar({
+   mobileOpen?: boolean;
+   onClose?: () => void;
+ }) {
+-  const [location] = useLocation();
++  const { pathname: location } = useLocation();
+   const overviewQuery = trpc.fiches.overview.useQuery();
+   const overview = overviewQuery.data ?? {
+     total: 0,
+@@ -80,7 +80,7 @@ export default function StudioSidebar({
+         <nav className="mt-3 space-y-1" aria-label="Navigation du studio">
+           <Link
+             className={isDashboard ? "sidebar-link sidebar-link-active" : "sidebar-link"}
+-            href={ADMIN_HOME_PATH}
++            to={ADMIN_HOME_PATH}
+             aria-current={isDashboard ? "page" : undefined}
+             onClick={onClose}
+           >
+@@ -89,7 +89,7 @@ export default function StudioSidebar({
+ 
+           <Link
+             className={isFiches ? "sidebar-link sidebar-link-active" : "sidebar-link"}
+-            href="/studio/fiches"
++            to="/studio/fiches"
+             aria-current={isFiches ? "page" : undefined}
+             onClick={onClose}
+           >
+diff --git a/client/src/components/client-space/AllFichesOverview.tsx b/client/src/components/client-space/AllFichesOverview.tsx
+index 43e60b9..9a65a6b 100644
+--- a/client/src/components/client-space/AllFichesOverview.tsx
++++ b/client/src/components/client-space/AllFichesOverview.tsx
+@@ -12,7 +12,7 @@ import {
+   Sparkles,
+ } from "lucide-react";
+ import { useMemo, useState } from "react";
+-import { useLocation } from "wouter";
++import { useNavigate } from "react-router-dom";
+ import { trpc } from "@/lib/trpc";
+ import { formuleLabels, getEcheanceStatus } from "@/lib/ficheStatus";
+ import KpiTile from "./KpiTile";
+@@ -46,7 +46,7 @@ function formatDate(date: Date | string) {
+  * are neither suspended nor expired), the UI only displays what it receives.
+  */
+ export default function AllFichesOverview({ fiches }: { fiches: FicheOption[] }) {
+-  const [, navigate] = useLocation();
++  const navigate = useNavigate();
+   const [selected, setSelected] = useState<"all" | number>("all");
+   const [search, setSearch] = useState("");
+   const overview = trpc.clientSpaceRouter.overview.useQuery(
+diff --git a/client/src/components/client-space/FicheOverview.tsx b/client/src/components/client-space/FicheOverview.tsx
+index c0f7e25..c9877da 100644
+--- a/client/src/components/client-space/FicheOverview.tsx
++++ b/client/src/components/client-space/FicheOverview.tsx
+@@ -1,5 +1,5 @@
+ import React from "react";
+-import { useLocation } from "wouter";
++import { useNavigate } from "react-router-dom";
+ import {
+   ArrowRight,
+   BarChart3,
+@@ -21,7 +21,7 @@ import FicheStatusAlert from "@/components/client-space/FicheStatusAlert";
+ import { getPlanFeatures, type PlanName } from "@shared/planFeatures";
+ 
+ export default function FicheOverview({ ficheId }: { ficheId: number }) {
+-  const [, navigate] = useLocation();
++  const navigate = useNavigate();
+   const [premiumFeature, setPremiumFeature] = React.useState<{ name: string; plan: PlanName } | null>(null);
+   const dashboard = trpc.clientSpaceRouter.dashboard.useQuery({ ficheId });
+ 
+diff --git a/client/src/components/client-space/FichesTable.tsx b/client/src/components/client-space/FichesTable.tsx
+index 5671367..0c956fc 100644
+--- a/client/src/components/client-space/FichesTable.tsx
++++ b/client/src/components/client-space/FichesTable.tsx
+@@ -7,7 +7,7 @@ import {
+   Phone,
+   Star,
+ } from "lucide-react";
+-import { Link } from "wouter";
++import { Link } from "react-router-dom";
+ import { formuleLabels, getEcheanceStatus } from "@/lib/ficheStatus";
+ 
+ export type ClientFicheRow = {
+@@ -140,7 +140,7 @@ function Actions({ fiche }: { fiche: ClientFicheRow }) {
+   return (
+     <div className="flex justify-end gap-1">
+       <Link
+-        href={`/espace-client/fiche/${fiche.id}`}
++        to={`/espace-client/fiche/${fiche.id}`}
+         className="table-action"
+         title="Ouvrir la fiche"
+         aria-label={`Ouvrir la fiche de ${name}`}
+@@ -149,7 +149,7 @@ function Actions({ fiche }: { fiche: ClientFicheRow }) {
+       </Link>
+       {canEdit(fiche) ? (
+         <Link
+-          href={`/espace-client/fiche/${fiche.id}/modifier`}
++          to={`/espace-client/fiche/${fiche.id}/modifier`}
+           className="table-action"
+           title="Modifier la fiche"
+           aria-label={`Modifier la fiche de ${name}`}
+@@ -263,7 +263,7 @@ export default function FichesTable({ fiches }: { fiches: ClientFicheRow[] }) {
+                 className={`border-b border-[#f0f2f4] align-top transition-colors last:border-0 hover:bg-[#fcfcfd] ${fiche.isMain ? "bg-[#fffdf9]" : ""}`}
+               >
+                 <td className="px-7 py-4">
+-                  <Link href={`/espace-client/fiche/${fiche.id}`}>
++                  <Link to={`/espace-client/fiche/${fiche.id}`}>
+                     <FicheIdentity fiche={fiche} />
+                   </Link>
+                 </td>
+diff --git a/client/src/main.tsx b/client/src/main.tsx
+index c92d6ca..3b83a7d 100644
+--- a/client/src/main.tsx
++++ b/client/src/main.tsx
+@@ -3,6 +3,7 @@ import { UNAUTHED_ERR_MSG } from '@shared/const';
+ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+ import { httpBatchLink, TRPCClientError } from "@trpc/client";
+ import { createRoot } from "react-dom/client";
++import { BrowserRouter } from "react-router-dom";
+ import superjson from "superjson";
+ import App from "./App";
+ import { startLogin } from "./const";
+@@ -63,7 +64,9 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
+ createRoot(document.getElementById("root")!).render(
+   <trpc.Provider client={trpcClient} queryClient={queryClient}>
+     <QueryClientProvider client={queryClient}>
+-      <App />
++      <BrowserRouter>
++        <App />
++      </BrowserRouter>
+     </QueryClientProvider>
+   </trpc.Provider>
+ );
+diff --git a/client/src/pages/AdminLogin.tsx b/client/src/pages/AdminLogin.tsx
+index 8ec0a43..82ba45f 100644
+--- a/client/src/pages/AdminLogin.tsx
++++ b/client/src/pages/AdminLogin.tsx
+@@ -1,5 +1,5 @@
+ import { FormEvent, useState } from "react";
+-import { useLocation } from "wouter";
++import { useNavigate } from "react-router-dom";
+ import { LockKeyhole, UserRound } from "lucide-react";
+ import { toast } from "sonner";
+ import { Button } from "@/components/ui/button";
+@@ -9,7 +9,7 @@ import { ADMIN_HOME_PATH } from "@/const";
+ import { trpc } from "@/lib/trpc";
+ 
+ export default function AdminLogin() {
+-  const [, navigate] = useLocation();
++  const navigate = useNavigate();
+   const utils = trpc.useUtils();
+   const [username, setUsername] = useState("");
+   const [password, setPassword] = useState("");
+diff --git a/client/src/pages/ClientDashboard.tsx b/client/src/pages/ClientDashboard.tsx
+index 0247a6a..768afc3 100644
+--- a/client/src/pages/ClientDashboard.tsx
++++ b/client/src/pages/ClientDashboard.tsx
+@@ -1,4 +1,4 @@
+-import { useLocation } from "wouter";
++import { useNavigate } from "react-router-dom";
+ import { LayoutGrid } from "lucide-react";
+ import { trpc } from "@/lib/trpc";
+ import ClientLayout from "@/components/ClientLayout";
+@@ -6,7 +6,7 @@ import FicheOverview from "@/components/client-space/FicheOverview";
+ import AllFichesOverview from "@/components/client-space/AllFichesOverview";
+ 
+ export default function ClientDashboard() {
+-  const [, navigate] = useLocation();
++  const navigate = useNavigate();
+   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
+ 
+   if (fiches.isLoading) {
+diff --git a/client/src/pages/ClientFicheEdit.tsx b/client/src/pages/ClientFicheEdit.tsx
+index 8210a55..28b90bc 100644
+--- a/client/src/pages/ClientFicheEdit.tsx
++++ b/client/src/pages/ClientFicheEdit.tsx
+@@ -21,7 +21,7 @@ import {
+ } from "lucide-react";
+ import React, { useEffect, useState } from "react";
+ import { toast } from "sonner";
+-import { useParams } from "wouter";
++import { useParams } from "react-router-dom";
+ 
+ type LinkItem = { label: string; url: string };
+ type SocialItem = { label: string; url: string; actif?: boolean };
+diff --git a/client/src/pages/ClientFiches.tsx b/client/src/pages/ClientFiches.tsx
+index 0c9fb1c..617083a 100644
+--- a/client/src/pages/ClientFiches.tsx
++++ b/client/src/pages/ClientFiches.tsx
+@@ -1,11 +1,11 @@
+ import { LayoutGrid, Plus, Sparkles } from "lucide-react";
+-import { useLocation } from "wouter";
++import { useNavigate } from "react-router-dom";
+ import { trpc } from "@/lib/trpc";
+ import ClientLayout from "@/components/ClientLayout";
+ import FichesTable from "@/components/client-space/FichesTable";
+ 
+ export default function ClientFiches() {
+-  const [, navigate] = useLocation();
++  const navigate = useNavigate();
+   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
+ 
+   if (fiches.isLoading) {
+diff --git a/client/src/pages/ClientLogin.tsx b/client/src/pages/ClientLogin.tsx
+index cbf7e0f..c3d6067 100644
+--- a/client/src/pages/ClientLogin.tsx
++++ b/client/src/pages/ClientLogin.tsx
+@@ -1,11 +1,11 @@
+ import { useEffect, useState } from "react";
+-import { useLocation } from "wouter";
++import { useNavigate } from "react-router-dom";
+ import { CreditCard, Eye, EyeOff, Loader2, MessageSquare, ScanLine } from "lucide-react";
+ import { trpc } from "@/lib/trpc";
+ import { toast } from "sonner";
+ 
+ export default function ClientLogin() {
+-  const [, navigate] = useLocation();
++  const navigate = useNavigate();
+   const utils = trpc.useUtils();
+   const [username, setUsername] = useState("");
+   const [password, setPassword] = useState("");
+diff --git a/client/src/pages/ClientRequests.tsx b/client/src/pages/ClientRequests.tsx
+index b8c7f58..b4b9683 100644
+--- a/client/src/pages/ClientRequests.tsx
++++ b/client/src/pages/ClientRequests.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from "wouter";
++import { useParams } from "react-router-dom";
+ import { MessageSquare, Phone } from "lucide-react";
+ import { trpc } from "@/lib/trpc";
+ import ClientLayout from "@/components/ClientLayout";
+diff --git a/client/src/pages/ClientStats.tsx b/client/src/pages/ClientStats.tsx
+index affcdac..be87647 100644
+--- a/client/src/pages/ClientStats.tsx
++++ b/client/src/pages/ClientStats.tsx
+@@ -1,5 +1,5 @@
+ import { useState } from "react";
+-import { useParams } from "wouter";
++import { useParams } from "react-router-dom";
+ import { BarChart3, ScanLine } from "lucide-react";
+ import { trpc } from "@/lib/trpc";
+ import ClientLayout from "@/components/ClientLayout";
+diff --git a/client/src/pages/FicheClientDetail.tsx b/client/src/pages/FicheClientDetail.tsx
+index de509d7..b259358 100644
+--- a/client/src/pages/FicheClientDetail.tsx
++++ b/client/src/pages/FicheClientDetail.tsx
+@@ -1,4 +1,4 @@
+-import { useParams } from "wouter";
++import { useParams } from "react-router-dom";
+ import ClientLayout from "@/components/ClientLayout";
+ import FicheOverview from "@/components/client-space/FicheOverview";
+ 
+diff --git a/client/src/pages/FicheEditor.tsx b/client/src/pages/FicheEditor.tsx
+index c74d653..1fae93c 100644
+--- a/client/src/pages/FicheEditor.tsx
++++ b/client/src/pages/FicheEditor.tsx
+@@ -19,7 +19,7 @@ import {
+ } from "lucide-react";
+ import { useEffect, useMemo, useState } from "react";
+ import { toast } from "sonner";
+-import { Link, useLocation, useParams } from "wouter";
++import { Link, useNavigate, useParams } from "react-router-dom";
+ const planLabels: Record<PlanName, string> = {
+   essentiel: "Essentiel",
+   pro: "Pro",
+@@ -91,7 +91,7 @@ function fileToDataUrl(file: File) {
+ 
+ export default function FicheEditor() {
+   const { slug = "" } = useParams<{ slug: string }>();
+-  const [, navigate] = useLocation();
++  const navigate = useNavigate();
+   const ficheQuery = trpc.fiches.getBySlug.useQuery({ slug });
+   const requestsQuery = trpc.fiches.contactRequests.useQuery({ slug });
+   const updateMutation = trpc.fiches.update.useMutation();
+@@ -302,7 +302,7 @@ export default function FicheEditor() {
+       <header className="sticky top-0 z-20 border-b border-[#e3e6ea] bg-white/95 backdrop-blur">
+         <div className="mx-auto flex max-w-[1300px] flex-col gap-4 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
+           <div className="flex items-center gap-3">
+-            <Link href={ADMIN_HOME_PATH} className="icon-button" title="Retour">
++            <Link to={ADMIN_HOME_PATH} className="icon-button" title="Retour">
+               <ArrowLeft className="h-4 w-4" />
+             </Link>
+             <div>
+diff --git a/client/src/pages/Fiches.tsx b/client/src/pages/Fiches.tsx
+index 478051d..ce90cd9 100644
+--- a/client/src/pages/Fiches.tsx
++++ b/client/src/pages/Fiches.tsx
+@@ -17,7 +17,7 @@ import {
+ import { QRCodeSVG } from "qrcode.react";
+ import { useEffect, useState, type FormEvent } from "react";
+ import { toast } from "sonner";
+-import { Link } from "wouter";
++import { Link } from "react-router-dom";
+ 
+ const formulaLabels = {
+   essentiel: "Essentiel",
+@@ -195,7 +195,7 @@ export default function Fiches() {
+             </div>
+           </div>
+           <Link
+-            href={ADMIN_HOME_PATH}
++            to={ADMIN_HOME_PATH}
+             className="hidden text-sm font-medium text-[#526078] hover:text-[#172033] sm:block"
+           >
+             Retour au tableau de bord
+@@ -383,7 +383,7 @@ function UsersTable({ users, onSelect, onCreate }: { users: ClientUser[]; onSele
+ }
+ function UserRow({ user, onSelect, onCreate }: { user: ClientUser; onSelect: (user: ClientUser) => void; onCreate: (user: ClientUser) => void }) {
+   const [open,setOpen]=useState(false); const formulas=Array.from(new Set(user.fiche.map(f=>formulaLabels[f.formule]))).join(", ")||"—";
+-  return <><tr className="border-b border-[#f0f2f4]"><td className="px-7 py-4"><div className="flex items-center gap-3"><div className="avatar"><UserRound className="h-4 w-4"/></div><div><p className="font-semibold text-[#29344a]">{user.name||"Client sans nom"}</p><p className="text-xs text-[#8b94a3]">{user.email||"Aucun email"}</p></div></div></td><td className="px-4 py-4">{user._count.fiche}</td><td className="px-4 py-4 text-sm text-[#657084]">{formulas}</td><td className="px-7 py-4 text-right"><div className="flex justify-end gap-1"><button type="button" className="table-action" title="Nouvelle fiche" onClick={()=>onCreate(user)}><Plus className="h-4 w-4"/></button><button type="button" className="table-action" title="Gérer les fiches" onClick={()=>onSelect(user)}><Link2 className="h-4 w-4"/></button><button type="button" onClick={()=>setOpen(v=>!v)} className="table-action" aria-expanded={open} title="Afficher les fiches"><ChevronDown className={`h-4 w-4 ${open?"rotate-180":""}`}/></button></div></td></tr>{open&&<tr className="border-b border-[#edf0f2] bg-[#fafbfc]"><td colSpan={4} className="px-7 py-4"><div className="space-y-2 pl-10">{user.fiche.length ? user.fiche.map(f=><Link key={f.id} href={`/studio/fiche/${f.slug}`} className="flex items-center justify-between rounded-lg border border-[#e6e8ec] bg-white px-4 py-3"><div><p className="text-sm font-semibold">{f.prenom} {f.nom}</p><p className="text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></div><div className="flex gap-4 text-xs text-[#657084]"><span>{formulaLabels[f.formule]}</span><span>{f.statut}</span><span>{f.scansTotal} passages</span></div></Link>) : <p className="text-sm text-[#8b94a3]">Aucune fiche rattachée.</p>}</div></td></tr>}</>;
++  return <><tr className="border-b border-[#f0f2f4]"><td className="px-7 py-4"><div className="flex items-center gap-3"><div className="avatar"><UserRound className="h-4 w-4"/></div><div><p className="font-semibold text-[#29344a]">{user.name||"Client sans nom"}</p><p className="text-xs text-[#8b94a3]">{user.email||"Aucun email"}</p></div></div></td><td className="px-4 py-4">{user._count.fiche}</td><td className="px-4 py-4 text-sm text-[#657084]">{formulas}</td><td className="px-7 py-4 text-right"><div className="flex justify-end gap-1"><button type="button" className="table-action" title="Nouvelle fiche" onClick={()=>onCreate(user)}><Plus className="h-4 w-4"/></button><button type="button" className="table-action" title="Gérer les fiches" onClick={()=>onSelect(user)}><Link2 className="h-4 w-4"/></button><button type="button" onClick={()=>setOpen(v=>!v)} className="table-action" aria-expanded={open} title="Afficher les fiches"><ChevronDown className={`h-4 w-4 ${open?"rotate-180":""}`}/></button></div></td></tr>{open&&<tr className="border-b border-[#edf0f2] bg-[#fafbfc]"><td colSpan={4} className="px-7 py-4"><div className="space-y-2 pl-10">{user.fiche.length ? user.fiche.map(f=><Link key={f.id} to={`/studio/fiche/${f.slug}`} className="flex items-center justify-between rounded-lg border border-[#e6e8ec] bg-white px-4 py-3"><div><p className="text-sm font-semibold">{f.prenom} {f.nom}</p><p className="text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></div><div className="flex gap-4 text-xs text-[#657084]"><span>{formulaLabels[f.formule]}</span><span>{f.statut}</span><span>{f.scansTotal} passages</span></div></Link>) : <p className="text-sm text-[#8b94a3]">Aucune fiche rattachée.</p>}</div></td></tr>}</>;
+ }
+ 
+ function FilterTab({
+@@ -442,7 +442,7 @@ function FicheRow({
+   return (
+     <tr className="border-b border-[#f0f2f4] transition-colors last:border-0 hover:bg-[#fcfcfd]">
+       <td className="px-7 py-4">
+-        <Link href={`/studio/fiche/${fiche.slug}`}>
++        <Link to={`/studio/fiche/${fiche.slug}`}>
+           <FicheIdentity fiche={fiche} />
+         </Link>
+       </td>
+@@ -467,7 +467,7 @@ function FicheRow({
+       <td className="px-7 py-4 text-right">
+         <div className="flex justify-end gap-1">
+           <Link
+-            href={`/studio/fiche/${fiche.slug}`}
++            to={`/studio/fiche/${fiche.slug}`}
+             className="table-action"
+             title="Ouvrir dans le studio"
+             aria-label={`Modifier ${fiche.prenom} ${fiche.nom}`}
+@@ -475,7 +475,7 @@ function FicheRow({
+             <Pencil className="h-4 w-4" />
+           </Link>
+           <Link
+-            href={`/fiche/${fiche.slug}`}
++            to={`/fiche/${fiche.slug}`}
+             className="table-action"
+             title="Voir la fiche publique"
+             aria-label={`Voir ${fiche.prenom} ${fiche.nom}`}
+@@ -560,7 +560,7 @@ function FicheCard({
+ 
+       <div className="mt-4 grid grid-cols-4 gap-2">
+         <Link
+-          href={`/studio/fiche/${fiche.slug}`}
++          to={`/studio/fiche/${fiche.slug}`}
+           className="rounded-lg bg-[#172033] py-2 text-center text-xs font-semibold text-white"
+           title="Ouvrir dans le studio"
+         >
+@@ -568,7 +568,7 @@ function FicheCard({
+           <span className="sr-only">Studio</span>
+         </Link>
+         <Link
+-          href={`/fiche/${fiche.slug}`}
++          to={`/fiche/${fiche.slug}`}
+           className="rounded-lg border border-[#e6e8ec] py-2 text-center"
+           title="Voir la fiche"
+         >
+@@ -694,7 +694,7 @@ function UserManagementModal({ user, onClose }: { user: ClientUser; onClose: ()
+   const detach=trpc.admin.detachFicheOwner.useMutation({onSuccess:async()=>{toast.success("Fiche détachée");await utils.fiches.usersPaginated.invalidate();},onError:e=>toast.error("Détachement impossible",{description:e.message})});
+   const unowned=(fichesQuery.data?.rows??[]).filter((f:any)=>!f.owner);
+   const others=(usersQuery.data??[]).filter((u:any)=>u.id!==user.id);
+-  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-4 sm:items-center"><div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl"><div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5"><div><p className="eyebrow">Gestion du compte</p><h2 className="mt-1 text-xl font-semibold">{user.name||"Client sans nom"}</h2><p className="text-sm text-[#7d8798]">{user.email||"Sans e-mail"} · {user._count.fiche} fiche{user._count.fiche>1?"s":""}</p></div><button type="button" className="icon-button" onClick={onClose} aria-label="Fermer"><X className="h-4 w-4"/></button></div><div className="grid gap-6 p-6 lg:grid-cols-2"><section><h3 className="font-semibold">Fiches rattachées</h3><div className="mt-3 space-y-2">{user.fiche.length?user.fiche.map(f=><div key={f.id} className="rounded-xl border border-[#e6e8ec] p-3"><div className="flex items-center justify-between gap-3"><Link href={`/studio/fiche/${f.slug}`} className="min-w-0"><p className="truncate text-sm font-semibold">{f.prenom} {f.nom}</p><p className="truncate text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></Link><button type="button" className="text-xs font-medium text-red-700" disabled={detach.isPending} onClick={()=>{if(window.confirm("Détacher cette fiche du compte ?")) detach.mutate({ficheId:f.id})}}>Détacher</button></div><div className="mt-2 flex flex-wrap gap-2"><span className="text-xs text-[#657084]">{formulaLabels[f.formule]}</span><span className="text-xs text-[#657084]">{f.scansTotal} passages</span></div><div className="mt-2 flex gap-2"><select className="w-full rounded-lg border border-[#e0e4e9] px-2 py-2 text-xs" defaultValue="" onChange={e=>{if(e.target.value) change.mutate({ficheId:f.id,ownerId:Number(e.target.value)});e.currentTarget.value=""}}><option value="">Changer de propriétaire…</option>{others.map((u:any)=><option key={u.id} value={u.id}>{u.name||"Sans nom"} — {u.email||"sans e-mail"}</option>)}</select></div></div>):<p className="mt-3 text-sm text-[#8b94a3]">Aucune fiche rattachée.</p>}</div></section><section><h3 className="font-semibold">Rattacher une fiche existante</h3><p className="mt-1 text-xs text-[#8b94a3]">Seules les fiches actuellement sans propriétaire sont proposées.</p><input className="mt-3 w-full rounded-lg border border-[#e0e4e9] px-3 py-2 text-sm" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher une fiche…"/><div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{fichesQuery.isFetching?<p className="py-5 text-center text-sm text-[#8b94a3]">Recherche…</p>:unowned.length?unowned.map((f:any)=><div key={f.id} className="flex items-center justify-between gap-3 rounded-xl border border-[#edf0f2] p-3"><div className="min-w-0"><p className="truncate text-sm font-medium">{f.prenom} {f.nom}</p><p className="truncate text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></div><button type="button" className="rounded-lg bg-[#172033] px-3 py-2 text-xs font-semibold text-white" disabled={attach.isPending} onClick={()=>attach.mutate({ficheId:f.id,ownerId:user.id})}>Rattacher</button></div>):<p className="py-5 text-center text-sm text-[#8b94a3]">Aucune fiche non rattachée trouvée.</p>}</div></section></div></div></div>;
++  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-4 sm:items-center"><div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl"><div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5"><div><p className="eyebrow">Gestion du compte</p><h2 className="mt-1 text-xl font-semibold">{user.name||"Client sans nom"}</h2><p className="text-sm text-[#7d8798]">{user.email||"Sans e-mail"} · {user._count.fiche} fiche{user._count.fiche>1?"s":""}</p></div><button type="button" className="icon-button" onClick={onClose} aria-label="Fermer"><X className="h-4 w-4"/></button></div><div className="grid gap-6 p-6 lg:grid-cols-2"><section><h3 className="font-semibold">Fiches rattachées</h3><div className="mt-3 space-y-2">{user.fiche.length?user.fiche.map(f=><div key={f.id} className="rounded-xl border border-[#e6e8ec] p-3"><div className="flex items-center justify-between gap-3"><Link to={`/studio/fiche/${f.slug}`} className="min-w-0"><p className="truncate text-sm font-semibold">{f.prenom} {f.nom}</p><p className="truncate text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></Link><button type="button" className="text-xs font-medium text-red-700" disabled={detach.isPending} onClick={()=>{if(window.confirm("Détacher cette fiche du compte ?")) detach.mutate({ficheId:f.id})}}>Détacher</button></div><div className="mt-2 flex flex-wrap gap-2"><span className="text-xs text-[#657084]">{formulaLabels[f.formule]}</span><span className="text-xs text-[#657084]">{f.scansTotal} passages</span></div><div className="mt-2 flex gap-2"><select className="w-full rounded-lg border border-[#e0e4e9] px-2 py-2 text-xs" defaultValue="" onChange={e=>{if(e.target.value) change.mutate({ficheId:f.id,ownerId:Number(e.target.value)});e.currentTarget.value=""}}><option value="">Changer de propriétaire…</option>{others.map((u:any)=><option key={u.id} value={u.id}>{u.name||"Sans nom"} — {u.email||"sans e-mail"}</option>)}</select></div></div>):<p className="mt-3 text-sm text-[#8b94a3]">Aucune fiche rattachée.</p>}</div></section><section><h3 className="font-semibold">Rattacher une fiche existante</h3><p className="mt-1 text-xs text-[#8b94a3]">Seules les fiches actuellement sans propriétaire sont proposées.</p><input className="mt-3 w-full rounded-lg border border-[#e0e4e9] px-3 py-2 text-sm" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher une fiche…"/><div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{fichesQuery.isFetching?<p className="py-5 text-center text-sm text-[#8b94a3]">Recherche…</p>:unowned.length?unowned.map((f:any)=><div key={f.id} className="flex items-center justify-between gap-3 rounded-xl border border-[#edf0f2] p-3"><div className="min-w-0"><p className="truncate text-sm font-medium">{f.prenom} {f.nom}</p><p className="truncate text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></div><button type="button" className="rounded-lg bg-[#172033] px-3 py-2 text-xs font-semibold text-white" disabled={attach.isPending} onClick={()=>attach.mutate({ficheId:f.id,ownerId:user.id})}>Rattacher</button></div>):<p className="py-5 text-center text-sm text-[#8b94a3]">Aucune fiche non rattachée trouvée.</p>}</div></section></div></div></div>;
+ }
+ 
+ function CreateFicheModal({ user, onClose, onCreate }: { user: ClientUser; onClose: () => void; onCreate: (input: any) => void }) {
+diff --git a/client/src/pages/Home.tsx b/client/src/pages/Home.tsx
+index 794cfc7..517268a 100644
+--- a/client/src/pages/Home.tsx
++++ b/client/src/pages/Home.tsx
+@@ -22,7 +22,7 @@ import {
+ import { QRCodeSVG } from "qrcode.react";
+ import { useMemo, useState } from "react";
+ import { toast } from "sonner";
+-import { Link } from "wouter";
++import { Link } from "react-router-dom";
+ 
+ const formulaLabels = {
+   essentiel: "Essentiel",
+@@ -505,7 +505,7 @@ function FicheRow({
+   return (
+     <tr className="border-b border-[#f0f2f4] transition-colors last:border-0 hover:bg-[#fcfcfd]">
+       <td className="px-7 py-4">
+-        <Link href={`/studio/fiche/${fiche.slug}`}>
++        <Link to={`/studio/fiche/${fiche.slug}`}>
+           <FicheIdentity fiche={fiche} />
+         </Link>
+       </td>
+@@ -531,14 +531,14 @@ function FicheRow({
+       <td className="px-7 py-4 text-right">
+         <div className="flex justify-end gap-1">
+           <Link
+-            href={`/studio/fiche/${fiche.slug}`}
++            to={`/studio/fiche/${fiche.slug}`}
+             className="table-action"
+             title="Modifier"
+           >
+             <Pencil className="h-4 w-4" />
+           </Link>
+           <Link
+-            href={`/fiche/${fiche.slug}?preview=1`}
++            to={`/fiche/${fiche.slug}?preview=1`}
+             className="table-action"
+             title="Prévisualiser"
+           >
+@@ -598,13 +598,13 @@ function FicheCard({
+       </div>
+       <div className="mt-4 flex gap-2">
+         <Link
+-          href={`/studio/fiche/${fiche.slug}`}
++          to={`/studio/fiche/${fiche.slug}`}
+           className="flex-1 rounded-lg bg-[#172033] py-2 text-center text-xs font-semibold text-white"
+         >
+           Modifier
+         </Link>
+         <Link
+-          href={`/fiche/${fiche.slug}?preview=1`}
++          to={`/fiche/${fiche.slug}?preview=1`}
+           className="rounded-lg border border-[#e6e8ec] px-3 py-2"
+           title="Prévisualiser"
+         >
+diff --git a/client/src/pages/LandingPage.tsx b/client/src/pages/LandingPage.tsx
+index 6a5abd4..8da0346 100644
+--- a/client/src/pages/LandingPage.tsx
++++ b/client/src/pages/LandingPage.tsx
+@@ -30,7 +30,7 @@ import {
+   Zap,
+ } from "lucide-react";
+ import { useEffect, useState, type ReactNode } from "react";
+-import { Link } from "wouter";
++import { Link } from "react-router-dom";
+ import {
+   BlackCard,
+   BrandMark,
+@@ -263,7 +263,7 @@ export default function LandingPage() {
+             ))}
+           </nav>
+           <div className="lp-header-cta">
+-            <Link href="/espace-client/connexion" className="lp-link">
++            <Link to="/espace-client/connexion" className="lp-link">
+               Se connecter
+             </Link>
+             <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper lp-btn--sm">
+@@ -286,7 +286,7 @@ export default function LandingPage() {
+                 {label}
+               </a>
+             ))}
+-            <Link href="/espace-client/connexion" className="lp-mobile-login">
++            <Link to="/espace-client/connexion" className="lp-mobile-login">
+               Se connecter
+             </Link>
+             <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper">
+@@ -676,7 +676,7 @@ export default function LandingPage() {
+                 <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper lp-btn--lg">
+                   <MessageCircle /> Demander une carte
+                 </a>
+-                <Link href="/espace-client/connexion" className="lp-btn lp-btn--ghost lp-btn--lg">
++                <Link to="/espace-client/connexion" className="lp-btn lp-btn--ghost lp-btn--lg">
+                   Se connecter
+                 </Link>
+               </div>
+@@ -702,7 +702,7 @@ export default function LandingPage() {
+             <a href="#principe">Le principe</a>
+             <a href="#gammes">Les cartes</a>
+             <a href="#parcours">Le parcours</a>
+-            <Link href="/espace-client/connexion">Espace client</Link>
++            <Link to="/espace-client/connexion">Espace client</Link>
+           </nav>
+           <small>© 2026 Support Connecté · Saly, Sénégal</small>
+         </div>
+diff --git a/client/src/pages/NotFound.tsx b/client/src/pages/NotFound.tsx
+index c4374ee..dfe0d61 100644
+--- a/client/src/pages/NotFound.tsx
++++ b/client/src/pages/NotFound.tsx
+@@ -1,13 +1,13 @@
+ import { Button } from "@/components/ui/button";
+ import { Card, CardContent } from "@/components/ui/card";
+ import { AlertCircle, Home } from "lucide-react";
+-import { useLocation } from "wouter";
++import { useNavigate } from "react-router-dom";
+ 
+ export default function NotFound() {
+-  const [, setLocation] = useLocation();
++  const navigate = useNavigate();
+ 
+   const handleGoHome = () => {
+-    setLocation("/");
++    navigate("/");
+   };
+ 
+   return (
+diff --git a/client/src/pages/PublicFiche.tsx b/client/src/pages/PublicFiche.tsx
+index 4149932..5a55939 100644
+--- a/client/src/pages/PublicFiche.tsx
++++ b/client/src/pages/PublicFiche.tsx
+@@ -1,7 +1,7 @@
+ import { trpc } from "@/lib/trpc";
+ import { ArrowUpRight, Phone, XCircle } from "lucide-react";
+ import { useEffect, useMemo, useRef, useState } from "react";
+-import { Link, useParams } from "wouter";
++import { Link, useParams } from "react-router-dom";
+ import {
+   FicheTemplate,
+   type FicheTemplateActions,
+@@ -114,7 +114,7 @@ export default function PublicFiche() {
+             {parseError(ficheQuery.error)}
+           </p>
+           <Link
+-            href="/"
++            to="/"
+             className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#244775]"
+           >
+             Retour à l’accueil <ArrowUpRight className="h-4 w-4" />
+diff --git a/package.json b/package.json
+index 53d4f06..58d1226 100644
+--- a/package.json
++++ b/package.json
+@@ -76,6 +76,7 @@
+     "react-dom": "^19.2.1",
+     "react-hook-form": "^7.64.0",
+     "react-resizable-panels": "^3.0.6",
++    "react-router-dom": "^6.30.1",
+     "recharts": "^2.15.2",
+     "sonner": "^2.0.7",
+     "streamdown": "^1.4.0",
+@@ -83,7 +84,6 @@
+     "tailwind-merge": "^3.3.1",
+     "tailwindcss-animate": "^1.0.7",
+     "vaul": "^1.1.2",
+-    "wouter": "^3.3.5",
+     "zod": "^4.1.12"
+   },
+   "devDependencies": {
+@@ -114,9 +114,6 @@
+   },
+   "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af",
+   "pnpm": {
+-    "patchedDependencies": {
+-      "wouter@3.7.1": "patches/wouter@3.7.1.patch"
+-    },
+     "overrides": {
+       "tailwindcss>nanoid": "3.3.7"
+     }
+diff --git a/patches/wouter@3.7.1.patch b/patches/wouter@3.7.1.patch
+deleted file mode 100644
+index 133e386..0000000
+--- a/patches/wouter@3.7.1.patch
++++ /dev/null
+@@ -1,28 +0,0 @@
+-diff --git a/esm/index.js b/esm/index.js
+-index c83bc63a2c10431fb62e25b7d490656a3796f301..bcae513cc20a4be6c38dc116e0b8d9bacda62b5b 100644
+---- a/esm/index.js
+-+++ b/esm/index.js
+-@@ -338,6 +338,23 @@ const Switch = ({ children, location }) => {
+-   const router = useRouter();
+-   const [originalLocation] = useLocationFromRouter(router);
+- 
+-+  // Collect all route paths to window object
+-+  if (typeof window !== 'undefined') {
+-+    if (!window.__WOUTER_ROUTES__) {
+-+      window.__WOUTER_ROUTES__ = [];
+-+    }
+-+
+-+    const allChildren = flattenChildren(children);
+-+    allChildren.forEach((element) => {
+-+      if (isValidElement(element) && element.props.path) {
+-+        const path = element.props.path;
+-+        if (!window.__WOUTER_ROUTES__.includes(path)) {
+-+          window.__WOUTER_ROUTES__.push(path);
+-+        }
+-+      }
+-+    });
+-+  }
+-+
+-   for (const element of flattenChildren(children)) {
+-     let match = 0;
+- 
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index cc5da8e..084eace 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -7,18 +7,13 @@ settings:
+ overrides:
+   tailwindcss>nanoid: 3.3.7
+ 
+-patchedDependencies:
+-  wouter@3.7.1:
+-    hash: 4e16e6ff3fde7d6c1024d3e0c8605dc9eb6afb690d0d49958c2f449091813072
+-    path: patches/wouter@3.7.1.patch
+-
+ importers:
+ 
+   .:
+     dependencies:
+       '@ajayche/trpc-panel':
+         specifier: ^2.1.0
+-        version: 2.1.0(@trpc/server@11.19.0(typescript@5.9.3))(@types/react@19.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(zod@4.1.12)
++        version: 2.1.0(@trpc/server@11.19.0(typescript@5.9.3))(@types/react@19.2.1)(react-dom@19.2.1(react@19.2.1))(react-router-dom@6.30.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-router@6.30.6(react@19.2.1))(react@19.2.1)(zod@4.1.12)
+       '@aws-sdk/client-s3':
+         specifier: ^3.693.0
+         version: 3.907.0
+@@ -196,6 +191,9 @@ importers:
+       react-resizable-panels:
+         specifier: ^3.0.6
+         version: 3.0.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
++      react-router-dom:
++        specifier: ^6.30.1
++        version: 6.30.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+       recharts:
+         specifier: ^2.15.2
+         version: 2.15.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+@@ -217,9 +215,6 @@ importers:
+       vaul:
+         specifier: ^1.1.2
+         version: 1.1.2(@types/react-dom@19.2.1(@types/react@19.2.1))(@types/react@19.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+-      wouter:
+-        specifier: ^3.3.5
+-        version: 3.7.1(patch_hash=4e16e6ff3fde7d6c1024d3e0c8605dc9eb6afb690d0d49958c2f449091813072)(react@19.2.1)
+       zod:
+         specifier: ^4.1.12
+         version: 4.1.12
+@@ -1794,6 +1789,10 @@ packages:
+   '@radix-ui/rect@1.1.1':
+     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
+ 
++  '@remix-run/router@1.23.4':
++    resolution: {integrity: sha512-q7j5geK7xs3UJSdm9/iytUNclBnLmYx1EnSeCFXHPeutdqgIMeFeHtUZgS3EhlKxdBEAu8OwtJCwmLrEzpSs7Q==}
++    engines: {node: '>=14.0.0'}
++
+   '@rolldown/pluginutils@1.0.0-beta.38':
+     resolution: {integrity: sha512-N/ICGKleNhA5nc9XXQG/kkKHJ7S55u0x0XUJbbkmdCnFuoRkM1Il12q9q0eX19+M7KKUEPw/daUPIRnxhcxAIw==}
+ 
+@@ -3802,9 +3801,6 @@ packages:
+     resolution: {integrity: sha512-KZxYo1BUkWD2TVFLr0MQoM8vUUigWD3LlD83a/75BqC+4qE0Hb1Vo5v1FgcfaNXvfXzr+5EhQ6ing/CaBijTlw==}
+     engines: {node: '>= 18'}
+ 
+-  mitt@3.0.1:
+-    resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
+-
+   mlly@1.8.0:
+     resolution: {integrity: sha512-l8D9ODSRWLe2KHJSifWGwBqpTZXIXTeo8mlKjY+E2HAakaTeNpqAyBZ8GSqLzHgw4XmHmC8whvpjJNMbFZN7/g==}
+ 
+@@ -4189,6 +4185,19 @@ packages:
+       react: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+       react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+ 
++  react-router-dom@6.30.6:
++    resolution: {integrity: sha512-0RHKZz7wwffvkU+2MFVT2NnjK44ssLEV+m0CAJaS2Ksmorrwj7WxH00jO0SOCW26/tINUnJHToXblDs33I38YQ==}
++    engines: {node: '>=14.0.0'}
++    peerDependencies:
++      react: '>=16.8'
++      react-dom: '>=16.8'
++
++  react-router@6.30.6:
++    resolution: {integrity: sha512-5HfK7k5im7LTOB0EqCQmfvy4C13G92Ssj1VTmouTK3AJvyjKTnFuCV0vcMAD/JS+JC4DvDIBRrlAeJIFjh5VWg==}
++    engines: {node: '>=14.0.0'}
++    peerDependencies:
++      react: '>=16.8'
++
+   react-smooth@4.0.4:
+     resolution: {integrity: sha512-gnGKTpYwqL0Iii09gHobNolvX4Kiq4PKx6eWBCYYix+8cdw+cGo3do906l1NBPKkSWx1DghC1dlWG9L2uGd61Q==}
+     peerDependencies:
+@@ -4245,10 +4254,6 @@ packages:
+   regex@6.0.1:
+     resolution: {integrity: sha512-uorlqlzAKjKQZ5P+kTJr3eeJGSVroLKoHmquUj4zHWuR+hEyNqlXsSKlYYF5F4NI6nl7tWCs0apKJ0lmfsXAPA==}
+ 
+-  regexparam@3.0.0:
+-    resolution: {integrity: sha512-RSYAtP31mvYLkAHrOlh25pCNQ5hWnT106VukGaaFfuJrZFkGRX5GhUAdPqpSDXxOhA2c4akmRuplv1mRqnBn6Q==}
+-    engines: {node: '>=8'}
+-
+   rehype-harden@1.1.5:
+     resolution: {integrity: sha512-JrtBj5BVd/5vf3H3/blyJatXJbzQfRT9pJBmjafbTaPouQCAKxHwRyCc7dle9BXQKxv4z1OzZylz/tNamoiG3A==}
+ 
+@@ -4800,11 +4805,6 @@ packages:
+     engines: {node: '>=8'}
+     hasBin: true
+ 
+-  wouter@3.7.1:
+-    resolution: {integrity: sha512-od5LGmndSUzntZkE2R5CHhoiJ7YMuTIbiXsa0Anytc2RATekgv4sfWRAxLEULBrp7ADzinWQw8g470lkT8+fOw==}
+-    peerDependencies:
+-      react: '>=16.8.0'
+-
+   xtend@4.0.2:
+     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
+     engines: {node: '>=0.4'}
+@@ -4837,13 +4837,13 @@ packages:
+ 
+ snapshots:
+ 
+-  '@ajayche/trpc-panel@2.1.0(@trpc/server@11.19.0(typescript@5.9.3))(@types/react@19.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)(zod@4.1.12)':
++  '@ajayche/trpc-panel@2.1.0(@trpc/server@11.19.0(typescript@5.9.3))(@types/react@19.2.1)(react-dom@19.2.1(react@19.2.1))(react-router-dom@6.30.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-router@6.30.6(react@19.2.1))(react@19.2.1)(zod@4.1.12)':
+     dependencies:
+       '@microlink/react-json-view': 1.31.34(@types/react@19.2.1)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+       '@trpc/server': 11.19.0(typescript@5.9.3)
+       clsx: 2.1.1
+       fuzzysort: 2.0.4
+-      nuqs: 2.10.1(react@19.2.1)
++      nuqs: 2.10.1(react-router-dom@6.30.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-router@6.30.6(react@19.2.1))(react@19.2.1)
+       path: 0.12.7
+       pretty-bytes: 6.1.1
+       pretty-ms: 8.0.0
+@@ -6581,6 +6581,8 @@ snapshots:
+ 
+   '@radix-ui/rect@1.1.1': {}
+ 
++  '@remix-run/router@1.23.4': {}
++
+   '@rolldown/pluginutils@1.0.0-beta.38': {}
+ 
+   '@rollup/rollup-android-arm-eabi@4.52.4':
+@@ -9072,8 +9074,6 @@ snapshots:
+     dependencies:
+       minipass: 7.1.2
+ 
+-  mitt@3.0.1: {}
+-
+   mlly@1.8.0:
+     dependencies:
+       acorn: 8.15.0
+@@ -9136,10 +9136,13 @@ snapshots:
+ 
+   normalize-range@0.1.2: {}
+ 
+-  nuqs@2.10.1(react@19.2.1):
++  nuqs@2.10.1(react-router-dom@6.30.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react-router@6.30.6(react@19.2.1))(react@19.2.1):
+     dependencies:
+       '@standard-schema/spec': 1.1.0
+       react: 19.2.1
++    optionalDependencies:
++      react-router: 6.30.6(react@19.2.1)
++      react-router-dom: 6.30.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+ 
+   object-assign@4.1.1: {}
+ 
+@@ -9454,6 +9457,18 @@ snapshots:
+       react: 19.2.1
+       react-dom: 19.2.1(react@19.2.1)
+ 
++  react-router-dom@6.30.6(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
++    dependencies:
++      '@remix-run/router': 1.23.4
++      react: 19.2.1
++      react-dom: 19.2.1(react@19.2.1)
++      react-router: 6.30.6(react@19.2.1)
++
++  react-router@6.30.6(react@19.2.1):
++    dependencies:
++      '@remix-run/router': 1.23.4
++      react: 19.2.1
++
+   react-smooth@4.0.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1):
+     dependencies:
+       fast-equals: 5.3.2
+@@ -9519,8 +9534,6 @@ snapshots:
+     dependencies:
+       regex-utilities: 2.3.0
+ 
+-  regexparam@3.0.0: {}
+-
+   rehype-harden@1.1.5: {}
+ 
+   rehype-katex@7.0.1:
+@@ -10130,13 +10143,6 @@ snapshots:
+       siginfo: 2.0.0
+       stackback: 0.0.2
+ 
+-  wouter@3.7.1(patch_hash=4e16e6ff3fde7d6c1024d3e0c8605dc9eb6afb690d0d49958c2f449091813072)(react@19.2.1):
+-    dependencies:
+-      mitt: 3.0.1
+-      react: 19.2.1
+-      regexparam: 3.0.0
+-      use-sync-external-store: 1.6.0(react@19.2.1)
+-
+   xtend@4.0.2: {}
+ 
+   yallist@3.1.1: {}
