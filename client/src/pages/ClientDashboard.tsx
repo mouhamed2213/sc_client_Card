@@ -1,4 +1,4 @@
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { LayoutGrid } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import ClientLayout from "@/components/ClientLayout";
@@ -6,7 +6,7 @@ import FicheOverview from "@/components/client-space/FicheOverview";
 import AllFichesOverview from "@/components/client-space/AllFichesOverview";
 
 export default function ClientDashboard() {
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
 
   if (fiches.isLoading) {

@@ -1,7 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { ArrowUpRight, Phone, XCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "wouter";
+import { Link, useParams } from "react-router-dom";
 import {
   FicheTemplate,
   type FicheTemplateActions,
@@ -114,7 +114,7 @@ export default function PublicFiche() {
             {parseError(ficheQuery.error)}
           </p>
           <Link
-            href="/"
+            to="/"
             className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#244775]"
           >
             Retour à l’accueil <ArrowUpRight className="h-4 w-4" />

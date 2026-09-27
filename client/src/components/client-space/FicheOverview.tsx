@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   BarChart3,
@@ -21,7 +21,7 @@ import FicheStatusAlert from "@/components/client-space/FicheStatusAlert";
 import { getPlanFeatures, type PlanName } from "@shared/planFeatures";
 
 export default function FicheOverview({ ficheId }: { ficheId: number }) {
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const [premiumFeature, setPremiumFeature] = React.useState<{ name: string; plan: PlanName } | null>(null);
   const dashboard = trpc.clientSpaceRouter.dashboard.useQuery({ ficheId });
 

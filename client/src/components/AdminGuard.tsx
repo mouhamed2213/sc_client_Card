@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Redirect } from "wouter";
+import { Navigate } from "react-router-dom";
 import { trpc } from "@/lib/trpc";
 
 export default function AdminGuard({ children }: { children: ReactNode }) {
@@ -36,7 +36,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
   }
 
   if (!meQuery.data || meQuery.data.role !== "admin") {
-    return <Redirect to="/admin/login" />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;

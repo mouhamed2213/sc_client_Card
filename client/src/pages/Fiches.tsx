@@ -17,7 +17,7 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 
 const formulaLabels = {
   essentiel: "Essentiel",
@@ -195,7 +195,7 @@ export default function Fiches() {
             </div>
           </div>
           <Link
-            href={ADMIN_HOME_PATH}
+            to={ADMIN_HOME_PATH}
             className="hidden text-sm font-medium text-[#526078] hover:text-[#172033] sm:block"
           >
             Retour au tableau de bord
@@ -383,7 +383,7 @@ function UsersTable({ users, onSelect, onCreate }: { users: ClientUser[]; onSele
 }
 function UserRow({ user, onSelect, onCreate }: { user: ClientUser; onSelect: (user: ClientUser) => void; onCreate: (user: ClientUser) => void }) {
   const [open,setOpen]=useState(false); const formulas=Array.from(new Set(user.fiche.map(f=>formulaLabels[f.formule]))).join(", ")||"—";
-  return <><tr className="border-b border-[#f0f2f4]"><td className="px-7 py-4"><div className="flex items-center gap-3"><div className="avatar"><UserRound className="h-4 w-4"/></div><div><p className="font-semibold text-[#29344a]">{user.name||"Client sans nom"}</p><p className="text-xs text-[#8b94a3]">{user.email||"Aucun email"}</p></div></div></td><td className="px-4 py-4">{user._count.fiche}</td><td className="px-4 py-4 text-sm text-[#657084]">{formulas}</td><td className="px-7 py-4 text-right"><div className="flex justify-end gap-1"><button type="button" className="table-action" title="Nouvelle fiche" onClick={()=>onCreate(user)}><Plus className="h-4 w-4"/></button><button type="button" className="table-action" title="Gérer les fiches" onClick={()=>onSelect(user)}><Link2 className="h-4 w-4"/></button><button type="button" onClick={()=>setOpen(v=>!v)} className="table-action" aria-expanded={open} title="Afficher les fiches"><ChevronDown className={`h-4 w-4 ${open?"rotate-180":""}`}/></button></div></td></tr>{open&&<tr className="border-b border-[#edf0f2] bg-[#fafbfc]"><td colSpan={4} className="px-7 py-4"><div className="space-y-2 pl-10">{user.fiche.length ? user.fiche.map(f=><Link key={f.id} href={`/studio/fiche/${f.slug}`} className="flex items-center justify-between rounded-lg border border-[#e6e8ec] bg-white px-4 py-3"><div><p className="text-sm font-semibold">{f.prenom} {f.nom}</p><p className="text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></div><div className="flex gap-4 text-xs text-[#657084]"><span>{formulaLabels[f.formule]}</span><span>{f.statut}</span><span>{f.scansTotal} passages</span></div></Link>) : <p className="text-sm text-[#8b94a3]">Aucune fiche rattachée.</p>}</div></td></tr>}</>;
+  return <><tr className="border-b border-[#f0f2f4]"><td className="px-7 py-4"><div className="flex items-center gap-3"><div className="avatar"><UserRound className="h-4 w-4"/></div><div><p className="font-semibold text-[#29344a]">{user.name||"Client sans nom"}</p><p className="text-xs text-[#8b94a3]">{user.email||"Aucun email"}</p></div></div></td><td className="px-4 py-4">{user._count.fiche}</td><td className="px-4 py-4 text-sm text-[#657084]">{formulas}</td><td className="px-7 py-4 text-right"><div className="flex justify-end gap-1"><button type="button" className="table-action" title="Nouvelle fiche" onClick={()=>onCreate(user)}><Plus className="h-4 w-4"/></button><button type="button" className="table-action" title="Gérer les fiches" onClick={()=>onSelect(user)}><Link2 className="h-4 w-4"/></button><button type="button" onClick={()=>setOpen(v=>!v)} className="table-action" aria-expanded={open} title="Afficher les fiches"><ChevronDown className={`h-4 w-4 ${open?"rotate-180":""}`}/></button></div></td></tr>{open&&<tr className="border-b border-[#edf0f2] bg-[#fafbfc]"><td colSpan={4} className="px-7 py-4"><div className="space-y-2 pl-10">{user.fiche.length ? user.fiche.map(f=><Link key={f.id} to={`/studio/fiche/${f.slug}`} className="flex items-center justify-between rounded-lg border border-[#e6e8ec] bg-white px-4 py-3"><div><p className="text-sm font-semibold">{f.prenom} {f.nom}</p><p className="text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></div><div className="flex gap-4 text-xs text-[#657084]"><span>{formulaLabels[f.formule]}</span><span>{f.statut}</span><span>{f.scansTotal} passages</span></div></Link>) : <p className="text-sm text-[#8b94a3]">Aucune fiche rattachée.</p>}</div></td></tr>}</>;
 }
 
 function FilterTab({
@@ -442,7 +442,7 @@ function FicheRow({
   return (
     <tr className="border-b border-[#f0f2f4] transition-colors last:border-0 hover:bg-[#fcfcfd]">
       <td className="px-7 py-4">
-        <Link href={`/studio/fiche/${fiche.slug}`}>
+        <Link to={`/studio/fiche/${fiche.slug}`}>
           <FicheIdentity fiche={fiche} />
         </Link>
       </td>
@@ -467,7 +467,7 @@ function FicheRow({
       <td className="px-7 py-4 text-right">
         <div className="flex justify-end gap-1">
           <Link
-            href={`/studio/fiche/${fiche.slug}`}
+            to={`/studio/fiche/${fiche.slug}`}
             className="table-action"
             title="Ouvrir dans le studio"
             aria-label={`Modifier ${fiche.prenom} ${fiche.nom}`}
@@ -475,7 +475,7 @@ function FicheRow({
             <Pencil className="h-4 w-4" />
           </Link>
           <Link
-            href={`/fiche/${fiche.slug}`}
+            to={`/fiche/${fiche.slug}`}
             className="table-action"
             title="Voir la fiche publique"
             aria-label={`Voir ${fiche.prenom} ${fiche.nom}`}
@@ -560,7 +560,7 @@ function FicheCard({
 
       <div className="mt-4 grid grid-cols-4 gap-2">
         <Link
-          href={`/studio/fiche/${fiche.slug}`}
+          to={`/studio/fiche/${fiche.slug}`}
           className="rounded-lg bg-[#172033] py-2 text-center text-xs font-semibold text-white"
           title="Ouvrir dans le studio"
         >
@@ -568,7 +568,7 @@ function FicheCard({
           <span className="sr-only">Studio</span>
         </Link>
         <Link
-          href={`/fiche/${fiche.slug}`}
+          to={`/fiche/${fiche.slug}`}
           className="rounded-lg border border-[#e6e8ec] py-2 text-center"
           title="Voir la fiche"
         >
@@ -694,7 +694,7 @@ function UserManagementModal({ user, onClose }: { user: ClientUser; onClose: () 
   const detach=trpc.admin.detachFicheOwner.useMutation({onSuccess:async()=>{toast.success("Fiche détachée");await utils.fiches.usersPaginated.invalidate();},onError:e=>toast.error("Détachement impossible",{description:e.message})});
   const unowned=(fichesQuery.data?.rows??[]).filter((f:any)=>!f.owner);
   const others=(usersQuery.data??[]).filter((u:any)=>u.id!==user.id);
-  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-4 sm:items-center"><div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl"><div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5"><div><p className="eyebrow">Gestion du compte</p><h2 className="mt-1 text-xl font-semibold">{user.name||"Client sans nom"}</h2><p className="text-sm text-[#7d8798]">{user.email||"Sans e-mail"} · {user._count.fiche} fiche{user._count.fiche>1?"s":""}</p></div><button type="button" className="icon-button" onClick={onClose} aria-label="Fermer"><X className="h-4 w-4"/></button></div><div className="grid gap-6 p-6 lg:grid-cols-2"><section><h3 className="font-semibold">Fiches rattachées</h3><div className="mt-3 space-y-2">{user.fiche.length?user.fiche.map(f=><div key={f.id} className="rounded-xl border border-[#e6e8ec] p-3"><div className="flex items-center justify-between gap-3"><Link href={`/studio/fiche/${f.slug}`} className="min-w-0"><p className="truncate text-sm font-semibold">{f.prenom} {f.nom}</p><p className="truncate text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></Link><button type="button" className="text-xs font-medium text-red-700" disabled={detach.isPending} onClick={()=>{if(window.confirm("Détacher cette fiche du compte ?")) detach.mutate({ficheId:f.id})}}>Détacher</button></div><div className="mt-2 flex flex-wrap gap-2"><span className="text-xs text-[#657084]">{formulaLabels[f.formule]}</span><span className="text-xs text-[#657084]">{f.scansTotal} passages</span></div><div className="mt-2 flex gap-2"><select className="w-full rounded-lg border border-[#e0e4e9] px-2 py-2 text-xs" defaultValue="" onChange={e=>{if(e.target.value) change.mutate({ficheId:f.id,ownerId:Number(e.target.value)});e.currentTarget.value=""}}><option value="">Changer de propriétaire…</option>{others.map((u:any)=><option key={u.id} value={u.id}>{u.name||"Sans nom"} — {u.email||"sans e-mail"}</option>)}</select></div></div>):<p className="mt-3 text-sm text-[#8b94a3]">Aucune fiche rattachée.</p>}</div></section><section><h3 className="font-semibold">Rattacher une fiche existante</h3><p className="mt-1 text-xs text-[#8b94a3]">Seules les fiches actuellement sans propriétaire sont proposées.</p><input className="mt-3 w-full rounded-lg border border-[#e0e4e9] px-3 py-2 text-sm" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher une fiche…"/><div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{fichesQuery.isFetching?<p className="py-5 text-center text-sm text-[#8b94a3]">Recherche…</p>:unowned.length?unowned.map((f:any)=><div key={f.id} className="flex items-center justify-between gap-3 rounded-xl border border-[#edf0f2] p-3"><div className="min-w-0"><p className="truncate text-sm font-medium">{f.prenom} {f.nom}</p><p className="truncate text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></div><button type="button" className="rounded-lg bg-[#172033] px-3 py-2 text-xs font-semibold text-white" disabled={attach.isPending} onClick={()=>attach.mutate({ficheId:f.id,ownerId:user.id})}>Rattacher</button></div>):<p className="py-5 text-center text-sm text-[#8b94a3]">Aucune fiche non rattachée trouvée.</p>}</div></section></div></div></div>;
+  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-4 sm:items-center"><div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl"><div className="flex items-start justify-between border-b border-[#edf0f2] px-6 py-5"><div><p className="eyebrow">Gestion du compte</p><h2 className="mt-1 text-xl font-semibold">{user.name||"Client sans nom"}</h2><p className="text-sm text-[#7d8798]">{user.email||"Sans e-mail"} · {user._count.fiche} fiche{user._count.fiche>1?"s":""}</p></div><button type="button" className="icon-button" onClick={onClose} aria-label="Fermer"><X className="h-4 w-4"/></button></div><div className="grid gap-6 p-6 lg:grid-cols-2"><section><h3 className="font-semibold">Fiches rattachées</h3><div className="mt-3 space-y-2">{user.fiche.length?user.fiche.map(f=><div key={f.id} className="rounded-xl border border-[#e6e8ec] p-3"><div className="flex items-center justify-between gap-3"><Link to={`/studio/fiche/${f.slug}`} className="min-w-0"><p className="truncate text-sm font-semibold">{f.prenom} {f.nom}</p><p className="truncate text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></Link><button type="button" className="text-xs font-medium text-red-700" disabled={detach.isPending} onClick={()=>{if(window.confirm("Détacher cette fiche du compte ?")) detach.mutate({ficheId:f.id})}}>Détacher</button></div><div className="mt-2 flex flex-wrap gap-2"><span className="text-xs text-[#657084]">{formulaLabels[f.formule]}</span><span className="text-xs text-[#657084]">{f.scansTotal} passages</span></div><div className="mt-2 flex gap-2"><select className="w-full rounded-lg border border-[#e0e4e9] px-2 py-2 text-xs" defaultValue="" onChange={e=>{if(e.target.value) change.mutate({ficheId:f.id,ownerId:Number(e.target.value)});e.currentTarget.value=""}}><option value="">Changer de propriétaire…</option>{others.map((u:any)=><option key={u.id} value={u.id}>{u.name||"Sans nom"} — {u.email||"sans e-mail"}</option>)}</select></div></div>):<p className="mt-3 text-sm text-[#8b94a3]">Aucune fiche rattachée.</p>}</div></section><section><h3 className="font-semibold">Rattacher une fiche existante</h3><p className="mt-1 text-xs text-[#8b94a3]">Seules les fiches actuellement sans propriétaire sont proposées.</p><input className="mt-3 w-full rounded-lg border border-[#e0e4e9] px-3 py-2 text-sm" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher une fiche…"/><div className="mt-3 max-h-72 space-y-2 overflow-y-auto">{fichesQuery.isFetching?<p className="py-5 text-center text-sm text-[#8b94a3]">Recherche…</p>:unowned.length?unowned.map((f:any)=><div key={f.id} className="flex items-center justify-between gap-3 rounded-xl border border-[#edf0f2] p-3"><div className="min-w-0"><p className="truncate text-sm font-medium">{f.prenom} {f.nom}</p><p className="truncate text-xs text-[#8b94a3]">{f.entreprise||f.slug}</p></div><button type="button" className="rounded-lg bg-[#172033] px-3 py-2 text-xs font-semibold text-white" disabled={attach.isPending} onClick={()=>attach.mutate({ficheId:f.id,ownerId:user.id})}>Rattacher</button></div>):<p className="py-5 text-center text-sm text-[#8b94a3]">Aucune fiche non rattachée trouvée.</p>}</div></section></div></div></div>;
 }
 
 function CreateFicheModal({ user, onClose, onCreate }: { user: ClientUser; onClose: () => void; onCreate: (input: any) => void }) {

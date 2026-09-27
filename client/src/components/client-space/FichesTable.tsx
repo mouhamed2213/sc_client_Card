@@ -7,7 +7,7 @@ import {
   Phone,
   Star,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { formuleLabels, getEcheanceStatus } from "@/lib/ficheStatus";
 
 export type ClientFicheRow = {
@@ -140,7 +140,7 @@ function Actions({ fiche }: { fiche: ClientFicheRow }) {
   return (
     <div className="flex justify-end gap-1">
       <Link
-        href={`/espace-client/fiche/${fiche.id}`}
+        to={`/espace-client/fiche/${fiche.id}`}
         className="table-action"
         title="Ouvrir la fiche"
         aria-label={`Ouvrir la fiche de ${name}`}
@@ -149,7 +149,7 @@ function Actions({ fiche }: { fiche: ClientFicheRow }) {
       </Link>
       {canEdit(fiche) ? (
         <Link
-          href={`/espace-client/fiche/${fiche.id}/modifier`}
+          to={`/espace-client/fiche/${fiche.id}/modifier`}
           className="table-action"
           title="Modifier la fiche"
           aria-label={`Modifier la fiche de ${name}`}
@@ -263,7 +263,7 @@ export default function FichesTable({ fiches }: { fiches: ClientFicheRow[] }) {
                 className={`border-b border-[#f0f2f4] align-top transition-colors last:border-0 hover:bg-[#fcfcfd] ${fiche.isMain ? "bg-[#fffdf9]" : ""}`}
               >
                 <td className="px-7 py-4">
-                  <Link href={`/espace-client/fiche/${fiche.id}`}>
+                  <Link to={`/espace-client/fiche/${fiche.id}`}>
                     <FicheIdentity fiche={fiche} />
                   </Link>
                 </td>

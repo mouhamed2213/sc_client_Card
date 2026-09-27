@@ -30,7 +30,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import {
   BlackCard,
   BrandMark,
@@ -263,7 +263,7 @@ export default function LandingPage() {
             ))}
           </nav>
           <div className="lp-header-cta">
-            <Link href="/espace-client/connexion" className="lp-link">
+            <Link to="/espace-client/connexion" className="lp-link">
               Se connecter
             </Link>
             <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper lp-btn--sm">
@@ -286,7 +286,7 @@ export default function LandingPage() {
                 {label}
               </a>
             ))}
-            <Link href="/espace-client/connexion" className="lp-mobile-login">
+            <Link to="/espace-client/connexion" className="lp-mobile-login">
               Se connecter
             </Link>
             <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper">
@@ -676,7 +676,7 @@ export default function LandingPage() {
                 <a href={WHATSAPP_URL} className="lp-btn lp-btn--copper lp-btn--lg">
                   <MessageCircle /> Demander une carte
                 </a>
-                <Link href="/espace-client/connexion" className="lp-btn lp-btn--ghost lp-btn--lg">
+                <Link to="/espace-client/connexion" className="lp-btn lp-btn--ghost lp-btn--lg">
                   Se connecter
                 </Link>
               </div>
@@ -702,7 +702,7 @@ export default function LandingPage() {
             <a href="#principe">Le principe</a>
             <a href="#gammes">Les cartes</a>
             <a href="#parcours">Le parcours</a>
-            <Link href="/espace-client/connexion">Espace client</Link>
+            <Link to="/espace-client/connexion">Espace client</Link>
           </nav>
           <small>© 2026 Support Connecté · Saly, Sénégal</small>
         </div>

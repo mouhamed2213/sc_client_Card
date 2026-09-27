@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { LockKeyhole, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { ADMIN_HOME_PATH } from "@/const";
 import { trpc } from "@/lib/trpc";
 
 export default function AdminLogin() {
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const utils = trpc.useUtils();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

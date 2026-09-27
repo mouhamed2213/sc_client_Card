@@ -17,7 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function ClientLayout({
   children,
@@ -26,7 +26,8 @@ export default function ClientLayout({
   children: ReactNode;
   ficheId?: number;
 }) {
-  const [location, navigate] = useLocation();
+  const { pathname: location } = useLocation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [premiumFeature, setPremiumFeature] = useState<
     "Statistiques" | "Demandes reçues" | null
@@ -204,7 +205,7 @@ export default function ClientLayout({
           ) : (
             <Link
               key={item.href}
-              href={item.href}
+              to={item.href}
               onClick={() => setOpen(false)}
               className={`sidebar-link ${active ? "sidebar-link-active" : ""}`}
             >

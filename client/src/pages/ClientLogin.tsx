@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { CreditCard, Eye, EyeOff, Loader2, MessageSquare, ScanLine } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
 export default function ClientLogin() {
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const utils = trpc.useUtils();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

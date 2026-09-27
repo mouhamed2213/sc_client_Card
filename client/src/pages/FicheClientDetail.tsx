@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { useParams } from "react-router-dom";
 import ClientLayout from "@/components/ClientLayout";
 import FicheOverview from "@/components/client-space/FicheOverview";
 

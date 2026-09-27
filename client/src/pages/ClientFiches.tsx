@@ -1,11 +1,11 @@
 import { LayoutGrid, Plus, Sparkles } from "lucide-react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { trpc } from "@/lib/trpc";
 import ClientLayout from "@/components/ClientLayout";
 import FichesTable from "@/components/client-space/FichesTable";
 
 export default function ClientFiches() {
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const fiches = trpc.clientSpaceRouter.myFiches.useQuery();
 
   if (fiches.isLoading) {

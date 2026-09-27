@@ -12,7 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { trpc } from "@/lib/trpc";
 import { formuleLabels, getEcheanceStatus } from "@/lib/ficheStatus";
 import KpiTile from "./KpiTile";
@@ -46,7 +46,7 @@ function formatDate(date: Date | string) {
  * are neither suspended nor expired), the UI only displays what it receives.
  */
 export default function AllFichesOverview({ fiches }: { fiches: FicheOption[] }) {
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<"all" | number>("all");
   const [search, setSearch] = useState("");
   const overview = trpc.clientSpaceRouter.overview.useQuery(

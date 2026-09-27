@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 
 const days = [
   "Lundi",
@@ -397,7 +397,7 @@ export default function AdminClientAccountCreationModal({
                   fiche.
                 </p>
                 <Link
-                  href={`/studio/fiche/${credentials.slug}`}
+                  to={`/studio/fiche/${credentials.slug}`}
                   onClick={close}
                   className="mt-3 inline-flex text-xs font-semibold underline"
                 >

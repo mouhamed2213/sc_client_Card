@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { useParams } from "react-router-dom";
 import { MessageSquare, Phone } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import ClientLayout from "@/components/ClientLayout";

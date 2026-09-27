@@ -1,5 +1,5 @@
 import { Bell, LayoutDashboard, LayoutGrid, Link2, LogOut, MoreHorizontal, Sparkles, X } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { ADMIN_HOME_PATH } from "@/const";
@@ -11,7 +11,7 @@ export default function StudioSidebar({
   mobileOpen?: boolean;
   onClose?: () => void;
 }) {
-  const [location] = useLocation();
+  const { pathname: location } = useLocation();
   const overviewQuery = trpc.fiches.overview.useQuery();
   const overview = overviewQuery.data ?? {
     total: 0,
@@ -80,7 +80,7 @@ export default function StudioSidebar({
         <nav className="mt-3 space-y-1" aria-label="Navigation du studio">
           <Link
             className={isDashboard ? "sidebar-link sidebar-link-active" : "sidebar-link"}
-            href={ADMIN_HOME_PATH}
+            to={ADMIN_HOME_PATH}
             aria-current={isDashboard ? "page" : undefined}
             onClick={onClose}
           >
@@ -89,7 +89,7 @@ export default function StudioSidebar({
 
           <Link
             className={isFiches ? "sidebar-link sidebar-link-active" : "sidebar-link"}
-            href="/studio/fiches"
+            to="/studio/fiches"
             aria-current={isFiches ? "page" : undefined}
             onClick={onClose}
           >

@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Suspense, lazy, type ReactNode } from "react";
-import { Route, Switch } from "wouter";
+import { Route, Routes } from "react-router-dom";
 import AdminGuard from "./components/AdminGuard";
 import ClientGuard from "./components/ClientGuard";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -37,85 +37,85 @@ function Router() {
         </div>
       }
     >
-      <Switch>
-        <Route path="/admin/login" component={AdminLogin} />
-        <Route path="/fiche/:slug" component={PublicFiche} />
+      <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/fiche/:slug" element={<PublicFiche />} />
         <Route
           path={ADMIN_HOME_PATH}
-          component={() => (
+          element={
             <AdminRoute>
               <Home />
             </AdminRoute>
-          )}
+          }
         />
         <Route
           path="/studio/fiches"
-          component={() => (
+          element={
             <AdminRoute>
               <Fiches />
             </AdminRoute>
-          )}
+          }
         />
         <Route
           path="/studio/fiche/:slug"
-          component={() => (
+          element={
             <AdminRoute>
               <FicheEditor />
             </AdminRoute>
-          )}
+          }
         />
-        <Route path="/espace-client/connexion" component={ClientLogin} />
+        <Route path="/espace-client/connexion" element={<ClientLogin />} />
         <Route
           path="/espace-client/fiches"
-          component={() => (
+          element={
             <ClientRoute>
               <ClientFiches />
             </ClientRoute>
-          )}
+          }
         />
         <Route
           path="/espace-client"
-          component={() => (
+          element={
             <ClientRoute>
               <ClientDashboard />
             </ClientRoute>
-          )}
+          }
         />
         <Route
           path="/espace-client/fiche/:ficheId/statistiques"
-          component={() => (
+          element={
             <ClientRoute>
               <ClientStats />
             </ClientRoute>
-          )}
+          }
         />
         <Route
           path="/espace-client/fiche/:ficheId/demandes"
-          component={() => (
+          element={
             <ClientRoute>
               <ClientRequests />
             </ClientRoute>
-          )}
+          }
         />
         <Route
           path="/espace-client/fiche/:ficheId/modifier"
-          component={() => (
+          element={
             <ClientRoute>
               <ClientFicheEdit />
             </ClientRoute>
-          )}
+          }
         />
         <Route
           path="/espace-client/fiche/:ficheId"
-          component={() => (
+          element={
             <ClientRoute>
               <FicheClientDetail />
             </ClientRoute>
-          )}
+          }
         />
-        <Route path="/404" component={NotFound} />
-        <Route component={NotFound} />
-      </Switch>
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </Suspense>
   );
 }

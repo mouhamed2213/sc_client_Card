@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useParams } from "wouter";
+import { useParams } from "react-router-dom";
 
 type LinkItem = { label: string; url: string };
 type SocialItem = { label: string; url: string; actif?: boolean };

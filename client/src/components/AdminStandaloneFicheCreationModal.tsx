@@ -5,7 +5,7 @@ import { planLabels, type PlanName } from "@shared/planFeatures";
 import { Check, Loader2, Search, UserPlus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 
 const plans: PlanName[] = ["essentiel", "pro", "signature"];
 const days = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
@@ -14,7 +14,7 @@ type Props = { open: boolean; onClose: () => void };
 
 export default function AdminStandaloneFicheCreationModal({ open, onClose }: Props) {
   const utils = trpc.useUtils();
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const [plan, setPlan] = useState<PlanName>("essentiel");
   const [prenom, setPrenom] = useState("");
   const [nom, setNom] = useState("");

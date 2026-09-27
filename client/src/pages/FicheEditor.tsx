@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Link, useLocation, useParams } from "wouter";
+import { Link, useNavigate, useParams } from "react-router-dom";
 const planLabels: Record<PlanName, string> = {
   essentiel: "Essentiel",
   pro: "Pro",
@@ -91,7 +91,7 @@ function fileToDataUrl(file: File) {
 
 export default function FicheEditor() {
   const { slug = "" } = useParams<{ slug: string }>();
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const ficheQuery = trpc.fiches.getBySlug.useQuery({ slug });
   const requestsQuery = trpc.fiches.contactRequests.useQuery({ slug });
   const updateMutation = trpc.fiches.update.useMutation();
@@ -302,7 +302,7 @@ export default function FicheEditor() {
       <header className="sticky top-0 z-20 border-b border-[#e3e6ea] bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1300px] flex-col gap-4 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4">
           <div className="flex items-center gap-3">
-            <Link href={ADMIN_HOME_PATH} className="icon-button" title="Retour">
+            <Link to={ADMIN_HOME_PATH} className="icon-button" title="Retour">
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div>

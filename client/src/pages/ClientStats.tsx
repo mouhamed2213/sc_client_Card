@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "wouter";
+import { useParams } from "react-router-dom";
 import { BarChart3, ScanLine } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import ClientLayout from "@/components/ClientLayout";

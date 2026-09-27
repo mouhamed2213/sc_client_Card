@@ -22,7 +22,7 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 
 const formulaLabels = {
   essentiel: "Essentiel",
@@ -505,7 +505,7 @@ function FicheRow({
   return (
     <tr className="border-b border-[#f0f2f4] transition-colors last:border-0 hover:bg-[#fcfcfd]">
       <td className="px-7 py-4">
-        <Link href={`/studio/fiche/${fiche.slug}`}>
+        <Link to={`/studio/fiche/${fiche.slug}`}>
           <FicheIdentity fiche={fiche} />
         </Link>
       </td>
@@ -531,14 +531,14 @@ function FicheRow({
       <td className="px-7 py-4 text-right">
         <div className="flex justify-end gap-1">
           <Link
-            href={`/studio/fiche/${fiche.slug}`}
+            to={`/studio/fiche/${fiche.slug}`}
             className="table-action"
             title="Modifier"
           >
             <Pencil className="h-4 w-4" />
           </Link>
           <Link
-            href={`/fiche/${fiche.slug}?preview=1`}
+            to={`/fiche/${fiche.slug}?preview=1`}
             className="table-action"
             title="Prévisualiser"
           >
@@ -598,13 +598,13 @@ function FicheCard({
       </div>
       <div className="mt-4 flex gap-2">
         <Link
-          href={`/studio/fiche/${fiche.slug}`}
+          to={`/studio/fiche/${fiche.slug}`}
           className="flex-1 rounded-lg bg-[#172033] py-2 text-center text-xs font-semibold text-white"
         >
           Modifier
         </Link>
         <Link
-          href={`/fiche/${fiche.slug}?preview=1`}
+          to={`/fiche/${fiche.slug}?preview=1`}
           className="rounded-lg border border-[#e6e8ec] px-3 py-2"
           title="Prévisualiser"
         >

@@ -1,6 +1,6 @@
 import { trpc } from "@/lib/trpc";
 import { ReactNode } from "react";
-import { Redirect } from "wouter";
+import { Navigate } from "react-router-dom";
 import ClientSplash from "./client-space/ClientSplash";
 
 export default function ClientGuard({ children }: { children: ReactNode }) {
@@ -16,11 +16,11 @@ export default function ClientGuard({ children }: { children: ReactNode }) {
   }
 
   if (!meQuery.data || meQuery.data.role !== "user" || meQuery.data.loginMethod !== "local-client") {
-    return <Redirect to="/espace-client/connexion" />;
+    return <Navigate to="/espace-client/connexion" replace />;
   }
 
   if (meQuery.data.mustChangePassword) {
-    return <Redirect to="/espace-client/connexion" />;
+    return <Navigate to="/espace-client/connexion" replace />;
   }
 
   return <>{children}</>;
