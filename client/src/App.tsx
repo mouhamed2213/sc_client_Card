@@ -15,6 +15,7 @@ import ClientLogin from "./pages/ClientLogin";
 import ClientRequests from "./pages/ClientRequests";
 import ClientStats from "./pages/ClientStats";
 import FicheClientDetail from "./pages/FicheClientDetail";
+import HomePage from "./pages/Landing/HomePage";
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const Home = lazy(() => import("@/pages/Home"));
 const Fiches = lazy(() => import("@/pages/Fiches"));
@@ -38,7 +39,8 @@ function Router() {
       }
     >
       <Routes>
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/home" element={<HomePage />} />
+        {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
         <Route path="/fiche/:slug" element={<PublicFiche />} />
         <Route
           path={ADMIN_HOME_PATH}
