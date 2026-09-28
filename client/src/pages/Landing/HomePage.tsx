@@ -1,3 +1,8 @@
+import "@/styles/cartes.css";
+import "@/styles/global.css";
+import "@/styles/home.css";
+import "@/styles/qr.css";
+import "@/styles/studio.css";
 import Footer from "../../components/Footer";
 import Header from "../../components/Header";
 import HomeHero from "../../components/home/HomeHero";
@@ -12,10 +17,6 @@ import SimpleCTA from "../../components/shared/SimpleCTA";
 import { CTA } from "../../data/content";
 import useReveal from "../../hooks/useReveal";
 import { useContent } from "../../lib/content";
-import "@/styles/cartes.css";
-import "@/styles/qr.css";
-import "@/styles/studio.css";
-import "@/styles/home.css";
 
 // Accueil V2 — structure et textes du cahier des charges (sections 06 à 17), mise en scène nouvelle.
 export default function HomePage() {

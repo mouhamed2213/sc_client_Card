@@ -1,17 +1,18 @@
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import { IconSprite } from '../../components/Icons';
-import useReveal from '../../hooks/useReveal';
-import BrandHero from '../../components/branding/BrandHero';
-import WearStory from '../../components/branding/WearStory';
-import WearProducts from '../../components/branding/WearProducts';
-import ObjectsBand from '../../components/branding/ObjectsBand';
-import QrCTA from '../../components/qr/QrCTA';
-import PhotoBand from '../../components/media/PhotoBand';
-import '../styles/cartes.css';
-import '../styles/qr.css';
-import '../styles/panneaux.css';
-import '../styles/branding.css';
+import "@/styles/branding.css";
+import "@/styles/cartes.css";
+import "@/styles/global.css";
+import "@/styles/panneaux.css";
+import "@/styles/qr.css";
+import BrandHero from "../../components/branding/BrandHero";
+import ObjectsBand from "../../components/branding/ObjectsBand";
+import WearProducts from "../../components/branding/WearProducts";
+import WearStory from "../../components/branding/WearStory";
+import Footer from "../../components/Footer";
+import Header from "../../components/Header";
+import { IconSprite } from "../../components/Icons";
+import PhotoBand from "../../components/media/PhotoBand";
+import QrCTA from "../../components/qr/QrCTA";
+import useReveal from "../../hooks/useReveal";
 
 // Page 5 — /branding-intelligent
 export default function BrandingPage() {
@@ -25,8 +26,13 @@ export default function BrandingPage() {
         <WearStory />
         <WearProducts />
         <ObjectsBand />
-        <PhotoBand src="/images/moodboard-1.webp" alt="Univers Support Connecté : carte, polo, sticker de table, enseigne, marquage de véhicule et présentoir Wi-Fi"
-          label="Partout où l’on vous voit" title="Polo, véhicule, enseigne :" red="chaque surface devient un point de contact." />
+        <PhotoBand
+          src="/images/moodboard-1.webp"
+          alt="Univers Support Connecté : carte, polo, sticker de table, enseigne, marquage de véhicule et présentoir Wi-Fi"
+          label="Partout où l’on vous voit"
+          title="Polo, véhicule, enseigne :"
+          red="chaque surface devient un point de contact."
+        />
         <QrCTA />
       </main>
       <Footer current="/branding-intelligent" />

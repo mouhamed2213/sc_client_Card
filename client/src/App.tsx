@@ -15,7 +15,13 @@ import ClientLogin from "./pages/ClientLogin";
 import ClientRequests from "./pages/ClientRequests";
 import ClientStats from "./pages/ClientStats";
 import FicheClientDetail from "./pages/FicheClientDetail";
+import AProposPage from "./pages/Landing/AProposPage";
+import BrandingPage from "./pages/Landing/BrandingPage";
+import ContactPage from "./pages/Landing/ContactPage";
 import HomePage from "./pages/Landing/HomePage";
+import PanneauxPage from "./pages/Landing/PanneauxPage";
+import QrSmartPage from "./pages/Landing/QrSmartPage";
+import SecteursPage from "./pages/Landing/SecteursPage";
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const Home = lazy(() => import("@/pages/Home"));
 const Fiches = lazy(() => import("@/pages/Fiches"));
@@ -39,8 +45,18 @@ function Router() {
       }
     >
       <Routes>
-        <Route path="/home" element={<HomePage />} />
-        {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
+        {/* landing pages */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/carte-connecte" element={<HomePage />} />
+        <Route path="/home-page" element={<HomePage />} />
+        <Route path="/qr-smart" element={<QrSmartPage />} />
+        <Route path="/panneaux-baches" element={<PanneauxPage />} />
+        <Route path="/branding-intelligent" element={<BrandingPage />} />
+        <Route path="/secteurs" element={<SecteursPage />} />
+        <Route path="/a-propos" element={<AProposPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/fiche/:slug" element={<PublicFiche />} />
         <Route
           path={ADMIN_HOME_PATH}
