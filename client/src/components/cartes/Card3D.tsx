@@ -21,7 +21,7 @@ export function FakeQR() {
     const mid = x > 7 && x < 13 && y > 7 && y < 13;
     if (!finder && !mid && rnd() > .52) cells.push(<rect key={x + '-' + y} x={x} y={y} width="1" height="1" />);
   }
-  const F = ({ x, y }) => (<g><rect x={x} y={y} width="7" height="7" /><rect x={x + 1} y={y + 1} width="5" height="5" fill="#fff" /><rect x={x + 2} y={y + 2} width="3" height="3" /></g>);
+  const F = ({ x, y }: { x: number; y: number }) => (<g><rect x={x} y={y} width="7" height="7" /><rect x={x + 1} y={y + 1} width="5" height="5" fill="#fff" /><rect x={x + 2} y={y + 2} width="3" height="3" /></g>);
   return (
     <svg viewBox="0 0 21 21" shapeRendering="crispEdges" fill="#000" aria-hidden="true">
       {cells}<F x={0} y={0} /><F x={14} y={0} /><F x={0} y={14} />
@@ -31,7 +31,7 @@ export function FakeQR() {
   );
 }
 
-const Card3D = forwardRef(function Card3D({ variant = 'pro', rotRef, className = '', onClick, label }: { variant?: string; rotRef?: React.RefObject<HTMLDivElement>; className?: string; onClick?: () => void; label?: string }, ref: React.ForwardedRef<HTMLDivElement>) {
+const Card3D = forwardRef(function Card3D({ variant = 'pro', rotRef, className = '', onClick, label }: { variant?: keyof typeof CARD_FACES; rotRef?: React.RefObject<HTMLDivElement | null>; className?: string; onClick?: () => void; label?: string }, ref: React.ForwardedRef<HTMLDivElement>) {
   const f = CARD_FACES[variant];
   return (
     <div className={`c3d ${variant} ${className}`} ref={ref} onClick={onClick}

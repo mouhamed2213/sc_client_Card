@@ -18,11 +18,11 @@ export default function ChainSection() {
         <ol className="ch2-poles">
           <span className="ch2-line" aria-hidden="true"><i /><b /></span>
           {S_CHAIN.poles.map((p, i) => (
-            <li key={p.n} style={{ '--i': i }}><span className="ch2-n">{p.n}</span><b>{p.title}</b><span>{p.sub}</span></li>
+            <li key={p.n} style={{ '--i': i } as React.CSSProperties}><span className="ch2-n">{p.n}</span><b>{p.title}</b><span>{p.sub}</span></li>
           ))}
         </ol>
         <blockquote className="ch2-q">
-          <p>« {words.map((w, i) => <span key={i} className="qw" style={{ '--i': i }}>{w} </span>)}»</p>
+          <p>« {words.map((w, i) => <span key={i} className="qw" style={{ '--i': i } as React.CSSProperties}>{w} </span>)}»</p>
         </blockquote>
       </div>
     </section>

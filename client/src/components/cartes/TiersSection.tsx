@@ -9,7 +9,7 @@ import { Icon } from '../Icons';
   avec repli instantané sur les navigateurs qui ne la gèrent pas.
   Sur mobile, le tableau n'affiche que la colonne du niveau sélectionné.
 */
-function Cell({ v }) {
+function Cell({ v }: { v: string | boolean | number }) {
   if (v === true) return <span className="yes" aria-label="Inclus" />;
   if (v === false) return <span className="no" aria-label="Non inclus">—</span>;
   return <span className="val">{v}</span>;
@@ -19,7 +19,7 @@ export default function TiersSection() {
   const [idx, setIdx] = useState(1);
   const tier = TIERS.list[idx];
 
-  const pick = (i) => {
+  const pick = (i: number) => {
     if (i === idx) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (document.startViewTransition && !reduce) {
@@ -65,7 +65,7 @@ export default function TiersSection() {
             </thead>
             <tbody>
               {TIERS.table.map(([label, ...vals]) => (
-                <tr key={label}><th scope="row">{label}</th>{vals.map((v, i) => <td key={i} className={`c${i}${i === idx ? ' sel' : ''}`}><Cell v={v} /></td>)}</tr>
+                <tr key={String(label)}><th scope="row">{label}</th>{vals.map((v, i) => <td key={String(i)} className={`c${i}${i === idx ? ' sel' : ''}`}><Cell v={v} /></td>)}</tr>
               ))}
             </tbody>
           </table>

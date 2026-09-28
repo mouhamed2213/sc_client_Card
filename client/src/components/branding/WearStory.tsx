@@ -7,19 +7,21 @@ import useStickyProgress from '../../hooks/useStickyProgress';
   Pour chaque tenue : vue d'ensemble → zoom sur le logo → panoramique vers le QR
   → le téléphone ouvre la page de la marque. Puis tenue suivante (fondu).
 */
-const ease = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-const cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
-const lerp = (a, b, f) => a + (b - a) * f;
+const ease = (x: number) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const cl = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a: number, b: number, f: number) => a + (b - a) * f;
 
 export default function WearStory() {
   const W = B_STORY.wears, N = W.length;
   const [g, setG] = useState(0), [beat, setBeat] = useState(0), [ph, setPh] = useState(false);
-  const sec = useRef(null), frame = useRef(null), imgs = useRef([]), phone = useRef(null), scan = useRef(null), prog = useRef(null);
-  const st = useRef({ g: -1, beat: -1, ph: null });
+  const sec = useRef<HTMLElement>(null), frame = useRef<HTMLDivElement>(null), imgs = useRef<(HTMLImageElement | null)[]>([]), phone = useRef<HTMLDivElement>(null), scan = useRef<HTMLSpanElement>(null), prog = useRef<HTMLElement>(null);
+  const st = useRef<{ g: number; beat: number; ph: boolean | null }>({ g: -1, beat: -1, ph: null });
 
   useStickyProgress(sec, (p) => {
     const t = p * N * 2 * 1.04, gi = Math.min(N - 1, Math.floor(t / 2)), u = cl(t - gi * 2, 0, 2);
-    const w = W[gi], F = frame.current, FW = F.clientWidth, FH = F.clientHeight;
+    const w = W[gi], F = frame.current;
+    if (!F || !scan.current || !prog.current) return;
+    const FW = F.clientWidth, FH = F.clientHeight;
     const m = window.innerWidth <= 900;
     const zoom = m ? 1.9 : 2.1;
     // 0 → .8 : vue d'ensemble → logo ; 1.1 → 1.8 : logo → QR
@@ -30,10 +32,10 @@ export default function WearStory() {
     const tx = (50 - px) / 100 * FW * k, ty = (50 - py) / 100 * FH * k;
     imgs.current.forEach((im, i) => {
       if (!im) return;
-      im.style.opacity = i === gi ? 1 : 0;
+      im.style.opacity = i === gi ? '1' : '0';
       if (i === gi) { im.style.transformOrigin = `${px}% ${py}%`; im.style.transform = `translate(${tx}px,${ty}px) scale(${s})`; }
     });
-    scan.current.style.opacity = u > 1.55 ? 1 : 0;
+    scan.current.style.opacity = u > 1.55 ? '1' : '0';
     prog.current.style.transform = `scaleX(${p})`;
     const nBeat = u < 1.1 ? 0 : 1, nPh = u > 1.6;
     if (gi !== st.current.g) { st.current.g = gi; setG(gi); }

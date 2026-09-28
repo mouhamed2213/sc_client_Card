@@ -15,18 +15,19 @@ export const UNIVERS = [
 ];
 
 export default function UniversGallery({ label = 'Un univers par métier', title = 'Vos supports,', red = 'à vos couleurs.', note = 'Univers de démonstration conçus par Support Connecté.' }) {
-  const track = useRef(null), [cur, setCur] = useState(0), user = useRef(false);
+  const track = useRef<HTMLDivElement>(null), [cur, setCur] = useState(0), user = useRef(false);
   useEffect(() => {
     const t = track.current;
+    if (!t) return;
     const io = new IntersectionObserver((es) => { es.forEach((e) => { if (e.isIntersecting) setCur(Number((e.target as HTMLElement).dataset.i)); }); }, { root: t, threshold: .6 });
-    [...t.children].forEach((c) => io.observe(c));
+    Array.from(t.children).forEach((c) => io.observe(c));
     const stop = () => { user.current = true; };
     t.addEventListener('pointerdown', stop); t.addEventListener('wheel', stop, { passive: true });
-    const id = setInterval(() => { if (user.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; const n = (Number((t as HTMLElement).dataset.cur || 0) + 1) % UNIVERS.length; go(n, true); }, 4200);
+    const id = setInterval(() => { if (user.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; const n = (Number(t.dataset.cur || 0) + 1) % UNIVERS.length; go(n, true); }, 4200);
     return () => { io.disconnect(); clearInterval(id); t.removeEventListener('pointerdown', stop); t.removeEventListener('wheel', stop); };
   }, []);
-  useEffect(() => { (track.current as HTMLElement).dataset.cur = String(cur); }, [cur]);
-  const go = (i, auto) => { const t = track.current, c = t.children[i]; if (!auto) user.current = true; t.scrollTo({ left: c.offsetLeft - (t.clientWidth - c.clientWidth) / 2, behavior: 'smooth' }); };
+  useEffect(() => { if (track.current) track.current.dataset.cur = String(cur); }, [cur]);
+  const go = (i: number, auto?: boolean) => { const t = track.current, c = t?.children[i] as HTMLElement | undefined; if (!t || !c) return; if (!auto) user.current = true; t.scrollTo({ left: c.offsetLeft - (t.clientWidth - c.clientWidth) / 2, behavior: 'smooth' }); };
   return (
     <section className="univ">
       <div className="wrap"><p className="label">{label}</p><h2 className="h2">{title} <em className="red">{red}</em></h2></div>

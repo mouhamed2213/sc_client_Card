@@ -7,10 +7,10 @@ import { Icon } from '../Icons';
   filtre par support au clic (les secteurs non concernés s'estompent).
   Un point = ce support figure dans les recommandations du secteur (calculé depuis secteurs.js).
 */
-const has = (s, k) => s.supports.some((u) => u.cat === k);
+const has = (s: (typeof SECTORS)[number], k: string) => s.supports.some((u) => u.cat === k);
 
 export default function SectorMatrix() {
-  const [col, setCol] = useState(null);
+  const [col, setCol] = useState<string | null>(null);
   const keys = Object.keys(CATS);
   return (
     <section className="matrix">
@@ -27,7 +27,7 @@ export default function SectorMatrix() {
                 {keys.map((k) => (
                   <th scope="col" key={k} data-c={k}>
                     <button className={col === k ? 'on' : ''} aria-pressed={col === k} onClick={() => setCol(col === k ? null : k)}>
-                      <Icon id={CATS[k].icon} /><span>{CATS[k].short}</span>
+                      <Icon id={CATS[k as keyof typeof CATS].icon} /><span>{CATS[k as keyof typeof CATS].short}</span>
                     </button>
                   </th>
                 ))}

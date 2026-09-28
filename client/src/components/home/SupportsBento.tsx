@@ -7,13 +7,13 @@ import { Icon } from '../Icons';
   sans en répéter le contenu : la carte s'incline, les stickers s'éventaillent,
   le panneau zoome sur son QR, le polo passe du logo au QR.
 */
-const VIS = {
+const VIS: Record<string, () => React.JSX.Element> = {
   cartes: () => <div className="bv bv-card"><img src="/images/main-carte-detouree.webp" alt="" loading="lazy" /><i className="bv-sheen" /></div>,
   qr: () => <div className="bv bv-qr"><img className="s1" src="/images/sticker-wifi.webp" alt="" loading="lazy" /><img className="s3" src="/images/sticker-menu.webp" alt="" loading="lazy" /><img className="s2" src="/images/sticker-google.webp" alt="" loading="lazy" /></div>,
   panneaux: () => <div className="bv bv-pan"><span className="pw"><img src="/images/panneau-immo.webp" alt="" loading="lazy" /><i className="bv-ring" /></span></div>,
   branding: () => <div className="bv bv-brand"><img src="/images/polo.webp" alt="" loading="lazy" /></div>,
 };
-const KEYS = ['cartes', 'qr', 'panneaux', 'branding'];
+const KEYS: string[] = ['cartes', 'qr', 'panneaux', 'branding'];
 
 export default function SupportsBento() {
   return (

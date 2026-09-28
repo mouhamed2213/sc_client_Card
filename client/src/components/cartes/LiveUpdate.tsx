@@ -11,12 +11,12 @@ const initial = Object.fromEntries(LIVE.changes.map((c) => [c.field, c.from]));
 
 export default function LiveUpdate() {
   const [data, setData] = useState(initial);
-  const [hot, setHot] = useState(null);
+  const [hot, setHot] = useState<string | null>(null);
   const [pulse, setPulse] = useState(0);
-  const [done, setDone] = useState({});
+  const [done, setDone] = useState<Record<string, boolean>>({});
   const box = useRef(null), user = useRef(false), cursor = useRef(0);
 
-  const apply = (c, fromUser) => {
+  const apply = (c: (typeof LIVE.changes)[number], fromUser?: boolean) => {
     if (fromUser) user.current = true;
     setData((d) => ({ ...d, [c.field]: d[c.field] === c.to ? c.from : c.to }));
     setDone((d) => ({ ...d, [c.key]: !d[c.key] }));
@@ -25,14 +25,15 @@ export default function LiveUpdate() {
   };
 
   useEffect(() => {
-    const el = box.current; let id = 0;
+    const el = box.current; let id: ReturnType<typeof setInterval> | undefined;
+    if (!el) return;
     const io = new IntersectionObserver(([e]) => {
       clearInterval(id);
       if (e.isIntersecting && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         id = setInterval(() => { if (user.current) return clearInterval(id); apply(LIVE.changes[cursor.current++ % LIVE.changes.length]); }, 2800);
       }
     }, { threshold: .5 });
-    io.observe(el);
+    if (el) io.observe(el);
     return () => { io.disconnect(); clearInterval(id); };
   }, []);
 

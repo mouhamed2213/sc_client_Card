@@ -10,17 +10,20 @@ export default function ParticleLogo({
   src = "/images/symbole-s.webp",
   className = "",
 }) {
-  const wrap = useRef(null),
-    cv = useRef(null);
+  const wrap = useRef<HTMLDivElement>(null),
+    cv = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const box = wrap.current,
-      c = cv.current,
-      ctx = c.getContext("2d");
+      c = cv.current;
+    if (!box || !c) return;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
     const reduce = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    let parts = [],
+    interface Particle { tx: number; ty: number; x: number; y: number; vx: number; vy: number; c: string; s: number; ph: number }
+    let parts: Particle[] = [],
       raf = 0,
       visible = true,
       W = 0,
@@ -48,6 +51,7 @@ export default function ParticleLogo({
       off.width = iw;
       off.height = ih;
       const o = off.getContext("2d");
+      if (!o) return;
       o.drawImage(img, 0, 0, iw, ih);
       const data = o.getImageData(0, 0, iw, ih).data;
       const gap = W < 420 ? 5 : 6,
@@ -77,7 +81,7 @@ export default function ParticleLogo({
         }
     };
 
-    const draw = now => {
+    const draw = (now: number) => {
       const t = (now - t0) / 1000;
       ctx.clearRect(0, 0, W, H);
       for (const p of parts) {
@@ -107,7 +111,7 @@ export default function ParticleLogo({
         ctx.fillRect(p.x, p.y, p.s, p.s);
       }
     };
-    const loop = now => {
+    const loop = (now: number) => {
       draw(now);
       raf = visible && !reduce ? requestAnimationFrame(loop) : 0;
     };
@@ -115,7 +119,7 @@ export default function ParticleLogo({
       if (!raf) raf = requestAnimationFrame(loop);
     };
 
-    const move = e => {
+    const move = (e: PointerEvent) => {
       const r = c.getBoundingClientRect();
       ptr.x = e.clientX - r.left;
       ptr.y = e.clientY - r.top;

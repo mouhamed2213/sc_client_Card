@@ -9,29 +9,33 @@ import track from '../../utils/track';
   copie en un geste du téléphone et de l'e-mail (Clipboard API) avec confirmation animée.
   « La démonstration » pré-remplit le formulaire (événement lead:preset).
 */
-function Magnetic({ children, className, ...rest }) {
-  const el = useRef(null);
-  const move = (e) => {
+type Channel = (typeof C_HERO.channels)[number];
+
+function Magnetic({ children, className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
+  const el = useRef<HTMLDivElement>(null);
+  const move = (e: React.PointerEvent<HTMLDivElement>) => {
     if (window.matchMedia('(hover: none)').matches) return;
+    if (!el.current) return;
     const r = el.current.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
     el.current.style.transform = `translate(${x * 10}px, ${y * 8}px) rotateX(${-y * 6}deg) rotateY(${x * 8}deg)`;
     el.current.style.setProperty('--gx', `${(x + .5) * 100}%`); el.current.style.setProperty('--gy', `${(y + .5) * 100}%`);
   };
-  const leave = () => { el.current.style.transform = ''; };
+  const leave = () => { if (el.current) el.current.style.transform = ''; };
   return <div ref={el} className={className} onPointerMove={move} onPointerLeave={leave} {...rest}>{children}</div>;
 }
 
 export default function ContactHero() {
   const CH = useContent('contact.hero', C_HERO);
-  const [go, setGo] = useState(false), [copied, setCopied] = useState(null);
+  const [go, setGo] = useState(false), [copied, setCopied] = useState<string | null>(null);
   useEffect(() => { const t = setTimeout(() => setGo(true), 60); return () => clearTimeout(t); }, []);
 
-  const copy = async (c) => {
+  const copy = async (c: Channel) => {
+    if (!c.copy) return;
     try { await navigator.clipboard.writeText(c.copy); } catch (e) { /* navigateur sans accès presse-papier */ }
     setCopied(c.id); track('contact_copy', { channel: c.id }); setTimeout(() => setCopied(null), 1600);
   };
-  const open = (c) => {
+  const open = (c: Channel) => {
     track(c.id === 'call' ? 'lead_call' : c.id === 'mail' ? 'lead_email' : 'cta_form', { source: 'contact_hero' });
     if (c.preset) window.dispatchEvent(new CustomEvent('lead:preset', { detail: { intent: c.preset } }));
   };

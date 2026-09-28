@@ -9,8 +9,9 @@ import { Icon } from '../Icons';
 export default function FormatsSection() {
   const [size, setSize] = useState(12);
   const [shape, setShape] = useState('rond');
-  const [opts, setOpts] = useState({ nfc: false, metal: false, cut: false });
-  const toggle = (id) => setOpts((o) => ({ ...o, [id]: !o[id] }));
+  type OptId = 'nfc' | 'metal' | 'cut';
+  const [opts, setOpts] = useState<Record<OptId, boolean>>({ nfc: false, metal: false, cut: false });
+  const toggle = (id: OptId) => setOpts((o) => ({ ...o, [id]: !o[id] }));
   const cls = ['q-sample', `sh-${shape}`, opts.cut ? 'cut' : '', opts.metal ? 'metal' : ''].join(' ');
 
   return (
@@ -33,7 +34,7 @@ export default function FormatsSection() {
             <p className="qf-k">Options</p>
             <div className="qf-opts">
               {Q_FORMATS.options.map((o) => (
-                <button key={o.id} className={`opt${opts[o.id] ? ' on' : ''}`} aria-pressed={opts[o.id]} onClick={() => toggle(o.id)}>
+                <button key={o.id} className={`opt${opts[o.id as OptId] ? ' on' : ''}`} aria-pressed={opts[o.id as OptId]} onClick={() => toggle(o.id as OptId)}>
                   <span className="opt-ic"><Icon id={o.icon} /></span>
                   <span><b>{o.label}</b><small>{o.text}</small></span>
                   <span className="opt-sw" aria-hidden="true" />
@@ -44,7 +45,7 @@ export default function FormatsSection() {
         </div>
 
         <div className="qf-vis rv">
-          <div className="qf-bench" style={{ '--cm': size }}>
+          <div className="qf-bench" style={{ '--cm': size } as React.CSSProperties}>
             <div className="qf-phone" aria-hidden="true"><i /></div>
             <div className={cls} aria-label={`Aperçu : ${size} cm, ${shape}`}>
               <div className="qs-in">

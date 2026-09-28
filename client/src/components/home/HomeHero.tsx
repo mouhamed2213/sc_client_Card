@@ -15,7 +15,7 @@ import { DemoPage } from '../PhoneMockup';
 export default function HomeHero() {
   const HERO_ = useContent('home.hero', HERO);
   const [go, setGo] = useState(false), [cur, setCur] = useState(0), [flash, setFlash] = useState(0);
-  const zone = useRef(null), stage = useRef(null), hold = useRef(0), vis = useRef(true);
+  const zone = useRef<HTMLElement>(null), stage = useRef<HTMLDivElement>(null), hold = useRef(0), vis = useRef(true);
   const S = H_SCENE.supports;
 
   useEffect(() => { const t = setTimeout(() => setGo(true), 60); return () => clearTimeout(t); }, []);
@@ -23,7 +23,7 @@ export default function HomeHero() {
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const io = new IntersectionObserver(([e]) => { vis.current = e.isIntersecting; }, { threshold: .1 });
-    io.observe(stage.current);
+    if (stage.current) io.observe(stage.current);
     const id = setInterval(() => {
       if (!vis.current || Date.now() < hold.current) return;
       setCur((c) => (c + 1) % S.length); setFlash((f) => f + 1);
@@ -33,6 +33,7 @@ export default function HomeHero() {
 
   useEffect(() => {
     const el = zone.current, st = stage.current;
+    if (!el || !st) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
     const tick = () => {
@@ -40,13 +41,13 @@ export default function HomeHero() {
       st.style.setProperty('--mx', cx.toFixed(3)); st.style.setProperty('--my', cy.toFixed(3));
       raf = Math.abs(tx - cx) + Math.abs(ty - cy) > .001 ? requestAnimationFrame(tick) : 0;
     };
-    const move = (e) => { const b = el.getBoundingClientRect(); tx = (e.clientX - b.left) / b.width - .5; ty = (e.clientY - b.top) / b.height - .5; if (!raf) raf = requestAnimationFrame(tick); };
+    const move = (e: PointerEvent) => { const b = el.getBoundingClientRect(); tx = (e.clientX - b.left) / b.width - .5; ty = (e.clientY - b.top) / b.height - .5; if (!raf) raf = requestAnimationFrame(tick); };
     const leave = () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(tick); };
     el.addEventListener('pointermove', move); el.addEventListener('pointerleave', leave);
     return () => { cancelAnimationFrame(raf); el.removeEventListener('pointermove', move); el.removeEventListener('pointerleave', leave); };
   }, []);
 
-  const pick = (i) => { hold.current = Date.now() + 6000; if (i !== cur) { setCur(i); setFlash((f) => f + 1); } };
+  const pick = (i: number) => { hold.current = Date.now() + 6000; if (i !== cur) { setCur(i); setFlash((f) => f + 1); } };
 
   return (
     <section className={`c-hero h2-hero${go ? ' go' : ''}`} ref={zone} id="top">

@@ -8,21 +8,22 @@ import { useEffect, useState } from 'react';
 */
 const ENV = (typeof import.meta !== 'undefined' && (import.meta as any).env) || {};
 const BASE = ENV.VITE_SUPABASE_URL, KEY = ENV.VITE_SUPABASE_ANON_KEY;
-let cache = null;
-const loadAll = () => {
+type ContentMap = Record<string, any>;
+let cache: Promise<ContentMap> | null = null;
+const loadAll = (): Promise<ContentMap> => {
   if (!BASE || !KEY) return Promise.resolve({});
   cache ??= fetch(`${BASE}/rest/v1/site_content?select=key,value`, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } })
     .then((r) => (r.ok ? r.json() : []))
-    .then((rows) => Object.fromEntries(rows.map((r) => [r.key, r.value])))
+    .then((rows) => Object.fromEntries(rows.map((r: { key: string; value: unknown }) => [r.key, r.value])))
     .catch(() => ({}));
   return cache;
 };
 
-export function useContent(key, fallback) {
+export function useContent<T extends object>(key: string, fallback: T): T {
   const [v, setV] = useState(fallback);
   useEffect(() => {
     let on = true;
-    loadAll().then((all) => { if (on && all[key]) setV({ ...fallback, ...all[key] }); });
+    loadAll().then((all: ContentMap) => { if (on && all[key]) setV({ ...fallback, ...all[key] }); });
     return () => { on = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);

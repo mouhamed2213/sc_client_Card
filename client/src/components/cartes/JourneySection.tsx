@@ -19,44 +19,46 @@ const PH_M = [[1.1,.5,-.04,0,0,0,0,.9,0],[1.8,.14,-.06,0,0,-10,0,1,1],[2.8,0,-.0
 const TILES_D = [[-.24,-.28],[-.27,-.02],[-.24,.24],[.32,-.28],[.35,-.02],[.32,.24]];
 const TILES_M = [[-.33,-.3],[-.36,0],[-.33,.3],[.33,-.3],[.36,0],[.33,.3]];
 
-const ease = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-function kf(K, t) {
+const ease = (x: number) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+function kf(K: number[][], t: number): number[] {
   if (t <= K[0][0]) return K[0].slice(1);
   for (let i = 0; i < K.length - 1; i++) { const a = K[i], b = K[i + 1]; if (t <= b[0]) { const f = ease((t - a[0]) / (b[0] - a[0])); return a.slice(1).map((v, k) => v + (b[k + 1] - v) * f); } }
   return K[K.length - 1].slice(1);
 }
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 export default function JourneySection() {
   const [step, setStep] = useState(0);
-  const sec = useRef(null), stage = useRef(null), card = useRef(null), rot = useRef(null), phone = useRef(null), screen = useRef(null);
-  const idle = useRef(null), read = useRef(null), page = useRef(null), waves = useRef(null), prog = useRef(null);
-  const tap = useRef(null), sheet = useRef(null), sT = useRef(null), sS = useRef(null);
-  const tiles = useRef([]), acts = useRef([]), loop = useRef(false), stepRef = useRef(-1);
+  const sec = useRef<HTMLElement>(null), stage = useRef<HTMLDivElement>(null), card = useRef<HTMLDivElement>(null), rot = useRef<HTMLDivElement>(null), phone = useRef<HTMLDivElement>(null), screen = useRef<HTMLDivElement>(null);
+  const idle = useRef<HTMLDivElement>(null), read = useRef<HTMLDivElement>(null), page = useRef<HTMLDivElement>(null), waves = useRef<HTMLDivElement>(null), prog = useRef<HTMLElement>(null);
+  const tap = useRef<HTMLDivElement>(null), sheet = useRef<HTMLDivElement>(null), sT = useRef<HTMLElement>(null), sS = useRef<HTMLElement>(null);
+  const tiles = useRef<(HTMLDivElement | null)[]>([]), acts = useRef<HTMLLIElement[]>([]), loop = useRef(false), stepRef = useRef(-1);
 
   useEffect(() => {
     let raf = 0, alive = true;
-    const view = (v) => { [idle.current, read.current, page.current].forEach((x) => x.classList.toggle('hide', x !== v)); page.current.classList.toggle('show', v === page.current); };
+    const view = (v: HTMLElement | null) => { [idle.current, read.current, page.current].forEach((x) => x?.classList.toggle('hide', x !== v)); page.current?.classList.toggle('show', v === page.current); };
 
     async function taps() {
       let k = 0;
       while (loop.current && alive) {
-        const [i, a, b] = DEMO.taps[k % DEMO.taps.length], el = acts.current[i];
+        const [i, a, b] = DEMO.taps[k % DEMO.taps.length] as [number, string, string], el = acts.current[i];
+        if (!screen.current || !el || !tap.current || !sT.current || !sS.current || !sheet.current) break;
         const sr = screen.current.getBoundingClientRect(), er = el.getBoundingClientRect();
         tap.current.style.left = ((er.left + er.width * .75 - sr.left) / sr.width) * 100 + '%';
         tap.current.style.top = ((er.top + er.height / 2 - sr.top) / sr.height) * 100 + '%';
         tap.current.classList.add('on'); await wait(600); if (!loop.current) break;
         tap.current.classList.add('hit'); el.classList.add('press');
-        const tile = tiles.current[DEMO.tileFor[i]]; tile?.classList.add('ping');
+        const tile = tiles.current[(DEMO.tileFor as Record<number, number>)[i]] as HTMLElement | null; tile?.classList.add('ping');
         await wait(180); tap.current.classList.remove('hit'); el.classList.remove('press');
-        sT.current.textContent = a; sS.current.textContent = b; sheet.current.classList.add('up');
+        sT.current.textContent = String(a); sS.current.textContent = String(b); sheet.current.classList.add('up');
         await wait(1500); sheet.current.classList.remove('up'); tile?.classList.remove('ping'); await wait(350); k++;
       }
       tap.current?.classList.remove('on'); sheet.current?.classList.remove('up');
     }
 
     function frame() {
+      if (!sec.current || !stage.current || !card.current || !rot.current || !phone.current || !waves.current || !prog.current) return;
       const r = sec.current.getBoundingClientRect(), span = r.height - innerHeight;
       if (r.bottom < 0 || r.top > innerHeight) { loop.current = false; return; }
       const p = clamp(-r.top / span, 0, 1), t = clamp(p * 4.4, 0, 4), m = innerWidth <= 900;
@@ -64,11 +66,11 @@ export default function JourneySection() {
       stage.current.style.setProperty('--sw', Math.min(w, h * (m ? 1.05 : 1.7)) + 'px');
       const c = kf(m ? CARD_M : CARD_D, t);
       card.current.style.transform = `translate(-50%,-50%) translate3d(${c[0] * w}px,${c[1] * h}px,${c[2]}px) scale(${c[6]})`;
-      card.current.style.opacity = c[7];
+      card.current.style.opacity = String(c[7]);
       rot.current.style.transform = `rotateX(${c[3]}deg) rotateY(${c[4]}deg) rotateZ(${c[5]}deg)`;
       const ph = kf(m ? PH_M : PH_D, t);
       phone.current.style.transform = `translate(-50%,-50%) translate(${ph[0] * w}px,${ph[1] * h}px) rotateY(${ph[4]}deg) scale(${ph[6]})`;
-      phone.current.style.opacity = ph[7];
+      phone.current.style.opacity = String(ph[7]);
       const reading = t >= 1.95 && t < 2.55;
       waves.current.classList.toggle('on', t >= 1.85 && t < 2.6);
       phone.current.classList.toggle('glow', reading);
@@ -77,10 +79,11 @@ export default function JourneySection() {
       acts.current.forEach((a, i) => a.classList.toggle('in', i < n));
       const tp = m ? TILES_M : TILES_D;
       tiles.current.forEach((el, i) => {
+        if (!el) return;
         const f = ease(clamp((t - 3.05 - i * .07) / .35, 0, 1));
         const x = tp[i][0] * f, y = tp[i][1] * f;
         el.style.transform = `translate(-50%,-50%) translate(${(x + (m ? 0 : .04 * f)) * w}px,${y * h}px) scale(${.4 + .6 * f})`;
-        el.style.opacity = f;
+        el.style.opacity = String(f);
       });
       prog.current.style.transform = `scaleX(${p})`;
       const st = t < 1.1 ? 0 : t < 1.95 ? 1 : t < 3.05 ? 2 : 3;
@@ -118,7 +121,7 @@ export default function JourneySection() {
 
           <div className="j-stage" ref={stage} aria-hidden="true">
             {JOURNEY.tiles.map((tl, i) => (
-              <div className="o tile" key={tl.label} ref={(el) => (tiles.current[i] = el)} style={{ opacity: 0 }}>
+              <div className="o tile" key={tl.label} ref={(el) => { tiles.current[i] = el; }} style={{ opacity: 0 }}>
                 <span className="ti"><Icon id={tl.icon} /></span>{tl.label}
               </div>
             ))}

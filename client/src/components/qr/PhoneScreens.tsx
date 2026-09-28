@@ -4,11 +4,11 @@ import { Icon } from '../Icons';
   Écrans de démonstration, un par type de sticker (PLACEHOLDER : à remplacer par
   les vraies pages Support Connecté). Chaque écran s'anime quand il devient actif (.on).
 */
-export const Head = ({ sub, name = 'LE SUNSET' }) => (
+export const Head = ({ sub, name = 'LE SUNSET' }: { sub: string; name?: string }) => (
   <div className="ps-head"><span className="ps-av"><Icon id="palm" /></span><div><b>{name}</b><small>{sub}</small></div></div>
 );
 
-export function ScreenGoogle({ name }) {
+export function ScreenGoogle({ name }: { name?: string }) {
   return (
     <div className="ps ps-google">
       <Head name={name} sub="Restaurant, Saly" />
@@ -19,7 +19,7 @@ export function ScreenGoogle({ name }) {
     </div>
   );
 }
-export function ScreenWifi({ name }) {
+export function ScreenWifi({ name }: { name?: string }) {
   return (
     <div className="ps ps-wifi">
       <Head name={name} sub="Accès Wi-Fi" />
@@ -29,18 +29,18 @@ export function ScreenWifi({ name }) {
     </div>
   );
 }
-export function ScreenReseaux({ name }) {
+export function ScreenReseaux({ name }: { name?: string }) {
   const L = [['Instagram', '#d6249f'], ['Facebook', '#1877f2'], ['TikTok', '#111'], ['YouTube', '#ff0000']];
   return (
     <div className="ps ps-soc">
       <Head name={name} sub="Suivez-nous" />
-      {L.map(([n, c]) => <span key={n} className="ps-sbtn" style={{ '--c': c }}><i />{n}<em>Suivre</em></span>)}
+      {L.map(([n, c]) => <span key={n} className="ps-sbtn" style={{ '--c': c } as React.CSSProperties}><i />{n}<em>Suivre</em></span>)}
       <p className="ps-note">Actualités, offres, événements</p>
     </div>
   );
 }
-export function ScreenMenu({ name }) {
-  const M = [['Entrées', [['Salade de la baie', '3 500 F'], ['Accras de poisson', '2 500 F']]], ['Plats', [['Thiof grillé', '7 500 F'], ['Yassa poulet', '5 000 F']]], ['Boissons', [['Jus de bissap', '1 500 F']]]];
+export function ScreenMenu({ name }: { name?: string }) {
+  const M: [string, [string, string][]][] = [['Entrées', [['Salade de la baie', '3 500 F'], ['Accras de poisson', '2 500 F']]], ['Plats', [['Thiof grillé', '7 500 F'], ['Yassa poulet', '5 000 F']]], ['Boissons', [['Jus de bissap', '1 500 F']]]];
   return (
     <div className="ps ps-menu">
       <Head name={name} sub="Menu du jour" />
@@ -50,8 +50,8 @@ export function ScreenMenu({ name }) {
     </div>
   );
 }
-export function ScreenContact({ name }) {
-  const L = [['i-phone', 'Appeler'], ['i-wa', 'WhatsApp'], ['i-mail', 'Email'], ['arr', 'Telegram'], ['i-globe', 'Site web']];
+export function ScreenContact({ name }: { name?: string }) {
+  const L: [string, string][] = [['i-phone', 'Appeler'], ['i-wa', 'WhatsApp'], ['i-mail', 'Email'], ['arr', 'Telegram'], ['i-globe', 'Site web']];
   return (
     <div className="ps ps-contact">
       <Head name={name} sub="Contactez-nous" />
@@ -59,7 +59,7 @@ export function ScreenContact({ name }) {
     </div>
   );
 }
-export function ScreenRdv({ name }) {
+export function ScreenRdv({ name }: { name?: string }) {
   const days = ['Lun 13', 'Mar 14', 'Mer 15', 'Jeu 16'];
   const slots = ['10 h 00', '11 h 30', '14 h 30', '16 h 00', '17 h 30', '19 h 00'];
   return (

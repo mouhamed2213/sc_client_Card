@@ -6,7 +6,20 @@ import { CONTACT, LEAD_ENDPOINT } from '../data/contact';
   - Sinon : ouvre la messagerie avec la demande pré-remplie → { mode: 'mailto' }.
   Lève une erreur si l'API répond en échec (la page affiche alors un message de repli).
 */
-export function leadText(p) {
+export interface LeadPayload {
+  intentLabel: string;
+  products: string[];
+  sector?: string;
+  name: string;
+  company?: string;
+  phone?: string;
+  email?: string;
+  city?: string;
+  prefer: string;
+  message?: string;
+}
+
+export function leadText(p: LeadPayload) {
   return [
     `Objet : ${p.intentLabel}`,
     p.products.length ? `Supports : ${p.products.join(', ')}` : null,
@@ -19,13 +32,13 @@ export function leadText(p) {
   ].filter((x) => x !== null).join('\n');
 }
 
-export default async function sendLead(payload) {
+export default async function sendLead(payload: LeadPayload): Promise<{ mode: 'api' | 'mailto' }> {
   if (LEAD_ENDPOINT) {
     const r = await fetch(LEAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(payload) });
     if (!r.ok) throw new Error('lead_failed');
-    return { mode: 'api' };
+    return { mode: 'api' as const };
   }
   const subject = `${payload.intentLabel} — ${payload.company || payload.name}`;
   window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(leadText(payload))}`;
-  return { mode: 'mailto' };
+  return { mode: 'mailto' as const };
 }

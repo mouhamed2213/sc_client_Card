@@ -6,12 +6,28 @@ import useViewProgress from '../../hooks/useViewProgress';
   repères qui s'allument quand le bandeau entre à l'écran. Réutilisable sur toutes les pages.
   hotspots : [{ x, y, label, far }] en % de l'image (far = masqué sur mobile).
 */
-export default function PhotoBand({ src, alt = '', label, title, red, text, note, hotspots = [], id, pos = 'bottom' }) {
-  const sec = useRef(null), [inView, setIn] = useState(false);
+export interface Hotspot { x: number; y: number; label: string; far?: boolean }
+
+interface PhotoBandProps {
+  src: string;
+  alt?: string;
+  label?: string;
+  title?: string;
+  red?: string;
+  text?: string;
+  note?: string;
+  hotspots?: Hotspot[];
+  id?: string;
+  pos?: string;
+}
+
+export default function PhotoBand({ src, alt = '', label, title, red, text, note, hotspots = [], id, pos = 'bottom' }: PhotoBandProps) {
+  const sec = useRef<HTMLElement>(null), [inView, setIn] = useState(false);
   useViewProgress(sec, (p) => sec.current?.style.setProperty('--p', p.toFixed(4)));
   useEffect(() => {
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setIn(true); io.disconnect(); } }, { threshold: .35 });
-    io.observe(sec.current); return () => io.disconnect();
+    if (sec.current) io.observe(sec.current);
+    return () => io.disconnect();
   }, []);
   return (
     <section className={`pband pos-${pos}${inView ? ' in' : ''}`} ref={sec} id={id}>

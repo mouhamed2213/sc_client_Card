@@ -13,7 +13,7 @@ const MAX = 400, SEG = MAX / 4;
 
 export default function ProcessScrubber() {
   const [v, setV] = useState(0);
-  const sec = useRef(null), user = useRef(false);
+  const sec = useRef<HTMLElement>(null), user = useRef(false);
   const step = Math.min(3, Math.floor(v / SEG));
   const s = PROCESS.steps[step];
 
@@ -21,8 +21,8 @@ export default function ProcessScrubber() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let raf = 0, vis = false, last = 0;
     const io = new IntersectionObserver(([e]) => { vis = e.isIntersecting; }, { threshold: .35 });
-    io.observe(sec.current);
-    const tick = (t) => {
+    if (sec.current) io.observe(sec.current);
+    const tick = (t: number) => {
       if (vis && !user.current) {
         const dt = last ? Math.min(64, t - last) : 16;
         setV((x) => { const f = x % SEG; const slow = f > SEG * .25 && f < SEG * .95 ? .018 : .09; const n = x + dt * slow; return n >= MAX ? 0 : n; });
@@ -34,7 +34,7 @@ export default function ProcessScrubber() {
   }, []);
 
   const take = () => { user.current = true; };
-  const goStep = (i) => { take(); setV(i * SEG + SEG / 2); };
+  const goStep = (i: number) => { take(); setV(i * SEG + SEG / 2); };
 
   return (
     <section className="h2-process" ref={sec}>

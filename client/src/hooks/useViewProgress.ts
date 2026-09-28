@@ -1,10 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, type RefObject } from 'react';
 
 /*
   Progression de visibilité d'un élément : 0 quand il entre par le bas, 1 quand il sort par le haut.
   Fonctionne dans tous les navigateurs (repli des scroll-driven animations CSS).
 */
-export default function useViewProgress(ref, onFrame) {
+export default function useViewProgress(
+  ref: RefObject<HTMLElement | null>,
+  onFrame: (p: number) => void
+) {
   useEffect(() => {
     let raf = 0;
     const frame = () => {

@@ -8,20 +8,21 @@ import { FakeQR } from '../cartes/Card3D';
   (machine à écrire : entreprise → nom → fonction → téléphone, puis effacement et exemple suivant).
   Pause hors écran. Mouvement réduit : premier exemple affiché en entier.
 */
-const ORDER = ['company', 'name', 'role', 'phone'];
+type Field = 'company' | 'name' | 'role' | 'phone';
+const ORDER: Field[] = ['company', 'name', 'role', 'phone'];
 
 export default function TypeTeaser() {
   const S = H_TEASER.samples;
-  const [txt, setTxt] = useState({ company: '', name: '', role: '', phone: '' });
-  const [field, setField] = useState('company');
-  const box = useRef(null);
+  const [txt, setTxt] = useState<Record<Field, string>>({ company: '', name: '', role: '', phone: '' });
+  const [field, setField] = useState<Field | null>('company');
+  const box = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setTxt(S[0]); setField(null); return; }
-    let alive = true, vis = false, t = 0;
+    let alive = true, vis = false, t: ReturnType<typeof setTimeout> | undefined;
     const io = new IntersectionObserver(([e]) => { vis = e.isIntersecting; }, { threshold: .3 });
-    io.observe(box.current);
-    const wait = (ms) => new Promise((r) => { t = setTimeout(r, ms); });
+    if (box.current) io.observe(box.current);
+    const wait = (ms: number) => new Promise((r) => { t = setTimeout(r, ms); });
     const until = async () => { while (alive && !vis) await wait(300); };
     (async () => {
       let k = 0;
@@ -40,7 +41,7 @@ export default function TypeTeaser() {
     return () => { alive = false; clearTimeout(t); io.disconnect(); };
   }, [S]);
 
-  const L = (f, cls, icon, ph) => (
+  const L = (f: Field, cls: string, icon: string | null, ph: string) => (
     <span className={`cs-l ${cls}${txt[f] ? '' : ' ph'}${field === f ? ' typing' : ''}`}>{icon && <Icon id={icon} />}<span className="cs-t">{txt[f] || ph}</span></span>
   );
 

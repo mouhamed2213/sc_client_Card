@@ -10,7 +10,7 @@ import { Icon } from '../Icons';
 */
 function Wheel() {
   const L = Q_GAME.wheel, n = L.length, seg = 360 / n;
-  const [rot, setRot] = useState(0), [res, setRes] = useState(null), [busy, setBusy] = useState(false);
+  const [rot, setRot] = useState(0), [res, setRes] = useState<string | null>(null), [busy, setBusy] = useState(false);
   const spin = () => {
     if (busy) return;
     const i = Math.floor(Math.random() * n);
@@ -47,8 +47,8 @@ function Wheel() {
 }
 
 function Boxes() {
-  const [opened, setOpened] = useState(null), [prizes, setPrizes] = useState(Q_GAME.boxes);
-  const pick = (i) => {
+  const [opened, setOpened] = useState<number | null>(null), [prizes, setPrizes] = useState(Q_GAME.boxes);
+  const pick = (i: number) => {
     if (opened !== null) return;
     setPrizes([...Q_GAME.boxes].sort(() => Math.random() - .5)); setOpened(i);
   };
@@ -69,7 +69,7 @@ function Boxes() {
   );
 }
 
-function Result({ res }) {
+function Result({ res }: { res: string | null }) {
   return (
     <div className={`g-res${res ? ' on' : ''}`} aria-live="polite">
       {res && (res === 'Perdu'
@@ -82,7 +82,7 @@ function Result({ res }) {
 export default function GameSection() {
   const [tab, setTab] = useState(0);
   const t = Q_GAME.tabs[tab];
-  const pick = (i) => {
+  const pick = (i: number) => {
     if (i === tab) return;
     if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(() => flushSync(() => setTab(i)));
     else setTab(i);
@@ -95,7 +95,7 @@ export default function GameSection() {
           <p className="side-note">{Q_GAME.text}</p>
         </div>
 
-        <div className="tabs rv" role="tablist" aria-label="Type de jeu" style={{ '--i': tab, '--n': 2 }}>
+        <div className="tabs rv" role="tablist" aria-label="Type de jeu" style={{ '--i': tab, '--n': 2 } as React.CSSProperties}>
           <span className="tab-ind two" aria-hidden="true" />
           {Q_GAME.tabs.map((x, i) => <button key={x.id} role="tab" aria-selected={i === tab} className={i === tab ? 'on' : ''} onClick={() => pick(i)}>{x.label}</button>)}
         </div>

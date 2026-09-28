@@ -1,13 +1,13 @@
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { IconSprite } from '../components/Icons';
-import useReveal from '../hooks/useReveal';
-import QrHero from '../components/qr/QrHero';
-import UseCasesSection from '../components/qr/UseCasesSection';
-import FormatsSection from '../components/qr/FormatsSection';
-import GameSection from '../components/qr/GameSection';
-import QrCTA from '../components/qr/QrCTA';
-import PhotoBand from '../components/media/PhotoBand';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import { IconSprite } from '../../components/Icons';
+import useReveal from '../../hooks/useReveal';
+import QrHero from '../../components/qr/QrHero';
+import UseCasesSection from '../../components/qr/UseCasesSection';
+import FormatsSection from '../../components/qr/FormatsSection';
+import GameSection from '../../components/qr/GameSection';
+import QrCTA from '../../components/qr/QrCTA';
+import PhotoBand from '../../components/media/PhotoBand';
 import '../styles/cartes.css';
 import '../styles/qr.css';
 

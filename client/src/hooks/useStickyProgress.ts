@@ -1,11 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, type RefObject } from "react";
 
 /*
   Suit la progression (0 → 1) d'une section « sticky » pendant le défilement.
   onFrame(p) est appelé dans requestAnimationFrame, uniquement quand la section est visible.
   Aucun re-render React par frame : on écrit directement dans le DOM depuis onFrame.
 */
-export default function useStickyProgress(ref, onFrame, onLeave) {
+export default function useStickyProgress(
+  ref: RefObject<HTMLElement | null>,
+  onFrame: (p: number) => void,
+  onLeave?: () => void
+) {
   useEffect(() => {
     let raf = 0;
     const frame = () => {

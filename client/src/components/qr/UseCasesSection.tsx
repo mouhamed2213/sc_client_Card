@@ -11,12 +11,13 @@ import { SCREENS } from './PhoneScreens';
 */
 export default function UseCasesSection() {
   const [idx, setIdx] = useState(0);
-  const sec = useRef(null), prog = useRef(null), cur = useRef(-1);
+  const sec = useRef<HTMLElement>(null), prog = useRef<HTMLElement>(null), cur = useRef(-1);
   const N = Q_STICKERS.length;
 
   useEffect(() => {
     let raf = 0;
     const frame = () => {
+      if (!sec.current || !prog.current) return;
       const r = sec.current.getBoundingClientRect(), span = r.height - innerHeight;
       if (r.bottom < 0 || r.top > innerHeight) return;
       const p = Math.max(0, Math.min(1, -r.top / span));
@@ -29,8 +30,10 @@ export default function UseCasesSection() {
     return () => { cancelAnimationFrame(raf); removeEventListener('scroll', on); removeEventListener('resize', on); };
   }, [N]);
 
-  const goTo = (i) => {
-    const el = sec.current, span = el.offsetHeight - innerHeight;
+  const goTo = (i: number) => {
+    const el = sec.current;
+    if (!el) return;
+    const span = el.offsetHeight - innerHeight;
     window.scrollTo({ top: el.offsetTop + span * ((i + .5) / N), behavior: 'smooth' });
   };
   const s = Q_STICKERS[idx];
@@ -66,7 +69,7 @@ export default function UseCasesSection() {
             <div className="phone static qu-phone" aria-hidden="true">
               <div className="screen">
                 <div className="isl" />
-                {Q_STICKERS.map((st, i) => { const S = SCREENS[st.id]; return <div key={st.id} className={`qu-scr${i === idx ? ' on' : ''}`}><S /></div>; })}
+                {Q_STICKERS.map((st, i) => { const S = (SCREENS as Record<string, React.ComponentType>)[st.id]; return <div key={st.id} className={`qu-scr${i === idx ? ' on' : ''}`}><S /></div>; })}
               </div>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { SECTORS as SEC_HEAD } from '../../data/content';
 import { SECTORS } from '../../data/secteurs';
 import { H_SECTORS } from '../../data/home';
@@ -9,7 +10,7 @@ import { Icon } from '../Icons';
   à son chapitre sur la page Secteurs. Mouvement réduit : bandeaux fixes et défilables.
 */
 export default function SectorsMarquee() {
-  const row = (items, render, cls) => (
+  const row = <T,>(items: T[], render: (x: T, k: number) => ReactNode, cls: string) => (
     <div className={`mq ${cls}`}>
       <div className="mq-track">
         {[0, 1].map((k) => <div className="mq-set" key={k} aria-hidden={k === 1}>{items.map((x) => render(x, k))}</div>)}

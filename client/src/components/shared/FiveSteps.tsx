@@ -1,5 +1,12 @@
 // « Cinq temps, un livrable à chaque étape » — ligne qui se remplit au scroll.
-export default function FiveSteps({ data }) {
+interface FiveStepsData {
+  label: string;
+  title: string;
+  red: string;
+  steps: { n: string | number; title: string; text: string }[];
+}
+
+export default function FiveSteps({ data }: { data: FiveStepsData }) {
   return (
     <section className="five">
       <div className="wrap">

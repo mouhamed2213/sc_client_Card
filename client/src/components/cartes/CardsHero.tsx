@@ -14,7 +14,7 @@ export default function CardsHero() {
   const CH = useContent('cartes.hero', C_HERO);
   const [go, setGo] = useState(false);
   const [flipped, setFlipped] = useState(false);
-  const zone = useRef(null), rot = useRef(null);
+  const zone = useRef<HTMLElement>(null), rot = useRef<HTMLDivElement>(null);
 
   useEffect(() => { const t = setTimeout(() => setGo(true), 60); return () => clearTimeout(t); }, []);
 
@@ -30,7 +30,7 @@ export default function CardsHero() {
       r.style.setProperty('--gy', (50 + cy * 60).toFixed(1) + '%');
       if (Math.abs(tx - cx) > .001 || Math.abs(ty - cy) > .001) raf = requestAnimationFrame(tick); else raf = 0;
     };
-    const move = (e) => {
+    const move = (e: PointerEvent) => {
       const b = el.getBoundingClientRect();
       tx = ((e.clientX - b.left) / b.width - .5) * 2; ty = ((e.clientY - b.top) / b.height - .5) * 2;
       if (!raf) raf = requestAnimationFrame(tick);

@@ -8,8 +8,8 @@ import useViewProgress from '../../hooks/useViewProgress';
   (background-clip: text) au fur et à mesure.
 */
 export default function VerbsBand() {
-  const sec = useRef(null);
-  useViewProgress(sec, (p) => sec.current.style.setProperty('--p', p.toFixed(4)));
+  const sec = useRef<HTMLElement>(null);
+  useViewProgress(sec, (p) => sec.current?.style.setProperty('--p', p.toFixed(4)));
   return (
     <section className="verbs" ref={sec} style={{ '--p': 0 } as React.CSSProperties}>
       {A_VERBS.map((v, i) => (

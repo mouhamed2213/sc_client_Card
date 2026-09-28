@@ -9,21 +9,21 @@ import { HOTEL_SCREENS } from './HotelScreens';
 */
 export default function AccueilSection() {
   const [cur, setCur] = useState(0);
-  const box = useRef(null), user = useRef(false);
+  const box = useRef<HTMLElement>(null), user = useRef(false);
   const S = P_ACCUEIL.spots;
 
   useEffect(() => {
-    let id = 0;
+    let id: ReturnType<typeof setInterval> | undefined;
     const io = new IntersectionObserver(([e]) => {
       clearInterval(id);
       if (e.isIntersecting && !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
         id = setInterval(() => { if (user.current) return clearInterval(id); setCur((c) => (c + 1) % S.length); }, 2600);
     }, { threshold: .45 });
-    io.observe(box.current);
+    if (box.current) io.observe(box.current);
     return () => { io.disconnect(); clearInterval(id); };
   }, [S.length]);
 
-  const pick = (i) => { user.current = true; setCur(i); };
+  const pick = (i: number) => { user.current = true; setCur(i); };
 
   return (
     <section className="accueil" id="accueil" ref={box}>
@@ -46,7 +46,7 @@ export default function AccueilSection() {
             <div className="phone static ac-phone" aria-live="polite">
               <div className="screen">
                 <div className="isl" />
-                {S.map((s, i) => { const C = HOTEL_SCREENS[s.id]; return <div key={s.id} className={`qu-scr${i === cur ? ' on' : ''}`}><C /></div>; })}
+                {S.map((s, i) => { const C = (HOTEL_SCREENS as Record<string, React.ComponentType>)[s.id]; return <div key={s.id} className={`qu-scr${i === cur ? ' on' : ''}`}><C /></div>; })}
               </div>
             </div>
             <div className="ac-chips" role="group" aria-label="Accès du panneau">

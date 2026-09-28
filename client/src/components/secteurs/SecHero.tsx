@@ -10,7 +10,7 @@ import SectorScreen from './SectorScreen';
   Survol / toucher : sélection. Clic : défilement jusqu'au chapitre du secteur.
 */
 const N = SECTORS.length;
-const ang = (i) => -90 + i * (360 / N);
+const ang = (i: number) => -90 + i * (360 / N);
 
 export default function SecHero() {
   const [go, setGo] = useState(false), [cur, setCur] = useState(0), [beam, setBeam] = useState(ang(0));
@@ -24,8 +24,8 @@ export default function SecHero() {
   useEffect(() => { // le faisceau tourne toujours par le chemin le plus court
     setBeam((prev) => { let a = ang(cur); while (a - prev > 180) a -= 360; while (a - prev < -180) a += 360; return a; });
   }, [cur]);
-  const pick = (i) => { user.current = true; setCur(i); };
-  const go2 = (i) => { pick(i); document.getElementById('sec-' + SECTORS[i].id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const pick = (i: number) => { user.current = true; setCur(i); };
+  const go2 = (i: number) => { pick(i); document.getElementById('sec-' + SECTORS[i].id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   const s = SECTORS[cur];
 
   return (
@@ -47,7 +47,7 @@ export default function SecHero() {
 
         <div className="orbit" onMouseLeave={() => { user.current = false; }}>
           <div className="orb-ring">
-            <span className="orb-beam" style={{ '--a': beam + 'deg' }} aria-hidden="true" />
+            <span className="orb-beam" style={{ '--a': beam + 'deg' } as React.CSSProperties} aria-hidden="true" />
             {SECTORS.map((x, i) => {
               const a = ang(i) * Math.PI / 180;
               return (

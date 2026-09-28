@@ -10,13 +10,14 @@ import { Icon } from '../Icons';
 export default function QrHero() {
   const [go, setGo] = useState(false);
   const [front, setFront] = useState(0);
-  const ring = useRef(null), zone = useRef(null);
+  const ring = useRef<HTMLDivElement>(null), zone = useRef<HTMLDivElement>(null);
   const N = Q_STICKERS.length, STEP = 360 / N;
 
   useEffect(() => { const t = setTimeout(() => setGo(true), 60); return () => clearTimeout(t); }, []);
 
   useEffect(() => {
     const el = zone.current, r = ring.current;
+    if (!el || !r) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let a = 0, v = reduce ? 0 : -0.12, drag = false, lx = 0, raf = 0, last = -1;
     const tick = () => {
@@ -26,8 +27,8 @@ export default function QrHero() {
       if (f !== last) { last = f; setFront(f); }
       raf = requestAnimationFrame(tick);
     };
-    const down = (e) => { drag = true; lx = e.clientX; el.setPointerCapture?.(e.pointerId); };
-    const move = (e) => { if (!drag) return; const dx = e.clientX - lx; lx = e.clientX; a += dx * 0.35; v = dx * 0.35; };
+    const down = (e: PointerEvent) => { drag = true; lx = e.clientX; el.setPointerCapture?.(e.pointerId); };
+    const move = (e: PointerEvent) => { if (!drag) return; const dx = e.clientX - lx; lx = e.clientX; a += dx * 0.35; v = dx * 0.35; };
     const up = () => { drag = false; };
     el.addEventListener('pointerdown', down); el.addEventListener('pointermove', move);
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);

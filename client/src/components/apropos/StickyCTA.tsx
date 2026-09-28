@@ -12,8 +12,8 @@ export default function StickyCTA() {
   const [show, setShow] = useState(false);
   useEffect(() => {
     const hero = document.getElementById('top');
-    const blockers = ['diagnostic', 'contact'].map((id) => document.getElementById(id)).filter(Boolean);
-    let pastHero = false; const vis = new Set();
+    const blockers = ['diagnostic', 'contact'].map((id) => document.getElementById(id)).filter((el): el is HTMLElement => el !== null);
+    let pastHero = false; const vis = new Set<Element>();
     const upd = () => setShow(pastHero && vis.size === 0);
     const io = new IntersectionObserver((es) => es.forEach((e) => {
       if (e.target === hero) pastHero = !e.isIntersecting && e.boundingClientRect.top < 0;

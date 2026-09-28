@@ -6,7 +6,7 @@ export default function PanIndex() {
     <nav className="p-index" id="formats" aria-label="Les formats">
       <div className="wrap p-index-row">
         {P_INDEX.map((f, i) => (
-          <a key={f.id} href={`#${f.id}`} className="p-idx rv" style={{ '--i': i }}>
+          <a key={f.id} href={`#${f.id}`} className="p-idx rv" style={{ '--i': i } as React.CSSProperties}>
             <span className="p-idx-img"><img src={f.img} alt="" loading="lazy" /></span>
             <span className="p-idx-n">0{i + 1}</span>
             <b>{f.title}</b>

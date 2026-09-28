@@ -1,7 +1,18 @@
 import { Icon } from '../Icons';
 
 // CTA de fin de page réutilisable (fond photo ambiance, léger parallaxe CSS).
-export default function SimpleCTA({ label, title, red, text, cta1, cta2, href1 = '/contact', bg }) {
+interface SimpleCTAProps {
+  label: string;
+  title: string;
+  red: string;
+  text?: string;
+  cta1: string;
+  cta2: string;
+  href1?: string;
+  bg?: string;
+}
+
+export default function SimpleCTA({ label, title, red, text, cta1, cta2, href1 = '/contact', bg }: SimpleCTAProps) {
   return (
     <section className="c-cta">
       <div className="c-cta-bg" aria-hidden="true" style={bg ? { backgroundImage: `url(${bg})`, opacity: .55 } : undefined} />

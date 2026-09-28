@@ -16,11 +16,12 @@ const LAYERS = [
 
 export default function PanHero() {
   const [go, setGo] = useState(false);
-  const zone = useRef(null), stack = useRef(null);
+  const zone = useRef<HTMLElement>(null), stack = useRef<HTMLDivElement>(null);
   useEffect(() => { const t = setTimeout(() => setGo(true), 60); return () => clearTimeout(t); }, []);
 
   useEffect(() => {
     const el = zone.current, st = stack.current;
+    if (!el || !st) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     let raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
     const tick = () => {
@@ -28,7 +29,7 @@ export default function PanHero() {
       st.style.setProperty('--mx', cx.toFixed(3)); st.style.setProperty('--my', cy.toFixed(3));
       raf = Math.abs(tx - cx) + Math.abs(ty - cy) > .001 ? requestAnimationFrame(tick) : 0;
     };
-    const move = (e) => { const b = el.getBoundingClientRect(); tx = (e.clientX - b.left) / b.width - .5; ty = (e.clientY - b.top) / b.height - .5; if (!raf) raf = requestAnimationFrame(tick); };
+    const move = (e: PointerEvent) => { const b = el.getBoundingClientRect(); tx = (e.clientX - b.left) / b.width - .5; ty = (e.clientY - b.top) / b.height - .5; if (!raf) raf = requestAnimationFrame(tick); };
     const leave = () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(tick); };
     el.addEventListener('pointermove', move); el.addEventListener('pointerleave', leave);
     return () => { cancelAnimationFrame(raf); el.removeEventListener('pointermove', move); el.removeEventListener('pointerleave', leave); };

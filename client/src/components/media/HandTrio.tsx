@@ -12,11 +12,11 @@ const ITEMS = [
 ];
 
 export default function HandTrio({ label = 'Trois niveaux', title = 'Elle tient dans la main.', red = 'Elle ouvre tout le reste.' }) {
-  const sec = useRef(null), [inView, setIn] = useState(false);
-  useEffect(() => { const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setIn(true); io.disconnect(); } }, { threshold: .2 }); io.observe(sec.current); return () => io.disconnect(); }, []);
-  const tilt = (e) => { if (window.matchMedia('(hover: none)').matches) return; const el = e.currentTarget, r = el.getBoundingClientRect(); el.style.setProperty('--ry', `${((e.clientX - r.left) / r.width - .5) * 10}deg`); el.style.setProperty('--rx', `${-((e.clientY - r.top) / r.height - .5) * 8}deg`); };
-  const reset = (e) => { e.currentTarget.style.setProperty('--ry', '0deg'); e.currentTarget.style.setProperty('--rx', '0deg'); };
-  const open = (t) => { window.dispatchEvent(new CustomEvent('studio:tier', { detail: t })); document.getElementById('creer-ma-carte')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  const sec = useRef<HTMLElement>(null), [inView, setIn] = useState(false);
+  useEffect(() => { const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setIn(true); io.disconnect(); } }, { threshold: .2 }); if (sec.current) io.observe(sec.current); return () => io.disconnect(); }, []);
+  const tilt = (e: React.PointerEvent<HTMLButtonElement>) => { if (window.matchMedia('(hover: none)').matches) return; const el = e.currentTarget, r = el.getBoundingClientRect(); el.style.setProperty('--ry', `${((e.clientX - r.left) / r.width - .5) * 10}deg`); el.style.setProperty('--rx', `${-((e.clientY - r.top) / r.height - .5) * 8}deg`); };
+  const reset = (e: React.PointerEvent<HTMLButtonElement>) => { e.currentTarget.style.setProperty('--ry', '0deg'); e.currentTarget.style.setProperty('--rx', '0deg'); };
+  const open = (t: string) => { window.dispatchEvent(new CustomEvent('studio:tier', { detail: t })); document.getElementById('creer-ma-carte')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   return (
     <section className={`htrio${inView ? ' in' : ''}`} ref={sec}>
       <div className="wrap">

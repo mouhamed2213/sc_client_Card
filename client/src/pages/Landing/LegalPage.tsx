@@ -1,7 +1,7 @@
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { IconSprite } from '../components/Icons';
-import { CONTACT } from '../data/apropos';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+import { IconSprite } from '../../components/Icons';
+import { CONTACT } from '../../data/apropos';
 
 // Mentions légales et politique de confidentialité — ⚠️ gabarits à compléter avant mise en ligne.
 const T = {
@@ -29,7 +29,7 @@ const T = {
   },
 };
 
-export default function LegalPage({ path }) {
+export default function LegalPage({ path }: { path: keyof typeof T }) {
   const p = T[path];
   return (
     <>
@@ -37,7 +37,7 @@ export default function LegalPage({ path }) {
       <main className="legal"><div className="wrap">
         <p className="label">Informations légales</p><h1>{p.title}</h1>
         <p className="todo">Gabarit à faire valider par un juriste : les passages entre crochets sont à compléter.</p>
-        {p.blocks.map(([h, t]) => <div key={h}><h2>{h}</h2><p>{t}</p></div>)}
+        {p.blocks.map(([h, t]: string[]) => <div key={h}><h2>{h}</h2><p>{t}</p></div>)}
       </div></main>
       <Footer current={path} />
     </>

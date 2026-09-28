@@ -5,7 +5,7 @@ import { Icon } from "../Icons";
   Engagements (textes du catalogue). Cartes « projecteur » : un halo suit le pointeur
   et illumine la bordure (variables CSS --mx / --my + masque CSS).
 */
-const track = e => {
+const track = (e: React.PointerEvent<HTMLElement>) => {
   const el = e.currentTarget,
     r = el.getBoundingClientRect();
   el.style.setProperty("--mx", `${e.clientX - r.left}px`);

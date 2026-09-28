@@ -10,31 +10,33 @@ import useStickyProgress from '../../hooks/useStickyProgress';
   la même page affiche le bien suivant.
 */
 const QR = [51.1, 65.5]; // centre du QR sur panneau-immo.webp (%)
-const ease = (x) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-const cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ease = (x: number) => (x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const cl = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 
 export default function ImmoStory() {
   const [step, setStep] = useState(0), [prop, setProp] = useState(0), [lit, setLit] = useState(-1);
-  const sec = useRef(null), frame = useRef(null), img = useRef(null), phone = useRef(null), stamp = useRef(null), ring = useRef(null), prog = useRef(null);
+  const sec = useRef<HTMLElement>(null), frame = useRef<HTMLDivElement>(null), img = useRef<HTMLImageElement>(null), phone = useRef<HTMLDivElement>(null), stamp = useRef<HTMLDivElement>(null), ring = useRef<HTMLElement>(null), prog = useRef<HTMLElement>(null);
   const st = useRef({ step: -1, prop: -1, lit: -2 });
 
   useStickyProgress(sec, (p) => {
     const t = p * 3.2, m = window.innerWidth <= 900;
-    const f = frame.current, W = f.clientWidth, H = f.clientHeight;
+    const f = frame.current, im = img.current, rg = ring.current, ph_ = phone.current, sp = stamp.current, pg = prog.current;
+    if (!f || !im || !rg || !ph_ || !sp || !pg) return;
+    const W = f.clientWidth, H = f.clientHeight;
     // zoom sur le QR, puis retour à mi-zoom pour montrer le tampon
     const zin = ease(cl(t / .9)), zout = ease(cl((t - 2) / .35));
     const s = 1 + 1.5 * zin - 1.2 * zout;
     const k = zin - zout * .8;
     const tx = (0.5 - QR[0] / 100) * W * k, ty = (0.5 - QR[1] / 100) * H * k;
-    img.current.style.transformOrigin = `${QR[0]}% ${QR[1]}%`;
-    img.current.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
-    ring.current.style.opacity = t > .6 && t < 1.2 ? 1 : 0;
+    im.style.transformOrigin = `${QR[0]}% ${QR[1]}%`;
+    im.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
+    rg.style.opacity = t > .6 && t < 1.2 ? '1' : '0';
     const ph = ease(cl((t - .85) / .35));
-    phone.current.style.opacity = ph;
-    phone.current.style.transform = `translate(${(1 - ph) * (m ? 40 : 80)}px, ${(1 - ph) * 20}px) rotate(${(1 - ph) * 6}deg)`;
-    stamp.current.style.opacity = t >= 2.15 ? 1 : 0;
-    stamp.current.classList.toggle('on', t >= 2.15);
-    prog.current.style.transform = `scaleX(${p})`;
+    ph_.style.opacity = String(ph);
+    ph_.style.transform = `translate(${(1 - ph) * (m ? 40 : 80)}px, ${(1 - ph) * 20}px) rotate(${(1 - ph) * 6}deg)`;
+    sp.style.opacity = t >= 2.15 ? '1' : '0';
+    sp.classList.toggle('on', t >= 2.15);
+    pg.style.transform = `scaleX(${p})`;
     const nStep = t < 1 ? 0 : t < 2.1 ? 1 : 2;
     const nProp = t >= 2.45 ? 1 : 0;
     const nLit = t < 1.15 ? -1 : t >= 2.1 ? 5 : Math.min(4, Math.floor((t - 1.15) / .18));
