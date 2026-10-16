@@ -29,6 +29,7 @@ import {
   getFicheById,
   getFicheBySlug,
   getFicheOwnedBy,
+  getPassageStatsForFiche,
   getOverview,
   listContactRequests,
   listFiches,
@@ -496,6 +497,32 @@ export const appRouter = router({
             message: "Fiche introuvable.",
           });
         return listScansForFiche(input.ficheId, input.days ?? 30);
+      }),
+    passageStats: clientProcedure
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          granularity: z.enum(["day", "month"]).optional().default("month"),
+          date: z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/).optional(),
+          month: z.string().regex(/^\\d{4}-(0[1-9]|1[0-2])$/).optional(),
+        }).refine(value => !(value.date && value.month), {
+          message: "Choisissez une date ou un mois, pas les deux.",
+        })
+      )
+      .query(async ({ ctx, input }) => {
+        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        if (!fiche)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
+        if (input.date && Number.isNaN(Date.parse(`${input.date}T00:00:00.000Z`)))
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Date invalide." });
+        return getPassageStatsForFiche(input.ficheId, {
+          granularity: input.granularity,
+          ...(input.date ? { date: input.date } : {}),
+          ...(input.month ? { month: input.month } : {}),
+        });
       }),
     contactRequests: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))
