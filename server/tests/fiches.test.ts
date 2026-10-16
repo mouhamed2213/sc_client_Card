@@ -99,24 +99,26 @@ describe("fiches.public", () => {
     const caller = appRouter.createCaller(createPublicContext());
     const fiche = await getFicheBySlug("hotel-teranga");
     expect(fiche).toBeTruthy();
-    const prefix = randomUUID();
+    const keys = ["qr", "nfc", "direct"].map(() => randomUUID());
     const before = await prisma.fiche.findUnique({ where: { id: fiche!.id } });
+    const today = new Date().toISOString().slice(0, 10);
+    const dailyBefore = await prisma.ficheScan.findUnique({
+      where: { ficheId_scanDate: { ficheId: fiche!.id, scanDate: today } },
+    });
 
     try {
-      for (const source of ["qr", "nfc", "direct"] as const) {
+      for (const [index, source] of (["qr", "nfc", "direct"] as const).entries()) {
         await expect(
           caller.fiches.recordPassage({
             slug: fiche!.slug,
             source,
-            idempotencyKey: randomUUID(),
+            idempotencyKey: keys[index],
           })
         ).resolves.toEqual({ ok: true, recorded: true });
       }
       const after = await prisma.fiche.findUnique({ where: { id: fiche!.id } });
       expect(after?.scansTotal).toBe((before?.scansTotal ?? 0) + 3);
-      expect(
-        await prisma.fichePassage.count({ where: { ficheId: fiche!.id, createdAt: { gte: new Date(Date.now() - 60_000) } } })
-      ).toBeGreaterThanOrEqual(3);
+      expect(await prisma.fichePassage.count({ where: { idempotencyKey: { in: keys } } })).toBe(3);
 
       const suspended = await getFicheBySlug("atelier-baobab");
       const suspendedResult = await caller.fiches.recordPassage({
@@ -126,21 +128,19 @@ describe("fiches.public", () => {
       });
       expect(suspendedResult).toEqual({ ok: false, recorded: false });
     } finally {
-      await prisma.fichePassage.deleteMany({
-        where: { ficheId: fiche!.id, createdAt: { gte: new Date(Date.now() - 60_000) } },
-      });
+      await prisma.fichePassage.deleteMany({ where: { idempotencyKey: { in: keys } } });
       await prisma.fiche.update({
         where: { id: fiche!.id },
         data: { scansTotal: before!.scansTotal, lastScanAt: before!.lastScanAt },
       });
-      const today = new Date().toISOString().slice(0, 10);
-      const passagesToday = await prisma.fichePassage.count({
-        where: { ficheId: fiche!.id, createdAt: { gte: new Date(new Date().toISOString().slice(0,10)) } },
-      });
-      // Le test d'endpoint vérifie le chemin public; le test recordPassage dédié
-      // vérifie l'agrégat journalier de façon isolée.
-      void passagesToday;
+      if (dailyBefore) {
+        await prisma.ficheScan.update({
+          where: { ficheId_scanDate: { ficheId: fiche!.id, scanDate: today } },
+          data: { count: dailyBefore.count },
+        });
+      } else {
+        await prisma.ficheScan.deleteMany({ where: { ficheId: fiche!.id, scanDate: today } });
+      }
     }
   });
-
 });
