@@ -1,6 +1,7 @@
+import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { appRouter } from "../routers";
-import { getFicheBySlug, updateFiche } from "../db";
+import { getFicheBySlug, prisma, recordPassage, updateFiche } from "../db";
 import type { TrpcContext } from "../_core/context";
 
 function createPublicContext(): TrpcContext {
@@ -47,4 +48,50 @@ describe("fiches.public", () => {
     expect((await getFicheBySlug("hotel-teranga"))?.scansTotal).toBe(before + 1);
     await updateFiche(fiche!.id, { scansTotal: before });
   });
+
+  it("records each passage once for an idempotency key and keeps legacy aggregates in sync", async () => {
+    const fiche = await getFicheBySlug("hotel-teranga");
+    expect(fiche).toBeTruthy();
+    const idempotencyKey = randomUUID();
+    const today = new Date().toISOString().slice(0, 10);
+    const before = await prisma.fiche.findUnique({ where: { id: fiche!.id } });
+    const dailyBefore = await prisma.ficheScan.findUnique({
+      where: { ficheId_scanDate: { ficheId: fiche!.id, scanDate: today } },
+    });
+
+    try {
+      await expect(recordPassage(fiche!.id, "qr", idempotencyKey)).resolves.toBe(true);
+      await expect(recordPassage(fiche!.id, "qr", idempotencyKey)).resolves.toBe(false);
+
+      const after = await prisma.fiche.findUnique({ where: { id: fiche!.id } });
+      expect(after?.scansTotal).toBe((before?.scansTotal ?? 0) + 1);
+      expect(
+        await prisma.fichePassage.count({ where: { idempotencyKey } })
+      ).toBe(1);
+      const dailyAfter = await prisma.ficheScan.findUnique({
+        where: { ficheId_scanDate: { ficheId: fiche!.id, scanDate: today } },
+      });
+      expect(dailyAfter?.count).toBe((dailyBefore?.count ?? 0) + 1);
+    } finally {
+      await prisma.fichePassage.deleteMany({ where: { idempotencyKey } });
+      await prisma.fiche.update({
+        where: { id: fiche!.id },
+        data: {
+          scansTotal: before!.scansTotal,
+          lastScanAt: before!.lastScanAt,
+        },
+      });
+      if (dailyBefore) {
+        await prisma.ficheScan.update({
+          where: { ficheId_scanDate: { ficheId: fiche!.id, scanDate: today } },
+          data: { count: dailyBefore.count },
+        });
+      } else {
+        await prisma.ficheScan.deleteMany({
+          where: { ficheId: fiche!.id, scanDate: today },
+        });
+      }
+    }
+  });
+
 });
