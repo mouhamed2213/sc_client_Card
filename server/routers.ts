@@ -35,6 +35,7 @@ import {
   listFichesByOwner,
   listMembershipCards,
   listScansForFiche,
+  recordPassage,
   recordScan,
   searchClientUsers,
   updateFiche,
@@ -83,6 +84,24 @@ export const appRouter = router({
         const fiche = await getFicheBySlug(input.slug);
         if (fiche && fiche.statut === "active") await recordScan(fiche);
         return { ok: true };
+      }),
+    recordPassage: publicProcedure
+      .input(
+        z.object({
+          slug: z.string().min(1).max(160),
+          source: z.enum(["qr", "nfc", "direct"]),
+          idempotencyKey: z.string().min(1).max(64),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const fiche = await getFicheBySlug(input.slug);
+        if (!fiche || fiche.statut !== "active") return { ok: false, recorded: false };
+        const recorded = await recordPassage(
+          fiche.id,
+          input.source,
+          input.idempotencyKey
+        );
+        return { ok: true, recorded };
       }),
     create: adminProcedure.input(fichePayload).mutation(async ({ input }) => {
       const existing = await getFicheBySlug(input.slug);
