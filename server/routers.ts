@@ -29,12 +29,14 @@ import {
   getFicheById,
   getFicheBySlug,
   getFicheOwnedBy,
+  getPassageStatsForFiche,
   getOverview,
   listContactRequests,
   listFiches,
   listFichesByOwner,
   listMembershipCards,
   listScansForFiche,
+  recordPassage,
   recordScan,
   searchClientUsers,
   updateFiche,
@@ -83,6 +85,33 @@ export const appRouter = router({
         const fiche = await getFicheBySlug(input.slug);
         if (fiche && fiche.statut === "active") await recordScan(fiche);
         return { ok: true };
+      }),
+    recordPassage: publicProcedure
+      .input(
+        z.object({
+          slug: z.string().min(1).max(160),
+          source: z.enum(["qr", "nfc", "direct"]),
+          idempotencyKey: z.string().min(1).max(64),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const fiche = await getFicheBySlug(input.slug);
+        if (!fiche || fiche.statut !== "active") return { ok: false, recorded: false };
+        try {
+          const recorded = await recordPassage(
+            fiche.id,
+            input.source,
+            input.idempotencyKey
+          );
+          return { ok: true, recorded };
+        } catch (error) {
+          if (error instanceof Error && error.message === "PASSAGE_IDEMPOTENCY_CONFLICT")
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Cette clé de passage a déjà été utilisée pour un autre événement.",
+            });
+          throw error;
+        }
       }),
     create: adminProcedure.input(fichePayload).mutation(async ({ input }) => {
       const existing = await getFicheBySlug(input.slug);
@@ -477,6 +506,32 @@ export const appRouter = router({
             message: "Fiche introuvable.",
           });
         return listScansForFiche(input.ficheId, input.days ?? 30);
+      }),
+    passageStats: clientProcedure
+      .input(
+        z.object({
+          ficheId: z.number().int().positive(),
+          granularity: z.enum(["day", "month"]).optional().default("month"),
+          date: z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/).optional(),
+          month: z.string().regex(/^\\d{4}-(0[1-9]|1[0-2])$/).optional(),
+        }).refine(value => !(value.date && value.month), {
+          message: "Choisissez une date ou un mois, pas les deux.",
+        })
+      )
+      .query(async ({ ctx, input }) => {
+        const fiche = await getFicheOwnedBy(input.ficheId, ctx.user.id);
+        if (!fiche)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Fiche introuvable.",
+          });
+        if (input.date && Number.isNaN(Date.parse(`${input.date}T00:00:00.000Z`)))
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Date invalide." });
+        return getPassageStatsForFiche(input.ficheId, {
+          granularity: input.granularity,
+          ...(input.date ? { date: input.date } : {}),
+          ...(input.month ? { month: input.month } : {}),
+        });
       }),
     contactRequests: clientProcedure
       .input(z.object({ ficheId: z.number().int().positive() }))

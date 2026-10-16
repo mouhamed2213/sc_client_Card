@@ -1,6 +1,6 @@
 import { trpc } from "@/lib/trpc";
 import { ArrowUpRight, Phone, XCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "wouter";
 import {
   FicheTemplate,
@@ -19,7 +19,8 @@ function parseError(error: unknown) {
 export default function PublicFiche() {
   const { slug = "" } = useParams<{ slug: string }>();
   const ficheQuery = trpc.fiches.getBySlug.useQuery({ slug });
-  const scanMutation = trpc.fiches.recordScan.useMutation();
+  const passageMutation = trpc.fiches.recordPassage.useMutation();
+  const passageKey = useRef<{ slug: string; key: string } | null>(null);
   const contactMutation = trpc.fiches.contact.useMutation();
   const cachedFiche = useMemo(() => readCachedFiche(slug), [slug]);
   const [contactOpen, setContactOpen] = useState(false);
@@ -47,7 +48,13 @@ export default function PublicFiche() {
   }, [ficheQuery.data, slug]);
 
   useEffect(() => {
-    if (ficheQuery.data?.statut === "active") scanMutation.mutate({ slug });
+    if (ficheQuery.data?.statut !== "active" || !slug) return;
+    if (!passageKey.current || passageKey.current.slug !== slug) {
+      passageKey.current = { slug, key: crypto.randomUUID() };
+    }
+    const requestedSource = new URLSearchParams(window.location.search).get("source");
+    const source = requestedSource === "qr" || requestedSource === "nfc" ? requestedSource : "direct";
+    passageMutation.mutate({ slug, source, idempotencyKey: passageKey.current.key });
   }, [ficheQuery.data?.statut, slug]);
 
   if (ficheQuery.isLoading && !cachedFiche) {

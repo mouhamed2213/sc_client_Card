@@ -1,0 +1,1 @@
+Migration additive pour l'historique détaillé des passages de fiche.

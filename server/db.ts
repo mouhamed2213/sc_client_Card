@@ -225,6 +225,47 @@ export async function recordScan(fiche: Fiche) {
     }),
   ]);
 }
+export async function recordPassage(
+  ficheId: number,
+  source: "qr" | "nfc" | "direct",
+  idempotencyKey: string
+): Promise<boolean> {
+  const key = idempotencyKey.trim();
+  if (!key || key.length > 64) throw new Error("INVALID_IDEMPOTENCY_KEY");
+
+  try {
+    return await prisma.$transaction(async tx => {
+      const existing = await tx.fichePassage.findUnique({ where: { idempotencyKey: key } });
+      if (existing) {
+        if (existing.ficheId !== ficheId || existing.source !== source) {
+          throw new Error("PASSAGE_IDEMPOTENCY_CONFLICT");
+        }
+        return false;
+      }
+
+      const now = new Date();
+      const today = now.toISOString().slice(0, 10);
+      await tx.fichePassage.create({ data: { ficheId, source, idempotencyKey: key } });
+      await tx.fiche.update({
+        where: { id: ficheId },
+        data: { scansTotal: { increment: 1 }, lastScanAt: now },
+      });
+      await tx.ficheScan.upsert({
+        where: { ficheId_scanDate: { ficheId, scanDate: today } },
+        create: { ficheId, scanDate: today, count: 1 },
+        update: { count: { increment: 1 } },
+      });
+      return true;
+    });
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2002") {
+      const existing = await prisma.fichePassage.findUnique({ where: { idempotencyKey: key } });
+      if (existing?.ficheId === ficheId && existing.source === source) return false;
+    }
+    throw error;
+  }
+}
+
 export async function createContactRequest(input: {
   ficheId: number;
   name: string;
@@ -352,6 +393,74 @@ export async function listScansForFiche(ficheId: number, days = 30) {
     where: { ficheId, scanDate: { gte: since } },
     orderBy: { scanDate: "asc" },
   });
+}
+
+
+export async function getPassageStatsForFiche(
+  ficheId: number,
+  options: { granularity: "day" | "month"; date?: string; month?: string }
+) {
+  let start: Date | null = null;
+  let end: Date | null = null;
+  if (options.date) {
+    const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(options.date);
+    if (!match) throw new Error("INVALID_STATS_DATE");
+    start = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+    if (start.toISOString().slice(0, 10) !== options.date)
+      throw new Error("INVALID_STATS_DATE");
+    end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + 1);
+  } else if (options.month) {
+    const match = /^(\\d{4})-(\\d{2})$/.exec(options.month);
+    if (!match) throw new Error("INVALID_STATS_MONTH");
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    if (month < 1 || month > 12) throw new Error("INVALID_STATS_MONTH");
+    start = new Date(Date.UTC(year, month - 1, 1));
+    end = new Date(Date.UTC(year, month, 1));
+  }
+
+  const totalsRows = await prisma.$queryRaw<Array<{ source: string; count: number }>>`
+    SELECT source::text AS source, COUNT(*)::int AS count
+    FROM fiche_passages
+    WHERE "ficheId" = ${ficheId}
+      AND (${start}::timestamp IS NULL OR "createdAt" >= ${start})
+      AND (${end}::timestamp IS NULL OR "createdAt" < ${end})
+    GROUP BY source
+  `;
+  const periodFormat = options.granularity === "day" ? "YYYY-MM-DD" : "YYYY-MM";
+  const historyRows = await prisma.$queryRaw<Array<{ period: string; source: string; count: number }>>`
+    SELECT to_char(date_trunc(${options.granularity}, "createdAt"), ${periodFormat}) AS period,
+           source::text AS source,
+           COUNT(*)::int AS count
+    FROM fiche_passages
+    WHERE "ficheId" = ${ficheId}
+      AND (${start}::timestamp IS NULL OR "createdAt" >= ${start})
+      AND (${end}::timestamp IS NULL OR "createdAt" < ${end})
+    GROUP BY 1, 2
+    ORDER BY 1 ASC
+  `;
+
+  const totals = { qr: 0, nfc: 0, direct: 0 };
+  for (const row of totalsRows) {
+    if (row.source === "qr" || row.source === "nfc" || row.source === "direct")
+      totals[row.source] = row.count;
+  }
+
+  const buckets = new Map<string, { qr: number; nfc: number; direct: number; total: number }>();
+  for (const row of historyRows) {
+    if (row.source !== "qr" && row.source !== "nfc" && row.source !== "direct") continue;
+    const bucket = buckets.get(row.period) ?? { qr: 0, nfc: 0, direct: 0, total: 0 };
+    bucket[row.source] = row.count;
+    bucket.total += row.count;
+    buckets.set(row.period, bucket);
+  }
+
+  return {
+    totals: { ...totals, total: totals.qr + totals.nfc + totals.direct },
+    granularity: options.granularity,
+    history: [...buckets.entries()].map(([period, counts]) => ({ period, ...counts })),
+  };
 }
 
 // --- Cartes membres ---
