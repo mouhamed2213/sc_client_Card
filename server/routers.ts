@@ -97,12 +97,21 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const fiche = await getFicheBySlug(input.slug);
         if (!fiche || fiche.statut !== "active") return { ok: false, recorded: false };
-        const recorded = await recordPassage(
-          fiche.id,
-          input.source,
-          input.idempotencyKey
-        );
-        return { ok: true, recorded };
+        try {
+          const recorded = await recordPassage(
+            fiche.id,
+            input.source,
+            input.idempotencyKey
+          );
+          return { ok: true, recorded };
+        } catch (error) {
+          if (error instanceof Error && error.message === "PASSAGE_IDEMPOTENCY_CONFLICT")
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: "Cette clé de passage a déjà été utilisée pour un autre événement.",
+            });
+          throw error;
+        }
       }),
     create: adminProcedure.input(fichePayload).mutation(async ({ input }) => {
       const existing = await getFicheBySlug(input.slug);
