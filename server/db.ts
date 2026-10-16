@@ -225,6 +225,47 @@ export async function recordScan(fiche: Fiche) {
     }),
   ]);
 }
+export async function recordPassage(
+  ficheId: number,
+  source: "qr" | "nfc" | "direct",
+  idempotencyKey: string
+): Promise<boolean> {
+  const key = idempotencyKey.trim();
+  if (!key || key.length > 64) throw new Error("INVALID_IDEMPOTENCY_KEY");
+
+  try {
+    return await prisma.$transaction(async tx => {
+      const existing = await tx.fichePassage.findUnique({ where: { idempotencyKey: key } });
+      if (existing) {
+        if (existing.ficheId !== ficheId || existing.source !== source) {
+          throw new Error("PASSAGE_IDEMPOTENCY_CONFLICT");
+        }
+        return false;
+      }
+
+      const now = new Date();
+      const today = now.toISOString().slice(0, 10);
+      await tx.fichePassage.create({ data: { ficheId, source, idempotencyKey: key } });
+      await tx.fiche.update({
+        where: { id: ficheId },
+        data: { scansTotal: { increment: 1 }, lastScanAt: now },
+      });
+      await tx.ficheScan.upsert({
+        where: { ficheId_scanDate: { ficheId, scanDate: today } },
+        create: { ficheId, scanDate: today, count: 1 },
+        update: { count: { increment: 1 } },
+      });
+      return true;
+    });
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2002") {
+      const existing = await prisma.fichePassage.findUnique({ where: { idempotencyKey: key } });
+      if (existing?.ficheId === ficheId && existing.source === source) return false;
+    }
+    throw error;
+  }
+}
+
 export async function createContactRequest(input: {
   ficheId: number;
   name: string;
