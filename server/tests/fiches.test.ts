@@ -40,6 +40,28 @@ describe("fiches.public", () => {
     await updateFiche(fiche!.id, { photo: fiche!.photo });
   });
 
+  it("does not expose passage statistics to unauthenticated callers", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    await expect(
+      caller.clientSpaceRouter.passageStats({
+        ficheId: 1,
+        granularity: "month",
+      })
+    ).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+  });
+
+  it("validates passage statistics filters", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
+    await expect(
+      caller.clientSpaceRouter.passageStats({
+        ficheId: 1,
+        granularity: "day",
+        date: "2026-10-16",
+        month: "2026-10",
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
   it("records a real scan and keeps the previous total after verification", async () => {
     const caller = appRouter.createCaller(createPublicContext());
     const fiche = await getFicheBySlug("hotel-teranga");
