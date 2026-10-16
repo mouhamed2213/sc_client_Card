@@ -395,6 +395,64 @@ export async function listScansForFiche(ficheId: number, days = 30) {
   });
 }
 
+
+export async function getPassageStatsForFiche(
+  ficheId: number,
+  options: { granularity: "day" | "month"; date?: string; month?: string }
+) {
+  const createdAt: { gte?: Date; lt?: Date } = {};
+  if (options.date) {
+    const start = new Date(`${options.date}T00:00:00.000Z`);
+    if (Number.isNaN(start.getTime())) throw new Error("INVALID_STATS_DATE");
+    const end = new Date(start);
+    end.setUTCDate(end.getUTCDate() + 1);
+    createdAt.gte = start;
+    createdAt.lt = end;
+  } else if (options.month) {
+    const match = /^(\\d{4})-(\\d{2})$/.exec(options.month);
+    if (!match) throw new Error("INVALID_STATS_MONTH");
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    if (month < 1 || month > 12) throw new Error("INVALID_STATS_MONTH");
+    createdAt.gte = new Date(Date.UTC(year, month - 1, 1));
+    createdAt.lt = new Date(Date.UTC(year, month, 1));
+  }
+
+  const where = { ficheId, ...(Object.keys(createdAt).length ? { createdAt } : {}) };
+  const [bySource, events] = await Promise.all([
+    prisma.fichePassage.groupBy({
+      by: ["source"],
+      where,
+      _count: { _all: true },
+    }),
+    prisma.fichePassage.findMany({
+      where,
+      select: { source: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
+
+  const totals = { qr: 0, nfc: 0, direct: 0 };
+  for (const row of bySource) totals[row.source] = row._count._all;
+
+  const buckets = new Map<string, { qr: number; nfc: number; direct: number; total: number }>();
+  for (const event of events) {
+    const key = options.granularity === "day"
+      ? event.createdAt.toISOString().slice(0, 10)
+      : event.createdAt.toISOString().slice(0, 7);
+    const bucket = buckets.get(key) ?? { qr: 0, nfc: 0, direct: 0, total: 0 };
+    bucket[event.source] += 1;
+    bucket.total += 1;
+    buckets.set(key, bucket);
+  }
+
+  return {
+    totals: { ...totals, total: totals.qr + totals.nfc + totals.direct },
+    granularity: options.granularity,
+    history: [...buckets.entries()].map(([period, counts]) => ({ period, ...counts })),
+  };
+}
+
 // --- Cartes membres ---
 export async function listMembershipCards(ficheId: number) {
   return prisma.membershipCard.findMany({
