@@ -25,6 +25,12 @@ enum Statut {
   brouillon
 }
 
+enum FichePassageSource {
+  qr
+  nfc
+  direct
+}
+
 model User {
   id             Int              @id @default(autoincrement())
   openId         String           @unique @db.VarChar(64)
@@ -79,6 +85,7 @@ model Fiche {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   scans           FicheScan[]
+  passages         FichePassage[]
   contactRequests ContactRequest[]
   ownerId         Int?
   owner            User?             @relation(fields: [ownerId], references: [id])
@@ -99,6 +106,19 @@ model FicheScan {
 
   @@unique([ficheId, scanDate])
   @@map("fiche_scans")
+}
+
+model FichePassage {
+  id             Int                @id @default(autoincrement())
+  ficheId        Int
+  source         FichePassageSource
+  idempotencyKey String             @unique @db.VarChar(64)
+  createdAt      DateTime           @default(now())
+  fiche          Fiche              @relation(fields: [ficheId], references: [id], onDelete: Cascade)
+
+  @@index([ficheId, createdAt])
+  @@index([ficheId, source, createdAt])
+  @@map("fiche_passages")
 }
 
 model ContactRequest {
