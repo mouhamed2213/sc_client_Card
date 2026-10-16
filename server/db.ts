@@ -400,50 +400,60 @@ export async function getPassageStatsForFiche(
   ficheId: number,
   options: { granularity: "day" | "month"; date?: string; month?: string }
 ) {
-  const createdAt: { gte?: Date; lt?: Date } = {};
+  let start: Date | null = null;
+  let end: Date | null = null;
   if (options.date) {
-    const start = new Date(`${options.date}T00:00:00.000Z`);
-    if (Number.isNaN(start.getTime())) throw new Error("INVALID_STATS_DATE");
-    const end = new Date(start);
+    const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(options.date);
+    if (!match) throw new Error("INVALID_STATS_DATE");
+    start = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+    if (start.toISOString().slice(0, 10) !== options.date)
+      throw new Error("INVALID_STATS_DATE");
+    end = new Date(start);
     end.setUTCDate(end.getUTCDate() + 1);
-    createdAt.gte = start;
-    createdAt.lt = end;
   } else if (options.month) {
     const match = /^(\\d{4})-(\\d{2})$/.exec(options.month);
     if (!match) throw new Error("INVALID_STATS_MONTH");
     const year = Number(match[1]);
     const month = Number(match[2]);
     if (month < 1 || month > 12) throw new Error("INVALID_STATS_MONTH");
-    createdAt.gte = new Date(Date.UTC(year, month - 1, 1));
-    createdAt.lt = new Date(Date.UTC(year, month, 1));
+    start = new Date(Date.UTC(year, month - 1, 1));
+    end = new Date(Date.UTC(year, month, 1));
   }
 
-  const where = { ficheId, ...(Object.keys(createdAt).length ? { createdAt } : {}) };
-  const [bySource, events] = await Promise.all([
-    prisma.fichePassage.groupBy({
-      by: ["source"],
-      where,
-      _count: { _all: true },
-    }),
-    prisma.fichePassage.findMany({
-      where,
-      select: { source: true, createdAt: true },
-      orderBy: { createdAt: "asc" },
-    }),
-  ]);
+  const totalsRows = await prisma.$queryRaw<Array<{ source: string; count: number }>>`
+    SELECT source::text AS source, COUNT(*)::int AS count
+    FROM fiche_passages
+    WHERE "ficheId" = ${ficheId}
+      AND (${start}::timestamp IS NULL OR "createdAt" >= ${start})
+      AND (${end}::timestamp IS NULL OR "createdAt" < ${end})
+    GROUP BY source
+  `;
+  const periodFormat = options.granularity === "day" ? "YYYY-MM-DD" : "YYYY-MM";
+  const historyRows = await prisma.$queryRaw<Array<{ period: string; source: string; count: number }>>`
+    SELECT to_char(date_trunc(${options.granularity}, "createdAt"), ${periodFormat}) AS period,
+           source::text AS source,
+           COUNT(*)::int AS count
+    FROM fiche_passages
+    WHERE "ficheId" = ${ficheId}
+      AND (${start}::timestamp IS NULL OR "createdAt" >= ${start})
+      AND (${end}::timestamp IS NULL OR "createdAt" < ${end})
+    GROUP BY 1, 2
+    ORDER BY 1 ASC
+  `;
 
   const totals = { qr: 0, nfc: 0, direct: 0 };
-  for (const row of bySource) totals[row.source] = row._count._all;
+  for (const row of totalsRows) {
+    if (row.source === "qr" || row.source === "nfc" || row.source === "direct")
+      totals[row.source] = row.count;
+  }
 
   const buckets = new Map<string, { qr: number; nfc: number; direct: number; total: number }>();
-  for (const event of events) {
-    const key = options.granularity === "day"
-      ? event.createdAt.toISOString().slice(0, 10)
-      : event.createdAt.toISOString().slice(0, 7);
-    const bucket = buckets.get(key) ?? { qr: 0, nfc: 0, direct: 0, total: 0 };
-    bucket[event.source] += 1;
-    bucket.total += 1;
-    buckets.set(key, bucket);
+  for (const row of historyRows) {
+    if (row.source !== "qr" && row.source !== "nfc" && row.source !== "direct") continue;
+    const bucket = buckets.get(row.period) ?? { qr: 0, nfc: 0, direct: 0, total: 0 };
+    bucket[row.source] = row.count;
+    bucket.total += row.count;
+    buckets.set(row.period, bucket);
   }
 
   return {
